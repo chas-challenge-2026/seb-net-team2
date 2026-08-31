@@ -1,0 +1,6 @@
+﻿namespace SebPortal.Api.Repositories
+{
+    public class placeholder
+    {
+    }
+}

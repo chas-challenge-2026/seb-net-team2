@@ -1,0 +1,6 @@
+﻿namespace SebPortal.Api.Dtos
+{
+    public class placeholder
+    {
+    }
+}
