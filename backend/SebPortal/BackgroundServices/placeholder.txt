@@ -1,0 +1,6 @@
+﻿namespace SebPortal.Api.BackgroundServices
+{
+    public class placeholder
+    {
+    }
+}
