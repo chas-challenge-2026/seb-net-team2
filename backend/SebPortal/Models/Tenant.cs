@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SebPortal.Models
 {
-    public class Tenants
+    public class Tenant
     {
         public int Id { get; set; }
         [Required]
