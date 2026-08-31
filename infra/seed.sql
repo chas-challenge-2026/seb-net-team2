@@ -11,7 +11,7 @@ CREATE TABLE users (
     tenant_id INT REFERENCES tenants(id),
     name VARCHAR(100),
     email VARCHAR(100) UNIQUE,
-    password_md5 VARCHAR(32),
+    password_hash VARCHAR(60),
     role VARCHAR(20) -- 'initiator', 'attestant', 'admin'
 );
 
@@ -61,11 +61,11 @@ CREATE TABLE audit_entries (
 -- Seed: tenant Malmö Bygg AB
 INSERT INTO tenants (name) VALUES ('Malmö Bygg AB');
 
--- password = "password123" MD5 = 482c811da5d5b4bc6d497ffa98491e38
-INSERT INTO users (tenant_id, name, email, password_md5, role) VALUES
-(1, 'Lisa Persson',  'lisa@malmobygg.se',  '482c811da5d5b4bc6d497ffa98491e38', 'initiator'),
-(1, 'Johan Berg',   'johan@malmobygg.se', '482c811da5d5b4bc6d497ffa98491e38', 'attestant'),
-(1, 'Sara Ek',      'sara@malmobygg.se',  '482c811da5d5b4bc6d497ffa98491e38', 'admin');
+-- password = "password123" (BCrypt, work factor 11 — hash embeds a random salt, so each row differs even though the plaintext is the same)
+INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES
+(1, 'Lisa Persson',  'lisa@malmobygg.se',  '$2a$11$rGnzXYtp.2j7JOzouSm8PeHltyBLU.ZdZ.DVC2F720NcY.PUAfuoe', 'initiator'),
+(1, 'Johan Berg',   'johan@malmobygg.se', '$2a$11$bDhV5BHgvmwM08nBbUGugOB.3xUbDwqRxLrAPpli.utrvq8x54Wp.', 'attestant'),
+(1, 'Sara Ek',      'sara@malmobygg.se',  '$2a$11$1b6oJqXIBVbwb3gs3RVavOJZwf.DUwxdPX.t9NCLRKZCiXlsKWjMW', 'admin');
 
 INSERT INTO accounts (tenant_id, account_name, iban, balance, currency) VALUES
 (1, 'Driftkonto',   'SE4550000000058398257466', 2500000.00, 'SEK'),
