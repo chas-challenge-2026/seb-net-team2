@@ -1,0 +1,26 @@
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 0.75rem 2rem;
+    background-color: var(--color-background);
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar__links {
+    display: flex;
+    flex: 1;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar__link {
+    font-weight: 500;
+    padding: 0.25rem 0;
+}
+
+.navbar__link--active {
+    border-bottom: 2px solid currentColor;
+}
