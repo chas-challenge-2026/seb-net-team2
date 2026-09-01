@@ -133,7 +133,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
-app.MapControllers();
 
 // Default route goes to login
 app.MapGet("/", context =>
