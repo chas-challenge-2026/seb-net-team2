@@ -94,11 +94,10 @@ if (!app.Environment.IsDevelopment())
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.MapControllers();
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
-
+app.MapControllers();
 app.MapRazorPages();
 
 // Default route goes to login
