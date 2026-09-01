@@ -91,7 +91,6 @@ builder.Services.AddAuthentication(options =>
 {
     options.MapInboundClaims = false;
     options.TokenValidationParameters = 
-    options.TokenValidationParameters =
     JwtTokenValidation.Create(
         jwtSecret,
         jwtIssuer,
