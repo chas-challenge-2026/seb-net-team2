@@ -23,3 +23,8 @@ Thumbs.db
 
 ## Docker volumes (local)
 pgdata/
+
+## 
+appsettings.json
+appsettings.*.json
+appsettings.Development.json
