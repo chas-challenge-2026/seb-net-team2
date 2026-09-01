@@ -2,6 +2,7 @@ using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using SebPortal.Api.Auth;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,22 +90,13 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
     options.MapInboundClaims = false;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidIssuer = jwtIssuer,
-
-        ValidateAudience = true,
-        ValidAudience = jwtAudience,
-
-        ValidateLifetime = true,
-
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-
-        RoleClaimType = "Role",
-        NameClaimType = "Name"
-    };
+    options.TokenValidationParameters = 
+    options.TokenValidationParameters =
+    JwtTokenValidation.Create(
+        jwtSecret,
+        jwtIssuer,
+        jwtAudience
+    );
 });
 builder.Services.AddAuthorization();
 
