@@ -6,6 +6,7 @@ namespace SebPortal.Models
     {
         public int Id { get; set; }
         public int UserId { get; set; }
+        public User User { get; set; } // Navigation property to Users
         [MaxLength(100)]
         public string Action {  get; set; }
         [MaxLength(50)]
