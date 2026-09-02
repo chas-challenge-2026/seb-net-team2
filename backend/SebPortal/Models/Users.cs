@@ -9,7 +9,7 @@ namespace SebPortal.Models
         [Key]
         public int Id { get; set; }
         public int TenantId { get; set; }
-        public Tenant Tenan { get; set; } // Navigation property to Tenants
+        public Tenant Tenant { get; set; } // Navigation property to Tenants
         [Required]
         [StringLength(100)]
         public string Name { get; set; }
