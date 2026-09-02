@@ -39,7 +39,7 @@ namespace SebPortal.Data
 
                 e.HasIndex(x => x.Email).IsUnique();
 
-                e.HasOne(x => x.Tenan)
+                e.HasOne(x => x.Tenant)
                  .WithMany()
                  .HasForeignKey(x => x.TenantId);
             });
