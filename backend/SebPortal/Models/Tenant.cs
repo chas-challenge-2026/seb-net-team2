@@ -7,6 +7,6 @@ namespace SebPortal.Models
         public int Id { get; set; }
         [Required]
         [StringLength(100)]
-        public string Name { get; set; }
+        public required string Name { get; set; }
     }
 }

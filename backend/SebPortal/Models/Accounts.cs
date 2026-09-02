@@ -8,13 +8,13 @@ namespace SebPortal.Models
     {
         public int Id { get; set; }
         public int TenantId { get; set; }
-        public Tenant Tenant { get; set; } // Navigation property to Tenants
+        public Tenant Tenant { get; set; } = null!; // Navigation property to Tenants
         [Required]
         [MaxLength(100)]
-        public string AccountName { get; set; }
+        public required string AccountName { get; set; }
         [Required]
         [MaxLength(34)]
-        public string Iban { get; set; }
+        public required string Iban { get; set; }
         [Column(TypeName = "decimal(15,2)")]
         public decimal Balance { get; set; } = 0;
         [Required]
