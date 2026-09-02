@@ -20,7 +20,7 @@ namespace SebPortal.Api.Repositories
             return payment;
         }
 
-        public async Task<Payment> GetPaymentByIdAsync(int paymentId)
+        public async Task<Payment?> GetPaymentByIdAsync(int paymentId)
         {
             return await _context.Payments.Include(p => p.Tenant)
                 .Include(p => p.FromAccount)

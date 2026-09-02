@@ -6,6 +6,6 @@ namespace SebPortal.Api.Services
     public interface ICreatePaymentService
     {
         Task<Payment> CreatePaymentAsync(CreatePaymentDTO createPaymentDTO, int userId);
-        Task<Payment> GetPaymentById(int paymentId);
+        Task<Payment?> GetPaymentById(int paymentId);
     }
 }

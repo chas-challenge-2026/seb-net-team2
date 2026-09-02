@@ -43,12 +43,12 @@ namespace SebPortal.Api.Services
             throw new NotImplementedException();
         }
 
-        public Task<User> GetUserByEmailAsync(string email)
+        public Task<User?> GetUserByEmailAsync(string email)
         {
             throw new NotImplementedException();
         }
 
-        public Task<User> GetUserByIdAsync(int userId)
+        public Task<User?> GetUserByIdAsync(int userId)
         {
             var user = _userRepository.GetUserByIdAsync(userId);
             return user;

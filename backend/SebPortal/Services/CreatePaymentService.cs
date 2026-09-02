@@ -40,7 +40,7 @@ namespace SebPortal.Api.Services
             return await _paymentRepository.CreatePaymentAsync(payment);
         }
 
-        public async Task<Payment> GetPaymentById(int paymentId)
+        public async Task<Payment?> GetPaymentById(int paymentId)
         {
             var payment = await _paymentRepository.GetPaymentByIdAsync(paymentId);
             return payment;
