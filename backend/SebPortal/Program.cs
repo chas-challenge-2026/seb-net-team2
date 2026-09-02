@@ -50,9 +50,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+    policy.AllowAnyOrigin()
+          .AllowAnyHeader()
+          .AllowAnyMethod();
     });
     options.AddPolicy("ProductionPolicy", policy =>
     {
@@ -114,7 +114,6 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
 app.MapControllers();
-
 app.MapRazorPages();
 
 // Default route goes to login

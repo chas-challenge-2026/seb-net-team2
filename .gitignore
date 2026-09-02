@@ -2,6 +2,11 @@
 bin/
 obj/
 
+## Native build artifacts
+native/libauditsigner.so
+native/libcsvparser.so
+native/libiban.so
+
 ## Rider / VS / VSCode
 .idea/
 .vs/
