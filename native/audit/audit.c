@@ -67,6 +67,32 @@ static void get_timestamp(char *buffer, size_t size)
         time_info);
 }
 
+static int get_last_log_line(
+    const char *log_path,
+    char *last_line,
+    size_t size)
+
+{
+    FILE *file = fopen(log_path, "r");
+
+    if (file == NULL)
+    {
+        return 0;
+    }
+
+    char line[1100];
+
+    last_line[0] = '\0';
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        strcpy(last_line, line);
+    }
+
+    fclose(file);
+    return 1;
+}
+
 int audit_append(
     const char *log_path,
     const char *secret_key,
@@ -84,8 +110,17 @@ int audit_append(
 
     get_timestamp(timestamp, sizeof(timestamp));
 
-    memset(prev_hash, '0', 64);
-    prev_hash[64] = '\0';
+    char last_line[1100];
+
+    if (get_last_log_line(log_path, last_line, sizeof(last_line)))
+    {
+        sha256_hex(last_line, prev_hash);
+    }
+    else
+    {
+        memset(prev_hash, '0', 64);
+        prev_hash[64] = '\0';
+    }
 
     snprintf(
         log_data,
@@ -114,14 +149,12 @@ int audit_append(
         sizeof(final_log),
         "%s|%s",
         log_data,
-        hmac
-    );
+        hmac);
 
     int fd = open(
         log_path,
         O_WRONLY | O_CREAT | O_APPEND | O_SYNC,
-        0644
-    );
+        0644);
 
     if (fd == -1)
     {
@@ -131,15 +164,13 @@ int audit_append(
     write(
         fd,
         final_log,
-        strlen(final_log)
-    );
+        strlen(final_log));
 
     write(
         fd,
         "\n",
-        1
-    );
-    
+        1);
+
     close(fd);
 
     return 0;
