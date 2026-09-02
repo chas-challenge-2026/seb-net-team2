@@ -1,5 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using SebPortal.Api.Repositories;
+using SebPortal.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +69,9 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
+builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 
 var app = builder.Build();
 
