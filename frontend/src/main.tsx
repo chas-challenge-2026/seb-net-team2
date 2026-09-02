@@ -1,9 +1,10 @@
+import { QueryClient, QueryClientProvider} from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router'
 import { MainLayout } from './layouts/MainLayout'
 import { AuthProvider } from './context/AuthProvider'
-import { Översikt } from './pages/Översikt/Översikt'
+import { Oversikt } from './pages/Oversikt/Oversikt'
 import { NyBetalning } from './pages/NyBetalning/NyBetalning'
 import { Attestkorg } from './pages/Attestkorg/Attestkorg'
 import { Batch } from './pages/Batch/Batch'
@@ -12,12 +13,14 @@ import { Profil } from './pages/Profil/Profil'
 import { LoggaUt } from './pages/LoggaUt/LoggaUt'
 import { LoggaIn } from './pages/LoggaIn/LoggaIn'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import './styles/reset.css'
+import './styles/variables.css'
 import './styles/globals.css'
 import './index.css'
 
 const rootRoute = createRootRoute({ component: MainLayout })
 
-const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Översikt })
+const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Oversikt })
 const loggaInRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-in', component: LoggaIn })
 const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <ProtectedRoute><NyBetalning /></ProtectedRoute> })
 const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <ProtectedRoute><Attestkorg /></ProtectedRoute> })
@@ -43,11 +46,14 @@ declare module '@tanstack/react-router' {
     router: typeof router
   }
 }
+const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <RouterProvider router={router} />
     </AuthProvider>
+    </QueryClientProvider>
   </StrictMode>,
 )

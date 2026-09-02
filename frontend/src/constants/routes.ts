@@ -1,5 +1,5 @@
 export const navLinks: { to: string; label: string }[] = [
-    { to: '/', label: 'Översikt' },
+    { to: '/', label: 'Oversikt' },
     { to: '/ny-betalning', label: 'Ny betalning' },
     { to: '/attestkorg', label: 'Attestkorg' },
     { to: '/batch', label: 'Batch' },
