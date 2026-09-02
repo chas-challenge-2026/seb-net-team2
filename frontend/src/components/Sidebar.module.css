@@ -1,0 +1,263 @@
+.sidebar {
+  width: clamp(320px, 34vw, 470px);
+  height: calc(100vh - 57px);
+  background-color: #ffffff;
+  color: #333333;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+  position: fixed;
+  top: 57px;
+  left: 0;
+  z-index: 100;
+  transition: transform 0.3s ease;
+  border-right: 1px solid #dedede;
+}
+
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 28px 25px 26px;
+  border-bottom: 1px solid #dedede;
+}
+
+
+.sidebar-title {
+  color: #221c1c;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 28px;
+  margin: 0;
+  font-weight: bold;
+}
+
+
+.sidebar-title::after {
+  content: '\203A';
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 28px;
+  font-weight: 300;
+  line-height: 0;
+  vertical-align: -2px;
+}
+
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 28px 25px 32px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+
+.nav-section-title {
+  margin: 8px 0 8px;
+  color: #7a7a75;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.nav-group {
+  padding: 0 0 24px;
+}
+
+
+.nav-group-last {
+  border-bottom: 0;
+}
+
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0;
+  color: #333333;
+  text-decoration: none;
+  border: 0;
+  border-radius: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21.3333px;
+  transition: color 0.2s ease;
+}
+
+
+.nav-item:hover {
+  background-color: transparent;
+  color: #333333;
+  text-decoration: underline;
+}
+
+
+.nav-item.active {
+  background-color: transparent;
+  color: #333333;
+  font-weight: 500;
+}
+
+.nav-item::after {
+  content: '\203A';
+  margin-left: auto;
+  color: #4d4d4b;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+
+.badge {
+  margin-left: auto;
+  background-color: #1d1d1b;
+  color: #ffffff;
+  font-size: 11px;
+  min-width: 20px;
+  padding: 3px 6px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
+
+.sidebar-footer {
+  padding: 22px 25px 26px;
+  border-top: 1px solid #dedede;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.user-name {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+
+.user-role {
+  font-size: 11px;
+  color: #666662;
+  font-weight: 600;
+}
+
+
+.logout-btn {
+  background: #ffffff;
+  border: 1px solid #1d1d1b;
+  color: #1d1d1b;
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.logout-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #1d1d1b;
+  border-radius: 4px;
+  color: #1d1d1b;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+.logout-link:hover {
+  background-color: #1d1d1b;
+  color: #ffffff;
+}
+
+
+.logout-btn:hover {
+  background-color: #1d1d1b;
+  color: #ffffff;
+}
+
+
+/* Mobil-anspassning */
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: 9px;
+  left: 12px;
+  z-index: 102;
+  background: #ffffff;
+  color: #1d1d1b;
+  border: 1px solid #1d1d1b;
+  font-size: 20px;
+  line-height: 1;
+  padding: 8px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: block;
+  }
+
+
+  .sidebar {
+    top: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    visibility: hidden;
+  }
+
+
+  .sidebar-header {
+    min-height: 64px;
+    padding: 18px 24px 18px 68px;
+  }
+
+
+  .sidebar-title {
+    font-size: 18px;
+  }
+
+
+  .sidebar.open {
+    transform: translateX(0);
+    visibility: visible;
+  }
+
+
+  .sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+
+  .content {
+    margin-left: 0;
+  }
+}
+
+.content {
+  min-height: calc(100vh - 57px);
+  margin-left: clamp(320px, 34vw, 470px);
+}
