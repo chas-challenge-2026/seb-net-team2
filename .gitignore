@@ -23,3 +23,8 @@ Thumbs.db
 
 ## Docker volumes (local)
 pgdata/
+
+## Audit test files
+native/audit/*.o
+native/audit/test_audit
+native/audit/*.log
