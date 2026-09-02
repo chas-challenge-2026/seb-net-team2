@@ -9,11 +9,18 @@
             _context = context;
         }
 
-        public async Task<List<ApprovalLimit>> GetOrderedLimitsAsync()
+        public async Task<List<ApprovalLimit>> GetOrderedLimitsAsync(int tenantId)
         {
             return await _context.ApprovalLimits
+                .Where(limit => limit.TenantId == tenantId)
                 .OrderBy(limit => limit.MinAmount)
                 .ToListAsync();
+        }
+
+        public async Task AddAsync(ApprovalLimit approvalLimit)
+        {
+            await _context.ApprovalLimits.AddAsync(approvalLimit);
+            await _context.SaveChangesAsync();
         }
     }
 }

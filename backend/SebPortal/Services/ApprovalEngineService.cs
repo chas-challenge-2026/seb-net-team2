@@ -12,11 +12,11 @@
         public async Task<bool> ProcessPaymentApprovalAsync(Payment payment)
         {
             // get all approval limits for the tenant and order them by MinAmount
-            var approvalLimit = await _limitRepository.GetOrderedLimitsAsync();
+            var approvalLimit = await _limitRepository.GetOrderedLimitsAsync(payment.TenantId);
 
             // find the highest approval limit that is less than or equal to the payment amount
             var applicableLimit = approvalLimit
-                .Where(limit => payment.Amount <= limit.MinAmount)
+                .Where(limit => payment.Amount >= limit.MinAmount)
                 .OrderByDescending(limit => limit.MinAmount)
                 .FirstOrDefault();
 

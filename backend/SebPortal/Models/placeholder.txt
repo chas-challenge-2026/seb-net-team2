@@ -1,6 +1,0 @@
-﻿namespace SebPortal.Api.Models
-{
-    public class placeholder
-    {
-    }
-}
