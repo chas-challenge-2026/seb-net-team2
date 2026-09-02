@@ -8,13 +8,17 @@
 
 */
 
+#define CSV_TO_IBAN_LENGTH 35
+#define CSV_REFERENCE_LENGTH 101
+#define CSV_ERROR_LENGTH 256
+
 typedef struct {
     int     from_account_id;
-    char    to_iban[35];
+    char    to_iban[CSV_TO_IBAN_LENGTH];
     double  amount;
-    char    reference[101];
+    char    reference[CSV_REFERENCE_LENGTH];
     int     valid;         // 1 = ok, 0 = parsningsfel
-    char    error[256];    // felmeddelande om valid == 0
+    char    error[CSV_ERROR_LENGTH];    // felmeddelande om valid == 0
 } CsvRow;
 
 // Parsar CSV-innehåll. Allokerar och returnerar array av CsvRow.
