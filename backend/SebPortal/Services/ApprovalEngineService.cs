@@ -1,12 +1,18 @@
-﻿namespace SebPortal.Api.Services
+﻿using SebPortal.Models;
+using SebPortal.Data;
+using SebPortal.Api.Repositories;
+
+namespace SebPortal.Api.Services
 {
     public class ApprovalEngineService : IApprovalEngineService
     {
         private readonly IApprovalLimitRepository _limitRepository;
+        private readonly SebDbContext _context;
 
-        public ApprovalEngineService(IApprovalLimitRepository limitRepository)
+        public ApprovalEngineService(IApprovalLimitRepository limitRepository, SebDbContext context)
         {
             _limitRepository = limitRepository;
+            _context = context;
         }
 
         public async Task<bool> ProcessPaymentApprovalAsync(Payment payment)
@@ -23,24 +29,25 @@
             // if no applicable limit is found, execute the payment immediately
             if (applicableLimit == null || applicableLimit.RequiredApprovals == 0)
             {
-                payment.Status = "Executed";
+                payment.Status = "completed";
                 return false;
             }
 
             // if the payment amount is greater than or equal to the applicable limit, create approval steps
-            payment.Status = "PendingApproval";
+            payment.Status = "pending_approval";
 
-            for (int sequence = 1; sequence <= applicableLimit.RequiredApprovals; sequence++)
+            for (int stepNumber = 1; stepNumber <= applicableLimit.RequiredApprovals; stepNumber++)
             {
-                payment.ApprovalSteps.Add(new ApprovalStep
+                var step = new ApprovalStep
                 {
                     PaymentId = payment.Id,
-                    SequenceOrder = sequence,
-                    Status = "Pending",
-                    CreatedAt = DateTime.UtcNow
-                });
+                    StepNumber = stepNumber,
+                    Status = "pending",
+                };
+                _context.ApprovalSteps.Add(step);
             }
-
+            
+            await _context.SaveChangesAsync();
             return true;
 
         }

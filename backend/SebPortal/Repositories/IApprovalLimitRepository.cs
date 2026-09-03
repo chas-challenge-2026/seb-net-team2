@@ -1,11 +1,16 @@
 ﻿using System;
+using SebPortal.Api.Services;
+using SebPortal.Models;
 
-public interface IApprovalLimitRepository
+namespace SebPortal.Api.Repositories
 {
-	/// <summary>
-	/// Get all approval limits in rising order after MinAmount
-	/// </summary>
-	/// 
-	Task<List<ApprovalLimit>> GetOrderedLimitsAsync(int tenantId);
-	Task AddAsync(ApprovalLimit approvalLimit);
+	public interface IApprovalLimitRepository
+	{
+		/// <summary>
+		/// Get all approval limits in rising order after MinAmount
+		/// </summary>
+		/// 
+		Task<List<ApprovalLimit>> GetOrderedLimitsAsync(int tenantId);
+		Task AddAsync(ApprovalLimit approvalLimit);
+	}
 }

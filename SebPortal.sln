@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SebPortal", "SebPortal", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SebPortal.Api", "backend\SebPortal\SebPortal.Api.csproj", "{BFD4E263-3901-4276-BD15-DFC434513125}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SebPortal.Tests", "backend\SebPortal.Tests\SebPortal.Tests.csproj", "{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,18 @@ Global
 		{BFD4E263-3901-4276-BD15-DFC434513125}.Release|x64.Build.0 = Release|Any CPU
 		{BFD4E263-3901-4276-BD15-DFC434513125}.Release|x86.ActiveCfg = Release|Any CPU
 		{BFD4E263-3901-4276-BD15-DFC434513125}.Release|x86.Build.0 = Release|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Debug|x64.Build.0 = Debug|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Debug|x86.Build.0 = Debug|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Release|x64.ActiveCfg = Release|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Release|x64.Build.0 = Release|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Release|x86.ActiveCfg = Release|Any CPU
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -38,5 +52,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{6A6FDE3B-FD13-071A-366A-E78285DF8C8E} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
 		{BFD4E263-3901-4276-BD15-DFC434513125} = {6A6FDE3B-FD13-071A-366A-E78285DF8C8E}
+		{5A3D8CF2-F8F3-4CFA-93EA-687373A97838} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
 	EndGlobalSection
 EndGlobal

@@ -1,8 +1,12 @@
-﻿namespace SebPortal.Api.Repositories
+﻿using SebPortal.Models;
+using SebPortal.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace SebPortal.Api.Repositories
 {
     public class ApprovalLimitRepository : IApprovalLimitRepository
     {
-        private readonly SebDbContext  _context;
+        private readonly SebDbContext _context;
 
         public ApprovalLimitRepository(SebDbContext context)
         {

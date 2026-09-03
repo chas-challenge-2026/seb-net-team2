@@ -1,13 +1,18 @@
-﻿using SebPortal.Pages;
+﻿using SebPortal.Models;
 using System;
 
-public interface IApprovalEngineService
+namespace SebPortal.Api.Services
 {
-	/// <summary>
-	/// Evaluate payment and create neccesary ApprovalSteps.
-	/// Returns 'true' if the payment needs attest (PendingApproval)
-	/// or 'false' if it can be done imidietly (Executed).
-	/// </summary>
+	public interface IApprovalEngineService
+	{
+		/// <summary>
+		/// Evaluate payment and create neccesary ApprovalSteps.
+		/// Returns 'true' if the payment needs attest (PendingApproval)
+		/// or 'false' if it can be done imidietly (Executed).
+		/// </summary>
 
-	Task<bool> ProcessPaymentApprovalAsync(Payment payment);
+		Task<bool> ProcessPaymentApprovalAsync(Payment payment);
+	}
 }
+
+
