@@ -1,3 +1,7 @@
+using SebPortal.Data;
+using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Repositories;
+using SebPortal.Api.Services;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,36 +22,7 @@ var jwtAudience = builder.Configuration["Jwt:Audience"]
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// Register CORS policies for development and production environments
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("DevelopmentPolicy", policy =>
-    {
-    policy.AllowAnyOrigin()
-          .AllowAnyHeader()
-          .AllowAnyMethod();
-    });
-    options.AddPolicy("ProductionPolicy", policy =>
-    {
-        policy.WithOrigins("https://our-production-domain.com")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-});
-
-
-// Add services to the container.
-builder.Services.AddRazorPages();
-
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-builder.Services.AddDistributedMemoryCache();
-
-
+// Swagger / OpenAPI for .NET 8 with JWT
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -82,6 +57,44 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// Register CORS policies for development and production environments
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevelopmentPolicy", policy =>
+    {
+    policy.AllowAnyOrigin()
+          .AllowAnyHeader()
+          .AllowAnyMethod();
+    });
+    options.AddPolicy("ProductionPolicy", policy =>
+    {
+        policy.WithOrigins("https://our-production-domain.com")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddDistributedMemoryCache();
+
+// Services
+builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<ICreatePaymentService, CreatePaymentService>();
+
+
+builder.Services.AddDbContext<SebDbContext>(options =>
+options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
