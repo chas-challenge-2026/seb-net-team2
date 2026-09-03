@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router'
@@ -13,6 +13,7 @@ import { Profil } from './pages/Profil/Profil'
 import { LoggaUt } from './pages/LoggaUt/LoggaUt'
 import { LoggaIn } from './pages/LoggaIn/LoggaIn'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import Register from './pages/Register/Register'
 import './styles/reset.css'
 import './styles/variables.css'
 import './styles/globals.css'
@@ -28,16 +29,18 @@ const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch'
 const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <ProtectedRoute><Granskningslogg /></ProtectedRoute> })
 const profilRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profil', component: () => <ProtectedRoute><Profil /></ProtectedRoute> })
 const loggaUtRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-ut', component: () => <ProtectedRoute><LoggaUt /></ProtectedRoute> })
+const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: "register", component: () => <Register /> })
 
 const routeTree = rootRoute.addChildren([
-    indexRoute,
-    loggaInRoute,
-    nyBetalningRoute,
-    attestkorgRoute,
-    batchRoute,
-    granskningsloggRoute,
-    profilRoute,
-    loggaUtRoute,
+  indexRoute,
+  loggaInRoute,
+  nyBetalningRoute,
+  attestkorgRoute,
+  batchRoute,
+  granskningsloggRoute,
+  profilRoute,
+  loggaUtRoute,
+  registerRoute,
 ])
 const router = createRouter({ routeTree })
 
@@ -51,9 +54,9 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
 )
