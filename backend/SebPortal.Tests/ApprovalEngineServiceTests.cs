@@ -9,82 +9,98 @@ using Xunit;
 using Moq;
 
 namespace SebPortal.Tests;
-public class ApprovalEngineServiceTests
+
+public class ApprovalEngineServiceTests : IDisposable 
 {
     private readonly Mock<IApprovalLimitRepository> _mockLimitRepository;
-    private readonly ApprovalEngineService _approvalEngineService;
+    private readonly ApprovalEngineService _service;
+    private readonly SebDbContext _context;
 
     public ApprovalEngineServiceTests()
     {
         _mockLimitRepository = new Mock<IApprovalLimitRepository>();
-        _approvalEngineService = new ApprovalEngineService(_mockLimitRepository.Object);
+        var options = new DbContextOptionsBuilder<SebDbContext>()
+                    .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                    .Options;
 
+        _context = new SebDbContext(options);
 
         // Rules for attenstants: 
-        // 50 000 SEK - 1 approver
-        // 200 000 SEK - 2 approvers
         var sampleLimits = new List<ApprovalLimit>
         {
-            new() { Id = 1, MinAmount = 50000m, RequiredApprovals = 1, Description = "Enkelattest" },
-            new() { Id = 2, MinAmount = 200000m, RequiredApprovals = 2, Description = "Dubbelattest" }
+            new() { Id = 1, TenantId = 1, MinAmount = 50000m, RequiredApprovals = 1, Description = "Enkelattest" },
+            new() { Id = 2, TenantId = 1, MinAmount = 200000m, RequiredApprovals = 2, Description = "Dubbelattest" }
         };
 
         _mockLimitRepository
-            .Setup(repo => repo.GetOrderedLimitsAsync())
+            .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
             .ReturnsAsync(sampleLimits);
 
+        _service = new ApprovalEngineService(_mockLimitRepository.Object, _context);
+    }
+
+    //Runs automatically after each test to clean up database
+    public void Dispose()
+    {
+        _context.Dispose();
     }
 
     [Fact]
     public async Task ProcessPaymentApprovalAsync_BelowThreshold_ExecuteDirecly()
     {
         // Arrange
-        var payment = new Payment { Id = 101, Amount = 30000m };
+        var payment = new Payment { Id = 101, TenantId = 1, Amount = 30000m, ToIban = "SE123456789", Reference = "Lön" };
 
         // Act
-        var requiresApproval = await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
 
         // Assert
         Assert.False(requiresApproval);
-        Assert.Equal("Executed", payment.Status);
-        Assert.Empty(payment.ApprovalSteps);
+        Assert.Equal("completed", payment.Status);
+        Assert.Empty(await _context.ApprovalSteps.ToListAsync());
     }
 
     [Fact]
     public async Task ProcessPAymentApprovalAsync_MatchesFirstLimit_OneApprover()
     {
         // Arrange
-        var payment = new Payment { Id = 102, Amount = 75000m };
+        var payment = new Payment { Id = 102, TenantId = 1, Amount = 75000m, ToIban = "SE123456789", Reference = "Lön" };
+        
         // Act
-        var requiresApproval = await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+        
         // Assert
         Assert.True(requiresApproval);
-        Assert.Equal("PendingApproval", payment.Status);
-        Assert.Single(payment.ApprovalSteps);
+        Assert.Equal("pending_approval", payment.Status);
 
-        var step = payment.ApprovalSteps.First();
-        Assert.Equal(1, step.SequenceOrder);
-        Assert.Equal("Pending", step.Status);
+        var steps = await _context.ApprovalSteps.Where(s => s.PaymentId == payment.Id).ToListAsync();
+        Assert.Single(steps);
+        Assert.Equal(1, steps.First().StepNumber);
+        Assert.Equal("pending", steps.First().Status);
     }
 
     [Fact]
     public async Task ProcessPaymentApprovalAsync_MatchesHighestThreshold_TwoApprovers()
     {
         // Arrange
-        var payment = new Payment { Id = 103, Amount = 250000m };
+        var payment = new Payment { Id = 103, TenantId = 1, Amount = 250000m, ToIban = "SE123456789", Reference = "Investering" };
 
         // Act
-        var requiresApproval = await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
 
         // Assert
         Assert.True(requiresApproval);
-        Assert.Equal("PendingApproval", payment.Status);
-        Assert.Equal(2, payment.ApprovalSteps.Count);
+        Assert.Equal("pending_approval", payment.Status);
 
-        var steps = payment.ApprovalSteps.OrderBy(s => s.SequenceOrder).ToList();
-        Assert.Equal(1, steps[0].SequenceOrder);
-        Assert.Equal(2, steps[1].SequenceOrder);
-        Assert.All(steps, step => Assert.Equal("Pending", step.Status));
+        var steps = await _context.ApprovalSteps
+            .Where(s => s.PaymentId == payment.Id)
+            .OrderBy(s => s.StepNumber)
+            .ToListAsync();
+
+        Assert.Equal(2, steps.Count);
+        Assert.Equal(1, steps[0].StepNumber);
+        Assert.Equal(2, steps[1].StepNumber);
+        Assert.All(steps, step => Assert.Equal("pending", step.Status));
     }
 
     [Fact]
@@ -92,23 +108,18 @@ public class ApprovalEngineServiceTests
     {
         //Arrange
         _mockLimitRepository
-            .Setup(repo => repo.GetOrderedLimitsAsync())
+            .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
             .ReturnsAsync(new List<ApprovalLimit>());
 
-        var payment = new Payment { Id = 104, Amount = 100000m };
+        var payment = new Payment { Id = 104, TenantId = 1, Amount = 100000m, ToIban = "SE123456789", Reference = "Överföring" };
 
         //Act 
-        var requiresApproval = await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
 
         //Assert
         Assert.False(requiresApproval);
-        Assert.Equal("Executed", payment.Status);
-        Assert.Empty(payment.ApprovalSteps);
-
-
+        Assert.Equal("completed", payment.Status);
+        Assert.Empty(await _context.ApprovalSteps.ToListAsync());
     }
-
-
-
 }
 

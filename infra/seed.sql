@@ -24,6 +24,6 @@ INSERT INTO audit_entries (user_id, action, entity_type, entity_id, description)
 (1, 'CREATE_PAYMENT', 'payment', 1, 'Skapade betalning 15000 SEK till SE8550000000054910000003'),
 (1, 'CREATE_PAYMENT', 'payment', 2, 'Skapade betalning 75000 SEK till SE8550000000054910000004');
 
-INSERT INTO "ApprovalLimits" ("MinAmount", "RequiredApprovals", "Description") VALUES
+INSERT INTO "ApprovalLimit" ("MinAmount", "RequiredApprovals", "Description") VALUES
 (50000.00, 1, 'Kräver 1 attestant'),
 (200000.00, 2, 'Kräver 2 attestanter (dubbelattest)');
