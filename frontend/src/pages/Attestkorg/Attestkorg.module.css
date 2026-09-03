@@ -155,6 +155,38 @@
     word-break: break-word;
 }
 
+.commentField {
+    display: grid;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.commentField label {
+    color: #5f6872;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.commentField textarea {
+    width: 100%;
+    min-height: 64px;
+    padding: 10px 12px;
+    border: 1px solid #b7c1cc;
+    border-radius: 4px;
+    color: #001e50;
+    resize: vertical;
+}
+
+.commentField textarea:focus-visible {
+    outline: 3px solid #4aa82e;
+    outline-offset: 2px;
+    border-color: #001e50;
+}
+
+.commentField textarea::placeholder {
+    color: #777f89;
+}
+
 .actions {
     display: flex;
     justify-content: flex-end;
@@ -294,4 +326,44 @@
     .actions {
         grid-template-columns: 1fr;
     }
+}
+
+.status-completed {
+    color: #287a22;
+}
+
+.status-completed::before {
+    background: #4aa82e;
+}
+
+.status-rejected {
+    color: #a33a2b;
+}
+
+.status-rejected::before {
+    background: #c94a3b;
+}
+
+.decision {
+    padding-top: 2px;
+    color: #287a22;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.decision-rejected {
+    color: #a33a2b;
+}
+
+.decision p {
+    margin: 0;
+}
+
+.decision blockquote {
+    margin: 8px 0 0;
+    padding-left: 12px;
+    border-left: 3px solid #b7c1cc;
+    color: #555550;
+    font-size: 14px;
+    font-weight: 400;
 }

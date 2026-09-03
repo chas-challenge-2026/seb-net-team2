@@ -8,6 +8,8 @@ type Payment = {
     amount: string
     submittedBy: string
     submittedAt: string
+    status: 'pending' | 'completed' | 'rejected'
+    comment?: string
 }
 
 const initialPayments: Payment[] = [
@@ -18,6 +20,7 @@ const initialPayments: Payment[] = [
         amount: '75 000,00 SEK',
         submittedBy: 'Lisa Svensson',
         submittedAt: '2026-08-13',
+        status: 'pending',
     },
     {
         id: 'PAY-1044',
@@ -26,14 +29,31 @@ const initialPayments: Payment[] = [
         amount: '125 000,00 SEK',
         submittedBy: 'Lisa Svensson',
         submittedAt: '2026-08-14',
+        status: 'pending',
     },
 ]
 
 export function Attestkorg() {
     const [payments, setPayments] = useState(initialPayments)
 
-    const removePayment = (id: string) => {
-        setPayments((currentPayments) => currentPayments.filter((payment) => payment.id !== id))
+    const updatePayment = (id: string, status: Payment['status'], comment?: string) => {
+        setPayments((currentPayments) => currentPayments.map((payment) => (
+            payment.id === id ? { ...payment, status, comment } : payment
+        )))
+    }
+
+    const updateComment = (id: string, comment: string) => {
+        setPayments((currentPayments) => currentPayments.map((payment) => (
+            payment.id === id ? { ...payment, comment } : payment
+        )))
+    }
+
+    const pendingPayments = payments.filter((payment) => payment.status === 'pending')
+
+    const statusLabels: Record<Payment['status'], string> = {
+        pending: 'Waiting for approval',
+        completed: 'Approved',
+        rejected: 'Rejected',
     }
 
     return (
@@ -45,7 +65,7 @@ export function Attestkorg() {
                     <p className={styles.intro}>Payments waiting for your review and approval.</p>
                 </div>
                 <span className={styles.count} role="status" aria-live="polite">
-                    {payments.length} pending
+                    {pendingPayments.length} pending
                 </span>
             </header>
 
@@ -54,7 +74,9 @@ export function Attestkorg() {
                     <article className={styles.card} key={payment.id} aria-labelledby={`${payment.id}-recipient`}>
                         <div className={styles.cardHeader}>
                             <div>
-                                <p className={styles.paymentId}>Waiting for approval</p>
+                                <p className={`${styles.paymentId} ${styles[`status-${payment.status}`]}`}>
+                                    {statusLabels[payment.status]}
+                                </p>
                                 <h2 id={`${payment.id}-recipient`}>{payment.recipient}</h2>
                             </div>
                             <strong>{payment.amount}</strong>
@@ -64,24 +86,43 @@ export function Attestkorg() {
                             <div><dt>Submitted by</dt><dd>{payment.submittedBy}</dd></div>
                             <div><dt>Submitted</dt><dd>{payment.submittedAt}</dd></div>
                         </dl>
-                        <div className={styles.actions}>
-                            <button
-                                type="button"
-                                className={styles.reject}
-                                onClick={() => removePayment(payment.id)}
-                                aria-label={`Reject payment to ${payment.recipient}`}
-                            >
-                                Reject
-                            </button>
-                            <button
-                                type="button"
-                                className={styles.approve}
-                                onClick={() => removePayment(payment.id)}
-                                aria-label={`Approve payment to ${payment.recipient}`}
-                            >
-                                Approve
-                            </button>
-                        </div>
+                        {payment.status === 'pending' ? (
+                            <>
+                                <div className={styles.commentField}>
+                                    <label htmlFor={`${payment.id}-comment`}>Comment (optional)</label>
+                                    <textarea
+                                        id={`${payment.id}-comment`}
+                                        value={payment.comment ?? ''}
+                                        onChange={(event) => updateComment(payment.id, event.target.value)}
+                                        rows={2}
+                                        placeholder="Add a comment"
+                                    />
+                                </div>
+                                <div className={styles.actions}>
+                                    <button
+                                        type="button"
+                                        className={styles.reject}
+                                        onClick={() => updatePayment(payment.id, 'rejected', payment.comment)}
+                                        aria-label={`Reject payment to ${payment.recipient}`}
+                                    >
+                                        Reject
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={styles.approve}
+                                        onClick={() => updatePayment(payment.id, 'completed', payment.comment)}
+                                        aria-label={`Approve payment to ${payment.recipient}`}
+                                    >
+                                        Approve
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className={`${styles.decision} ${styles[`decision-${payment.status}`]}`}>
+                                <p>Decision recorded</p>
+                                {payment.comment && <blockquote>{payment.comment}</blockquote>}
+                            </div>
+                        )}
                     </article>
                 )) : (
                     <div className={styles.emptyState}>
