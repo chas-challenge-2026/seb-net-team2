@@ -252,12 +252,18 @@
     z-index: 99;
   }
 
-  .content {
-    margin-left: 0;
-  }
 }
 
 .content {
   min-height: calc(100vh - 57px);
   margin-left: clamp(320px, 34vw, 470px);
+}
+
+
+@media (max-width: 768px) {
+  .content {
+    width: 100%;
+    margin-left: 0;
+    overflow-x: hidden;
+  }
 }
