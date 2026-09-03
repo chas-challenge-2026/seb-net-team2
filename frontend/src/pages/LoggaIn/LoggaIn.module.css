@@ -1,0 +1,268 @@
+.layout {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: var(--spacing-lg);
+    box-sizing: border-box;
+}
+
+.centeredCard {
+    width: 500px;
+
+    display: grid;
+    grid-template-rows: auto auto;
+
+    padding: 0;
+    gap: 0;
+
+    overflow: hidden;
+}
+
+.sliderContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 16px 40px 10px;
+}
+
+.slider {
+    position: relative;
+
+    width: 280px;
+    height: 40px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    padding: 3px;
+    box-sizing: border-box;
+
+    background-color: var(--color-hover-light);
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-pill);
+
+    overflow: hidden;
+}
+
+.slider::before {
+    content: "";
+
+    position: absolute;
+
+    top: 3px;
+    left: 3px;
+
+    width: calc(50% - 3px);
+    height: calc(100% - 6px);
+
+    background-color: var(--color-surface);
+
+    border-radius: var(--radius-pill);
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+    transform: translateX(0);
+
+    transition: transform 220ms ease;
+}
+
+.companySelected::before {
+    transform: translateX(100%);
+}
+
+.slider input[type="radio"] {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    opacity: 0;
+}
+
+.slider label {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: var(--font-size-md);
+    font-weight: 500;
+
+    color: var(--color-text-soft);
+
+    cursor: pointer;
+
+    transition:
+        color 220ms ease,
+        font-weight 220ms ease;
+}
+
+.slider input[type="radio"]:checked+label {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.slider input[type="radio"]:focus-visible+label {
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: -2px;
+
+    border-radius: var(--radius-pill);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px 40px 14px;
+    box-sizing: border-box;
+}
+
+.inputGrid {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+.label {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+
+    color: var(--color-text);
+}
+
+.input {
+    width: 100%;
+    height: 40px;
+
+    box-sizing: border-box;
+
+    padding: 0 12px;
+
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    outline: none;
+
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.input::placeholder {
+    color: var(--placeholder-grey);
+}
+
+.input:hover {
+    border-color: var(--color-text-soft);
+}
+
+.input:focus {
+    border-color: var(--seb-green-dark-1);
+
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 2px;
+}
+
+.actionGrid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 16px;
+}
+
+.formButton {
+    width: 150px;
+}
+
+.formButton:hover {
+    background-color: var(--color-hover-light);
+}
+
+.formButton:focus-visible {
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 2px;
+}
+
+.register {
+    font-size: var(--font-size-md);
+    color: var(--color-primary);
+
+    text-align: center;
+    text-decoration: none;
+}
+
+.register:hover {
+    text-decoration: underline;
+}
+
+.register:focus-visible {
+    border-radius: var(--radius-sm);
+
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 3px;
+}
+
+.error {
+    min-height: 18px;
+    margin: 0;
+
+    font-size: var(--font-size-md);
+    text-align: center;
+
+    color: var(--color-error);
+}
+
+.companyContent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 10px 40px 20px;
+
+    font-size: var(--font-size-lg);
+    color: var(--color-text);
+}
+
+.active {
+    font-weight: 600;
+}
+
+@media (max-width: 560px) {
+    .centeredCard {
+        width: 100%;
+    }
+
+    .sliderContainer,
+    .form,
+    .companyContent {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+
+    .slider {
+        width: 100%;
+    }
+}
