@@ -5,14 +5,13 @@ using SebPortal.Api.Services;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using SebPortal.Api.Auth;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? throw new InvalidOperationException("JWT secret is missing.");
+    ?? "SuperSecretLocalDevKeyForTesting12345!"; //temporary shortcut for lack of konfig
+    //?? throw new InvalidOperationException("JWT secret is missing.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]
     ?? throw new InvalidOperationException("JWT issuer is missing.");
 var jwtAudience = builder.Configuration["Jwt:Audience"]
@@ -111,6 +110,9 @@ builder.Services.AddAuthentication(options =>
     );
 });
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
+builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 
 var app = builder.Build();
 

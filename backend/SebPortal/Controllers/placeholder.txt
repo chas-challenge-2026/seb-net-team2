@@ -1,6 +1,0 @@
-﻿namespace SebPortal.Api.Controllers
-{
-    public class placeholder
-    {
-    }
-}
