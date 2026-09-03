@@ -11,6 +11,10 @@
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
 
+/*
+ * Creates a SHA256 hash from input data
+ * and stores the result as a hexadecimal string.
+ */
 static void sha256_hex(const char *input, char output[65])
 {
 
@@ -29,6 +33,10 @@ static void sha256_hex(const char *input, char output[65])
     output[64] = '\0';
 }
 
+/*
+ * Creates an HMAC-SHA256 signature using
+ * the provided secret key.
+ */
 static void hmac_sha256_hex(
     const char *input,
     const char *secret_key,
@@ -55,6 +63,10 @@ static void hmac_sha256_hex(
     output[64] = '\0';
 }
 
+/*
+ * Gets the current timestamp and formats it
+ * for use in the audit log.
+ */
 static void get_timestamp(char *buffer, size_t size)
 {
     time_t now = time(NULL);
@@ -92,7 +104,13 @@ static int get_last_log_line(
     fclose(file);
     return 1;
 }
-
+/*
+ * Adds a new entry to the audit log.
+ * Each log entry contains:
+ * TIMESTAMP | USER_ID | ACTION | ENTITY_ID |DESCRIPTION | PREV_HASH | HMAC
+ * PREV_HASH connects the current entry to the previous log entry.
+ * HMAC-SHA256 protects the entry from undetected modification.
+ */
 int audit_append(
     const char *log_path,
     const char *secret_key,
@@ -173,5 +191,81 @@ int audit_append(
 
     close(fd);
 
+    return 0;
+}
+/*
+ * Verifies the integrity of the audit log.
+ * The function verifies:
+ * - The HMAC signature of each log entry.
+ * - The PREV_HASH value of the first log entry.
+ * PREV_HASH chain verification for the remaining entries is currently being implemented.
+ */
+int audit_verify(
+    const char *log_path,
+    const char *secret_key)
+
+{
+
+    FILE *file = fopen(log_path, "r");
+
+    if (file == NULL)
+    {
+        return -1;
+    }
+
+    char line[1100];
+    char previous_line[1100] = "";
+    int line_number = 0;
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        line_number++;
+        line[strcspn(line, "\n")] = '\0';
+        char *last_separator = strrchr(line, '|');
+        if (last_separator == NULL)
+
+        {
+
+            fclose(file);
+
+            return -1;
+        }
+
+        *last_separator = '\0';
+
+        char *prev_separator = strrchr(line, '|');
+        if (prev_separator == NULL)
+        {
+            fclose(file);
+            return -1;
+        }
+        char *stored_prev_hash = prev_separator + 1;
+        if (line_number == 1)
+        {
+            char zero_hash[65];
+            memset(zero_hash, '0', 64);
+            zero_hash[64] = '\0';
+            if (strcmp(stored_prev_hash, zero_hash) != 0)
+            {
+                fclose(file);
+                return -1;
+            }
+        }
+        char *stored_hmac = last_separator + 1;
+        char calculated_hmac[65];
+
+        hmac_sha256_hex(
+            line,
+            secret_key,
+            calculated_hmac);
+
+        if (strcmp(stored_hmac, calculated_hmac) != 0)
+        {
+            fclose(file);
+            return -1;
+        }
+    }
+
+    fclose(file);
     return 0;
 }
