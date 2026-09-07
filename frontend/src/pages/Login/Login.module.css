@@ -1,0 +1,194 @@
+.layout {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: var(--spacing-lg);
+    box-sizing: border-box;
+}
+
+.centeredCard {
+    width: 500px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 0;
+    gap: 0;
+
+    overflow: hidden;
+}
+
+.selectorContainer {
+    width: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 16px 40px 10px;
+    box-sizing: border-box;
+}
+
+.line {
+    margin: 12px 0;
+}
+
+.line::before {
+    content: "";
+
+    display: block;
+
+    width: 200px;
+    height: 1px;
+
+    margin: 0 auto;
+
+    background-color: var(--color-border-light);
+}
+
+.form {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px 40px 14px;
+    box-sizing: border-box;
+}
+
+.inputGrid {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.formGroup {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.label {
+    margin: 0;
+    padding: 0;
+
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    line-height: 1;
+
+    color: var(--color-text);
+}
+
+.input {
+    width: 100%;
+    height: 40px;
+
+    box-sizing: border-box;
+
+    padding: 0 12px;
+
+    font-size: var(--font-size-md);
+    color: var(--color-text);
+
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    outline: none;
+
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.input::placeholder {
+    color: var(--placeholder-grey);
+}
+
+.input:hover {
+    border-color: var(--color-text-soft);
+}
+
+.input:focus {
+    border-color: var(--seb-green-dark-1);
+
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 2px;
+}
+
+.actionGrid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 16px;
+}
+
+.formButton {
+    width: 150px;
+}
+
+.formButton:hover {
+    background-color: var(--color-hover-light);
+}
+
+.formButton:focus-visible {
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 2px;
+}
+
+.register {
+    font-size: var(--font-size-md);
+    color: var(--color-primary);
+
+    text-align: center;
+    text-decoration: none;
+}
+
+.register:hover {
+    text-decoration: underline;
+}
+
+.register:focus-visible {
+    border-radius: var(--radius-sm);
+
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 3px;
+}
+
+.error {
+    min-height: 18px;
+
+    margin: 0;
+
+    font-size: var(--font-size-md);
+    text-align: center;
+
+    color: var(--color-error);
+}
+
+@media (max-width: 560px) {
+    .centeredCard {
+        width: 100%;
+    }
+
+    .selectorContainer,
+    .form {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+
+    .selectorContainer>* {
+        width: 100%;
+    }
+}
