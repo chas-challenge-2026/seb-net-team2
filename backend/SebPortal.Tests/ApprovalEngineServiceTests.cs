@@ -65,6 +65,9 @@ public class ApprovalEngineServiceTests : IDisposable
     {
         // Arrange
         var payment = new Payment { Id = 102, TenantId = 1, Amount = 75000m, ToIban = "SE123456789", Reference = "Lön" };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
         
         // Act
         var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
@@ -84,6 +87,9 @@ public class ApprovalEngineServiceTests : IDisposable
     {
         // Arrange
         var payment = new Payment { Id = 103, TenantId = 1, Amount = 250000m, ToIban = "SE123456789", Reference = "Investering" };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
 
         // Act
         var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
