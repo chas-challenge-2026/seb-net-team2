@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <errno.h>
-#include <math.h>
 
 typedef enum
 {
