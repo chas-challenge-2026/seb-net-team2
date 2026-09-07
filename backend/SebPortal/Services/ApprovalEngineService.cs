@@ -46,7 +46,8 @@ namespace SebPortal.Api.Services
                 };
                 _context.ApprovalSteps.Add(step);
             }
-            
+
+            _context.Payments.Update(payment);
             await _context.SaveChangesAsync();
             return true;
 

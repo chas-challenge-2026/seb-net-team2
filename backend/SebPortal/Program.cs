@@ -10,8 +10,7 @@ using SebPortal.Api.Auth;
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSecret = builder.Configuration["Jwt:Secret"]
-    ?? "SuperSecretLocalDevKeyForTesting12345!"; //temporary shortcut for lack of konfig
-    //?? throw new InvalidOperationException("JWT secret is missing.");
+    ?? throw new InvalidOperationException("JWT secret is missing.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"]
     ?? throw new InvalidOperationException("JWT issuer is missing.");
 var jwtAudience = builder.Configuration["Jwt:Audience"]
