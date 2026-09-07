@@ -53,7 +53,7 @@ static int get_last_log_line(const char *log_path, char *last_line, size_t size)
     while (fgets(line, sizeof(line), file) != NULL)
     {
         line[strcspn(line, "\n")] = '\0';
-        strcpy(last_line, line);
+        snprintf(last_line, size, "%s", line);
     }
 
     fclose(file);
