@@ -5,7 +5,7 @@ type CardProps = HTMLAttributes<HTMLDivElement> & {
     title?: string;
     className?: string;
     children?: ReactNode;
-    variant?: "default" | "primary" | "image";
+    variant?: "default" | "primary" | "image" | "defaultOnHover" | "square";
 };
 
 export default function Card({

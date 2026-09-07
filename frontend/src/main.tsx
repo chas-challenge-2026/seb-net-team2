@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router'
@@ -13,8 +13,9 @@ import { Batch } from './pages/Batch/Batch'
 import { Granskningslogg } from './pages/Granskningslogg/Granskningslogg'
 import { Profil } from './pages/Profil/Profil'
 import { LoggaUt } from './pages/LoggaUt/LoggaUt'
-import { LoggaIn } from './pages/LoggaIn/LoggaIn'
+import Login from './pages/Login/Login';
 import { ProtectedRoute } from './components/ProtectedRoute'
+import Register from './pages/Register/Register'
 import './styles/reset.css'
 import './styles/variables.css'
 import './styles/globals.css'
@@ -23,7 +24,7 @@ import './index.css'
 const rootRoute = createRootRoute({ component: MainLayout })
 
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Overview })
-const loggaInRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-in', component: LoggaIn })
+const loggaInRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-in', component: Login })
 const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <ProtectedRoute><NyBetalning /></ProtectedRoute> })
 const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SparaInvestera /></ProtectedRoute> })
 const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
@@ -32,18 +33,20 @@ const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch'
 const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <ProtectedRoute><Granskningslogg /></ProtectedRoute> })
 const profilRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profil', component: () => <ProtectedRoute><Profil /></ProtectedRoute> })
 const loggaUtRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-ut', component: () => <ProtectedRoute><LoggaUt /></ProtectedRoute> })
+const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: "register", component: () => <Register /> })
 
 const routeTree = rootRoute.addChildren([
-    indexRoute,
-    loggaInRoute,
-    nyBetalningRoute,
-    sparaInvesteraRoute,
-    mortgageRoute,
-    attestkorgRoute,
-    batchRoute,
-    granskningsloggRoute,
-    profilRoute,
-    loggaUtRoute,
+  indexRoute,
+  loggaInRoute,
+  nyBetalningRoute,
+  sparaInvesteraRoute,
+  mortgageRoute,
+  attestkorgRoute,
+  batchRoute,
+  granskningsloggRoute,
+  profilRoute,
+  loggaUtRoute,
+  registerRoute,
 ])
 const router = createRouter({ routeTree })
 
@@ -57,9 +60,9 @@ const queryClient = new QueryClient()
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
 )
