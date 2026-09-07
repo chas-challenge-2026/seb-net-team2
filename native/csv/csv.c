@@ -19,7 +19,7 @@ typedef enum
 
 static bool is_end_of_line(char* curr)
 {
-    if (curr[0] == '\r' || curr[0] == '\0')
+    if (curr[0] == '\r')
     {
         if (curr[1] == '\n')
         {
@@ -38,18 +38,22 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
     }
     memset(rows, 0, sizeof(CsvRow) * 500);
 
-    char *csv =
-        "from_account_id,to_iban,amount,reference\r\n"
-        "1,SE8550000000054910000003,5000.00,Faktura #2001\r\n"
-        "1,SE8550000000054910000005,12500.00,Faktura #2002\r\n"
-        "1,SE8550000000054910000006,8750.50,Faktura #2003\r\n";
+    char* buffer = (char*)malloc(content_len + 1);
+    if (buffer == NULL)
+    {
+        rows->valid = 0;
+        snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Slut på heap memory");
+        return NULL;
+    }
 
-    char* buffer = (char*)malloc(sizeof(char) * strlen(csv) + 1);
-    snprintf(buffer, sizeof(char) * strlen(csv) + 1, "%s", csv);
+    snprintf(buffer, content_len, "%s", content);
 
     char* start = buffer;
     char* current = start;
     int length = 0;
+
+    size_t current_length = 0;
+    size_t full_length = content_len;
 
     bool is_headers = true;
 
@@ -58,7 +62,12 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
 
     while (true)
     {
-        //printf("Current: %c\r\n", current[0]);
+        if (current_length >= full_length)
+        {
+            rows->valid = 1;
+            *rows_out = index;
+            return rows;
+        }
 
         if (is_headers)
         {
@@ -72,73 +81,59 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
             }
 
             current++;
+            current_length++;
             continue;
         }
 
-        if (current[0] != ',')
-        {
-            printf("Current: %c\n", current[0]);
-            current++;
-            length++;
-        }
-        else if (current[0] == ',')
+        bool eol = is_end_of_line(current);
+        if (eol || current[0] == ',')
         {
             char* temp;
+            current[0] = '\0';
+
             switch (inner_index)
             {
             case Row_Data_From_Account_Id:
-                current[0] = '\0';
-
                 rows[index].from_account_id = strtol(start, &temp, 10);
-                length = 0;
-                //printf("ID: %d\n", rows[index].from_account_id);
-                current = &current[1];
-                start = current;
-
                 break;
             case Row_Data_To_Iban:
-                current[0] = '\0';
-
                 snprintf(rows[index].to_iban, CSV_TO_IBAN_LENGTH, "%s", start);
-                printf("TO IBAN: %s\n", rows[index].to_iban);
-
-                length = 0;
-                current = &current[1];
-                start = current;
-
                 break;
             case Row_Data_Amount:
-                current[0] = '\0';
-
                 rows[index].amount = strtod(start, &temp);
-                printf("Amount: %lf\n", rows[index].amount);
-
-                length = 0;
-                current = &current[1];
-                start = current;
                 break;
             case Row_Data_Reference:
-                strncpy(rows[index].reference, start, length);
-                printf("[Reference: %s]\n", rows[index].reference);
+                snprintf(rows[index].reference, CSV_REFERENCE_LENGTH, "%s", start);
 
-                length = 0;
-                current = &current[1];
-                start = current;
                 break;
             default:
-                printf("Inner index is out of range\n");
-                return NULL;
+                rows->valid = 0;
+                snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Inner index är utanför range");
+                return rows;
                 break;
             }
 
-            inner_index++;
-            //start = &current[1];
+            if (eol) 
+            {
+                current += 2;
+                current_length += 2;
+                start = current;
+                index++;
+                inner_index = 0;
+            } 
+            else 
+            { // comma
+                current += 1;
+                current_length += 1;
+                start = current;
+                inner_index++;
+            }
         }
-        else if (is_end_of_line(current))
+        else
         {
-            printf("Found current!\n");
-            index++;
-            inner_index = 0;
+            current_length++;
+            current++;
+            length++;
         }
     }
     return rows;
