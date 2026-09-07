@@ -51,7 +51,7 @@ export default function PasswordInput({
                 }
                 aria-pressed={isPasswordVisible}
             >
-                {isPasswordVisible ? (
+                {!isPasswordVisible ? (
                     <svg
                         className={styles.icon}
                         viewBox="0 0 24 24"
