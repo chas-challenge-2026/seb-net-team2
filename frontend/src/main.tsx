@@ -4,8 +4,10 @@ import { createRoot } from 'react-dom/client'
 import { createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router'
 import { MainLayout } from './layouts/MainLayout'
 import { AuthProvider } from './context/AuthProvider'
-import { Oversikt } from './pages/Oversikt/Oversikt'
+import { Overview } from './pages/Overview/Overview'
 import { NyBetalning } from './pages/NyBetalning/NyBetalning'
+import { SparaInvestera } from './pages/SparaInvestera/SparaInvestera'
+import { Mortgage } from './pages/Mortgage/Mortgage'
 import { Attestkorg } from './pages/Attestkorg/Attestkorg'
 import { Batch } from './pages/Batch/Batch'
 import { Granskningslogg } from './pages/Granskningslogg/Granskningslogg'
@@ -21,9 +23,11 @@ import './index.css'
 
 const rootRoute = createRootRoute({ component: MainLayout })
 
-const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Oversikt })
+const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Overview })
 const loggaInRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-in', component: LoggaIn })
 const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <ProtectedRoute><NyBetalning /></ProtectedRoute> })
+const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SparaInvestera /></ProtectedRoute> })
+const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
 const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <ProtectedRoute><Attestkorg /></ProtectedRoute> })
 const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch', component: () => <ProtectedRoute><Batch /></ProtectedRoute> })
 const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <ProtectedRoute><Granskningslogg /></ProtectedRoute> })
@@ -35,6 +39,8 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loggaInRoute,
   nyBetalningRoute,
+  sparaInvesteraRoute,
+  mortgageRoute,
   attestkorgRoute,
   batchRoute,
   granskningsloggRoute,

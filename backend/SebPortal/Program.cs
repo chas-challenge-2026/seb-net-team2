@@ -5,9 +5,7 @@ using SebPortal.Api.Services;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using SebPortal.Api.Auth;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -111,6 +109,9 @@ builder.Services.AddAuthentication(options =>
     );
 });
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
+builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 
 var app = builder.Build();
 
