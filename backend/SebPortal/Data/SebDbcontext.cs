@@ -15,6 +15,7 @@ namespace SebPortal.Data
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<ApprovalStep> ApprovalSteps => Set<ApprovalStep>();
         public DbSet<AuditEntries> AuditEntries => Set<AuditEntries>();
+        public DbSet<ApprovalLimit> ApprovalLimits => Set<ApprovalLimit>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -106,6 +107,23 @@ namespace SebPortal.Data
                 e.Property(x => x.EntityId).HasColumnName("entity_id");
                 e.Property(x => x.Description).HasColumnName("description");
                 e.Property(x => x.DateTime).HasColumnName("created_at");
+            });
+
+            modelBuilder.Entity<ApprovalLimit>(e =>
+            {
+                e.ToTable("approvalLimit");
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.TenantId).HasColumnName("tenant_id");
+                e.Property(x => x.MinAmount).HasColumnName("minAmount");
+                e.Property(x => x.RequiredApprovals).HasColumnName("requiredApprovals");
+                e.Property(x => x.Description).HasColumnName("description");
+                e.Property(x => x.CreatedAt).HasColumnName("created_at");
+                e.Property(x => x.LastModifiedAt).HasColumnName("lastModified_at");
+                e.Property(x => x.LastModifiedBy).HasColumnName("lastModified_by");
+
+                e.HasOne(x => x.Tenant)
+                 .WithMany()
+                 .HasForeignKey(x => x.TenantId);
             });
         }
     }

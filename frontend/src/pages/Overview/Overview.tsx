@@ -1,23 +1,23 @@
 import { useAccounts } from "../../hooks/useAccounts"
 import { usePayments } from "../../hooks/usePayments"
-import styles from './Oversikt.module.css'
+import styles from './Overview.module.css'
 
-export function Oversikt() {
+export function Overview() {
     const { data: accounts, isLoading: loadingAccounts, isError: accountsError } = useAccounts()
     const { data: payments, isLoading: loadingPayments } = usePayments()
 
-    if (accountsError) return <p>Något gick fel.</p>
+    if (accountsError) return <p>Something went wrong.</p>
 
     return (
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
-                <h1>Välkommen, ________</h1>
-                <p>Företagsnamn</p>
+                <h1>Welcome, ________</h1>
+                <p>Company name</p>
             </header>
 
             <section>
-                <h2>Konton</h2>
-                {loadingAccounts ? <p>Laddar...</p> : (
+                <h2>Accounts</h2>
+                {loadingAccounts ? <p>Loading...</p> : (
                     <div className={styles['accounts-grid']}>
                         {accounts?.map(account => (
                             <div key={account.id} className={styles['account-card']}>
@@ -34,15 +34,15 @@ export function Oversikt() {
 
             <div className={styles['dashboard__bottom']}>
                 <section>
-                    <h2>Senaste betalningar</h2>
-                    {loadingPayments ? <p>Laddar...</p> : (
+                    <h2>Recent payments</h2>
+                    {loadingPayments ? <p>Loading...</p> : (
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Datum</th>
-                                    <th>Till IBAN</th>
-                                    <th>Referens</th>
-                                    <th>Belopp</th>
+                                    <th>Date</th>
+                                    <th>Recipient IBAN</th>
+                                    <th>Reference</th>
+                                    <th>Amount</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
@@ -53,7 +53,7 @@ export function Oversikt() {
                                         <td>{p.toIban}</td>
                                         <td>{p.reference}</td>
                                         <td>{p.amount.toLocaleString('sv-SE', { minimumFractionDigits: 2 })} {p.currency}</td>
-                                        <td><span className={`${styles.status} ${styles[p.status === 'Genomförd' ? 'status--done' : 'status--pending']}`}>{p.status}</span></td>
+                                        <td><span className={`${styles.status} ${styles[p.status === 'Completed' ? 'status--done' : 'status--pending']}`}>{p.status}</span></td>
                                     </tr>
                                 ))}
                             </tbody>

@@ -1,15 +1,15 @@
 import { Link } from '@tanstack/react-router'
-import { navLinks } from '../constants/routes'
+import { navigationLinks } from '../constants/routes'
 import styles from './Navbar.module.css'
 
-export function Navbar() {
+export function NavigationBar() {
     return (
         <nav className={styles.navbar}>
             <div className={styles.navbar__brand}>
                 <span> SEB </span>
             </div>
             <ul className={styles.navbar__links}>
-                {navLinks.map(({ to, label }) => (
+                {navigationLinks.map(({ to, label }) => (
                     <li key={to}>
                         <Link
                             to={to}

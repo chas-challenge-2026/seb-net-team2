@@ -17,6 +17,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const sidebarId = useId();
+  const roleLabels = {
+    initiator: 'Initiator',
+    attestant: 'Approver',
+    admin: 'Administrator',
+  };
+  const roleLabel = roleLabels[userRole];
 
 
   const toggleSidebar = () => setIsOpen(!isOpen);
@@ -45,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <button
         className={styles['hamburger-btn']}
         onClick={toggleSidebar}
-        aria-label="Meny"
+        aria-label="Menu"
         aria-controls={sidebarId}
         aria-expanded={isOpen}
       >
@@ -60,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <aside id={sidebarId} className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
         {/* SEB Bank Logga & Rubrik */}
         <div className={styles['sidebar-header']}>
-          <h2 className={styles['sidebar-title']}>Företag</h2>
+          <h2 className={styles['sidebar-title']}>Business</h2>
         </div>
 
 
@@ -73,20 +79,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
               activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
               onClick={handleNavClick}
             >
-              <span>Översikt</span>
+              <span>Dashboard</span>
             </Link>
           </div>
 
           {(userRole === 'initiator' || userRole === 'admin') && (
             <div className={styles['nav-group']}>
-              <p className={styles['nav-section-title']}>Betalningar</p>
+              <p className={styles['nav-section-title']}>Payments</p>
               <Link
                 to="/ny-betalning"
                 className={styles['nav-item']}
                 activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
                 onClick={handleNavClick}
               >
-                <span>Ny betalning</span>
+                <span>New payment</span>
               </Link>
               <Link
                 to="/batch"
@@ -94,28 +100,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
                 onClick={handleNavClick}
               >
-                <span>Betalningar i batch</span>
+                <span>Batch upload</span>
               </Link>
             </div>
           )}
 
-          {/* Visas ENDAST för Attestanter och Admins */}
+          {/* Only shown for approvers and administrators */}
           {(userRole === 'attestant' || userRole === 'admin') && (
             <div className={styles['nav-group']}>
-              <p className={styles['nav-section-title']}>Attestering</p>
+              <p className={styles['nav-section-title']}>Approvals</p>
               <Link
                 to="/attestkorg"
                 className={styles['nav-item']}
                 activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
                 onClick={handleNavClick}
               >
-                <span>Attestkorg</span>
+                <span>Approval inbox</span>
                 <span className={styles.badge}>2</span>
               </Link>
             </div>
           )}
 
-          {/* Visas ENDAST för Admin */}
+          {/* Only shown for administrators */}
           {userRole === 'admin' && (
             <div className={styles['nav-group']}>
               <p className={styles['nav-section-title']}>Administration</p>
@@ -125,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
                 onClick={handleNavClick}
               >
-                <span>Granskningslogg</span>
+                <span>Audit log</span>
               </Link>
             </div>
           )}
@@ -138,26 +144,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
               activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
               onClick={handleNavClick}
             >
-              <span>Min profil</span>
+              <span>My profile</span>
             </Link>
           </div>
         </nav>
 
 
-        {/* Användarprofil & Logga ut längst ned */}
+        {/* User profile and logout */}
         <div className={styles['sidebar-footer']}>
           <div className={styles['user-info']}>
             <span className={styles['user-name']}>{userName}</span>
-            <span className={styles['user-role']}>{userRole.toUpperCase()}</span>
+            <span className={styles['user-role']}>{roleLabel}</span>
           </div>
           {onLogout && (
             <button className={styles['logout-btn']} onClick={onLogout}>
-              Logga ut
+              Log out
             </button>
           )}
           {!onLogout && (
             <Link to="/logga-ut" className={styles['logout-link']} onClick={handleNavClick}>
-              Logga ut
+              Log out
             </Link>
           )}
         </div>
