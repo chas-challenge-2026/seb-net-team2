@@ -13,7 +13,7 @@ import { Batch } from './pages/Batch/Batch'
 import { Granskningslogg } from './pages/Granskningslogg/Granskningslogg'
 import { Profil } from './pages/Profil/Profil'
 import { LoggaUt } from './pages/LoggaUt/LoggaUt'
-import { LoggaIn } from './pages/LoggaIn/LoggaIn'
+import Login from './pages/Login/Login';
 import { ProtectedRoute } from './components/ProtectedRoute'
 import Register from './pages/Register/Register'
 import './styles/reset.css'
@@ -24,7 +24,7 @@ import './index.css'
 const rootRoute = createRootRoute({ component: MainLayout })
 
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Overview })
-const loggaInRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-in', component: LoggaIn })
+const loggaInRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logga-in', component: Login })
 const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <ProtectedRoute><NyBetalning /></ProtectedRoute> })
 const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SparaInvestera /></ProtectedRoute> })
 const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
