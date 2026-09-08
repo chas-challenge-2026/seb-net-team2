@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SebPortal.Api.Dtos;
+using SebPortal.Api.Filters;
 using SebPortal.Api.Services;
 
 
@@ -17,11 +18,13 @@ namespace SebPortal.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto)
+        [ServiceFilter(typeof(IdempotencyFilter))]
+        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, [FromHeader(Name = "X-Idempotency-Key")] string idempotencyKey)
         {
             int userId = 1;
 
             var payment = await _createPaymentService.CreatePaymentAsync(dto, userId);
+
             return CreatedAtAction(nameof(GetPaymentById), new { id = payment.Id }, payment);
         }
 

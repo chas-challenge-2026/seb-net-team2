@@ -21,7 +21,7 @@ services:
       POSTGRES_PASSWORD: seb123
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      #- ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U seb -d seb"]
       interval: 5s

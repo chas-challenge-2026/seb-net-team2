@@ -16,6 +16,7 @@ namespace SebPortal.Data
         public DbSet<ApprovalStep> ApprovalSteps => Set<ApprovalStep>();
         public DbSet<AuditEntries> AuditEntries => Set<AuditEntries>();
         public DbSet<ApprovalLimit> ApprovalLimits => Set<ApprovalLimit>();
+        public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -124,6 +125,32 @@ namespace SebPortal.Data
                 e.HasOne(x => x.Tenant)
                  .WithMany()
                  .HasForeignKey(x => x.TenantId);
+            });
+
+            modelBuilder.Entity<IdempotencyKey>(e =>
+            {
+                e.ToTable("idempotency_keys");
+
+                e.Property(x => x.Id)
+                    .HasColumnName("id");
+
+                e.Property(x => x.Key)
+                    .HasColumnName("key");
+
+                e.Property(x => x.RequestHash)
+                    .HasColumnName("request_hash");
+
+                e.Property(x => x.ResponseContent)
+                    .HasColumnName("response_content");
+
+                e.Property(x => x.StatusCode)
+                    .HasColumnName("status_code");
+
+                e.Property(x => x.CreatedAt)
+                    .HasColumnName("created_at");
+
+                e.HasIndex(x => x.Key)
+                    .IsUnique();
             });
         }
     }
