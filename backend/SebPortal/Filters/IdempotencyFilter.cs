@@ -12,6 +12,8 @@ namespace SebPortal.Api.Filters
     public class IdempotencyFilter : IAsyncActionFilter
     {
         private readonly SebDbContext _context;
+
+        //Idempotency keys are valid for 1 minute. After that, they can be reused. CHANGE THIS LATER
         private static readonly TimeSpan IdempotencyKeyLifetime = TimeSpan.FromMinutes(1);
 
         public IdempotencyFilter(SebDbContext context)
@@ -21,7 +23,7 @@ namespace SebPortal.Api.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            // 1. Require idempotency header
+            // Require idempotency header
             if (!context.HttpContext.Request.Headers.TryGetValue("X-Idempotency-Key",out var idempotencyKey) ||string.IsNullOrWhiteSpace(idempotencyKey))
             {
                 context.Result = new BadRequestObjectResult("X-Idempotency-Key header is required.");
@@ -31,12 +33,12 @@ namespace SebPortal.Api.Filters
 
             var key = idempotencyKey.ToString();
 
-            // 2. Create a hash of the request
+            // Create a hash of the request
             var requestJson = JsonSerializer.Serialize(context.ActionArguments);
 
             var requestHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(requestJson)));
 
-            // 3. Check if this key has already been used
+            // Check if this key has already been used
             var existingKey = await _context.IdempotencyKeys.FirstOrDefaultAsync(x => x.Key == key);
 
             if (existingKey != null)
@@ -79,7 +81,7 @@ namespace SebPortal.Api.Filters
                 }
             }
 
-            // 4. Reserve the key BEFORE running the controller
+            // Reserve the key BEFORE running the controller
             var idempotencyRecord = new IdempotencyKey
             {
                 Key = key,
@@ -101,7 +103,7 @@ namespace SebPortal.Api.Filters
                 return;
             }
 
-            // 5. Run the actual controller/service
+            // Run the actual controller/service
             ActionExecutedContext executedContext;
 
             try
@@ -110,14 +112,14 @@ namespace SebPortal.Api.Filters
             }
             catch
             {
-                // Request failed completely - remove the reservation
+                // Request failed completely, remove the reservation
                 _context.IdempotencyKeys.Remove(idempotencyRecord);
                 await _context.SaveChangesAsync();
 
                 throw;
             }
 
-            // 6. Save the response from the controller
+            // Save the response from the controller
             if (executedContext.Result is ObjectResult objectResult)
             {
                 idempotencyRecord.ResponseContent = JsonSerializer.Serialize(objectResult.Value,new JsonSerializerOptions(JsonSerializerDefaults.Web));
