@@ -24,7 +24,7 @@ namespace SebPortal.Api.Filters
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             // Require idempotency header
-            if (!context.HttpContext.Request.Headers.TryGetValue("X-Idempotency-Key",out var idempotencyKey) ||string.IsNullOrWhiteSpace(idempotencyKey))
+            if (!context.HttpContext.Request.Headers.TryGetValue("X-Idempotency-Key",out var idempotencyKey) || string.IsNullOrWhiteSpace(idempotencyKey))
             {
                 context.Result = new BadRequestObjectResult("X-Idempotency-Key header is required.");
 

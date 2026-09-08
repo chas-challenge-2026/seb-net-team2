@@ -17,14 +17,11 @@ public class IdempotencyFilterTests
     public async Task SameKeyAndRequest_ActionIsOnlyExecutedOnce()
     {
         // Arrange
-        await using var connection =
-            new SqliteConnection("Data Source=:memory:");
+        await using var connection = new SqliteConnection("Data Source=:memory:");
 
         await connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<SebDbContext>()
-            .UseSqlite(connection)
-            .Options;
+        var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
 
         await using var dbContext = new SebDbContext(options);
 
@@ -61,10 +58,7 @@ public class IdempotencyFilterTests
             );
         };
 
-        await filter.OnActionExecutionAsync(
-            firstContext,
-            firstNext
-        );
+        await filter.OnActionExecutionAsync(firstContext, firstNext);
 
         // Second identical request
         var secondContext = CreateActionContext(
@@ -93,30 +87,20 @@ public class IdempotencyFilterTests
             );
         };
 
-        await filter.OnActionExecutionAsync(
-            secondContext,
-            secondNext
-        );
+        await filter.OnActionExecutionAsync(secondContext, secondNext);
 
         // Assert
         Assert.Equal(1, actionCallCount);
         Assert.IsType<ContentResult>(secondContext.Result);
     }
 
-    private static ActionExecutingContext CreateActionContext(
-        string idempotencyKey,
-        object request)
+    private static ActionExecutingContext CreateActionContext(string idempotencyKey, object request)
     {
         var httpContext = new DefaultHttpContext();
 
-        httpContext.Request.Headers["X-Idempotency-Key"] =
-            idempotencyKey;
+        httpContext.Request.Headers["X-Idempotency-Key"] =idempotencyKey;
 
-        var actionContext = new ActionContext(
-            httpContext,
-            new RouteData(),
-            new ActionDescriptor()
-        );
+        var actionContext = new ActionContext(httpContext, new RouteData(),new ActionDescriptor());
 
         return new ActionExecutingContext(
             actionContext,
@@ -129,9 +113,7 @@ public class IdempotencyFilterTests
         );
     }
 
-    private static ActionExecutedContext CreateExecutedContext(
-        ActionExecutingContext executingContext,
-        IActionResult result)
+    private static ActionExecutedContext CreateExecutedContext(ActionExecutingContext executingContext, IActionResult result)
     {
         return new ActionExecutedContext(
             executingContext,
@@ -147,14 +129,11 @@ public class IdempotencyFilterTests
     public async Task SameKeyDifferentRequest_ReturnsConflict()
     {
         // Arrange
-        await using var connection =
-            new SqliteConnection("Data Source=:memory:");
+        await using var connection = new SqliteConnection("Data Source=:memory:");
 
         await connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<SebDbContext>()
-            .UseSqlite(connection)
-            .Options;
+        var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
 
         await using var dbContext = new SebDbContext(options);
         await dbContext.Database.EnsureCreatedAsync();
@@ -176,15 +155,10 @@ public class IdempotencyFilterTests
                 StatusCode = StatusCodes.Status201Created
             };
 
-            return Task.FromResult(
-                CreateExecutedContext(firstContext, result)
-            );
+            return Task.FromResult(CreateExecutedContext(firstContext, result));
         };
 
-        await filter.OnActionExecutionAsync(
-            firstContext,
-            firstNext
-        );
+        await filter.OnActionExecutionAsync(firstContext, firstNext);
 
         // Same key, different request
         var secondContext = CreateActionContext(
@@ -210,35 +184,24 @@ public class IdempotencyFilterTests
         };
 
         // Act
-        await filter.OnActionExecutionAsync(
-            secondContext,
-            secondNext
-        );
+        await filter.OnActionExecutionAsync(secondContext, secondNext);
 
         // Assert
         Assert.False(secondActionCalled);
 
-        var result =
-            Assert.IsType<ConflictObjectResult>(
-                secondContext.Result);
+        var result = Assert.IsType<ConflictObjectResult>(secondContext.Result);
 
-        Assert.Equal(
-            StatusCodes.Status409Conflict,
-            result.StatusCode
-        );
+        Assert.Equal(StatusCodes.Status409Conflict, result.StatusCode);
     }
     [Fact]
     public async Task MissingIdempotencyKey_ReturnsBadRequest()
     {
         // Arrange
-        await using var connection =
-            new SqliteConnection("Data Source=:memory:");
+        await using var connection = new SqliteConnection("Data Source=:memory:");
 
         await connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<SebDbContext>()
-            .UseSqlite(connection)
-            .Options;
+        var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
 
         await using var dbContext = new SebDbContext(options);
         await dbContext.Database.EnsureCreatedAsync();
@@ -247,11 +210,7 @@ public class IdempotencyFilterTests
 
         var httpContext = new DefaultHttpContext();
 
-        var actionContext = new ActionContext(
-            httpContext,
-            new RouteData(),
-            new ActionDescriptor()
-        );
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
 
         var executingContext = new ActionExecutingContext(
             actionContext,
@@ -275,29 +234,22 @@ public class IdempotencyFilterTests
         };
 
         // Act
-        await filter.OnActionExecutionAsync(
-            executingContext,
-            next
-        );
+        await filter.OnActionExecutionAsync(executingContext, next);
 
         // Assert
         Assert.False(actionCalled);
 
-        Assert.IsType<BadRequestObjectResult>(
-            executingContext.Result);
+        Assert.IsType<BadRequestObjectResult>(executingContext.Result);
     }
     [Fact]
     public async Task ExpiredKey_AllowsRequestToExecuteAgain()
     {
         // Arrange
-        await using var connection =
-            new SqliteConnection("Data Source=:memory:");
+        await using var connection = new SqliteConnection("Data Source=:memory:");
 
         await connection.OpenAsync();
 
-        var options = new DbContextOptionsBuilder<SebDbContext>()
-            .UseSqlite(connection)
-            .Options;
+        var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
 
         await using var dbContext = new SebDbContext(options);
         await dbContext.Database.EnsureCreatedAsync();
@@ -315,13 +267,7 @@ public class IdempotencyFilterTests
 
         var filter = new IdempotencyFilter(dbContext);
 
-        var context = CreateActionContext(
-            "expired-key",
-            new
-            {
-                amount = 100,
-                reference = "test"
-            });
+        var context = CreateActionContext("expired-key", new{amount = 100, reference = "test"});
 
         var actionCallCount = 0;
 
