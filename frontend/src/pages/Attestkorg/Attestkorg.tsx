@@ -56,6 +56,18 @@ export function Attestkorg() {
         rejected: 'Rejected',
     }
 
+    const handleApprove = (payment: Payment) => {
+        const confirmed = window.confirm(`Approve payment of ${payment.amount} to ${payment.recipient}?`)
+        if (!confirmed) return
+        updatePayment(payment.id, 'completed', payment.comment)
+    }
+
+    const handleReject = (payment: Payment) => {
+        const confirmed = window.confirm(`Reject payment of ${payment.amount} to ${payment.recipient}?`)
+        if (!confirmed) return
+        updatePayment(payment.id, 'rejected', payment.comment)
+    }
+
     return (
         <section className={styles.inbox} aria-labelledby="approval-inbox-title">
             <header className={styles.header}>
@@ -102,7 +114,7 @@ export function Attestkorg() {
                                     <button
                                         type="button"
                                         className={styles.reject}
-                                        onClick={() => updatePayment(payment.id, 'rejected', payment.comment)}
+                                        onClick={() => handleReject(payment)}
                                         aria-label={`Reject payment to ${payment.recipient}`}
                                     >
                                         Reject
@@ -110,7 +122,7 @@ export function Attestkorg() {
                                     <button
                                         type="button"
                                         className={styles.approve}
-                                        onClick={() => updatePayment(payment.id, 'completed', payment.comment)}
+                                        onClick={() => handleApprove(payment)}
                                         aria-label={`Approve payment to ${payment.recipient}`}
                                     >
                                         Approve
