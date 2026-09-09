@@ -1,5 +1,7 @@
-using SebPortal.Data;
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 using Microsoft.EntityFrameworkCore;
+using SebPortal.Data;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using Microsoft.OpenApi.Models;
@@ -58,6 +60,7 @@ builder.Services.AddSwaggerGen(options =>
 // Register CORS policies for development and production environments
 builder.Services.AddCors(options =>
 {
+
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
     policy.AllowAnyOrigin()
@@ -81,6 +84,11 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddDistributedMemoryCache();
+
+// Persist ASP.NET Core DataProtection keys to disk (fixes session cookie unprotect warnings)
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "DataProtection-Keys")))
+    .SetApplicationName("SebPortal");
 
 // Services
 builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();

@@ -102,24 +102,31 @@ namespace SebPortal.Api.Services
             var existingUser = await _userRepository.GetUserByIdAsync(id);
             if (existingUser == null)
             {
-                throw new Exception("Användaren hittades inte");
+                throw new Exception($"Användaren med id: {id} hittades inte");
+            }
+
+            // Update if updated
+            if (dto.Name != null)
+            {
+                existingUser.Name = dto.Name;
             }
 
             //if email is changed, validate unique email
-            if (existingUser.Email != dto.Email)
+            if (dto.Email != null && existingUser.Email != dto.Email)
             {
                 var existingEmailUser = await _userRepository.GetUserByEmailAsync(dto.Email);
                 if (existingEmailUser != null)
                 {
                     throw new Exception("En användare med denna e-postadress finns redan");
                 }
+                existingUser.Email = dto.Email;
             }
 
-            //update user properties
-            existingUser.Name = dto.Name;
-            existingUser.Email = dto.Email;
-            existingUser.Role = dto.Role;
-            existingUser.TenantId = dto.TenantId;
+            //Update if updated
+            if (dto.Role != null)
+            {
+                existingUser.Role = dto.Role;
+            }
 
             //if password is provided, hash it and update the password hash
             if (!string.IsNullOrEmpty(dto.Password))

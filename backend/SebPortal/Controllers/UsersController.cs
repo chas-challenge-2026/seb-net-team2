@@ -47,7 +47,8 @@ namespace SebPortal.Api.Controllers
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
-        [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("{id:int}")]
         public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
         {
             var updatedUser = await _userService.UpdateUserAsync(id, dto);
