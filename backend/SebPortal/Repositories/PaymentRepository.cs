@@ -28,14 +28,42 @@ namespace SebPortal.Api.Repositories
                 .FirstOrDefaultAsync(p => p.Id == paymentId);
         }
 
-        public Task<IEnumerable<Payment>> GetPaymentsByUserIdAsync(int userId)
+        public async Task<IEnumerable<Payment>> GetPaymentsByUserIdAsync(int userId)
         {
-            throw new NotImplementedException();
+            var payments = await _context.Payments.Include(p => p.Tenant)
+                .Include(p => p.FromAccount)
+                .Include(p => p.CreatedByUser)
+                .Where(p => p.CreatedByUserId == userId)
+                .ToListAsync();
+
+            return payments.AsEnumerable();
         }
 
-        public Task UpdatePaymentStatusAsync(int paymentId, string status)
+        public async Task UpdatePaymentStatusAsync(int paymentId, string status)
         {
-            throw new NotImplementedException();
+            var payment = await _context.Payments.FindAsync(paymentId);
+            if (payment != null)
+            {
+                payment.Status = status;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task CompletePaymentAsync(int paymentId)
+        {
+            await _context.Payments
+                .Where(p => p.Id == paymentId && p.Status == "pending_approval")
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.Status, "completed")
+                    .SetProperty(p => p.ExecutedAt, DateTime.UtcNow));
+        }
+
+        public async Task RejectPaymentAsync(int paymentId)
+        {
+            await _context.Payments
+                .Where(p => p.Id == paymentId && p.Status == "pending_approval")
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.Status, "rejected"));
         }
     }
 }

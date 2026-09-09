@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Services;
 
@@ -17,10 +18,9 @@ namespace SebPortal.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto)
+        [Authorize(Roles = "initiator")]
+        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, int userId)
         {
-            int userId = 1;
-
             var payment = await _createPaymentService.CreatePaymentAsync(dto, userId);
             return CreatedAtAction(nameof(GetPaymentById), new { id = payment.Id }, payment);
         }
