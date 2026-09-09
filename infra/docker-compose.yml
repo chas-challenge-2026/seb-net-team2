@@ -16,9 +16,9 @@ services:
   db:
     image: postgres:12
     environment:
-      POSTGRES_DB: seb
-      POSTGRES_USER: seb
-      POSTGRES_PASSWORD: seb123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
@@ -39,7 +39,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://+:8081"
-      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=seb;Username=seb;Password=seb123"
+      ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION}
+      Jwt__Secret: ${JWT_SECRET}
     depends_on:
       db:
         condition: service_healthy
