@@ -6,6 +6,7 @@ obj/
 native/libauditsigner.so
 native/libcsvparser.so
 native/libiban.so
+native/csv-test
 
 ## Rider / VS / VSCode
 .idea/
