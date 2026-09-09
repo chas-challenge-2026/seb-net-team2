@@ -14,3 +14,7 @@ cd ..
 
 rm -rf cmocka-2.0.2
 rm cmocka-2.0.2.tar.xz
+
+# if cmocka lib cant be found when compiling use this:
+# echo /usr/local/lib | sudo tee /etc/ld.so.conf.d/usr-local.conf
+# sudo ldconfig
