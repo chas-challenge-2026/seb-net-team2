@@ -1,29 +1,65 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SebPortal.Api.Dtos;
+using SebPortal.Api.Services;
 
 namespace SebPortal.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class UsersController : ControllerBase
     {
+        private readonly IUserService _userService;
 
-        // endpoints:
-        // login, create user (admin only), get current user, update user, delete user (admin only), get all users (admin only)
-        [Authorize]
-        [HttpGet("me")]
-        public IActionResult GetCurrentUser()
+        public UsersController(IUserService userService)
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            var role = User.FindFirst("Role")?.Value;
-            var tenantId = User.FindFirst("TenantId")?.Value;
+            _userService = userService;
+        }
 
-            return Ok(new
-            {
-                UserId = userId,
-                Role = role,
-                TenantId = tenantId
-            });
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ReadUserDTO>>> GetAllUsers()
+        {
+            var users = await _userService.GetAllUsersAsync();
+            return Ok(users);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<ReadUserDTO>> GetUserById(int id)
+        {
+            var user = await _userService.GetUserByIdAsync(id);
+            return Ok(user);
+        }
+
+        [HttpGet("by-email")]
+        public async Task<ActionResult<ReadUserDTO>> GetUserByEmail([FromQuery] string email)
+        {
+            var user = await _userService.GetUserByEmailAsync(email);
+            return Ok(user);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<ReadUserDTO>> CreateUser([FromBody] CreateUserDTO dto)
+        {
+            var createdUser = await _userService.CreateUserAsync(dto);
+            return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
+        }
+
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
+        {
+            var updatedUser = await _userService.UpdateUserAsync(id, dto);
+            return Ok(updatedUser);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var result = await _userService.DeleteUserAsync(id);
+            return NoContent();
         }
     }
 }

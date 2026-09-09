@@ -52,7 +52,10 @@ namespace SebPortal.Api.Services
         public async Task<bool> DeleteUserAsync(int userId)
         {
             var user = await _userRepository.GetUserByIdAsync(userId);
-            if (user == null) return false;
+            if (user == null)
+            {
+                throw new Exception($"Användaren med id: {userId} hittades inte");
+            }
 
             await _userRepository.DeleteUserAsync(user.Id);
             return true;
@@ -61,7 +64,10 @@ namespace SebPortal.Api.Services
         public async Task<ReadUserDTO?> GetUserByEmailAsync(string email)
         {
             var user = await _userRepository.GetUserByEmailAsync(email);
-            if (user == null) return null;
+            if (user == null)
+            {
+                throw new Exception($"Användaren med e-post: {email} hittades inte");
+            }
 
             return new ReadUserDTO
             {
@@ -78,7 +84,7 @@ namespace SebPortal.Api.Services
             var user = await _userRepository.GetUserByIdAsync(userId);
             if (user == null)
             {
-                return null;
+                throw new Exception($"Användaren med id: {userId} hittades inte");
             }
 
             return new ReadUserDTO
@@ -157,6 +163,19 @@ namespace SebPortal.Api.Services
                 Role = user.Role,
                 TenantId = user.TenantId
             };
+        }
+
+        public async Task<IEnumerable<ReadUserDTO>> GetAllUsersAsync()
+        {
+            var users = await _userRepository.GetAllUsersAsync();
+            return users.Select(user => new ReadUserDTO
+            {
+                Id = user.Id,
+                TenantId = user.TenantId,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role
+            });
         }
 
         private string GenerateJwtToken(User user)

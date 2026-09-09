@@ -11,5 +11,6 @@ namespace SebPortal.Api.Services
         Task<ReadUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto);
         Task<bool> DeleteUserAsync(int userId);
         Task<LoginResponseDTO> LoginAsync (LoginRequestDTO dto);
+        Task<IEnumerable<ReadUserDTO>> GetAllUsersAsync();
     }
 }

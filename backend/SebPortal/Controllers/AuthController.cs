@@ -44,10 +44,6 @@ namespace SebPortal.Api.Controllers
         {
             // get user by email
             var response = await _userService.LoginAsync(dto);
-            if (response == null)
-            {
-                return Unauthorized();
-            }
 
             //return token and user info
             return Ok(response);
