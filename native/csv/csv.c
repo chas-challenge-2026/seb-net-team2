@@ -44,7 +44,8 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
         return NULL;
     }
 
-    snprintf(buffer, content_len, "%s", content);
+    memcpy(buffer, content, content_len);
+    buffer[content_len] = '\0';
 
     char* start = buffer;
     char* current = start;
@@ -63,8 +64,21 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
     {
         if (current_length >= full_length)
         {
+            if (!is_headers && inner_index == Row_Data_Reference)
+            {
+                snprintf(rows[index].reference, CSV_REFERENCE_LENGTH, "%s", start);
+
+                if (fields != 3)
+                {
+                    rows->valid = 0;
+                    snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Fields matchar inte header fields");
+                    return rows;
+                }
+                index++;
+            }
+
             rows->valid = 1;
-            *rows_out = index + 1;
+            *rows_out = index;
             return rows;
         }
 
@@ -74,6 +88,7 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
             {
                 current = &current[2];
                 start = current;
+                current_length += 2;
                 is_headers = false;
                 
                 continue;
