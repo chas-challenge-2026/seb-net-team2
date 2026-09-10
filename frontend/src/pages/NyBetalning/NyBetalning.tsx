@@ -3,9 +3,15 @@ import { useAccounts } from "../../hooks/useAccounts"
 import styles from './NyBetalning.module.css'
 import Card from '../../components/Card/Card'
 import Button from '../../components/Button/Button'
-import { createPayment } from '../../services/accountService'
-import { paymentSchema, type PaymentForm } from "../../schemas/paymentSchema"
 
+type PaymentForm = {
+    fromAccountId: string
+    recipient: string
+    iban: string
+    amount: string
+    reference: string
+    message: string
+}
 
 const initialForm: PaymentForm = {
     fromAccountId: '1',
@@ -19,15 +25,9 @@ const initialForm: PaymentForm = {
 
 export function NyBetalning() {
         
-    const { 
-        data: accounts = [],
-        isLoading: isLoadingAccounts,
-        isError: accountsError, 
-    } = useAccounts()
+    const { data: accounts = [] } = useAccounts()
     const [form, setForm] = useState(initialForm)
     const [submitted, setSubmitted] = useState(false)
-    const [ isSubmitting, setIsSubmitting] = useState(false)
-    const [error, setError] = useState<string | null>(null)
 
     const selectedAccount = accounts.find(account => account.id === form.fromAccountId,)
 
@@ -43,57 +43,12 @@ export function NyBetalning() {
             [field]: value,
         }))
         setSubmitted(false)
-        setError(null)
-    }
-
-    function clearForm() {
-        setForm(initialForm)
-        setSubmitted(false)
-        setError(null)
     }
     
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
-        if(!selectedAccount){
-            setError('Select an account.')
-            return
-        }
-
-        const validation = paymentSchema.safeParse(form)
-
-        if(!validation.success) {
-            setError(validation.error.issues[0].message)
-            return
-        }
-
-        const validatedForm = validation.data
-
-        if(amount > selectedAccount.balance) {
-            setError('The payment amount exceeds the account balance.')
-            return
-        }
-
-        setError(null)
-        setSubmitted(false)
-        setIsSubmitting(true)
-
-        try {
-            await createPayment({
-                fromAccountId: Number(validatedForm.fromAccountId),
-                toIban: validatedForm.iban,
-                amount: Number(validatedForm.amount),
-                currency: 'SEK',
-                reference: validatedForm.reference,
-            })
-
-            setSubmitted(true)
-            setForm(initialForm)
-        } catch {
-            setError('Could not create the payment. Please try again.')
-        } finally {
-            setIsSubmitting(false)
-        }
+        setSubmitted(true)
     }
 
     return(
@@ -122,21 +77,16 @@ export function NyBetalning() {
 
                     <label>
                         From account
-                        <select
+                        <select 
                         value={form.fromAccountId}
-                        disabled={isLoadingAccounts || accountsError || isSubmitting}
                         onChange={event => updateField('fromAccountId', event.target.value)}
                         >
-                            {isLoadingAccounts && <option>Loading accounts...</option>}
                             {accounts.map((account) => (
                                 <option key={account.id} value={account.id}>
                                     {account.name} · {account.balance.toLocaleString('en-SE')} {account.currency}
                                 </option>
                             ))}
                         </select>
-                        {accountsError && (
-                            <p className={styles.fieldError}>Could not load accounts.</p>
-                        )}
                     </label>
                     
                     <label>
@@ -200,19 +150,17 @@ export function NyBetalning() {
                         </div>
                     )}
 
-                    {error && <div className={styles.error}>{error}</div>}
-
                     <div className={styles.actions}>
                         <Button
                         type="button"
                         variant="ghost"
                         size="medium"
-                        onClick={clearForm}
+                        onClick={() => setForm(initialForm)}
                         >
                             Clear form
                         </Button>
-                        <Button type="submit" variant="primary" size="medium" disabled={isSubmitting}>
-                            {isSubmitting ? 'Creating payment...' : 'Review payment'}
+                        <Button type="submit" variant="primary" size="medium">
+                            Review payment
                             <span aria-hidden="true">→</span>
                         </Button>
                     </div>
@@ -227,23 +175,7 @@ export function NyBetalning() {
                             {amount.toLocaleString('en-SE', {
                                 minimumFractionDigits: 2,
                             })}{' '}
-                            SEK
                         </strong>
-                    </div>
-
-                    <div className={styles.summaryRow}>
-                        <span>Recipient</span>
-                        <strong>{form.recipient || 'Not specified'}</strong>
-                    </div>
-
-                    <div className={styles.summaryRow}>
-                        <span>Recipient IBAN</span>
-                        <strong>{form.iban || 'Not specified'}</strong>
-                    </div>
-
-                    <div className={styles.summaryRow}>
-                        <span>Reference</span>
-                        <strong>{form.reference || 'Not specified'}</strong>
                     </div>
 
                     <div className={styles.summaryRow}>

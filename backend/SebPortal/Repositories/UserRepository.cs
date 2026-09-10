@@ -22,27 +22,15 @@ namespace SebPortal.Api.Repositories
             return user;
         }
 
-        public async Task<User> UpdateUserAsync(User user)
+
+        public Task<bool> DeleteUserAsync(int userId)
         {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
-            return user;
+            throw new NotImplementedException();
         }
 
-        public async Task<bool> DeleteUserAsync(int userId)
+        public Task<User?> GetUserByEmailAsync(string email)
         {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null) return false;
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<User?> GetUserByEmailAsync(string email)
-        {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            throw new NotImplementedException();
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
@@ -50,9 +38,9 @@ namespace SebPortal.Api.Repositories
             return await _context.Users.FindAsync(userId);
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public Task<User> UpdateUserAsync(User user)
         {
-            return await _context.Users.ToListAsync();
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<User>> GetAttestantsByTenantIdAsync(int tenantId)
