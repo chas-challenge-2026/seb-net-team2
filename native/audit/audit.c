@@ -122,7 +122,7 @@ int audit_verify(const char *log_path, const char *secret_key)
         if (last_separator == NULL)
         {
             fclose(file);
-            return -1;
+            return line_number;
         }
         *last_separator = '\0';
         char *stored_hmac = last_separator + 1;
@@ -131,7 +131,7 @@ int audit_verify(const char *log_path, const char *secret_key)
         if (prev_hash_separator == NULL)
         {
             fclose(file);
-            return -1;
+            return line_number;
         }
         char *stored_prev_hash = prev_hash_separator + 1;
 
@@ -143,7 +143,7 @@ int audit_verify(const char *log_path, const char *secret_key)
             if (strcmp(stored_prev_hash, zero_hash) != 0)
             {
                 fclose(file);
-                return -1;
+                return line_number;
             }
         }
         else
@@ -153,7 +153,7 @@ int audit_verify(const char *log_path, const char *secret_key)
             if (strcmp(stored_prev_hash, expected_prev_hash) != 0)
             {
                 fclose(file);
-                return -1;
+                return line_number;
             }
         }
 
@@ -162,12 +162,12 @@ int audit_verify(const char *log_path, const char *secret_key)
         if (strcmp(stored_hmac, calculated_hmac) != 0)
         {
             fclose(file);
-            return -1;
+            return line_number;
         }
 
         strcpy(previous_line, current_line);
     }
 
     fclose(file);
-    return 0;
+    return -1;
 }
