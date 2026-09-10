@@ -1,14 +1,12 @@
-using Microsoft.AspNetCore.DataProtection;
-using System.IO;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SebPortal.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-using Scalar.AspNetCore;
-using SebPortal.Api.Auth;
-using SebPortal.Api.Filters;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
-using SebPortal.Data;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SebPortal.Api.Middleware;
+using SebPortal.Api.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +18,8 @@ var jwtAudience = builder.Configuration["Jwt:Audience"]
     ?? throw new InvalidOperationException("JWT audience is missing.");
 
 
-builder
-    .Services.AddControllers();
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-
-builder.Services.AddScoped<IdempotencyFilter>();
 
 // Swagger / OpenAPI for .NET 8 with JWT
 builder.Services.AddEndpointsApiExplorer();
@@ -64,7 +59,6 @@ builder.Services.AddSwaggerGen(options =>
 // Register CORS policies for development and production environments
 builder.Services.AddCors(options =>
 {
-
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
     policy.AllowAnyOrigin()
@@ -89,11 +83,6 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddDistributedMemoryCache();
 
-// Persist ASP.NET Core DataProtection keys to disk (fixes session cookie unprotect warnings)
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "DataProtection-Keys")))
-    .SetApplicationName("SebPortal");
-
 // Services
 builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
@@ -101,7 +90,16 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ICreatePaymentService, CreatePaymentService>();
+builder.Services.AddScoped<IGenerateIban, GenerateIbanService>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
+builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 
+// Global error handling middleware
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<SebDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -122,8 +120,7 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
-builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
+
 
 var app = builder.Build();
 
@@ -150,6 +147,7 @@ if (!app.Environment.IsDevelopment())
 
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
+app.UseExceptionHandler();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();

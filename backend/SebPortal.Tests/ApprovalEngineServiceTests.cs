@@ -13,19 +13,21 @@ namespace SebPortal.Tests;
 public class ApprovalEngineServiceTests : IDisposable 
 {
     private readonly Mock<IApprovalLimitRepository> _mockLimitRepository;
+    private readonly Mock<IUserRepository> _mockUserRepository;
     private readonly ApprovalEngineService _service;
     private readonly SebDbContext _context;
 
     public ApprovalEngineServiceTests()
     {
         _mockLimitRepository = new Mock<IApprovalLimitRepository>();
+        _mockUserRepository = new Mock<IUserRepository>();
         var options = new DbContextOptionsBuilder<SebDbContext>()
                     .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                     .Options;
 
         _context = new SebDbContext(options);
 
-        // Rules for attenstants: 
+        // Rules for attenstants:
         var sampleLimits = new List<ApprovalLimit>
         {
             new() { Id = 1, TenantId = 1, MinAmount = 50000m, RequiredApprovals = 1, Description = "Enkelattest" },
@@ -36,7 +38,16 @@ public class ApprovalEngineServiceTests : IDisposable
             .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
             .ReturnsAsync(sampleLimits);
 
-        _service = new ApprovalEngineService(_mockLimitRepository.Object, _context);
+        var sampleAttestants = new List<User>
+        {
+            new() { Id = 1, TenantId = 1, Name = "Johan Berg", Email = "johan@malmobygg.se", PasswordHash = "hash", Role = "attestant" }
+        };
+
+        _mockUserRepository
+            .Setup(repo => repo.GetAttestantsByTenantIdAsync(It.IsAny<int>()))
+            .ReturnsAsync(sampleAttestants);
+
+        _service = new ApprovalEngineService(_mockLimitRepository.Object, _mockUserRepository.Object, _context);
     }
 
     //Runs automatically after each test to clean up database
@@ -71,7 +82,11 @@ public class ApprovalEngineServiceTests : IDisposable
         
         // Act
         var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
-        
+        // ProcessPaymentApprovalAsync sparar inte längre själv — det gör
+        // anroparen (CreatePaymentService, i en gemensam transaktion), så
+        // testet måste spara explicit innan det kan läsa tillbaka stegen.
+        await _context.SaveChangesAsync();
+
         // Assert
         Assert.True(requiresApproval);
         Assert.Equal("pending_approval", payment.Status);
@@ -93,6 +108,7 @@ public class ApprovalEngineServiceTests : IDisposable
 
         // Act
         var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+        await _context.SaveChangesAsync();
 
         // Assert
         Assert.True(requiresApproval);

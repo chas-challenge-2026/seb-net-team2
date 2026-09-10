@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>e01a91cd-da9d-4cfd-8b88-5e872e9f1187</UserSecretsId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>400273f5-8820-4aeb-8228-27e0b95130b3</UserSecretsId>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
@@ -20,6 +20,7 @@
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.30" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.17.2" />
+		<PackageReference Include="Selenium.WebDriver" Version="4.49.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
 
 	</ItemGroup>

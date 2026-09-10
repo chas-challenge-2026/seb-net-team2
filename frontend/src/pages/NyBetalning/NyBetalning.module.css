@@ -149,6 +149,34 @@ textarea {
     padding-top: 0.5rem;
 }
 
+.primaryButton,
+.secondaryButton {
+    border: 0;
+    border-radius: 4px;
+    padding: 0.8rem 1rem;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.primaryButton {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    background: var(--seb-green-dark-2);
+    color: white;
+}
+
+.primaryButton:hover {
+    background: #216d00;
+}
+
+.secondaryButton {
+    border: 1px solid #cbd8ce;
+    background: white;
+    color: #34483b;
+}
+
 .summary {
     padding: 1.5rem;
     background: #163226;
@@ -180,7 +208,7 @@ textarea {
 .summaryAmount span,
 .summaryRow span {
     display: block;
-    color: #aeb8b2;
+    color: #b9cabe;
     font-size: 0.8rem;
 }
 
@@ -238,29 +266,6 @@ textarea {
     background: #eef8ed;
     color: #245526;
     font-size: 0.85rem;
-}
-
-.error {
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border-left: 4px solid #b42318;
-    background: #fef3f2;
-    color: #8a1c14;
-    font-size: 0.85rem;
-}
-
-.fieldHint,
-.fieldError {
-    margin: 0.45rem 0 0;
-    font-size: 0.78rem;
-}
-
-.fieldHint {
-    color: #68756e;
-}
-
-.fieldError {
-    color: #b42318;
 }
 
 @media (max-width: 760px) {

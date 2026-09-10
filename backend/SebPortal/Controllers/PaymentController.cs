@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SebPortal.Api.Dtos;
-using SebPortal.Api.Filters;
 using SebPortal.Api.Services;
 
 
@@ -18,14 +18,11 @@ namespace SebPortal.Api.Controllers
         }
 
         [HttpPost]
-        [ServiceFilter(typeof(IdempotencyFilter))]
-        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, [FromHeader(Name = "X-Idempotency-Key")] string idempotencyKey)
+        [Authorize(Roles = "initiator")]
+        public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, int userId)
         {
-            int userId = 1;
-
             var payment = await _createPaymentService.CreatePaymentAsync(dto, userId);
-
-            return Created($"/api/Payment/{payment.Id}", payment);
+            return CreatedAtAction(nameof(GetPaymentById), new { id = payment.Id }, payment);
         }
 
         [HttpGet("{id}")]
