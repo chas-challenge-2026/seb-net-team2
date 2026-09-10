@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SebPortal.Data;
@@ -11,9 +12,11 @@ using SebPortal.Data;
 namespace SebPortal.Api.Migrations
 {
     [DbContext(typeof(SebDbContext))]
-    partial class SebDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260910102615_AddIdempotencyResponseLocation")]
+    partial class AddIdempotencyResponseLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

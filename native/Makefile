@@ -13,5 +13,12 @@ libiban.so: iban/iban.c
 libauditsigner.so: audit/audit.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $< -lssl -lcrypto
 
+test: test-csv
+
+test-csv:
+	$(CC) csv/test.c csv/csv.c -o csv-test -lcmocka
+	./csv-test
+	rm csv-test
+
 clean:
 	rm -f *.so
