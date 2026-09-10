@@ -9,5 +9,6 @@ namespace SebPortal.Api.Repositories
         Task<User> CreateUserAsync(User user);
         Task<User> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
+        Task<IEnumerable<User>> GetAllUsersAsync();
     }
 }
