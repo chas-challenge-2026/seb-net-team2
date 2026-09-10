@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
@@ -63,7 +64,18 @@ public class CreatePaymentServiceIntegrationTests
             var userRepository = new UserRepository(context);
             var paymentRepository = new PaymentRepository(context);
 
-            var service = new CreatePaymentService(userRepository,paymentRepository,context);
+            // Det här testet handlar om saldo-rollback, inte om attestregler —
+            // en mockad, tom limit-lista räcker (och undviker en SQLite-specifik
+            // begränsning: providern kan inte översätta ORDER BY på en decimal-
+            // kolumn, vilket den riktiga ApprovalLimitRepository gör).
+            var mockLimitRepository = new Mock<IApprovalLimitRepository>();
+            mockLimitRepository
+                .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<ApprovalLimit>());
+            var mockUserRepository = new Mock<IUserRepository>();
+            var approvalEngineService = new ApprovalEngineService(mockLimitRepository.Object, mockUserRepository.Object, context);
+
+            var service = new CreatePaymentService(userRepository, paymentRepository, approvalEngineService, context);
 
             var dto = new CreatePaymentDTO
             {
