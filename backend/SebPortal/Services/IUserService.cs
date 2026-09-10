@@ -5,10 +5,12 @@ namespace SebPortal.Api.Services
 {
     public interface IUserService
     {
-        Task<User?> GetUserByIdAsync(int userId);
-        Task<User?> GetUserByEmailAsync(string email);
-        Task<ReadUserDTO> CreateUserAsync(CreateUserDTO Dto);
-        Task<User> UpdateUserAsync(User user);
+        Task<ReadUserDTO?> GetUserByIdAsync(int userId);
+        Task<ReadUserDTO?> GetUserByEmailAsync(string email);
+        Task<ReadUserDTO> CreateUserAsync(CreateUserDTO dto);
+        Task<ReadUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto);
         Task<bool> DeleteUserAsync(int userId);
+        Task<LoginResponseDTO> LoginAsync (LoginRequestDTO dto);
+        Task<IEnumerable<ReadUserDTO>> GetAllUsersAsync();
     }
 }

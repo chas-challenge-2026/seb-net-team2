@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.DataProtection;
+using System.IO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -62,6 +64,7 @@ builder.Services.AddSwaggerGen(options =>
 // Register CORS policies for development and production environments
 builder.Services.AddCors(options =>
 {
+
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
     policy.AllowAnyOrigin()
@@ -86,6 +89,11 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddDistributedMemoryCache();
 
+// Persist ASP.NET Core DataProtection keys to disk (fixes session cookie unprotect warnings)
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "DataProtection-Keys")))
+    .SetApplicationName("SebPortal");
+
 // Services
 builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
 builder.Services.AddScoped<IApprovalService, ApprovalService>();
@@ -93,7 +101,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ICreatePaymentService, CreatePaymentService>();
-
+builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
+builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
+builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
 
 builder.Services.AddDbContext<SebDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -13,7 +13,7 @@ namespace SebPortal.Api.Repositories
             _context = context;
         }
 
-        public async Task<List<ApprovalLimit>> GetOrderedLimitsAsync(int tenantId)
+        public async Task<IEnumerable<ApprovalLimit>> GetOrderedLimitsAsync(int tenantId)
         {
             return await _context.ApprovalLimits
                 .Where(limit => limit.TenantId == tenantId)
@@ -21,10 +21,33 @@ namespace SebPortal.Api.Repositories
                 .ToListAsync();
         }
 
-        public async Task AddAsync(ApprovalLimit approvalLimit)
+        public async Task<ApprovalLimit?> GetByIdAsync(int id, int tenantId)
         {
-            await _context.ApprovalLimits.AddAsync(approvalLimit);
+            return await _context.ApprovalLimits
+                .FirstOrDefaultAsync(limit => limit.Id == id && limit.TenantId == tenantId);
+        }
+
+
+        public async Task<ApprovalLimit> CreateApprovalLimitAsync(ApprovalLimit approvalLimit)
+        {
+            _context.ApprovalLimits.Add(approvalLimit);
             await _context.SaveChangesAsync();
+            return approvalLimit;
+        }
+
+        public async Task<ApprovalLimit> UpdateApprovalLimitAsync(ApprovalLimit approvalLimit)
+        {
+            _context.ApprovalLimits.Update(approvalLimit);
+            await _context.SaveChangesAsync();
+            return approvalLimit;
+        }
+
+        public async Task<bool> DeleteApprovalLimitAsync(ApprovalLimit approvalLimit)
+        {
+            _context.ApprovalLimits.Remove(approvalLimit);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
+    
 }
