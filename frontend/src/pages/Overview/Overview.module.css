@@ -1,0 +1,120 @@
+.dashboard {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+}
+
+.dashboard__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.dashboard__header h1 {
+    margin: 0 0 0.4rem;
+    font-size: 2rem;
+}
+
+.dashboard__header p {
+    margin: 0;
+    color: #5f6872;
+}
+
+.accounts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.account-card {
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--seb-green-dark-2);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 6%);
+}
+
+.account-card__name {
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+}
+
+.account-card__balance {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.account-card__iban {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #888;
+}
+
+.dashboard__bottom {
+    margin-top: 2.5rem;
+}
+
+.dashboard__bottom > section {
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+}
+
+@media (max-width: 760px) {
+    .dashboard {
+        padding: 1.5rem 1rem 3rem;
+    }
+    .dashboard__header, .dashboard__bottom {
+        display: block;
+    }
+    .dashboard__bottom > section + section {
+        margin-top: 1rem;
+    }
+    .accounts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid #e0e0e0;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+}
+
+.status {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status--done {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status--pending {
+    background: #e8e8e8;
+    color: #444;
+}
+
