@@ -3,6 +3,7 @@ using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Data;
 using SebPortal.Models;
+using SebPortal.Api.Middleware;
 using System.Diagnostics;
 
 namespace SebPortal.Api.Services
@@ -33,7 +34,7 @@ namespace SebPortal.Api.Services
 
                 if (user == null)
                 {
-                    throw new Exception("User not found");
+                    throw new UnauthorizedAccessException("User not found or unauthorized.");
                 }
 
                 if (createPaymentDTO.Amount <= 0)
