@@ -55,6 +55,7 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
 
     bool is_headers = true;
 
+    int fields = 0;
     int index = 0;
     int inner_index = 0;
 
@@ -113,14 +114,23 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
 
             if (eol) 
             {
+                if (fields != 3)
+                {
+                    snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Fields matchar inte header fields");
+                    rows->valid = 0;
+                    return rows;
+                }
+
                 current += 2;
                 current_length += 2;
                 start = current;
                 index++;
                 inner_index = 0;
+                fields = 0;
             } 
             else 
             { // comma
+                fields++;
                 current += 1;
                 current_length += 1;
                 start = current;
