@@ -63,7 +63,7 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
         if (current_length >= full_length)
         {
             rows->valid = 1;
-            *rows_out = index;
+            *rows_out = index + 1;
             return rows;
         }
 
