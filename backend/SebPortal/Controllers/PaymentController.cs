@@ -25,7 +25,7 @@ namespace SebPortal.Api.Controllers
 
             var payment = await _createPaymentService.CreatePaymentAsync(dto, userId);
 
-            return CreatedAtAction(nameof(GetPaymentById), new { id = payment.Id }, payment);
+            return Created($"/api/Payment/{payment.Id}", payment);
         }
 
         [HttpGet("{id}")]

@@ -17,7 +17,7 @@ namespace SebPortal.Models
         public string? ResponseContent { get; set; }
 
         public int? StatusCode { get; set; }
-
+        public string? ResponseLocation { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -145,6 +145,8 @@ namespace SebPortal.Data
 
                 e.Property(x => x.StatusCode)
                     .HasColumnName("status_code");
+                e.Property(x => x.ResponseLocation)
+                    .HasColumnName("response_location");
 
                 e.Property(x => x.CreatedAt)
                     .HasColumnName("created_at");

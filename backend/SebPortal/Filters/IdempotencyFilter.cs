@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Dtos;
 using SebPortal.Data;
 using SebPortal.Models;
 using System.Security.Cryptography;
@@ -33,10 +34,20 @@ namespace SebPortal.Api.Filters
 
             var key = idempotencyKey.ToString();
 
-            // Create a hash of the request
-            var requestJson = JsonSerializer.Serialize(context.ActionArguments);
+            // Create a hash of the payment request only
+            if (!context.ActionArguments.TryGetValue("dto", out var dtoObject) ||
+                dtoObject is not CreatePaymentDTO dto)
+            {
+                context.Result = new BadRequestObjectResult("Payment request is missing.");
+                return;
+            }
 
-            var requestHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(requestJson)));
+            var requestJson = JsonSerializer.Serialize(
+                dto,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+            var requestHash = Convert.ToHexString(
+                SHA256.HashData(Encoding.UTF8.GetBytes(requestJson)));
 
             // Check if this key has already been used
             var existingKey = await _context.IdempotencyKeys.FirstOrDefaultAsync(x => x.Key == key);
@@ -62,9 +73,14 @@ namespace SebPortal.Api.Filters
                         return;
                     }
 
-                    // Same key + same request
+                    // Same key + same request and the first request is already finished
                     if (existingKey.ResponseContent != null && existingKey.StatusCode != null)
                     {
+                        if (!string.IsNullOrWhiteSpace(existingKey.ResponseLocation))
+                        {
+                            context.HttpContext.Response.Headers.Location = existingKey.ResponseLocation;
+                        }
+
                         context.Result = new ContentResult
                         {
                             Content = existingKey.ResponseContent,
@@ -75,7 +91,9 @@ namespace SebPortal.Api.Filters
                         return;
                     }
 
-                    context.Result = new ConflictObjectResult("A request with this idempotency key is already being processed.");
+                    // Same request is currently being processed by another request.
+                    // Wait for it to finish and replay its response.
+                    context.Result = await WaitForCompletedResponseAsync(key, requestHash, context.HttpContext);
 
                     return;
                 }
@@ -97,8 +115,10 @@ namespace SebPortal.Api.Filters
             }
             catch (DbUpdateException)
             {
-                // Another request may have inserted the same key at the same time.
-                context.Result = new ConflictObjectResult("A request with this idempotency key is already being processed.");
+                // Another request inserted the same key before us.
+                _context.Entry(idempotencyRecord).State = EntityState.Detached;
+
+                context.Result = await WaitForCompletedResponseAsync(key, requestHash, context.HttpContext);
 
                 return;
             }
@@ -126,8 +146,52 @@ namespace SebPortal.Api.Filters
 
                 idempotencyRecord.StatusCode = objectResult.StatusCode ?? StatusCodes.Status200OK;
 
+                if (objectResult is CreatedResult createdResult)
+                {
+                    idempotencyRecord.ResponseLocation = createdResult.Location;
+                }
+
                 await _context.SaveChangesAsync();
             }
+
+        }
+
+        private async Task<IActionResult> WaitForCompletedResponseAsync(string key,string requestHash,HttpContext httpContext)
+        {
+            const int maxAttempts = 10;
+            const int delayMilliseconds = 100;
+
+            for (var attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                var concurrentKey = await _context.IdempotencyKeys.AsNoTracking().FirstOrDefaultAsync(x => x.Key == key);
+
+                if (concurrentKey != null)
+                {
+                    if (concurrentKey.RequestHash != requestHash)
+                    {
+                        return new ConflictObjectResult("The idempotency key has already been used for a different request.");
+                    }
+
+                    if (concurrentKey.ResponseContent != null && concurrentKey.StatusCode != null)
+                    {
+                        if (!string.IsNullOrWhiteSpace(concurrentKey.ResponseLocation))
+                        {
+                            httpContext.Response.Headers.Location = concurrentKey.ResponseLocation;
+                        }
+
+                        return new ContentResult
+                        {
+                            Content = concurrentKey.ResponseContent,
+                            ContentType = "application/json",
+                            StatusCode = concurrentKey.StatusCode
+                        };
+                    }
+                }
+
+                await Task.Delay(delayMilliseconds, httpContext.RequestAborted);
+            }
+
+            return new ConflictObjectResult("A request with this idempotency key is still being processed.");
         }
     }
 }
