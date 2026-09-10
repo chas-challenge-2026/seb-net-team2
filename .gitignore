@@ -15,6 +15,7 @@ TestResults/
 native/libauditsigner.so
 native/libcsvparser.so
 native/libiban.so
+native/csv-test
 *.o
 *.so
 *.dll
