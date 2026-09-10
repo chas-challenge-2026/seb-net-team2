@@ -34,21 +34,25 @@ public class ApprovalLimitsController: ControllerBase
     public async Task<ActionResult<ApprovalLimitResponseDTO>> CreateApprovalLimit([FromBody] CreateApprovalLimitDTO dto)
     {
         var tenantId = GetUserTenantId();
-        var createdLimit = await _approvalLimitService.CreateApprovalLimitAsync(tenantId, dto);
+        var userEmail = User.FindFirst("email")?.Value ?? "System"; // Get from token
+        var createdLimit = await _approvalLimitService.CreateApprovalLimitAsync(tenantId, userEmail, dto);
         return CreatedAtAction(nameof(GetApprovalLimits), new { id = createdLimit.Id }, createdLimit);
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<ActionResult<ApprovalLimitResponseDTO>> UpdateApprovalLimit(int tenantId, int id, [FromBody] UpdateApprovalLimitDTO dto)
+    public async Task<ActionResult<ApprovalLimitResponseDTO>> UpdateApprovalLimit(int id, [FromBody] UpdateApprovalLimitDTO dto)
     {
-        var updatedLimit = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, dto);
+        var tenantId = GetUserTenantId();
+        var userEmail = User.FindFirst("email")?.Value ?? "System"; // Get from token
+        var updatedLimit = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userEmail, dto);
         return Ok(updatedLimit);
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteApprovalLimit(int tenantId, int id)
+    public async Task<IActionResult> DeleteApprovalLimit(int id)
     {
-        var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id);
+        var tenantId = GetUserTenantId();
+        var result = await _approvalLimitService.DeleteApprovalLimitAsync(id, tenantId);
         return NoContent();
     }
 
