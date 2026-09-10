@@ -1,11 +1,12 @@
-using SebPortal.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using SebPortal.Api.Repositories;
-using SebPortal.Api.Services;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SebPortal.Api.Auth;
+using SebPortal.Api.Filters;
+using SebPortal.Api.Repositories;
+using SebPortal.Api.Services;
+using SebPortal.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,8 +18,11 @@ var jwtAudience = builder.Configuration["Jwt:Audience"]
     ?? throw new InvalidOperationException("JWT audience is missing.");
 
 
-builder.Services.AddControllers();
+builder
+    .Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IdempotencyFilter>();
 
 // Swagger / OpenAPI for .NET 8 with JWT
 builder.Services.AddEndpointsApiExplorer();
