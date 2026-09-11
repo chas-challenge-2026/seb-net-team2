@@ -1,0 +1,254 @@
+.page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.eyebrow {
+    color: var(--seb-green-dark-2);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.header h1 {
+    margin: 0.45rem 0 0.5rem;
+    color: #163226;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: 0;
+}
+
+.header p {
+    margin: 0;
+    color: #68756e;
+}
+
+.headerBadge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #d9e6dc;
+    border-radius: 999px;
+    color: #456052;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.statusDot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--seb-green);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.sectionHeading {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5ebe6;
+}
+
+.sectionHeading p {
+    margin: 0;
+    color: #68756e;
+}
+
+.sectionHeading h2 {
+    margin: 0 0 0.35rem;
+    color: #163226;
+    font-size: 1.2rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: #34483b;
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+input[type='file'] {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 0.45rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #cbd8ce;
+    border-radius: 4px;
+    background: #fbfdfb;
+    color: #193326;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+input[type='file']:focus-visible {
+    outline: 3px solid rgb(96 205 24 / 20%);
+    border-color: var(--seb-green-dark-1);
+}
+
+.hint {
+    margin: 0 0 1rem;
+    color: #8a978e;
+    font-size: 0.78rem;
+}
+
+.errorBanner {
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--color-error);
+    background: #fdecea;
+    color: var(--color-error);
+    font-size: 0.85rem;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 0.5rem;
+}
+
+.formatCard p {
+    margin: 0 0 0.75rem;
+    color: #34483b;
+    font-size: 0.85rem;
+}
+
+.formatExample {
+    overflow-x: auto;
+    padding: 0.85rem;
+    margin: 0 0 1rem;
+    border: 1px solid #e5ebe6;
+    border-radius: 4px;
+    background: #fbfdfb;
+    color: #193326;
+    font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    white-space: pre;
+}
+
+.warning {
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #d69e2e;
+    background: #fff9ec;
+    color: #7a5a14;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.exampleLink {
+    border: 0;
+    padding: 0;
+    background: none;
+    color: var(--seb-green-dark-2);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.exampleLink:focus-visible {
+    outline: 3px solid rgb(96 205 24 / 20%);
+    outline-offset: 2px;
+}
+
+.resultsCard {
+    margin-top: 1.25rem;
+}
+
+.resultOk {
+    color: #245526;
+    font-size: 0.9rem;
+}
+
+.resultWarning {
+    color: var(--color-error);
+    font-size: 0.9rem;
+}
+
+.tableWrapper {
+    max-height: 420px;
+    overflow: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.table th,
+.table td {
+    padding: 0.65rem 0.75rem;
+    border-bottom: 1px solid #e5ebe6;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.table th {
+    position: sticky;
+    top: 0;
+    background: var(--color-surface);
+    color: #68756e;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.statusSuccess {
+    color: #245526;
+    font-weight: 700;
+}
+
+.statusError {
+    color: var(--color-error);
+    font-weight: 700;
+    white-space: normal;
+}
+
+@media (max-width: 760px) {
+    .page {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    .header {
+        display: block;
+    }
+
+    .headerBadge {
+        width: fit-content;
+        margin-top: 1rem;
+    }
+
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column;
+        justify-content: stretch;
+    }
+
+    .actions > * {
+        width: 100%;
+    }
+}
