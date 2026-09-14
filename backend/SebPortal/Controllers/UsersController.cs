@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SebPortal.Api.Authorization;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Services;
 
@@ -18,7 +19,7 @@ namespace SebPortal.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<IEnumerable<ReadUserDTO>>> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
@@ -39,24 +40,24 @@ namespace SebPortal.Api.Controllers
             return Ok(user);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<ReadUserDTO>> CreateUser([FromBody] CreateUserDTO dto)
         {
             var createdUser = await _userService.CreateUserAsync(dto);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPatch("{id:int}")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
         {
             var updatedUser = await _userService.UpdateUserAsync(id, dto);
             return Ok(updatedUser);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var result = await _userService.DeleteUserAsync(id);
