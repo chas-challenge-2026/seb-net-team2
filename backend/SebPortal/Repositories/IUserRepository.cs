@@ -10,5 +10,6 @@ namespace SebPortal.Api.Repositories
         Task<User> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
         Task<IEnumerable<User>> GetAttestantsByTenantIdAsync(int tenantId);
+        Task<IEnumerable<User>> GetAllUsersAsync();
     }
 }
