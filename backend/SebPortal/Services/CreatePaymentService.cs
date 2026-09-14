@@ -3,6 +3,8 @@ using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Data;
 using SebPortal.Models;
+using SebPortal.Api.Middleware;
+using System.Diagnostics;
 
 namespace SebPortal.Api.Services
 {
@@ -10,12 +12,14 @@ namespace SebPortal.Api.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IPaymentRepository _paymentRepository;
+        private readonly IApprovalEngineService _approvalEngineService;
         private readonly SebDbContext _context;
 
-        public CreatePaymentService(IUserRepository userRepository, IPaymentRepository paymentRepository, SebDbContext context)
+        public CreatePaymentService(IUserRepository userRepository, IPaymentRepository paymentRepository, IApprovalEngineService approvalEngineService, SebDbContext context)
         {
             _userRepository = userRepository;
             _paymentRepository = paymentRepository;
+            _approvalEngineService = approvalEngineService;
             _context = context;
         }
 
@@ -30,7 +34,7 @@ namespace SebPortal.Api.Services
 
                 if (user == null)
                 {
-                    throw new Exception("User not found");
+                    throw new UnauthorizedAccessException("User not found or unauthorized.");
                 }
 
                 if (createPaymentDTO.Amount <= 0)
@@ -66,6 +70,8 @@ namespace SebPortal.Api.Services
                     CreatedByUserId = userId,
                     CreatedAt = DateTime.UtcNow
                 };
+
+                await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
 
                 _context.Payments.Add(payment);
 

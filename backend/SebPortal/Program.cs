@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using SebPortal.Api.Middleware;
 using SebPortal.Api.Auth;
 using SebPortal.Api.Filters;
 using SebPortal.Api.Repositories;
@@ -101,9 +102,17 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ICreatePaymentService, CreatePaymentService>();
+builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
+builder.Services.AddScoped<IGenerateIban, GenerateIbanService>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
 builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
-builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
+
+// Global error handling middleware
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddDbContext<SebDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -124,8 +133,7 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
-builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
+
 
 var app = builder.Build();
 
@@ -152,6 +160,7 @@ if (!app.Environment.IsDevelopment())
 
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
+app.UseExceptionHandler();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
