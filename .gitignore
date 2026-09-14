@@ -43,6 +43,7 @@ Thumbs.db
 pgdata/
 .docker/
 
+appsettings.Development.json
 ## Security & secrets
 **/.env
 **/.env.*
