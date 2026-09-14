@@ -4,10 +4,17 @@ import type {
     FormEvent,
 } from "react";
 
-import { Link } from "@tanstack/react-router";
+import {
+    Link,
+    useNavigate,
+} from "@tanstack/react-router";
 
 import Button from "../../components/Button/Button";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
+import LoadingWheel from "../../components/LoadingState/LoadingWheel";
+
+import { useAuth } from "../../hooks/useAuth";
+import { AppError } from "../../errors/AppError";
 
 import styles from "./Login.module.css";
 
@@ -15,6 +22,13 @@ export default function PrivateLogin() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+
+    const {
+        login,
+        isLoggingIn,
+    } = useAuth();
+
+    const navigate = useNavigate();
 
     function handleEmail(
         event: ChangeEvent<HTMLInputElement>
@@ -28,7 +42,7 @@ export default function PrivateLogin() {
         setPassword(event.target.value);
     }
 
-    function handleSubmit(
+    async function handleSubmit(
         event: FormEvent<HTMLFormElement>
     ) {
         event.preventDefault();
@@ -40,11 +54,26 @@ export default function PrivateLogin() {
 
         setError("");
 
-        console.log({
-            email: email.trim(),
-            password,
-            customerType: "private",
-        });
+        try {
+            await login(
+                email.trim(),
+                password
+            );
+
+            await navigate({
+                to: "/overview",
+            });
+        } catch (error) {
+            if (error instanceof AppError) {
+                setError(
+                    error.detail ??
+                    error.message
+                );
+                return;
+            }
+
+            setError("Something went wrong.");
+        }
     }
 
     return (
@@ -72,6 +101,7 @@ export default function PrivateLogin() {
                         value={email}
                         onChange={handleEmail}
                         className={styles.input}
+                        disabled={isLoggingIn}
                     />
                 </div>
 
@@ -90,6 +120,7 @@ export default function PrivateLogin() {
                         onChange={handlePassword}
                         autoComplete="current-password"
                         required
+                        disabled={isLoggingIn}
                     />
                 </div>
             </div>
@@ -100,8 +131,13 @@ export default function PrivateLogin() {
                     variant="square"
                     size="medium"
                     className={styles.formButton}
+                    disabled={isLoggingIn}
                 >
-                    Log in
+                    {isLoggingIn ? (
+                        <LoadingWheel size="small" />
+                    ) : (
+                        "Log in"
+                    )}
                 </Button>
 
                 <Link

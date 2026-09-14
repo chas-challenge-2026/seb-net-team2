@@ -25,3 +25,10 @@ Thumbs.db
 pgdata/
 
 appsettings.Development.json
+## Security & secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+!frontend/.env.development
+!frontend/.env.example
