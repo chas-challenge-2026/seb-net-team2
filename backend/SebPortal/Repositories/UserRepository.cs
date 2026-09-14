@@ -54,5 +54,13 @@ namespace SebPortal.Api.Repositories
         {
             return await _context.Users.ToListAsync();
         }
+
+        public async Task<IEnumerable<User>> GetAttestantsByTenantIdAsync(int tenantId)
+        {
+            return await _context.Users
+                .Where(u => u.TenantId == tenantId && u.Role == "attestant")
+                .OrderBy(u => u.Id)
+                .ToListAsync();
+        }
     }
 }

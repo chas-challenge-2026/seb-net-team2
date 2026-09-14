@@ -1,4 +1,5 @@
-﻿using SebPortal.Models;
+using Microsoft.EntityFrameworkCore;
+using SebPortal.Models;
 using SebPortal.Data;
 
 namespace SebPortal.Api.Repositories
@@ -12,26 +13,40 @@ namespace SebPortal.Api.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<ApprovalStep> IsApprovalStepValid(Payment payment, ApprovalStep approvalStep, int currentUserId)
+        public async Task<ApprovalStep?> GetApprovalStepByIdAsync(int id)
         {
-            _dbContext.ApprovalSteps.Add(approvalStep);
-            await _dbContext.SaveChangesAsync();
-            return approvalStep;
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                .FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        public Task<ApprovalStep> GetApprovalStepByIdAsync(int id)
+        public async Task<IEnumerable<ApprovalStep>> GetApprovalStepsByPaymentIdAsync(int paymentId)
         {
-            throw new NotImplementedException();
+            return await _dbContext.ApprovalSteps
+                .Where(s => s.PaymentId == paymentId)
+                .OrderBy(s => s.StepNumber)
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<ApprovalStep>> GetApprovalStepsByPaymentIdAsync(int paymentId)
+        public async Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId)
         {
-            throw new NotImplementedException();
+            return await _dbContext.ApprovalSteps
+                .Where(s => s.PaymentId == paymentId && s.AttestantId == attestantId && s.Status == "pending")
+                .OrderBy(s => s.StepNumber)
+                .ToListAsync();
         }
 
-        public Task<ApprovalStep> UpdateApprovalStepAsync(ApprovalStep approvalStep)
+        public async Task<bool> UpdateApprovalStepAsync(ApprovalStep approvalStep)
         {
-            throw new NotImplementedException();
+            // Use ExecuteUpdateAsync to update the approval step directly in the database
+            var rowsAffected = await _dbContext.ApprovalSteps
+                .Where(s => s.Id == approvalStep.Id && s.Status == "pending")
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(s => s.Status, approvalStep.Status)
+                    .SetProperty(s => s.DecidedAt, approvalStep.DecidedAt)
+                    .SetProperty(s => s.Comment, approvalStep.Comment));
+
+            return rowsAffected == 1;
         }
 
     }
