@@ -107,7 +107,7 @@ export default function CompanyRegistration() {
                 </Button>
 
                 <Link
-                    to="/logga-in"
+                    to="/login"
                     className={styles.loginLink}
                 >
                     Already have an account? Log in.

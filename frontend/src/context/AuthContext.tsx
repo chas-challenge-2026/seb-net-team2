@@ -1,9 +1,19 @@
 import { createContext } from "react";
+import type { AuthUser } from "../schemas/userSchema";
 
 export interface AuthContextType {
-    isAuthenticated: boolean
-    login: () => void
-    logout: () => void
+    user: AuthUser | null;
+    isAuthenticated: boolean;
+    isInitializing: boolean;
+    isLoggingIn: boolean;
+
+    login: (
+        email: string,
+        password: string
+    ) => Promise<void>;
+
+    logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType | null>(null)
+export const AuthContext =
+    createContext<AuthContextType | null>(null);
