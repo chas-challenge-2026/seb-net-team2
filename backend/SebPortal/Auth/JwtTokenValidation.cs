@@ -1,4 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Text;
 
 namespace SebPortal.Api.Auth
@@ -25,7 +26,7 @@ namespace SebPortal.Api.Auth
                     Encoding.UTF8.GetBytes(secret)
                 ),
 
-                RoleClaimType = "Role",
+                RoleClaimType = ClaimTypes.Role,
                 NameClaimType = "UserId",
 
                 ClockSkew = TimeSpan.Zero
