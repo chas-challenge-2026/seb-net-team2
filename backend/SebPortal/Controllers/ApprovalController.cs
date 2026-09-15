@@ -55,7 +55,7 @@ namespace SebPortal.Api.Controllers
             return int.TryParse(claim, out var userId) ? userId : null;
         }
 
-        [HttpGet("Payment/{paymentId}/steps")]
+        [HttpGet("payment/{paymentId}/steps")]
         public async Task<IActionResult> GetApprovalStepsForPayment(int paymentId)
         {
             var userId = GetCurrentUserId();
