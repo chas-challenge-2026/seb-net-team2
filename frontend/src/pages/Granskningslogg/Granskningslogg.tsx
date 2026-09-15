@@ -4,6 +4,7 @@ import styles from './Granskningslogg.module.css'
 
 const ALL_USERS = 'all'
 const ALL_EVENTS = 'all'
+const PAGE_SIZE = 5
 
 function formatTimestamp(timestamp: string): string {
     return new Date(timestamp).toLocaleString('sv-SE', {
@@ -41,12 +42,38 @@ export function Granskningslogg() {
 
     const hasActiveFilters = userFilter !== ALL_USERS || eventFilter !== ALL_EVENTS || dateFrom !== '' || dateTo !== ''
 
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+    const updateUserFilter = (value: string) => {
+        setUserFilter(value)
+        setVisibleCount(PAGE_SIZE)
+    }
+
+    const updateEventFilter = (value: string) => {
+        setEventFilter(value)
+        setVisibleCount(PAGE_SIZE)
+    }
+
+    const updateDateFrom = (value: string) => {
+        setDateFrom(value)
+        setVisibleCount(PAGE_SIZE)
+    }
+
+    const updateDateTo = (value: string) => {
+        setDateTo(value)
+        setVisibleCount(PAGE_SIZE)
+    }
+
     const resetFilters = () => {
         setUserFilter(ALL_USERS)
         setEventFilter(ALL_EVENTS)
         setDateFrom('')
         setDateTo('')
+        setVisibleCount(PAGE_SIZE)
     }
+
+    const visibleEntries = filteredEntries.slice(0, visibleCount)
+    const hasMore = visibleCount < filteredEntries.length
 
     return (
         <section className={styles.page} aria-labelledby="audit-log-title">
@@ -68,7 +95,7 @@ export function Granskningslogg() {
                         <select
                             id="audit-user-filter"
                             value={userFilter}
-                            onChange={(event) => setUserFilter(event.target.value)}
+                            onChange={(event) => updateUserFilter(event.target.value)}
                         >
                             <option value={ALL_USERS}>All users</option>
                             {users.map((user) => (
@@ -81,7 +108,7 @@ export function Granskningslogg() {
                         <select
                             id="audit-event-filter"
                             value={eventFilter}
-                            onChange={(event) => setEventFilter(event.target.value)}
+                            onChange={(event) => updateEventFilter(event.target.value)}
                         >
                             <option value={ALL_EVENTS}>All events</option>
                             {events.map((action) => (
@@ -95,7 +122,7 @@ export function Granskningslogg() {
                             id="audit-date-from"
                             type="date"
                             value={dateFrom}
-                            onChange={(event) => setDateFrom(event.target.value)}
+                            onChange={(event) => updateDateFrom(event.target.value)}
                         />
                     </div>
                     <div className={styles.filterField}>
@@ -104,7 +131,7 @@ export function Granskningslogg() {
                             id="audit-date-to"
                             type="date"
                             value={dateTo}
-                            onChange={(event) => setDateTo(event.target.value)}
+                            onChange={(event) => updateDateTo(event.target.value)}
                         />
                     </div>
                     {hasActiveFilters && (
@@ -140,8 +167,8 @@ export function Granskningslogg() {
                                     Could not load the audit log.
                                 </td>
                             </tr>
-                        ) : filteredEntries.length > 0 ? (
-                            filteredEntries.map((entry) => (
+                        ) : visibleEntries.length > 0 ? (
+                            visibleEntries.map((entry) => (
                                 <tr key={entry.id}>
                                     <td>{formatTimestamp(entry.timestamp)}</td>
                                     <td>{entry.user}</td>
@@ -162,6 +189,23 @@ export function Granskningslogg() {
                     </tbody>
                 </table>
             </div>
+
+            {!isLoading && !isError && filteredEntries.length > 0 && (
+                <div className={styles.pagination}>
+                    <span className={styles.paginationCount}>
+                        Showing {visibleEntries.length} of {filteredEntries.length} entries
+                    </span>
+                    {hasMore && (
+                        <button
+                            type="button"
+                            className={styles.showMoreButton}
+                            onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                        >
+                            Show more
+                        </button>
+                    )}
+                </div>
+            )}
 
             <p className={styles.footnote}>
                 Showing the latest 200 entries. For the full log, also see <code>/tmp/audit.log</code> on the server.

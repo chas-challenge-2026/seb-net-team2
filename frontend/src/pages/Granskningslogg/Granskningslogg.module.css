@@ -48,6 +48,42 @@
     font-size: 0.9em;
 }
 
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.paginationCount {
+    color: var(--placeholder-grey);
+    font-size: var(--font-size-sm);
+}
+
+.showMoreButton {
+    height: 38px;
+    padding: 0 16px;
+    border: 1px solid var(--color-text);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.showMoreButton:hover {
+    background: var(--color-hover-light);
+}
+
+.showMoreButton:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
 .footnote {
     margin: 1rem 0 0;
     color: var(--placeholder-grey);
