@@ -108,10 +108,13 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
 builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
+builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
 
 // Global error handling middleware
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+
 
 builder.Services.AddDbContext<SebDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
