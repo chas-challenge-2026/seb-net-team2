@@ -36,7 +36,7 @@ static void hmac_sha256_hex(const char *input, const char *secret_key, char outp
 static void get_timestamp(char *buffer, size_t size)
 {
     time_t now = time(NULL);
-    struct tm *time_info = localtime(&now);
+    const struct tm *time_info = localtime(&now);
     strftime(buffer, size, "%Y-%m-%d %H:%M:%S", time_info);
 }
 
@@ -125,7 +125,7 @@ int audit_verify(const char *log_path, const char *secret_key)
             return line_number;
         }
         *last_separator = '\0';
-        char *stored_hmac = last_separator + 1;
+        const char *stored_hmac = last_separator + 1;
 
         char *prev_hash_separator = strrchr(line, '|');
         if (prev_hash_separator == NULL)
@@ -133,7 +133,7 @@ int audit_verify(const char *log_path, const char *secret_key)
             fclose(file);
             return line_number;
         }
-        char *stored_prev_hash = prev_hash_separator + 1;
+        const char *stored_prev_hash = prev_hash_separator + 1;
 
         if (line_number == 1)
         {
