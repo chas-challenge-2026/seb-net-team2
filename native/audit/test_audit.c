@@ -82,6 +82,33 @@ static void test_append_success(void **state)
         0);
 }
 
+static void test_notification_events(void **state)
+{
+    remove("audit.log");
+
+    assert_int_equal(
+        audit_append("audit.log", secret_key, 1,
+                     AUDIT_NOTIFICATION_SENT, 100,
+                     "Notification sent"),
+        0);
+
+    assert_int_equal(
+        audit_append("audit.log", secret_key, 1,
+                     AUDIT_NOTIFICATION_RETRY, 100,
+                     "Notification retry"),
+        0);
+
+    assert_int_equal(
+        audit_append("audit.log", secret_key, 1,
+                     AUDIT_NOTIFICATION_FAILED, 100,
+                     "Notification failed"),
+        0);
+
+    assert_int_equal(
+        audit_verify("audit.log", secret_key),
+        -1);
+}
+
 static void test_valid_log(void **state)
 {
     assert_int_equal(
@@ -121,6 +148,7 @@ int main(void)
 
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_append_success),
+        cmocka_unit_test(test_notification_events),
         cmocka_unit_test_setup(test_valid_log, setup_test_log),
         cmocka_unit_test_setup(test_tampered_action, setup_test_log),
         cmocka_unit_test_setup(test_wrong_key, setup_test_log),
