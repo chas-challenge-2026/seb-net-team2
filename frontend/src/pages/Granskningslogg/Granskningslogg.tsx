@@ -1,5 +1,9 @@
+import { useMemo, useState } from 'react'
 import { useAuditLog } from '../../hooks/useAuditLog'
 import styles from './Granskningslogg.module.css'
+
+const ALL_USERS = 'all'
+const ALL_EVENTS = 'all'
 
 function formatTimestamp(timestamp: string): string {
     return new Date(timestamp).toLocaleString('sv-SE', {
@@ -10,6 +14,39 @@ function formatTimestamp(timestamp: string): string {
 
 export function Granskningslogg() {
     const { data: entries, isLoading, isError } = useAuditLog()
+
+    const [userFilter, setUserFilter] = useState(ALL_USERS)
+    const [eventFilter, setEventFilter] = useState(ALL_EVENTS)
+    const [dateFrom, setDateFrom] = useState('')
+    const [dateTo, setDateTo] = useState('')
+
+    const users = useMemo(() => (
+        [...new Set((entries ?? []).map((entry) => entry.user))].sort()
+    ), [entries])
+
+    const events = useMemo(() => (
+        [...new Set((entries ?? []).map((entry) => entry.action))].sort()
+    ), [entries])
+
+    const filteredEntries = useMemo(() => {
+        return (entries ?? []).filter((entry) => {
+            const entryDate = entry.timestamp.slice(0, 10)
+            if (userFilter !== ALL_USERS && entry.user !== userFilter) return false
+            if (eventFilter !== ALL_EVENTS && entry.action !== eventFilter) return false
+            if (dateFrom && entryDate < dateFrom) return false
+            if (dateTo && entryDate > dateTo) return false
+            return true
+        })
+    }, [entries, userFilter, eventFilter, dateFrom, dateTo])
+
+    const hasActiveFilters = userFilter !== ALL_USERS || eventFilter !== ALL_EVENTS || dateFrom !== '' || dateTo !== ''
+
+    const resetFilters = () => {
+        setUserFilter(ALL_USERS)
+        setEventFilter(ALL_EVENTS)
+        setDateFrom('')
+        setDateTo('')
+    }
 
     return (
         <section className={styles.page} aria-labelledby="audit-log-title">
@@ -23,6 +60,60 @@ export function Granskningslogg() {
                 Some events (e.g. batch payments and partial approval steps) are only logged to{' '}
                 <code>/tmp/audit.log</code> and do not appear here.
             </div>
+
+            {entries && entries.length > 0 && (
+                <div className={styles.toolbar}>
+                    <div className={styles.filterField}>
+                        <label htmlFor="audit-user-filter">User</label>
+                        <select
+                            id="audit-user-filter"
+                            value={userFilter}
+                            onChange={(event) => setUserFilter(event.target.value)}
+                        >
+                            <option value={ALL_USERS}>All users</option>
+                            {users.map((user) => (
+                                <option key={user} value={user}>{user}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className={styles.filterField}>
+                        <label htmlFor="audit-event-filter">Event type</label>
+                        <select
+                            id="audit-event-filter"
+                            value={eventFilter}
+                            onChange={(event) => setEventFilter(event.target.value)}
+                        >
+                            <option value={ALL_EVENTS}>All events</option>
+                            {events.map((action) => (
+                                <option key={action} value={action}>{action}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className={styles.filterField}>
+                        <label htmlFor="audit-date-from">From date</label>
+                        <input
+                            id="audit-date-from"
+                            type="date"
+                            value={dateFrom}
+                            onChange={(event) => setDateFrom(event.target.value)}
+                        />
+                    </div>
+                    <div className={styles.filterField}>
+                        <label htmlFor="audit-date-to">To date</label>
+                        <input
+                            id="audit-date-to"
+                            type="date"
+                            value={dateTo}
+                            onChange={(event) => setDateTo(event.target.value)}
+                        />
+                    </div>
+                    {hasActiveFilters && (
+                        <button type="button" className={styles.resetButton} onClick={resetFilters}>
+                            Clear filters
+                        </button>
+                    )}
+                </div>
+            )}
 
             <div className={styles.tableWrapper}>
                 <table className={styles.table}>
@@ -49,8 +140,8 @@ export function Granskningslogg() {
                                     Could not load the audit log.
                                 </td>
                             </tr>
-                        ) : entries && entries.length > 0 ? (
-                            entries.map((entry) => (
+                        ) : filteredEntries.length > 0 ? (
+                            filteredEntries.map((entry) => (
                                 <tr key={entry.id}>
                                     <td>{formatTimestamp(entry.timestamp)}</td>
                                     <td>{entry.user}</td>
@@ -62,7 +153,9 @@ export function Granskningslogg() {
                         ) : (
                             <tr>
                                 <td className={styles.statusRow} colSpan={5}>
-                                    No audit log entries found.
+                                    {entries && entries.length > 0
+                                        ? 'No audit log entries match this filter.'
+                                        : 'No audit log entries found.'}
                                 </td>
                             </tr>
                         )}
