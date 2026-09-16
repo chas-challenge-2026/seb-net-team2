@@ -27,6 +27,19 @@ static bool is_end_of_line(char* curr)
     return false;
 }
 
+static void remove_quotes(char* start, int length)
+{
+    printf("Length: %d\n", length);
+
+    if (start[0] == '"' && start[length - 1] == '"')
+    {
+        start[0] = ' ';
+        start[length - 1] = 0;
+        start++;
+    }
+}
+
+
 CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
 {
     CsvRow* rows = (CsvRow*)malloc(sizeof(CsvRow) * 500);
@@ -108,9 +121,11 @@ CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
             switch (inner_index)
             {
             case Row_Data_From_Account_Id:
+                remove_quotes(start, length);
                 rows[index].from_account_id = strtol(start, &temp, 10);
                 break;
             case Row_Data_To_Iban:
+                remove_quotes(start, length);
                 snprintf(rows[index].to_iban, CSV_TO_IBAN_LENGTH, "%s", start);
                 break;
             case Row_Data_Amount:
