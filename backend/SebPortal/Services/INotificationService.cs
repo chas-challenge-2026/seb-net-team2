@@ -4,6 +4,6 @@ namespace SebPortal.Api.Services
 {
     public interface INotificationService
     {
-        Task<NotificationMessageDTO> SendNotificationMessageAsync(NotificationMessageDTO dto);
+        Task SendNotificationMessageAsync(NotificationMessageDTO dto);
     }
 }
