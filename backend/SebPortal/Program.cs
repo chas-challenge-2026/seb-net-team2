@@ -102,6 +102,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<ICreatePaymentService, CreatePaymentService>();
+builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
 builder.Services.AddScoped<IGenerateIban, GenerateIbanService>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IAccountService, AccountService>();

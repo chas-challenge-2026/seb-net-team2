@@ -9,6 +9,14 @@ public class CreateApprovalLimitDTO
 
 }
 
+public class UpdateApprovalLimitDTO
+{
+    public decimal? MinAmount { get; set; }
+    public int? RequiredApprovals { get; set; }
+    public string? Description { get; set; } = string.Empty;
+}
+
+
 public class ApprovalLimitResponseDTO
 {
     public int Id { get; set; }
