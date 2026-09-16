@@ -19,7 +19,7 @@ import Login from "./pages/Login/Login";
 import { Logout } from "./pages/Logout/Logout";
 import { Mortgage } from "./pages/Mortgage/Mortgage";
 import { NyBetalning } from "./pages/NyBetalning/NyBetalning";
-import { Overview } from "./pages/Overview/Overview";
+import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Profil } from "./pages/Profil/Profil";
 import Register from "./pages/Register/Register";
 import { SparaInvestera } from "./pages/SparaInvestera/SparaInvestera";
@@ -45,12 +45,12 @@ const loginRoute = createRoute({
     component: Login,
 });
 
-const overviewRoute = createRoute({
+const dashboardRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: "/overview",
+    path: "/dashboard",
     component: () => (
         <ProtectedRoute>
-            <Overview />
+            <Dashboard />
         </ProtectedRoute>
     ),
 });
@@ -140,7 +140,7 @@ const registerRoute = createRoute({
 const routeTree = rootRoute.addChildren([
     indexRoute,
     loginRoute,
-    overviewRoute,
+    dashboardRoute,
     nyBetalningRoute,
     sparaInvesteraRoute,
     mortgageRoute,

@@ -112,6 +112,7 @@ export function AuthProvider({
 
             setUser({
                 userId: response.userId,
+                email: response.email,
                 role: response.role,
                 tenantId: response.tenantId,
             });

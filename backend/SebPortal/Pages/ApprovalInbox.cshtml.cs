@@ -150,6 +150,14 @@ public class ApprovalInboxModel : PageModel
                 }
             }
 
+            if (stepAttestantId != userIdInt && role != "admin")
+            {
+                ErrorMessage = "Du har inte behörighet till detta atteststeg.";
+                LoadPendingPayments(userId);
+                LoadRecentlyHandled(userId);
+                return Page();
+            }
+
             if (stepStatus != "pending")
             {
                 ErrorMessage = "Det här atteststeget är redan hanterat.";

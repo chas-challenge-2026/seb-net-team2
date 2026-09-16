@@ -7,6 +7,18 @@
     border-bottom: 1px solid #e0e0e0;
 }
 
+.navbar__brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar__logo {
+    display: block;
+    width: 4.25rem;
+    height: 2.4rem;
+    object-fit: cover;
+}
+
 .navbar__links {
     display: flex;
     flex: 1;

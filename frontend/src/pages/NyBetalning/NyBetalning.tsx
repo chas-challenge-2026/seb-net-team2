@@ -28,6 +28,7 @@ export function NyBetalning() {
     const [submitted, setSubmitted] = useState(false)
     const [ isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isReviewOpen, setIsReviewOpen] = useState(false)
 
     const selectedAccount = accounts.find(account => account.id === form.fromAccountId,)
 
@@ -52,7 +53,7 @@ export function NyBetalning() {
         setError(null)
     }
     
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         if(!selectedAccount){
@@ -67,8 +68,6 @@ export function NyBetalning() {
             return
         }
 
-        const validatedForm = validation.data
-
         if(amount > selectedAccount.balance) {
             setError('The payment amount exceeds the account balance.')
             return
@@ -76,6 +75,19 @@ export function NyBetalning() {
 
         setError(null)
         setSubmitted(false)
+        setIsReviewOpen(true)
+    }
+
+    async function confirmPayment() {
+        const validation = paymentSchema.safeParse(form)
+        if (!validation.success || !selectedAccount) {
+            setIsReviewOpen(false)
+            setError('Please review the payment details and try again.')
+            return
+        }
+
+        const validatedForm = validation.data
+        setIsReviewOpen(false)
         setIsSubmitting(true)
 
         try {
@@ -103,10 +115,6 @@ export function NyBetalning() {
                     <span className={styles.eyebrow}>PAYMENTS</span>
                     <h1>Create a new payment</h1>
                     <p>Send a secure payment from your company account.</p>
-                </div>
-                <div className={styles.headerBadge}>
-                    <span className={styles.statusDot} />
-                    Mock mode
                 </div>
             </header>
 
@@ -211,8 +219,8 @@ export function NyBetalning() {
                         >
                             Clear form
                         </Button>
-                        <Button type="submit" variant="primary" size="medium" disabled={isSubmitting}>
-                            {isSubmitting ? 'Creating payment...' : 'Review payment'}
+                        <Button type="submit" variant="primary" size="medium" disabled={isSubmitting || isLoadingAccounts || accountsError}>
+                            Review payment
                             <span aria-hidden="true">→</span>
                         </Button>
                     </div>
@@ -269,6 +277,75 @@ export function NyBetalning() {
                     </div>
                 </Card>
             </div>
+
+            {isReviewOpen && (
+                <div
+                    className={styles.modalBackdrop}
+                    role="presentation"
+                    onMouseDown={event => {
+                        if (event.target === event.currentTarget) {
+                            setIsReviewOpen(false)
+                        }
+                    }}
+                >
+                    <section
+                        className={styles.reviewModal}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="review-payment-title"
+                    >
+                        <p className={styles.eyebrow}>FINAL CHECK</p>
+                        <h2 id="review-payment-title">Review payment</h2>
+                        <p className={styles.reviewIntro}>
+                            Check the details before creating this payment.
+                        </p>
+
+                        <div className={styles.reviewDetails}>
+                            <div>
+                                <span>Recipient</span>
+                                <strong>{form.recipient}</strong>
+                            </div>
+                            <div>
+                                <span>IBAN</span>
+                                <strong>{form.iban}</strong>
+                            </div>
+                            <div>
+                                <span>Amount</span>
+                                <strong>{amount.toLocaleString('en-SE', { minimumFractionDigits: 2 })} SEK</strong>
+                            </div>
+                            <div>
+                                <span>From account</span>
+                                <strong>{selectedAccount?.name}</strong>
+                            </div>
+                            {form.reference && (
+                                <div>
+                                    <span>Reference</span>
+                                    <strong>{form.reference}</strong>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="medium"
+                                onClick={() => setIsReviewOpen(false)}
+                            >
+                                Go back
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="primary"
+                                size="medium"
+                                onClick={confirmPayment}
+                            >
+                                Confirm payment
+                            </Button>
+                        </div>
+                    </section>
+                </div>
+            )}
         </div>
     )
 }

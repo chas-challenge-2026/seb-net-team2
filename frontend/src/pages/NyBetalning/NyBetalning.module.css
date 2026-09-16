@@ -263,6 +263,68 @@ textarea {
     color: #b42318;
 }
 
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(10 28 18 / 52%);
+}
+
+.reviewModal {
+    width: min(100%, 30rem);
+    padding: 2rem;
+    border: 1px solid #dce5df;
+    background: #fff;
+    color: #163226;
+    box-shadow: 0 20px 50px rgb(0 0 0 / 22%);
+}
+
+.reviewModal h2 {
+    margin: 0.35rem 0 0.5rem;
+    font-size: 1.5rem;
+}
+
+.reviewIntro {
+    margin: 0 0 1.5rem;
+    color: #68756e;
+}
+
+.reviewDetails {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1rem 0;
+    border-top: 1px solid #e5ebe6;
+    border-bottom: 1px solid #e5ebe6;
+}
+
+.reviewDetails div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.reviewDetails span {
+    color: #7b8780;
+    font-size: 0.8rem;
+}
+
+.reviewDetails strong {
+    max-width: 65%;
+    overflow-wrap: anywhere;
+    text-align: right;
+    font-size: 0.85rem;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1.5rem;
+}
+
 @media (max-width: 760px) {
     .page {
         padding: 1.5rem 1rem 3rem;
@@ -284,5 +346,17 @@ textarea {
 
     .summary {
         order: -1;
+    }
+
+    .reviewModal {
+        padding: 1.5rem;
+    }
+
+    .modalActions {
+        flex-direction: column-reverse;
+    }
+
+    .modalActions button {
+        width: 100%;
     }
 }
