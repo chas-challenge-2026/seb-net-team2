@@ -61,7 +61,7 @@ export default function CompanyLogin() {
             );
 
             await navigate({
-                to: "/overview",
+                to: "/dashboard",
             });
         } catch (error) {
             if (error instanceof AppError) {

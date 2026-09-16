@@ -32,7 +32,7 @@ export default function Login() {
     }
 
     if (isAuthenticated) {
-        return <Navigate to="/overview" />;
+        return <Navigate to="/dashboard" />;
     }
 
     return (

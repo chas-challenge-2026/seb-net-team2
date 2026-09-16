@@ -116,10 +116,6 @@ export function NyBetalning() {
                     <h1>Create a new payment</h1>
                     <p>Send a secure payment from your company account.</p>
                 </div>
-                <div className={styles.headerBadge}>
-                    <span className={styles.statusDot} />
-                    Mock mode
-                </div>
             </header>
 
             <div className={styles.layout}>
