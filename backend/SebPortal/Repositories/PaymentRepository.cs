@@ -33,9 +33,16 @@ namespace SebPortal.Api.Repositories
             throw new NotImplementedException();
         }
 
-        public Task UpdatePaymentStatusAsync(int paymentId, string status)
+        public async Task UpdatePaymentStatusAsync(int paymentId, string status, uint rowVersion)
         {
-            throw new NotImplementedException();
+            var payment = await _context.Payments.FindAsync(paymentId);
+            if (payment == null)
+                throw new KeyNotFoundException($"Payment with id {paymentId} not found.");
+
+            _context.Entry(payment).Property(p => p.RowVersion).OriginalValue = rowVersion;
+            payment.Status = status;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

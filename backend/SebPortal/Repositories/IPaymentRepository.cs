@@ -7,6 +7,6 @@ namespace SebPortal.Api.Repositories
         Task<Payment> CreatePaymentAsync(Payment payment);
         Task<Payment?> GetPaymentByIdAsync(int paymentId);
         Task<IEnumerable<Payment>> GetPaymentsByUserIdAsync(int userId);
-        Task UpdatePaymentStatusAsync(int paymentId, string status);
+        Task UpdatePaymentStatusAsync(int paymentId, string status, uint rowVersion);
     }
 }

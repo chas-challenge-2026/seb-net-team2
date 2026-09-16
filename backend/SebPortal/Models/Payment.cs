@@ -23,6 +23,8 @@ namespace SebPortal.Models
         [Required]
         [MaxLength(100)]
         public required string Reference { get; set; } // Payment reference
+        [Timestamp]
+        public uint RowVersion { get; set; } // For optimistic concurrency control
         [Required]
         [MaxLength(30)]
         public string Status { get; set; } = "pending_approval"; // default status is pending_approval
