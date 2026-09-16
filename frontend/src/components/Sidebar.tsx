@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className={styles['sidebar-nav']}>
           <div className={styles['nav-group']}>
             <Link
-              to="/"
+              to="/dashboard"
               className={styles['nav-item']}
               activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
               onClick={handleNavClick}
@@ -162,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           )}
           {!onLogout && (
-            <Link to="/logga-ut" className={styles['logout-link']} onClick={handleNavClick}>
+            <Link to="/logout" className={styles['logout-link']} onClick={handleNavClick}>
               Log out
             </Link>
           )}

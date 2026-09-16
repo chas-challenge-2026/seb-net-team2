@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Migration: AddApprovalLimit
+// Creates the `approvalLimit` table used to store tenant-specific approval thresholds.
+// Contains columns for min amount, required approvals and audit fields.
+
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 

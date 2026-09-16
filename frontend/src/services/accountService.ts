@@ -1,4 +1,7 @@
 
+import { apiRequest } from './apiRequest'
+import { createdPaymentSchema, type CreatedPayment } from '../schemas/paymentSchema'
+
 
 export interface Account {
     id: string
@@ -45,25 +48,23 @@ export type CreatePaymentRequest = {
     reference: string
 }
 
-export type CreatedPayment = {
-    id: number
-    fromAccountId: number
-    toIban: string
-    amount: number
-    currency: string
-    reference: string
-    status: 'pending_approval'
-    createdAt: string
-}
+export async function createPayment(payment: CreatePaymentRequest): Promise<CreatedPayment> {
+    const apiUrl = import.meta.env.VITE_API_URL
 
-export async function createPayment(payment: CreatePaymentRequest,): Promise<CreatedPayment> {
-    await new Promise(resolve => setTimeout(resolve, 700))
-
-    return {
-        id: Date.now(),
-        ...payment,
-        status: 'pending_approval',
-        createdAt: new Date().toISOString(),
+    if (!apiUrl) {
+        throw new Error('VITE_API_URL is not configured.')
     }
 
+    return apiRequest(
+        `${apiUrl}/api/Payment`,
+        createdPaymentSchema,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Idempotency-Key': crypto.randomUUID(),
+            },
+            body: JSON.stringify(payment),
+        },
+    )
 }

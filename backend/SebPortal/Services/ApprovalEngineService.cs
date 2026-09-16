@@ -7,11 +7,13 @@ namespace SebPortal.Api.Services
     public class ApprovalEngineService : IApprovalEngineService
     {
         private readonly IApprovalLimitRepository _limitRepository;
+        private readonly IUserRepository _userRepository;
         private readonly SebDbContext _context;
 
-        public ApprovalEngineService(IApprovalLimitRepository limitRepository, SebDbContext context)
+        public ApprovalEngineService(IApprovalLimitRepository limitRepository, IUserRepository userRepository, SebDbContext context)
         {
             _limitRepository = limitRepository;
+            _userRepository = userRepository;
             _context = context;
         }
 
@@ -36,19 +38,25 @@ namespace SebPortal.Api.Services
             // if the payment amount is greater than or equal to the applicable limit, create approval steps
             payment.Status = "pending_approval";
 
+            var attestants = (await _userRepository.GetAttestantsByTenantIdAsync(payment.TenantId)).ToList();
+            if (attestants.Count == 0)
+            {
+                throw new InvalidOperationException($"Ingen attestant hittades för tenant {payment.TenantId}.");
+            }
+
             for (int stepNumber = 1; stepNumber <= applicableLimit.RequiredApprovals; stepNumber++)
             {
+                var attestant = attestants[(stepNumber - 1) % attestants.Count];
                 var step = new ApprovalStep
                 {
-                    PaymentId = payment.Id,
+
+                    Payment = payment,
                     StepNumber = stepNumber,
                     Status = "pending",
+                    AttestantId = attestant.Id,
                 };
                 _context.ApprovalSteps.Add(step);
             }
-
-            _context.Payments.Update(payment);
-            await _context.SaveChangesAsync();
             return true;
 
         }

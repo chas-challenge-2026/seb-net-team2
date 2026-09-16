@@ -1,17 +1,19 @@
 import { useAccounts } from "../../hooks/useAccounts"
 import { usePayments } from "../../hooks/usePayments"
-import styles from './Overview.module.css'
+import { useAuth } from "../../hooks/useAuth"
+import styles from './Dashboard.module.css'
 
-export function Overview() {
+export function Dashboard() {
     const { data: accounts, isLoading: loadingAccounts, isError: accountsError } = useAccounts()
     const { data: payments, isLoading: loadingPayments } = usePayments()
+    const { user } = useAuth()
 
     if (accountsError) return <p>Something went wrong.</p>
 
     return (
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
-                <h1>Welcome, ________</h1>
+                <h1>Welcome, {user?.email ?? 'user'}</h1>
                 <p>Company name</p>
             </header>
 
@@ -47,13 +49,13 @@ export function Overview() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {payments?.map(p => (
-                                    <tr key={p.id}>
-                                        <td>{p.date}</td>
-                                        <td>{p.toIban}</td>
-                                        <td>{p.reference}</td>
-                                        <td>{p.amount.toLocaleString('sv-SE', { minimumFractionDigits: 2 })} {p.currency}</td>
-                                        <td><span className={`${styles.status} ${styles[p.status === 'Completed' ? 'status--done' : 'status--pending']}`}>{p.status}</span></td>
+                                {payments?.map(payment => (
+                                    <tr key={payment.id}>
+                                        <td>{payment.date}</td>
+                                        <td>{payment.toIban}</td>
+                                        <td>{payment.reference}</td>
+                                        <td>{payment.amount.toLocaleString('sv-SE', { minimumFractionDigits: 2 })} {payment.currency}</td>
+                                        <td><span className={`${styles.status} ${styles[payment.status === 'Completed' ? 'status--done' : 'status--pending']}`}>{payment.status}</span></td>
                                     </tr>
                                 ))}
                             </tbody>

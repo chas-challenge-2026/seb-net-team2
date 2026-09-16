@@ -1,5 +1,5 @@
 export const navigationLinks: { to: string; label: string }[] = [
-    { to: '/', label: 'Overview' },
+    { to: '/dashboard', label: 'Dashboard' },
     { to: '/ny-betalning', label: 'New payment' },
     { to: '/spara-investera', label: 'Save & invest' },
     { to: '/bolan', label: 'Mortgage' },
