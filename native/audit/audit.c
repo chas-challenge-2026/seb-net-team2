@@ -16,7 +16,12 @@ static void sha256_hex(const char *input, char output[65])
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((const unsigned char *)input, strlen(input), hash);
     for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-        sprintf(output + (i * 2), "%02x", hash[i]);
+    {
+        const char hex[] = "0123456789abcdef";
+        output[i * 2] = hex[(hash[i] >> 4) & 0x0F];
+        output[i * 2 + 1] = hex[hash[i] & 0x0F];
+    }
+
     output[64] = '\0';
 }
 
@@ -28,8 +33,15 @@ static void hmac_sha256_hex(const char *input, const char *secret_key, char outp
     HMAC(EVP_sha256(), secret_key, strlen(secret_key),
          (const unsigned char *)input, strlen(input), hmac, &hmac_length);
     for (unsigned int i = 0; i < hmac_length; i++)
-        sprintf(output + (i * 2), "%02x", hmac[i]);
-    output[64] = '\0';
+    {
+        int written = snprintf(output + (i * 2), 3, "%02x", hmac[i]);
+
+        if (written != 2)
+        {
+            output[0] = '\0';
+            return;
+        }
+    }
 }
 
 /* Hämtar och formaterar aktuell tidsstämpel för loggen. */
@@ -53,7 +65,18 @@ static int get_last_log_line(const char *log_path, char *last_line, size_t size)
     while (fgets(line, sizeof(line), file) != NULL)
     {
         line[strcspn(line, "\n")] = '\0';
-        snprintf(last_line, size, "%s", line);
+        size_t line_length = strlen(line);
+
+        if (line_length >= size)
+        {
+            fclose(file);
+            return 0;
+        }
+
+        for (size_t i = 0; i <= line_length; i++)
+        {
+            last_line[i] = line[i];
+        }
     }
 
     fclose(file);
@@ -71,17 +94,28 @@ int audit_append(const char *log_path, const char *secret_key, int user_id,
     char timestamp[64], prev_hash[65], log_data[1024], hmac[65], final_log[1100], last_line[1100];
 
     get_timestamp(timestamp, sizeof(timestamp));
-    memset(prev_hash, '0', 64);
+    for (int i = 0; i < 64; i++)
+    {
+        prev_hash[i] = '0';
+    }
     prev_hash[64] = '\0';
 
     if (get_last_log_line(log_path, last_line, sizeof(last_line)))
         sha256_hex(last_line, prev_hash);
 
-    snprintf(log_data, sizeof(log_data), "%s|%d|%s|%d|%s|%s",
-             timestamp, user_id, action, entity_id, description, prev_hash);
+    if (snprintf(log_data, sizeof(log_data), "%s|%d|%s|%d|%s|%s",
+                 timestamp, user_id, action, entity_id, description, prev_hash) >= (int)sizeof(log_data))
+    {
+        return -1;
+    }
 
     hmac_sha256_hex(log_data, secret_key, hmac);
-    snprintf(final_log, sizeof(final_log), "%s|%s", log_data, hmac);
+
+    if (snprintf(final_log, sizeof(final_log), "%s|%s",
+                 log_data, hmac) >= (int)sizeof(final_log))
+    {
+        return -1;
+    }
 
     int fd = open(log_path, O_WRONLY | O_CREAT | O_APPEND | O_SYNC, 0644);
     if (fd == -1)
@@ -116,7 +150,18 @@ int audit_verify(const char *log_path, const char *secret_key)
     {
         line_number++;
         line[strcspn(line, "\n")] = '\0';
-        strcpy(current_line, line);
+        size_t line_length = strlen(line);
+
+        if (line_length >= sizeof(current_line))
+        {
+            fclose(file);
+            return line_number;
+        }
+
+        for (size_t i = 0; i <= line_length; i++)
+        {
+            current_line[i] = line[i];
+        }
 
         char *last_separator = strrchr(line, '|');
         if (last_separator == NULL)
@@ -138,7 +183,10 @@ int audit_verify(const char *log_path, const char *secret_key)
         if (line_number == 1)
         {
             char zero_hash[65];
-            memset(zero_hash, '0', 64);
+            for (int i = 0; i < 64; i++)
+            {
+                zero_hash[i] = '0';
+            }
             zero_hash[64] = '\0';
             if (strcmp(stored_prev_hash, zero_hash) != 0)
             {
@@ -165,7 +213,18 @@ int audit_verify(const char *log_path, const char *secret_key)
             return line_number;
         }
 
-        strcpy(previous_line, current_line);
+        size_t current_line_length = strlen(current_line);
+
+        if (current_line_length >= sizeof(previous_line))
+        {
+            fclose(file);
+            return line_number;
+        }
+
+        for (size_t i = 0; i <= current_line_length; i++)
+        {
+            previous_line[i] = current_line[i];
+        }
     }
 
     fclose(file);

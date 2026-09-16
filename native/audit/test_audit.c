@@ -82,6 +82,27 @@ static void test_append_success(void **state)
         0);
 }
 
+static void test_description_too_long(void **state)
+{
+    (void)state;
+
+    remove("audit.log");
+
+    char description[2001];
+
+    memset(description, 'A', 2000);
+    description[2000] = '\0';
+
+    assert_int_equal(
+        audit_append("audit.log", secret_key, 1,
+                     "DESCRIPTION_TOO_LONG", 100,
+                     description),
+        -1);
+
+    FILE *file = fopen("audit.log", "r");
+    assert_null(file);
+}
+
 static void test_notification_events(void **state)
 {
     remove("audit.log");
@@ -148,6 +169,7 @@ int main(void)
 
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_append_success),
+        cmocka_unit_test(test_description_too_long),
         cmocka_unit_test(test_notification_events),
         cmocka_unit_test_setup(test_valid_log, setup_test_log),
         cmocka_unit_test_setup(test_tampered_action, setup_test_log),
