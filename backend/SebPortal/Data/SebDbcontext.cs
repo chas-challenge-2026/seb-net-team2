@@ -17,7 +17,8 @@ namespace SebPortal.Data
         public DbSet<AuditEntries> AuditEntries => Set<AuditEntries>();
         public DbSet<ApprovalLimit> ApprovalLimits => Set<ApprovalLimit>();
         public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
-
+        public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // seed.sql använder snake_case kolumn-/tabellnamn — utan den här mappningen
@@ -153,6 +154,21 @@ namespace SebPortal.Data
 
                 e.HasIndex(x => x.Key)
                     .IsUnique();
+            });
+            modelBuilder.Entity<NotificationLog>(e =>
+            {
+                e.ToTable("notificationLogs");
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.RecipientEmail).HasColumnName("recipientEmail");
+                e.Property(x => x.Subject).HasColumnName("subject");
+                e.Property(x => x.Message).HasColumnName("message");
+                e.Property(x => x.ErrorMessage).HasColumnName("errorMessage");
+                e.Property(x => x.AttemptNumber).HasColumnName("attemptNumber");
+                e.Property(x => x.TimeStamp).HasColumnName("timeStamp");
+
+                e.HasOne(x => x.Tenant)
+                 .WithMany()
+                 .HasForeignKey(x => x.TenantId);
             });
         }
     }

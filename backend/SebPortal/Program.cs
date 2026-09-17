@@ -10,6 +10,7 @@ using SebPortal.Api.Filters;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Data;
+using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -109,6 +110,10 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
 builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<SmtpClient>(sp => new SmtpClient("localhost", 1025));
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
 
 // Global error handling middleware
@@ -127,12 +132,14 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
     options.MapInboundClaims = false;
-    options.TokenValidationParameters = 
+    var validationParameters = 
     JwtTokenValidation.Create(
         jwtSecret,
         jwtIssuer,
         jwtAudience
     );
+    validationParameters.RoleClaimType = "Role";
+    options.TokenValidationParameters = validationParameters;
 });
 builder.Services.AddAuthorization();
 

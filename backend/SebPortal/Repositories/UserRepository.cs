@@ -2,6 +2,7 @@
 using SebPortal.Models;
 using SebPortal.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Authorization;
 
 namespace SebPortal.Api.Repositories
 {
@@ -58,7 +59,7 @@ namespace SebPortal.Api.Repositories
         public async Task<IEnumerable<User>> GetAttestantsByTenantIdAsync(int tenantId)
         {
             return await _context.Users
-                .Where(u => u.TenantId == tenantId && u.Role == "attestant")
+                .Where(u => u.TenantId == tenantId && u.Role == UserRoles.Attestant)
                 .OrderBy(u => u.Id)
                 .ToListAsync();
         }
