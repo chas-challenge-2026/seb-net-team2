@@ -14,13 +14,13 @@ namespace SebPortal.Api.Services
     {
         private readonly INotificationRepository _repository;
         private readonly ILogger<NotificationService> _logger;
-        private readonly SmtpClient _smtpClient;
+        private readonly IEmailSender _emailSender;
 
-        public NotificationService(INotificationRepository repository, ILogger<NotificationService> logger, SmtpClient smtpClient )
+        public NotificationService(INotificationRepository repository, ILogger<NotificationService> logger, IEmailSender emailSender)
         {
             _repository = repository;
             _logger = logger;
-            _smtpClient = smtpClient;
+            _emailSender = emailSender;
         }
 
         public async Task SendNotificationMessageAsync(NotificationMessageDTO dto)
@@ -28,7 +28,7 @@ namespace SebPortal.Api.Services
             var pipeline = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions
                 {
-                    MaxRetryAttempts = 3,
+                    MaxRetryAttempts = 2,
                     Delay = TimeSpan.FromSeconds(2),
                     BackoffType = DelayBackoffType.Exponential,
                     ShouldHandle = new PredicateBuilder().Handle<Exception>(),
@@ -48,7 +48,7 @@ namespace SebPortal.Api.Services
                 {
                     finalAttemptCount++;
                     var mailMessage = new MailMessage("noreply@sebportal.se", dto.RecipientEmail, dto.Subject, dto.Message);
-                    await _smtpClient.SendMailAsync(mailMessage, token);
+                    await _emailSender.SendMailAsync(mailMessage, token);
                 });
             }
             catch (Exception ex)
@@ -62,7 +62,8 @@ namespace SebPortal.Api.Services
                     Subject = dto.Subject,
                     Message = dto.Message,
                     AttemptNumber = finalAttemptCount,
-                    TimeStamp = DateTime.UtcNow
+                    TimeStamp = DateTime.UtcNow,
+                    ErrorMessage = ex.Message
                 };
 
                 await _repository.LogFailedNotificationAsync(errorLog);
