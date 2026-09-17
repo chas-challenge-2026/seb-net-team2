@@ -113,6 +113,7 @@ builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<SmtpClient>(sp => new SmtpClient("localhost", 1025));
+builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
 builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
