@@ -13,13 +13,15 @@ namespace SebPortal.Api.Services
         private readonly IUserRepository _userRepository;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IApprovalEngineService _approvalEngineService;
+        private readonly INotificationService _notificationService;
         private readonly SebDbContext _context;
 
-        public CreatePaymentService(IUserRepository userRepository, IPaymentRepository paymentRepository, IApprovalEngineService approvalEngineService, SebDbContext context)
+        public CreatePaymentService(IUserRepository userRepository, IPaymentRepository paymentRepository, IApprovalEngineService approvalEngineService, INotificationService notificationService, SebDbContext context)
         {
             _userRepository = userRepository;
             _paymentRepository = paymentRepository;
             _approvalEngineService = approvalEngineService;
+            _notificationService = notificationService;
             _context = context;
         }
 
@@ -76,6 +78,15 @@ namespace SebPortal.Api.Services
                 _context.Payments.Add(payment);
 
                 await _context.SaveChangesAsync();
+                var notificationDTO = new NotificationMessageDTO
+                {
+                    TenantId = user.TenantId,
+                    RecipientEmail = "attestant@seb.se", //change later
+                    Subject = "Attest krävs",
+                    Message = "En ny betalning har skapats och väntar på din attestering."
+                };
+
+                await _notificationService.SendNotificationMessageAsync(notificationDTO);
 
                 await transaction.CommitAsync();
 
