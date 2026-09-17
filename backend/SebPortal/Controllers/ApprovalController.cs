@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SebPortal.Api.Authorization;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Services;
 
@@ -7,7 +8,7 @@ namespace SebPortal.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "attestant, admin")]
+    [Authorize(Roles = UserRoles.Attestant + "," + UserRoles.Admin)]
     public class ApprovalController : ControllerBase
     {
         private readonly IApprovalService _approvalService;

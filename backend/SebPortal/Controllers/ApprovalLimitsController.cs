@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
+using SebPortal.Api.Authorization;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
@@ -10,7 +11,7 @@ using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles ="admin, Admin")]
+[Authorize(Roles = UserRoles.Admin)]
 public class ApprovalLimitsController: ControllerBase
 {
     private readonly IApprovalLimitService _approvalLimitService;
