@@ -6,6 +6,7 @@ export interface AuthContextType {
     isAuthenticated: boolean;
     isInitializing: boolean;
     isLoggingIn: boolean;
+    sessionExpired: boolean;
 
     login: (
         email: string,

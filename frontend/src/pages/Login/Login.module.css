@@ -49,6 +49,7 @@
     background-color: var(--color-border-light);
 }
 
+
 .form {
     width: 100%;
 
@@ -184,6 +185,23 @@
     color: var(--color-error);
 }
 
+.sessionExpired {
+    margin: 0 40px 14px;
+
+    padding: 10px 12px;
+
+    font-size: var(--font-size-md);
+    line-height: 1.4;
+    text-align: center;
+
+    color: var(--color-error);
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    border-color: var(--color-error);
+}
+
 @media (max-width: 560px) {
     .centeredCard {
         width: 100%;
@@ -197,5 +215,10 @@
 
     .selectorContainer>* {
         width: 100%;
+    }
+
+    .sessionExpired {
+        margin-left: var(--spacing-lg);
+        margin-right: var(--spacing-lg);
     }
 }

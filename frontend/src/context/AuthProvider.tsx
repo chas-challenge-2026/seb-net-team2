@@ -19,6 +19,8 @@ import {
     removeAuthToken,
 } from "../utils/authStorage";
 
+import { SESSION_EXPIRED_EVENT } from "../utils/authEvents";
+
 import type { AuthUser } from "../schemas/userSchema";
 
 type AuthProviderProps = {
@@ -26,7 +28,7 @@ type AuthProviderProps = {
 };
 
 const useMockAuth =
-    import.meta.env.VITE_MOCK_AUTH === "true";
+    import.meta.env.VITE_MOCK_AUTH === "false";
 
 const mockUser: AuthUser = {
     userId: 1,
@@ -51,9 +53,14 @@ export function AuthProvider({
     const [isLoggingIn, setIsLoggingIn] =
         useState(false);
 
+    const [sessionExpired, setSessionExpired] =
+        useState(false);
+
     const isAuthenticated = useMockAuth
         ? user !== null
         : user !== null && token !== null;
+
+
 
     useEffect(() => {
         if (useMockAuth) {
@@ -66,6 +73,7 @@ export function AuthProvider({
             setIsInitializing(false);
             return;
         }
+
 
         async function restoreAuth(
             savedToken: string
@@ -87,6 +95,26 @@ export function AuthProvider({
         }
 
         void restoreAuth(storedToken);
+    }, []);
+
+    useEffect(() => {
+        function handleSessionExpired() {
+            setToken(null);
+            setUser(null);
+            setSessionExpired(true);
+        }
+
+        window.addEventListener(
+            SESSION_EXPIRED_EVENT,
+            handleSessionExpired
+        );
+
+        return () => {
+            window.removeEventListener(
+                SESSION_EXPIRED_EVENT,
+                handleSessionExpired
+            );
+        };
     }, []);
 
     async function login(
@@ -140,6 +168,7 @@ export function AuthProvider({
                 isAuthenticated,
                 isInitializing,
                 isLoggingIn,
+                sessionExpired,
                 login,
                 logout,
             }}

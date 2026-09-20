@@ -5,7 +5,6 @@ import type {
 } from "react";
 
 import {
-    Link,
     useNavigate,
 } from "@tanstack/react-router";
 
@@ -139,13 +138,6 @@ export default function PrivateLogin() {
                         "Log in"
                     )}
                 </Button>
-
-                <Link
-                    to="/register"
-                    className={styles.register}
-                >
-                    Don't have an account? Register here.
-                </Link>
 
                 <p
                     className={styles.error}
