@@ -2,11 +2,12 @@ import React, { useEffect, useId, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import styles from './Sidebar.module.css';
 
-
 export interface SidebarProps {
   userRole?: 'initiator' | 'attestant' | 'admin';
   userName?: string;
   onLogout?: () => void;
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
 }
 
 
@@ -14,6 +15,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   userRole = 'attestant',
   userName = 'Johan Berg',
   onLogout,
+  collapsed,
+  onToggleCollapsed,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const sidebarId = useId();
@@ -23,7 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     admin: 'Administrator',
   };
   const roleLabel = roleLabels[userRole];
-
 
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -63,7 +65,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isOpen && <div className={styles['sidebar-backdrop']} onClick={toggleSidebar} />}
 
 
-      <aside id={sidebarId} className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      <aside id={sidebarId} className={`${styles.sidebar} ${isOpen ? styles.open : ''} ${collapsed ? styles.collapsed : ''}`}>
+        <button
+          type="button"
+          className={styles['collapse-toggle']}
+          onClick={onToggleCollapsed}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!collapsed}
+          aria-controls={sidebarId}
+        >
+          <svg
+            className={styles['collapse-toggle-icon']}
+            viewBox="0 0 16 16"
+            width="14"
+            height="14"
+            aria-hidden="true"
+          >
+            <path
+              d="M10 2 L5 8 L10 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
         {/* SEB Bank Logga & Rubrik */}
         <div className={styles['sidebar-header']}>
           <h2 className={styles['sidebar-title']}>Business</h2>
