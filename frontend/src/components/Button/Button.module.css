@@ -50,12 +50,12 @@
 
 .danger {
     background-color: var(--color-background);
-    color: var(--color-text);
-    border-color: var(--color-border);
+    color: var(--color-danger);
+    border-color: var(--color-danger);
 }
 
 .danger:hover {
-    background-color: var(--color-border);
+    background-color: var(--color-border-light);
 }
 
 
@@ -66,7 +66,7 @@
 }
 
 .ghost:hover {
-    background-color: var(--color-border);
+    background-color: var(--color-border-light);
 }
 
 .square {
@@ -77,7 +77,7 @@
 }
 
 .square:hover {
-    background-color: var(--color-border);
+    background-color: var(--color-border-light);
 }
 
 .small {

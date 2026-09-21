@@ -14,6 +14,20 @@
     --color-hover-light: #f6f3f3;
 
     --color-error: #b42318;
+    --color-danger: #b42318;
+
+    --color-50: #f8fff7;
+    --color-100: #f5fff3;
+    --color-200: #f0fcee;
+    --color-300: #ecf9e9;
+    --color-400: #daf9d5;
+    --color-500: #c9f4c2;
+    --color-600: #b5ecab;
+    --color-700: #9add8f;
+    --color-800: #72cc64;
+    --color-900: #63b756;
+    --color-1000: #338e23;
+    --color-1100: #0a5500;
 
     --seb-green: #60cd18;
     --seb-green-dark-1: #308800;

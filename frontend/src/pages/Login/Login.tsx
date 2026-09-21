@@ -19,8 +19,10 @@ export default function Login() {
         useState<CustomerType>("private");
 
     const {
+        user,
         isAuthenticated,
         isInitializing,
+        sessionExpired,
     } = useAuth();
 
     if (isInitializing) {
@@ -29,6 +31,10 @@ export default function Login() {
                 <LoadingWheel size="medium" />
             </div>
         );
+    }
+
+    if (isAuthenticated && user?.role === "Admin") {
+        return <Navigate to="/admin" />;
     }
 
     if (isAuthenticated) {
@@ -50,10 +56,20 @@ export default function Login() {
 
                 <div className={styles.line} />
 
+
                 {customerType === "private" ? (
                     <PrivateLogin />
                 ) : (
                     <CompanyLogin />
+                )}
+
+                {sessionExpired && (
+                    <p
+                        className={styles.sessionExpired}
+                        role="status"
+                    >
+                        Your session has expired. Please log in again.
+                    </p>
                 )}
             </Card>
         </div>

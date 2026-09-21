@@ -1,58 +1,68 @@
-import React, { useEffect, useId, useState } from 'react';
+import React, {
+  useEffect,
+  useId,
+  useState,
+} from 'react';
+
 import { Link } from '@tanstack/react-router';
+
+import { useAuth } from '../hooks/useAuth';
+
 import styles from './Sidebar.module.css';
 
 export interface SidebarProps {
-  userRole?: 'initiator' | 'attestant' | 'admin';
-  userName?: string;
   onLogout?: () => void;
   collapsed: boolean;
   onToggleCollapsed: () => void;
 }
 
-
 export const Sidebar: React.FC<SidebarProps> = ({
-  userRole = 'attestant',
-  userName = 'Johan Berg',
   onLogout,
   collapsed,
   onToggleCollapsed,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   const sidebarId = useId();
-  const roleLabels = {
-    initiator: 'Initiator',
-    attestant: 'Approver',
-    admin: 'Administrator',
-  };
-  const roleLabel = roleLabels[userRole];
 
-  const toggleSidebar = () => setIsOpen(!isOpen);
+  const { user } = useAuth();
 
+  function toggleMobileSidebar() {
+    setIsOpen((previous) => !previous);
+  }
+
+  function handleMobileNavClick() {
+    setIsOpen(false);
+  }
 
   useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => {
+    function closeOnEscape(
+      event: KeyboardEvent
+    ) {
       if (event.key === 'Escape') {
         setIsOpen(false);
       }
+    }
+
+    window.addEventListener(
+      'keydown',
+      closeOnEscape
+    );
+
+    return () => {
+      window.removeEventListener(
+        'keydown',
+        closeOnEscape
+      );
     };
-
-    window.addEventListener('keydown', closeOnEscape);
-    return () => window.removeEventListener('keydown', closeOnEscape);
   }, []);
-
-
-  const handleNavClick = () => {
-    setIsOpen(false); // Stäng sidebaren på mobil när man klickat
-  };
-
 
   return (
     <>
-      {/* Hamburgarknapp för mobiler */}
       <button
+        type="button"
         className={styles['hamburger-btn']}
-        onClick={toggleSidebar}
+        onClick={toggleMobileSidebar}
         aria-label="Menu"
         aria-controls={sidebarId}
         aria-expanded={isOpen}
@@ -60,22 +70,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ☰
       </button>
 
+      {isOpen && (
+        <div
+          className={styles['sidebar-backdrop']}
+          onClick={toggleMobileSidebar}
+        />
+      )}
 
-      {/* Skuggbakgrund på mobil när sidebaren är öppen */}
-      {isOpen && <div className={styles['sidebar-backdrop']} onClick={toggleSidebar} />}
-
-
-      <aside id={sidebarId} className={`${styles.sidebar} ${isOpen ? styles.open : ''} ${collapsed ? styles.collapsed : ''}`}>
+      <aside
+        id={sidebarId}
+        className={`
+          ${styles.sidebar}
+          ${isOpen ? styles.open : ''}
+          ${collapsed ? styles.collapsed : ''}
+        `}
+      >
         <button
           type="button"
           className={styles['collapse-toggle']}
           onClick={onToggleCollapsed}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={
+            collapsed
+              ? 'Expand sidebar'
+              : 'Collapse sidebar'
+          }
           aria-expanded={!collapsed}
           aria-controls={sidebarId}
         >
           <svg
-            className={styles['collapse-toggle-icon']}
+            className={
+              styles['collapse-toggle-icon']
+            }
             viewBox="0 0 16 16"
             width="14"
             height="14"
@@ -92,105 +117,141 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </svg>
         </button>
 
-        {/* SEB Bank Logga & Rubrik */}
-        <div className={styles['sidebar-header']}>
-          <h2 className={styles['sidebar-title']}>Business</h2>
-        </div>
-
-
-        {/* Navigationslänkar */}
         <nav className={styles['sidebar-nav']}>
-          <div className={styles['nav-group']}>
-            <Link
-              to="/dashboard"
-              className={styles['nav-item']}
-              activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
-              onClick={handleNavClick}
-            >
-              <span>Dashboard</span>
-            </Link>
-          </div>
+          <Link
+            to="/dashboard"
+            activeOptions={{ exact: true }}
+            className={styles['nav-item']}
+            activeProps={{
+              className: `${styles['nav-item']} ${styles.active}`,
+            }}
+            onClick={handleMobileNavClick}
+          >
+            <span>Dashboard</span>
+          </Link>
 
-          {(userRole === 'initiator' || userRole === 'admin') && (
-            <div className={styles['nav-group']}>
-              <p className={styles['nav-section-title']}>Payments</p>
-              <Link
-                to="/ny-betalning"
-                className={styles['nav-item']}
-                activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
-                onClick={handleNavClick}
-              >
-                <span>New payment</span>
-              </Link>
-              <Link
-                to="/batch"
-                className={styles['nav-item']}
-                activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
-                onClick={handleNavClick}
-              >
-                <span>Batch upload</span>
-              </Link>
-            </div>
-          )}
+          {(user?.role === 'Initiator' ||
+            user?.role === 'Admin') && (
+              <>
+                <Link
+                  to="/ny-betalning"
+                  activeOptions={{ exact: true }}
+                  className={styles['nav-item']}
+                  activeProps={{
+                    className: `${styles['nav-item']} ${styles.active}`,
+                  }}
+                  onClick={handleMobileNavClick}
+                >
+                  <span>New payment</span>
+                </Link>
 
-          {/* Only shown for approvers and administrators */}
-          {(userRole === 'attestant' || userRole === 'admin') && (
-            <div className={styles['nav-group']}>
-              <p className={styles['nav-section-title']}>Approvals</p>
+                <Link
+                  to="/batch"
+                  activeOptions={{ exact: true }}
+                  className={styles['nav-item']}
+                  activeProps={{
+                    className: `${styles['nav-item']} ${styles.active}`,
+                  }}
+                  onClick={handleMobileNavClick}
+                >
+                  <span>Batch upload</span>
+                </Link>
+              </>
+            )}
+
+          {(user?.role === 'Attestant' ||
+            user?.role === 'Admin') && (
               <Link
                 to="/attestkorg"
+                activeOptions={{ exact: true }}
                 className={styles['nav-item']}
-                activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
-                onClick={handleNavClick}
+                activeProps={{
+                  className: `${styles['nav-item']} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
               >
                 <span>Approval inbox</span>
-                <span className={styles.badge}>2</span>
-              </Link>
-            </div>
-          )}
 
-          {/* Only shown for administrators */}
-          {userRole === 'admin' && (
-            <div className={styles['nav-group']}>
-              <p className={styles['nav-section-title']}>Administration</p>
+                <span className={styles.badge}>
+                  2
+                </span>
+              </Link>
+            )}
+
+          {user?.role === 'Admin' && (
+            <>
               <Link
                 to="/granskningslogg"
+                activeOptions={{ exact: true }}
                 className={styles['nav-item']}
-                activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
-                onClick={handleNavClick}
+                activeProps={{
+                  className: `${styles['nav-item']} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
               >
                 <span>Audit log</span>
               </Link>
-            </div>
+
+              <Link
+                to="/admin"
+                activeOptions={{ exact: true }}
+                className={styles['nav-item']}
+                activeProps={{
+                  className: `${styles['nav-item']} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
+              >
+                <span>Administration</span>
+              </Link>
+            </>
           )}
 
-          <div className={`${styles['nav-group']} ${styles['nav-group-last']}`}>
-          
-            <Link
-              to="/profil"
-              className={styles['nav-item']}
-              activeProps={{ className: `${styles['nav-item']} ${styles.active}` }}
-              onClick={handleNavClick}
-            >
-              <span>My profile</span>
-            </Link>
-          </div>
+          <Link
+            to="/profil"
+            activeOptions={{ exact: true }}
+            className={styles['nav-item']}
+            activeProps={{
+              className: `${styles['nav-item']} ${styles.active}`,
+            }}
+            onClick={handleMobileNavClick}
+          >
+            <span>My profile</span>
+          </Link>
         </nav>
 
-
-        {/* User profile and logout */}
         <div className={styles['sidebar-footer']}>
           <div className={styles['user-info']}>
-            <span className={styles['user-name']}>{userName}</span>
-            <span className={styles['user-role']}>{roleLabel}</span>
+            {user?.name && (
+              <span className={styles['user-name']}>
+                {user.name}
+              </span>
+            )}
+
+            {user?.email && (
+              <span className={styles['user-email']}>
+                {user.email}
+              </span>
+            )}
+
+            <span className={styles['user-role']}>
+              {user?.role}
+            </span>
           </div>
-          {onLogout && (
-            <button className={styles['logout-btn']} onClick={onLogout}>
+
+          {onLogout ? (
+            <button
+              type="button"
+              className={styles['logout-btn']}
+              onClick={onLogout}
+            >
               Log out
             </button>
-          )}
-          {!onLogout && (
-            <Link to="/logout" className={styles['logout-link']} onClick={handleNavClick}>
+          ) : (
+            <Link
+              to="/logout"
+              className={styles['logout-link']}
+              onClick={handleMobileNavClick}
+            >
               Log out
             </Link>
           )}
