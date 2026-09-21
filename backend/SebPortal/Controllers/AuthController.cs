@@ -16,11 +16,13 @@ namespace SebPortal.Api.Controllers
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly IRefreshTokenService _refreshTokenService; 
 
-        public AuthController(IUserService userService, IConfiguration configuration)
+        public AuthController(IUserService userService, IConfiguration configuration, IRefreshTokenService refreshTokenService)
         {
             _userService = userService;
-            _configuration = configuration; 
+            _configuration = configuration;
+            _refreshTokenService = refreshTokenService;
         }
 
         [Authorize]
@@ -48,6 +50,30 @@ namespace SebPortal.Api.Controllers
             //return token and user info
             return Ok(response);
             
+        }
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDTO dto)
+        {
+            var revoked = await _refreshTokenService.RevokeAsync(dto.RefreshToken);
+
+            if (!revoked)
+            {
+                return Unauthorized();
+            }
+
+            return NoContent();
+        }
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO dto)
+        {
+            var response = await _refreshTokenService.RefreshAsync(dto.RefreshToken);
+
+            if (response == null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(response);
         }
     }
 }

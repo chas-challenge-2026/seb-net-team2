@@ -12,12 +12,14 @@ namespace SebPortal.Api.Services
     {
 
         private readonly IUserRepository _userRepository;
-        private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public UserService(IUserRepository userRepository, IConfiguration configuration)
+        public UserService(IUserRepository userRepository, ITokenService tokenService, IRefreshTokenService refreshTokenService)
         {
             _userRepository = userRepository;
-            _configuration = configuration;
+            _tokenService = tokenService;
+            _refreshTokenService = refreshTokenService;
         }
 
         public async Task<ReadUserDTO> CreateUserAsync(CreateUserDTO dto)
@@ -160,11 +162,12 @@ namespace SebPortal.Api.Services
                 throw new Exception("Ogiltig e-postadress eller lösenord.");
             }
 
-            // Generate JWT token (this method should be implemented in a separate service)
-            var token = GenerateJwtToken(user);
+            var accessToken = _tokenService.GenerateAccessToken(user);
+            var refreshToken = await _refreshTokenService.CreateRefreshTokenAsync(user.Id);
             return new LoginResponseDTO
             {
-                Token = token,
+                Token = accessToken,
+                RefreshToken = refreshToken,
                 UserId = user.Id,
                 Email = user.Email,
                 Role = user.Role,
@@ -183,37 +186,6 @@ namespace SebPortal.Api.Services
                 Email = user.Email,
                 Role = user.Role
             });
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var secret = _configuration["Jwt:Secret"] ?? _configuration["Jwt:SecretKey"];
-            var issuer = _configuration["Jwt:Issuer"];
-            var audience = _configuration["Jwt:Audience"];
-
-            var key = Encoding.UTF8.GetBytes(secret!);
-            var tokenHandler = new JwtSecurityTokenHandler();
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("UserId", user.Id.ToString()),
-                    new Claim("Role", user.Role),
-                    new Claim("TenantId", user.TenantId.ToString()),
-                    new Claim(ClaimTypes.Email, user.Email)
-                }),
-                Expires = DateTime.UtcNow.AddHours(8),
-                Issuer = issuer,
-                Audience = audience,
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
-                )
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
         }
     }
 }

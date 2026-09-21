@@ -19,7 +19,7 @@ namespace SebPortal.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "initiator")]
+        [Authorize(Roles = "Initiator")]
         [ServiceFilter(typeof(IdempotencyFilter))]
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, int userId, [FromHeader(Name = "X-Idempotency-Key")] string idempotencyKey)
         {

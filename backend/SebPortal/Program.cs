@@ -110,6 +110,8 @@ builder.Services.AddScoped<IAuditRepository, AuditRepository>();
 builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
 builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
 // Global error handling middleware
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

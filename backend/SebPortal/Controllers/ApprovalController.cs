@@ -7,7 +7,7 @@ namespace SebPortal.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "attestant, admin")]
+    [Authorize(Roles = "attestant, Admin")]
     public class ApprovalController : ControllerBase
     {
         private readonly IApprovalService _approvalService;
