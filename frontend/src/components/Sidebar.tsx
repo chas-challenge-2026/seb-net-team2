@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
 
           <div className={`${styles['nav-group']} ${styles['nav-group-last']}`}>
-          
+
             <Link
               to="/profil"
               className={styles['nav-item']}
