@@ -6,7 +6,11 @@ export function NavigationBar() {
     return (
         <nav className={styles.navbar}>
             <div className={styles.navbar__brand}>
-                <span> SEB </span>
+                <img
+                    src="/seb-logo.svg"
+                    alt="SEB"
+                    className={styles.navbar__logo}
+                />
             </div>
             <ul className={styles.navbar__links}>
                 {navigationLinks.map(({ to, label }) => (

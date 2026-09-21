@@ -61,7 +61,7 @@ export default function PrivateLogin() {
             );
 
             await navigate({
-                to: "/overview",
+                to: "/dashboard",
             });
         } catch (error) {
             if (error instanceof AppError) {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using SebPortal.Api.Auth;
+using SebPortal.Api.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -61,7 +62,7 @@ public class JwtTokenValidationTests
 
         // Assert
         Assert.Equal("123", principal.FindFirst("UserId")?.Value);
-        Assert.Equal("Admin", principal.FindFirst("Role")?.Value);
+        Assert.True(principal.IsInRole(UserRoles.Admin));
         Assert.Equal("456", principal.FindFirst("TenantId")?.Value);
     }
     private static string CreateExpiredToken()
@@ -69,7 +70,7 @@ public class JwtTokenValidationTests
         var claims = new[]
         {
             new Claim("UserId", "123"),
-            new Claim("Role", "Admin"),
+            new Claim(ClaimTypes.Role, UserRoles.Admin),
             new Claim("TenantId", "456")
         };
 
@@ -98,7 +99,7 @@ public class JwtTokenValidationTests
         var claims = new[]
         {
         new Claim("UserId", "123"),
-        new Claim("Role", "Admin"),
+        new Claim(ClaimTypes.Role, UserRoles.Admin),
         new Claim("TenantId", "456")
     };
 

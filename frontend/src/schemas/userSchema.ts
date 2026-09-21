@@ -10,6 +10,7 @@ export const loginResponseSchema = z.object({
 
 export const currentUserSchema = z.object({
     userId: z.coerce.number(),
+    email: z.string().email().optional(),
     role: z.string(),
     tenantId: z.coerce.number(),
 });
