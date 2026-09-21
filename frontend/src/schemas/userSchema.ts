@@ -10,7 +10,8 @@ export const userRoleSchema = z.enum([
 
 export const currentUserSchema = z.object({
     userId: z.coerce.number(),
-    email: z.string().email().optional(),
+    name: z.string(),
+    email: z.string().email(),
     role: userRoleSchema,
     tenantId: z.coerce.number(),
 });

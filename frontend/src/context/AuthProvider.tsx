@@ -28,10 +28,12 @@ type AuthProviderProps = {
 };
 
 const useMockAuth =
-    import.meta.env.VITE_MOCK_AUTH === "false";
+    import.meta.env.VITE_MOCK_AUTH === "true";
 
 const mockUser: AuthUser = {
     userId: 1,
+    name: "Mock Admin",
+    email: "admin@example.com",
     role: "Admin",
     tenantId: 1,
 };
@@ -135,15 +137,13 @@ export function AuthProvider({
             );
 
             setAuthToken(response.token);
-
             setToken(response.token);
 
-            setUser({
-                userId: response.userId,
-                email: response.email,
-                role: response.role,
-                tenantId: response.tenantId,
-            });
+            const currentUser =
+                await getCurrentUser();
+
+            setUser(currentUser);
+            setSessionExpired(false);
         } finally {
             setIsLoggingIn(false);
         }

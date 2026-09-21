@@ -77,6 +77,7 @@ export default function UserDetails() {
                     variant="danger"
                     disabled={isDeleting}
                     onClick={() => setIsDeleteModalOpen(true)}
+                    className={styles.modalButton}
                 >
                     Delete user
                 </Button>
@@ -101,6 +102,7 @@ export default function UserDetails() {
                             size="medium"
                             variant="square"
                             onClick={() => setIsDeleteModalOpen(false)}
+                            className={styles.modalButton}
                         >
                             Cancel
                         </Button>
@@ -109,6 +111,7 @@ export default function UserDetails() {
                             size="medium"
                             variant="danger"
                             onClick={handleDeleteUser}
+                            className={styles.modalButton}
                         >
                             {isDeleting ? (
                                 <span className={styles.deletingContent}>

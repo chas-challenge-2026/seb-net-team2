@@ -65,9 +65,9 @@
 }
 
 .navigation a[data-status="active"] {
-    color: var(--seb-green-dark-2);
+    color: var(--color-text);
 
-    background-color: var(--color-hover-light);
+    background-color: var(--color-200);
 
     font-weight: 600;
 }
