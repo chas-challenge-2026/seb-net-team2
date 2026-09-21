@@ -4,7 +4,10 @@ import {
     type FormEvent,
 } from "react";
 
-import { useParams } from "@tanstack/react-router";
+import {
+    Link,
+    useParams,
+} from "@tanstack/react-router";
 
 import {
     getUserById,
@@ -17,8 +20,8 @@ import type {
 
 import { AppError } from "../../../errors/AppError";
 
-import Card from "../../../components/Card/Card";
 import Button from "../../../components/Button/Button";
+import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 
 import styles from "./EditUserDetails.module.css";
@@ -28,14 +31,23 @@ export default function EditUserDetails() {
         from: "/admin/users/$userId/edit",
     });
 
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [name, setName] =
+        useState("");
+
+    const [email, setEmail] =
+        useState("");
+
+    const [password, setPassword] =
+        useState("");
+
     const [role, setRole] =
         useState<UserRole>("User");
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const [error, setError] =
+        useState("");
+
+    const [success, setSuccess] =
+        useState("");
 
     const [isLoading, setIsLoading] =
         useState(true);
@@ -49,9 +61,10 @@ export default function EditUserDetails() {
                 setError("");
                 setIsLoading(true);
 
-                const user = await getUserById(
-                    Number(userId)
-                );
+                const user =
+                    await getUserById(
+                        Number(userId)
+                    );
 
                 setName(user.name);
                 setEmail(user.email);
@@ -72,7 +85,7 @@ export default function EditUserDetails() {
             }
         }
 
-        loadUser();
+        void loadUser();
     }, [userId]);
 
     async function handleUpdateUser(
@@ -100,7 +113,7 @@ export default function EditUserDetails() {
 
             setName(updatedUser.name ?? "");
             setEmail(updatedUser.email ?? "");
-            setRole(updatedUser.role as UserRole);
+            setRole(updatedUser.role ?? role);
 
             setPassword("");
 
@@ -125,25 +138,48 @@ export default function EditUserDetails() {
 
     if (isLoading) {
         return (
-            <div className={styles.loading}>
+            <div
+                className={styles.loadingState}
+                role="status"
+                aria-live="polite"
+            >
                 <LoadingWheel size="medium" />
+                <p>Loading user...</p>
             </div>
         );
     }
 
     return (
         <div className={styles.layout}>
-            <Card variant="default">
-                <h2>
-                    Edit user details
-                </h2>
+
+            <header className={styles.pageHeader}>
+                <h1>Edit user</h1>
+
+                <p>
+                    Update user information,
+                    password or access role.
+                </p>
+            </header>
+
+            <section className={styles.formSection}>
+                <div className={styles.sectionHeader}>
+                    <h2>User information</h2>
+
+                    <p>
+                        Changes will be applied
+                        to this user account.
+                    </p>
+                </div>
 
                 <form
                     className={styles.form}
                     onSubmit={handleUpdateUser}
                 >
                     <div className={styles.formGroup}>
-                        <label htmlFor="name">
+                        <label
+                            htmlFor="name"
+                            className={styles.label}
+                        >
                             Name
                         </label>
 
@@ -151,7 +187,9 @@ export default function EditUserDetails() {
                             id="name"
                             name="name"
                             type="text"
+                            className={styles.input}
                             value={name}
+                            disabled={isUpdating}
                             onChange={(event) =>
                                 setName(
                                     event.target.value
@@ -162,7 +200,10 @@ export default function EditUserDetails() {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="email">
+                        <label
+                            htmlFor="email"
+                            className={styles.label}
+                        >
                             Email
                         </label>
 
@@ -170,7 +211,9 @@ export default function EditUserDetails() {
                             id="email"
                             name="email"
                             type="email"
+                            className={styles.input}
                             value={email}
+                            disabled={isUpdating}
                             onChange={(event) =>
                                 setEmail(
                                     event.target.value
@@ -181,26 +224,33 @@ export default function EditUserDetails() {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="password">
+                        <label
+                            htmlFor="password"
+                            className={styles.label}
+                        >
                             New password
                         </label>
 
-                        <input
+                        <PasswordInput
                             id="password"
                             name="password"
-                            type="password"
                             value={password}
+                            disabled={isUpdating}
                             onChange={(event) =>
                                 setPassword(
                                     event.target.value
                                 )
                             }
                             autoComplete="new-password"
+                            placeholder="Leave blank to keep current password"
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="role">
+                        <label
+                            htmlFor="role"
+                            className={styles.label}
+                        >
                             Role
                         </label>
 
@@ -209,6 +259,7 @@ export default function EditUserDetails() {
                             name="role"
                             className={styles.select}
                             value={role}
+                            disabled={isUpdating}
                             onChange={(event) =>
                                 setRole(
                                     event.target
@@ -234,45 +285,60 @@ export default function EditUserDetails() {
                         </select>
                     </div>
 
-                    <Button
-                        type="submit"
-                        variant="square"
-                        size="medium"
-                        disabled={isUpdating}
-                    >
-                        {isUpdating ? (
-                            <span
-                                className={
-                                    styles.updatingContent
-                                }
-                            >
-                                Saving...
-                                <LoadingWheel size="small" />
-                            </span>
-                        ) : (
-                            "Save changes"
-                        )}
-                    </Button>
+                    {success && (
+                        <div
+                            className={styles.success}
+                            role="status"
+                        >
+                            {success}
+                        </div>
+                    )}
+
+                    {error && (
+                        <div
+                            className={styles.error}
+                            role="alert"
+                        >
+                            {error}
+                        </div>
+                    )}
+
+                    <div className={styles.actions}>
+                        <Link
+                            to="/admin/users/$userId"
+                            params={{ userId }}
+                            className={
+                                styles.cancelButton
+                            }
+                        >
+                            Cancel
+                        </Link>
+
+                        <Button
+                            type="submit"
+                            variant="square"
+                            size="medium"
+                            disabled={isUpdating}
+                            className={
+                                styles.formButton
+                            }
+                        >
+                            {isUpdating ? (
+                                <span
+                                    className={
+                                        styles.loadingButton
+                                    }
+                                >
+                                    <LoadingWheel size="small" />
+                                    Saving...
+                                </span>
+                            ) : (
+                                "Save changes"
+                            )}
+                        </Button>
+                    </div>
                 </form>
-
-                {success && (
-                    <p
-                        className={styles.success}
-                        role="status"
-                    >
-                        {success}
-                    </p>
-                )}
-
-                {error && (
-                    <p
-                        className={styles.error}
-                        role="alert"
-                    >
-                        {error}
-                    </p>
-                )}
-            </Card>
+            </section>
         </div>
     );
 }

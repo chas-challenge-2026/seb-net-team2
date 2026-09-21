@@ -1,0 +1,287 @@
+.layout {
+    width: 100%;
+    max-width: 1100px;
+
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+
+    box-sizing: border-box;
+}
+
+/* Header */
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: var(--spacing-lg);
+
+    margin-bottom: var(--spacing-xl);
+}
+
+.pageHeader h1 {
+    margin: 0;
+
+    font-size: 2rem;
+    font-weight: 600;
+
+    color: var(--color-text);
+}
+
+.pageHeader p {
+    margin:
+        var(--spacing-xs) 0 0;
+
+    color: var(--color-text-soft);
+}
+
+.createButton {
+    min-height: 40px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding:
+        0 var(--spacing-lg);
+
+    border-radius: var(--radius-sm);
+
+    background-color:
+        var(--seb-green-dark-1);
+
+    color: white;
+
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.createButton:hover {
+    background-color:
+        var(--seb-green-dark-2);
+}
+
+.createButton:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+/* Panel */
+
+.limitsSection {
+    background-color: var(--color-surface);
+
+    border:
+        1px solid var(--color-border-light);
+
+    border-radius: var(--radius-md);
+
+    overflow: hidden;
+}
+
+.toolbar {
+    padding: var(--spacing-lg);
+
+    border-bottom:
+        1px solid var(--color-border-light);
+
+    background-color: var(--color-300);
+}
+
+.toolbar h2 {
+    margin: 0;
+
+    font-size: var(--font-size-xl);
+}
+
+.toolbar p {
+    margin:
+        var(--spacing-xs) 0 0;
+
+    color: var(--color-text-soft);
+}
+
+/* List */
+
+.limitList {
+    display: flex;
+    flex-direction: column;
+}
+
+.limitLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.limitRow {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr) 120px 220px 24px;
+
+    align-items: center;
+
+    gap: var(--spacing-lg);
+
+    padding:
+        var(--spacing-md) var(--spacing-lg);
+
+    border-bottom:
+        1px solid var(--color-border-light);
+
+    transition:
+        background-color 150ms ease;
+}
+
+.limitLink:last-child .limitRow {
+    border-bottom: 0;
+}
+
+.limitLink:hover .limitRow {
+    background-color:
+        var(--color-hover-light);
+}
+
+.limitLink:focus-visible {
+    outline: none;
+}
+
+.limitLink:focus-visible .limitRow {
+    outline:
+        2px solid var(--seb-green-dark-1);
+
+    outline-offset: -2px;
+}
+
+/* Limit information */
+
+.limitInfo {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--spacing-xs);
+}
+
+.amount {
+    font-size: var(--font-size-lg);
+    color: var(--color-text);
+}
+
+.description {
+    overflow: hidden;
+
+    color: var(--color-text-soft);
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.approvals {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.approvals strong {
+    font-size: var(--font-size-lg);
+}
+
+.approvals span {
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-sm);
+}
+
+.modified {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.modified span,
+.modified small {
+    color: var(--color-text-soft);
+}
+
+.modified strong {
+    font-size: var(--font-size-md);
+}
+
+.chevron {
+    color: var(--color-text-soft);
+
+    font-size: 1.5rem;
+}
+
+/* States */
+
+.loadingState,
+.emptyState,
+.errorState {
+    min-height: 180px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: var(--spacing-sm);
+
+    padding: var(--spacing-xl);
+
+    box-sizing: border-box;
+
+    text-align: center;
+}
+
+.loadingState {
+    color: var(--color-text-soft);
+}
+
+.emptyState h2,
+.emptyState p {
+    margin: 0;
+}
+
+.emptyState p {
+    color: var(--color-text-soft);
+}
+
+.errorState {
+    color: var(--color-error);
+}
+
+/* Responsive */
+
+@media (max-width: 800px) {
+    .layout {
+        padding: var(--spacing-md);
+    }
+
+    .pageHeader {
+        flex-direction: column;
+    }
+
+    .createButton {
+        width: 100%;
+    }
+
+    .limitRow {
+        grid-template-columns:
+            minmax(0, 1fr) auto 20px;
+    }
+
+    .modified {
+        grid-column: 1 / 3;
+    }
+
+    .chevron {
+        grid-column: 3;
+        grid-row: 1 / 3;
+    }
+}

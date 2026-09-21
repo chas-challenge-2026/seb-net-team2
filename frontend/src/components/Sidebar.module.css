@@ -207,6 +207,31 @@
 }
 
 
+.admin-section {
+  display: flex;
+  flex-direction: column;
+
+  gap: var(--spacing-sm);
+
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+
+  border-top:
+    1px solid var(--color-border-light);
+}
+
+.section-label {
+  padding:
+    0 var(--spacing-md);
+
+  color: var(--color-text-soft);
+
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+
+  letter-spacing: 0.04em;
+}
+
 /* Footer */
 
 .sidebar-footer {

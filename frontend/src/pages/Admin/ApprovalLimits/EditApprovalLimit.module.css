@@ -31,9 +31,15 @@
     outline-offset: 3px;
 }
 
-/* Page header */
+/* Header */
 
 .pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: var(--spacing-lg);
+
     margin-bottom: var(--spacing-xl);
 }
 
@@ -56,8 +62,11 @@
 /* Form panel */
 
 .formSection {
+    background-color: var(--color-surface);
 
-    border: 1px solid var(--color-border-light);
+    border:
+        1px solid var(--color-border-light);
+
     border-radius: var(--radius-md);
 
     overflow: hidden;
@@ -68,9 +77,6 @@
 
     border-bottom:
         1px solid var(--color-border-light);
-
-    background-color: var(--color-300);
-
 }
 
 .sectionHeader h2 {
@@ -103,11 +109,16 @@
     padding: var(--spacing-xl);
 }
 
-.formGroup {
+.formGroup,
+.descriptionGroup {
     display: flex;
     flex-direction: column;
 
     gap: var(--spacing-xs);
+}
+
+.descriptionGroup {
+    grid-column: 1 / -1;
 }
 
 .label {
@@ -117,15 +128,19 @@
     color: var(--color-text);
 }
 
+.helperText {
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-sm);
+}
+
 /* Inputs */
 
 .input,
-.select {
+.textarea {
     width: 100%;
-    height: 42px;
 
-    padding:
-        0 var(--spacing-md);
+    padding: var(--spacing-md);
 
     box-sizing: border-box;
 
@@ -144,13 +159,27 @@
         box-shadow 150ms ease;
 }
 
+.input {
+    height: 42px;
+
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.textarea {
+    min-height: 100px;
+
+    resize: vertical;
+}
+
 .input:hover:not(:disabled),
-.select:hover:not(:disabled) {
-    border-color: var(--color-text-soft);
+.textarea:hover:not(:disabled) {
+    border-color:
+        var(--color-text-soft);
 }
 
 .input:focus,
-.select:focus {
+.textarea:focus {
     outline:
         2px solid var(--seb-green-dark-1);
 
@@ -158,19 +187,16 @@
 }
 
 .input:disabled,
-.select:disabled {
+.textarea:disabled {
     opacity: 0.6;
+
     cursor: not-allowed;
 
     background-color:
         var(--color-hover-light);
 }
 
-.select {
-    cursor: pointer;
-}
-
-/* Messages */
+/* Feedback */
 
 .success,
 .error {
@@ -259,11 +285,30 @@
     gap: var(--spacing-sm);
 }
 
+/* Loading */
+
+.loadingState {
+    min-height: 300px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: var(--spacing-md);
+
+    color: var(--color-text-soft);
+}
+
 /* Responsive */
 
 @media (max-width: 700px) {
     .layout {
         padding: var(--spacing-md);
+    }
+
+    .pageHeader {
+        flex-direction: column;
     }
 
     .form {
@@ -272,6 +317,7 @@
         padding: var(--spacing-lg);
     }
 
+    .descriptionGroup,
     .success,
     .error,
     .actions {
