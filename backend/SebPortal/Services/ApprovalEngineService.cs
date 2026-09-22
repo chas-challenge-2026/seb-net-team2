@@ -32,16 +32,30 @@ namespace SebPortal.Api.Services
             if (applicableLimit == null || applicableLimit.RequiredApprovals == 0)
             {
                 payment.Status = "completed";
+                payment.ExecutedAt = DateTime.UtcNow;
                 return false;
             }
 
             // if the payment amount is greater than or equal to the applicable limit, create approval steps
             payment.Status = "pending_approval";
 
-            var attestants = (await _userRepository.GetAttestantsByTenantIdAsync(payment.TenantId)).ToList();
+            // the payment's creator can never be its own attestant, so they are excluded
+            // from the pool before checking availability and assigning steps
+            var attestants = (await _userRepository.GetAttestantsByTenantIdAsync(payment.TenantId))
+                .Where(a => a.Id != payment.CreatedByUserId)
+                .ToList();
+
             if (attestants.Count == 0)
             {
                 throw new InvalidOperationException($"Ingen attestant hittades för tenant {payment.TenantId}.");
+            }
+
+            // there must be at least as many distinct attestants (excluding the payment's creator)
+            // as required approvals, otherwise the same person could satisfy the multi-approval requirement alone
+            if (attestants.Count < applicableLimit.RequiredApprovals)
+            {
+                throw new InvalidOperationException(
+                    $"Endast {attestants.Count} attestant(er) tillgängliga (exklusive betalningens skapare) för tenant {payment.TenantId}, men {applicableLimit.RequiredApprovals} krävs för betalningar över {applicableLimit.MinAmount}.");
             }
 
             for (int stepNumber = 1; stepNumber <= applicableLimit.RequiredApprovals; stepNumber++)
