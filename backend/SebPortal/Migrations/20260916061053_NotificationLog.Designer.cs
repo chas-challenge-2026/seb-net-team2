@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SebPortal.Data;
@@ -11,9 +12,11 @@ using SebPortal.Data;
 namespace SebPortal.Api.Migrations
 {
     [DbContext(typeof(SebDbContext))]
-    partial class SebDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260916061053_NotificationLog")]
+    partial class NotificationLog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -360,51 +363,6 @@ namespace SebPortal.Api.Migrations
                     b.ToTable("payments", (string)null);
                 });
 
-            modelBuilder.Entity("SebPortal.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_at");
-
-                    b.Property<int?>("ReplacedByTokenId")
-                        .HasColumnType("integer")
-                        .HasColumnName("replaced_by_token_id");
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("revoked_at");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("token_hash");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("refresh_tokens", (string)null);
-                });
-
             modelBuilder.Entity("SebPortal.Models.Tenant", b =>
                 {
                     b.Property<int>("Id")
@@ -560,17 +518,6 @@ namespace SebPortal.Api.Migrations
                     b.Navigation("FromAccount");
 
                     b.Navigation("Tenant");
-                });
-
-            modelBuilder.Entity("SebPortal.Models.RefreshToken", b =>
-                {
-                    b.HasOne("SebPortal.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SebPortal.Models.User", b =>

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SebPortal.Data;
@@ -11,9 +12,11 @@ using SebPortal.Data;
 namespace SebPortal.Api.Migrations
 {
     [DbContext(typeof(SebDbContext))]
-    partial class SebDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260918064125_AddRefreshTokens")]
+    partial class AddRefreshTokens
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,53 +246,6 @@ namespace SebPortal.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("idempotency_keys", (string)null);
-                });
-
-            modelBuilder.Entity("SebPortal.Models.NotificationLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AttemptNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("attemptNumber");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("errorMessage");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("message");
-
-                    b.Property<string>("RecipientEmail")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("recipientEmail");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("subject");
-
-                    b.Property<int>("TenantId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("timeStamp");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("notificationLogs", (string)null);
                 });
 
             modelBuilder.Entity("SebPortal.Models.Payment", b =>
@@ -522,17 +478,6 @@ namespace SebPortal.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SebPortal.Models.NotificationLog", b =>
-                {
-                    b.HasOne("SebPortal.Models.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("SebPortal.Models.Payment", b =>
