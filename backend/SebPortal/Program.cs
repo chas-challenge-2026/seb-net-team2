@@ -10,7 +10,6 @@ using SebPortal.Api.Filters;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Data;
-using System.Net.Mail;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -112,8 +111,10 @@ builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
 builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
-builder.Services.AddScoped<SmtpClient>(sp => new SmtpClient("localhost", 1025));
-builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
+builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+builder.Services.AddSingleton<INotificationQueue, NotificationQueue>();
+builder.Services.AddHostedService<NotificationBackgroundService>();
+builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
