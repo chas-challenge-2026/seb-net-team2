@@ -16,6 +16,6 @@ namespace SebPortal.Models
         public int EntityId { get; set; }
         [Required]
         public required string Description { get; set; }
-        public DateTime DateTime { get; set; } = DateTime.Now;
+        public DateTime DateTime { get; set; } = DateTime.UtcNow;
     }
 }
