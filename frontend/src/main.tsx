@@ -6,7 +6,7 @@ import { MainLayout } from './layouts/MainLayout'
 import { AuthProvider } from './context/AuthProvider'
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { NyBetalning } from './pages/NyBetalning/NyBetalning'
-import { SparaInvestera } from './pages/SparaInvestera/SparaInvestera'
+import { SaveInvest } from './pages/SaveInvest/SaveInvest'
 import { Mortgage } from './pages/Mortgage/Mortgage'
 import { Attestkorg } from './pages/Attestkorg/Attestkorg'
 import { Batch } from './pages/Batch/Batch'
@@ -33,7 +33,7 @@ const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', com
 const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', component: Login })
 const overviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/dashboard', component: () => <ProtectedRoute><Dashboard /></ProtectedRoute> })
 const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <ProtectedRoute><NyBetalning /></ProtectedRoute> })
-const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SparaInvestera /></ProtectedRoute> })
+const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SaveInvest /></ProtectedRoute> })
 const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
 const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <ProtectedRoute><Attestkorg /></ProtectedRoute> })
 const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch', component: () => <ProtectedRoute><Batch /></ProtectedRoute> })

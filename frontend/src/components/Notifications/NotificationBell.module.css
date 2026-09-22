@@ -1,0 +1,97 @@
+.container {
+    position: relative;
+}
+
+.button {
+    position: relative;
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid #dce5df;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.button:hover {
+    background: #eef8ed;
+}
+
+.badge {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    display: grid;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    padding: 0 0.2rem;
+    place-items: center;
+    border-radius: 999px;
+    background: #b42318;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 800;
+}
+
+.panel {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    z-index: 300;
+    width: min(22rem, calc(100vw - 2rem));
+    overflow: hidden;
+    border: 1px solid #dce5df;
+    background: white;
+    box-shadow: 0 12px 30px rgb(0 0 0 / 15%);
+}
+
+.panelHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    border-bottom: 1px solid #e5ebe6;
+    color: #163226;
+}
+
+.panelHeader span {
+    color: #68756e;
+    font-size: 0.75rem;
+}
+
+.item {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1rem;
+    border-bottom: 1px solid #eef2ef;
+    color: #163226;
+    text-decoration: none;
+}
+
+.item:hover {
+    background: #f5faf6;
+}
+
+.item span,
+.item small {
+    color: #68756e;
+    font-size: 0.78rem;
+    line-height: 1.4;
+}
+
+.item small {
+    font-size: 0.7rem;
+}
+
+.unread {
+    border-left: 3px solid var(--seb-green-dark-2);
+    background: #f5faf6;
+}
+
+.empty {
+    padding: 1rem;
+    margin: 0;
+    color: #68756e;
+    font-size: 0.85rem;
+}
