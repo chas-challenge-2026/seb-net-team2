@@ -48,7 +48,10 @@ export type CreatePaymentRequest = {
     reference: string
 }
 
-export async function createPayment(payment: CreatePaymentRequest): Promise<CreatedPayment> {
+export async function createPayment(
+    payment: CreatePaymentRequest,
+    idempotencyKey: string,
+): Promise<CreatedPayment> {
     const apiUrl = import.meta.env.VITE_API_URL
 
     if (!apiUrl) {
@@ -62,7 +65,7 @@ export async function createPayment(payment: CreatePaymentRequest): Promise<Crea
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Idempotency-Key': crypto.randomUUID(),
+                'X-Idempotency-Key': idempotencyKey,
             },
             body: JSON.stringify(payment),
         },
