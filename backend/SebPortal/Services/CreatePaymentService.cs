@@ -93,5 +93,10 @@ namespace SebPortal.Api.Services
             var payment = await _paymentRepository.GetPaymentByIdAsync(paymentId);
             return payment;
         }
+
+        public Task<IEnumerable<Payment>> GetPaymentsByUserId(int userId)
+        {
+            return _paymentRepository.GetPaymentsByUserIdAsync(userId);
+        }
     }
 }

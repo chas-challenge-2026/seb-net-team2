@@ -7,5 +7,6 @@ namespace SebPortal.Api.Services
     {
         Task<Payment> CreatePaymentAsync(CreatePaymentDTO createPaymentDTO, int userId);
         Task<Payment?> GetPaymentById(int paymentId);
+        Task<IEnumerable<Payment>> GetPaymentsByUserId(int userId);
     }
 }
