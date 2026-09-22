@@ -30,7 +30,7 @@ public class ApprovalLimitsController: ControllerBase
         return Ok(response);
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPost]
     public async Task<ActionResult<ApprovalLimitResponseDTO>> CreateApprovalLimit([FromBody] CreateApprovalLimitDTO dto)
     {

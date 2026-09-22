@@ -1,8 +1,8 @@
-﻿using SebPortal.Data;
-using SebPortal.Models;
-using SebPortal.Api.Dtos;
+﻿using Microsoft.EntityFrameworkCore;
 using SebPortal.Api.Authorization;
-using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Dtos;
+using SebPortal.Data;
+using SebPortal.Models;
 
 namespace SebPortal.Api.Repositories
 {
