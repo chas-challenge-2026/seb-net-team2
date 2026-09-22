@@ -17,6 +17,8 @@ namespace SebPortal.Data
         public DbSet<AuditEntries> AuditEntries => Set<AuditEntries>();
         public DbSet<ApprovalLimit> ApprovalLimits => Set<ApprovalLimit>();
         public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
+        public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
+        
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -188,6 +190,21 @@ namespace SebPortal.Data
                     .WithMany()
                     .HasForeignKey(x => x.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<NotificationLog>(e =>
+            {
+                e.ToTable("notificationLogs");
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.RecipientEmail).HasColumnName("recipientEmail");
+                e.Property(x => x.Subject).HasColumnName("subject");
+                e.Property(x => x.Message).HasColumnName("message");
+                e.Property(x => x.ErrorMessage).HasColumnName("errorMessage");
+                e.Property(x => x.AttemptNumber).HasColumnName("attemptNumber");
+                e.Property(x => x.TimeStamp).HasColumnName("timeStamp");
+
+                e.HasOne(x => x.Tenant)
+                 .WithMany()
+                 .HasForeignKey(x => x.TenantId);
             });
         }
     }

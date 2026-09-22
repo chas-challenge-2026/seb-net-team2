@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Moq;
+using SebPortal.Api.Authorization;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
@@ -42,7 +43,7 @@ public class CreatePaymentServiceIntegrationTests
                 Name = "Test User",
                 Email = "test@example.com",
                 PasswordHash = "testhash",
-                Role = "user"
+                Role = UserRoles.User
             };
 
             var account = new Account
@@ -73,9 +74,10 @@ public class CreatePaymentServiceIntegrationTests
                 .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
                 .ReturnsAsync(new List<ApprovalLimit>());
             var mockUserRepository = new Mock<IUserRepository>();
+            var mockNotificationService = new Mock<INotificationService>();
             var approvalEngineService = new ApprovalEngineService(mockLimitRepository.Object, mockUserRepository.Object, context);
 
-            var service = new CreatePaymentService(userRepository, paymentRepository, approvalEngineService, context);
+            var service = new CreatePaymentService(userRepository, paymentRepository, approvalEngineService, mockNotificationService.Object, context);
 
             var dto = new CreatePaymentDTO
             {
