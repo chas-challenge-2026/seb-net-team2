@@ -36,6 +36,16 @@ namespace SebPortal.Api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int attestantId)
+        {
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .Where(s => s.AttestantId == attestantId && s.Status == "pending")
+                .OrderBy(s => s.Payment.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<bool> UpdateApprovalStepAsync(ApprovalStep approvalStep)
         {
             // Use ExecuteUpdateAsync to update the approval step directly in the database

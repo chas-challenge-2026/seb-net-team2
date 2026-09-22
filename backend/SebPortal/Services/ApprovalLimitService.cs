@@ -10,10 +10,12 @@ namespace SebPortal.Api.Services
     public class ApprovalLimitService : IApprovalLimitService
     {
         private readonly IApprovalLimitRepository _repository;
+        private readonly IAuditRepository _auditRepository;
 
-        public ApprovalLimitService(IApprovalLimitRepository repository)
+        public ApprovalLimitService(IApprovalLimitRepository repository, IAuditRepository auditRepository)
         {
             _repository = repository;
+            _auditRepository = auditRepository;
         }
 
 
@@ -52,7 +54,7 @@ namespace SebPortal.Api.Services
         }
 
 
-        public async Task<ApprovalLimitResponseDTO> CreateApprovalLimitAsync(int tenantId, string modifiedBy, CreateApprovalLimitDTO dto)
+        public async Task<ApprovalLimitResponseDTO> CreateApprovalLimitAsync(int tenantId, int userId, string modifiedBy, CreateApprovalLimitDTO dto)
         {
             var existingLimits = await _repository.GetOrderedLimitsAsync(tenantId);
 
@@ -70,6 +72,16 @@ namespace SebPortal.Api.Services
                 LastModifiedBy = modifiedBy
             };
             await _repository.CreateApprovalLimitAsync(limit);
+
+            await _auditRepository.AddEntryAsync(new AuditEntries
+            {
+                UserId = userId,
+                Action = "CREATE_APPROVAL_LIMIT",
+                EntityType = "approvalLimit",
+                EntityId = limit.Id,
+                Description = $"Attestbeloppgräns skapad för belopp {limit.MinAmount} ({limit.RequiredApprovals} attestanter krävs)."
+            });
+
             return new ApprovalLimitResponseDTO
             {
                 Id = limit.Id,
@@ -82,7 +94,7 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<ApprovalLimitResponseDTO> UpdateApprovalLimitAsync(int id, int tenantId, string modifiedBy,UpdateApprovalLimitDTO dto)
+        public async Task<ApprovalLimitResponseDTO> UpdateApprovalLimitAsync(int tenantId, int id, int userId, string modifiedBy, UpdateApprovalLimitDTO dto)
         {
             var existingLimit = await _repository.GetByIdAsync(id, tenantId);
 
@@ -97,7 +109,7 @@ namespace SebPortal.Api.Services
             decimal targetMinAmount = dto.MinAmount ?? existingLimit.MinAmount;
             int targetRequiredApprovals = dto.RequiredApprovals ?? existingLimit.RequiredApprovals;
 
-            // Validate with id 
+            // Validate with id
             ValidateLimitsOrder(existingLimits, targetMinAmount, targetRequiredApprovals, id);
 
             if (dto.MinAmount != null)
@@ -120,6 +132,16 @@ namespace SebPortal.Api.Services
 
 
             await _repository.UpdateApprovalLimitAsync(existingLimit);
+
+            await _auditRepository.AddEntryAsync(new AuditEntries
+            {
+                UserId = userId,
+                Action = "UPDATE_APPROVAL_LIMIT",
+                EntityType = "approvalLimit",
+                EntityId = existingLimit.Id,
+                Description = $"Attestbeloppgräns {existingLimit.Id} uppdaterad till belopp {existingLimit.MinAmount} ({existingLimit.RequiredApprovals} attestanter krävs)."
+            });
+
             return new ApprovalLimitResponseDTO
             {
                 Id = existingLimit.Id,
@@ -132,7 +154,7 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<bool> DeleteApprovalLimitAsync(int id, int tenantId)
+        public async Task<bool> DeleteApprovalLimitAsync(int tenantId, int id, int userId)
         {
             var limit = await _repository.GetByIdAsync(id, tenantId);
             if (limit == null)
@@ -140,6 +162,16 @@ namespace SebPortal.Api.Services
                 throw new Exception($"Attestbeloppgräns med id: {id} hittades inte");
             }
             await _repository.DeleteApprovalLimitAsync(limit);
+
+            await _auditRepository.AddEntryAsync(new AuditEntries
+            {
+                UserId = userId,
+                Action = "DELETE_APPROVAL_LIMIT",
+                EntityType = "approvalLimit",
+                EntityId = limit.Id,
+                Description = $"Attestbeloppgräns {limit.Id} (belopp {limit.MinAmount}) togs bort."
+            });
+
             return true;
         }
 
