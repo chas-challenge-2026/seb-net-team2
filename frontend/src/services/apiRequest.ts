@@ -2,7 +2,15 @@ import { z } from "zod";
 
 import { AppError } from "../errors/AppError";
 import { createAppError } from "../errors/createAppError";
-import { getAuthToken } from "../utils/authStorage";
+
+import {
+    getAuthToken,
+    removeAuthToken,
+} from "../utils/authStorage";
+
+import {
+    notifySessionExpired,
+} from "../utils/authEvents";
 
 export async function apiRequest<T extends z.ZodType>(
     url: string,
@@ -34,7 +42,19 @@ export async function apiRequest<T extends z.ZodType>(
     }
 
     if (!response.ok) {
+        if (
+            response.status === 401 &&
+            token
+        ) {
+            removeAuthToken();
+            notifySessionExpired();
+        }
+
         throw await createAppError(response);
+    }
+
+    if (response.status === 204) {
+        return schema.parse(undefined);
     }
 
     const data: unknown = await response.json();

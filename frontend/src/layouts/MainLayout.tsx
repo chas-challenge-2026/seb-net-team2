@@ -1,16 +1,35 @@
 import { Outlet } from '@tanstack/react-router'
+import { useState } from 'react'
+
 import { NavigationBar } from '../components/Navbar'
 import { Sidebar } from '../components/Sidebar'
+
 import styles from '../components/Sidebar.module.css'
 
 export function MainLayout() {
-    return(
+    const [collapsed, setCollapsed] = useState(false)
+
+    function handleToggleCollapsed() {
+        setCollapsed((current) => !current)
+    }
+
+    return (
         <>
-        <NavigationBar />
-        <Sidebar />
-        <main className={styles.content}>
-            <Outlet />
-        </main>
+            <NavigationBar />
+
+            <Sidebar
+                collapsed={collapsed}
+                onToggleCollapsed={handleToggleCollapsed}
+            />
+
+            <main
+                className={`${styles.content} ${collapsed
+                    ? styles.contentCollapsed
+                    : ''
+                    }`}
+            >
+                <Outlet />
+            </main>
         </>
     )
 }

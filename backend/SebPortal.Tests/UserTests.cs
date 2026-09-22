@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
+using SebPortal.Data;
 using SebPortal.Models;
 
 
@@ -11,19 +14,22 @@ namespace SebPortal.Tests
     public class UserTests
     {
         private readonly Mock<IUserRepository> _userRepositoryMock;
-        private readonly Mock<IConfiguration> _configurationMock;
+        private readonly Mock<ITokenService> _tokenServiceMock;
+        private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock;
         private readonly UserService _userService;
 
         public UserTests()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            _configurationMock = new Mock<IConfiguration>();
+            _tokenServiceMock = new Mock<ITokenService>();
 
-            _configurationMock.Setup(c => c["Jwt:Secret"]).Returns("my_super_secret_key_which_is_long_enough_12345");
-            _configurationMock.Setup(c => c["Jwt:Issuer"]).Returns("TestIssuer");
-            _configurationMock.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
+            _tokenServiceMock.Setup(x => x.GenerateAccessToken(It.IsAny<User>())).Returns("my_super_secret_key_which_is_long_enough_12345");
 
-            _userService = new UserService(_userRepositoryMock.Object, _configurationMock.Object);
+            _refreshTokenServiceMock = new Mock<IRefreshTokenService>();
+
+            _refreshTokenServiceMock.Setup(x => x.CreateRefreshTokenAsync(It.IsAny<int>())).ReturnsAsync("fake_refresh_token");
+            
+            _userService = new UserService(_userRepositoryMock.Object, _tokenServiceMock.Object, _refreshTokenServiceMock.Object);
 
         }
 
@@ -120,8 +126,219 @@ namespace SebPortal.Tests
             Assert.Equal(existingUser.Email, result.Email);
             Assert.Equal(existingUser.Role, result.Role);
             Assert.NotNull(result.Token);
+            Assert.Equal("my_super_secret_key_which_is_long_enough_12345", result.Token);
+            Assert.Equal("fake_refresh_token", result.RefreshToken);
         }
+        [Fact]
+        public async Task RefreshAsync_ValidToken_RotatesToken()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
 
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
+
+            await using var context = new SebDbContext(options);
+
+            await context.Database.EnsureCreatedAsync();
+            var tenant = new Tenant
+            {
+                Id = 1,
+                Name = "Test Tenant"
+            };
+
+            context.Tenants.Add(tenant);
+
+            var user = new User
+            {
+                Id = 1,
+                Name = "Test User",
+                Email = "test@test.se",
+                PasswordHash = "hash",
+                Role = "User", //Change to new User roles
+                TenantId = 1
+            };
+
+            context.Users.Add(user);
+
+            var tokenServiceMock = new Mock<ITokenService>();
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("old_refresh_token"))
+                .Returns("OLD_HASH");
+
+            tokenServiceMock
+                .Setup(x => x.GenerateRefreshToken())
+                .Returns("new_refresh_token");
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("new_refresh_token"))
+                .Returns("NEW_HASH");
+
+            tokenServiceMock
+                .Setup(x => x.GenerateAccessToken(It.IsAny<User>()))
+                .Returns("new_access_token");
+
+            context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = 1,
+                TokenHash = "OLD_HASH",
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new RefreshTokenService(
+                context,
+                tokenServiceMock.Object);
+
+            var result =
+                await service.RefreshAsync("old_refresh_token");
+
+            Assert.NotNull(result);
+
+            Assert.Equal("new_access_token",result.Token);
+
+            Assert.Equal("new_refresh_token",result.RefreshToken);
+            // Old token should now be revoked and replaced
+            var oldToken = await context.RefreshTokens
+                .AsNoTracking()
+                .FirstAsync(x => x.TokenHash == "OLD_HASH");
+
+            Assert.NotNull(oldToken.RevokedAt);
+            Assert.NotNull(oldToken.ReplacedByTokenId);
+
+            // A new refresh token should exist
+            var newToken = await context.RefreshTokens
+                .AsNoTracking()
+                .FirstAsync(x => x.TokenHash == "NEW_HASH");
+
+            Assert.Null(newToken.RevokedAt);
+
+            // Old refresh token cannot be reused
+            var reusedResult =
+                await service.RefreshAsync("old_refresh_token");
+
+            Assert.Null(reusedResult);
+        }
+        [Fact]
+        public async Task RefreshAsync_RevokedToken_ReturnsNull()
+        {
+            await using var connection =
+                new SqliteConnection("Data Source=:memory:");
+
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<SebDbContext>()
+                .UseSqlite(connection)
+                .Options;
+
+            await using var context = new SebDbContext(options);
+
+            await context.Database.EnsureCreatedAsync();
+
+            context.Tenants.Add(new Tenant
+            {
+                Id = 1,
+                Name = "Test Tenant"
+            });
+
+            context.Users.Add(new User
+            {
+                Id = 1,
+                Name = "Test User",
+                Email = "test@test.se",
+                PasswordHash = "hash",
+                Role = "User", //Change to new User roles
+                TenantId = 1
+            });
+
+            context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = 1,
+                TokenHash = "REVOKED_HASH",
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                RevokedAt = DateTime.UtcNow.AddMinutes(-1)
+            });
+
+            await context.SaveChangesAsync();
+
+            var tokenServiceMock = new Mock<ITokenService>();
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("revoked_refresh_token"))
+                .Returns("REVOKED_HASH");
+
+            var service = new RefreshTokenService(
+                context,
+                tokenServiceMock.Object);
+
+            var result =
+                await service.RefreshAsync("revoked_refresh_token");
+
+            Assert.Null(result);
+        }
+        [Fact]
+        public async Task RefreshAsync_ExpiredToken_ReturnsNull()
+        {
+            await using var connection =
+                new SqliteConnection("Data Source=:memory:");
+
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<SebDbContext>()
+                .UseSqlite(connection)
+                .Options;
+
+            await using var context = new SebDbContext(options);
+
+            await context.Database.EnsureCreatedAsync();
+
+            var tenant = new Tenant
+            {
+                Id = 1,
+                Name = "Test Tenant"
+            };
+
+            var user = new User
+            {
+                Id = 1,
+                Name = "Test User",
+                Email = "test@test.se",
+                PasswordHash = "hash",
+                Role = "User",
+                TenantId = 1
+            };
+
+            context.Tenants.Add(tenant);
+            context.Users.Add(user);
+
+            context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = 1,
+                TokenHash = "EXPIRED_HASH",
+                CreatedAt = DateTime.UtcNow.AddDays(-8),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(-1)
+            });
+
+            await context.SaveChangesAsync();
+
+            var tokenServiceMock = new Mock<ITokenService>();
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("expired_refresh_token"))
+                .Returns("EXPIRED_HASH");
+
+            var service = new RefreshTokenService(
+                context,
+                tokenServiceMock.Object);
+
+            var result = await service.RefreshAsync("expired_refresh_token");
+
+            Assert.Null(result);
+        }
         [Fact]
         public async Task LoginAsync_ShouldThrowException_WhenCredentialsNotValid()
         {

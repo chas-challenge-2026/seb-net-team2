@@ -1,0 +1,163 @@
+.layout {
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding: 48px var(--spacing-lg);
+    box-sizing: border-box;
+}
+
+.form {
+    width: min(760px, 100%);
+
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 20px 24px;
+
+    padding: 32px;
+    box-sizing: border-box;
+
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.heading {
+    grid-column: 1 / -1;
+
+    margin: 0 0 8px;
+
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+
+    color: var(--color-text);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.label {
+    font-size: var(--font-size-md);
+    font-weight: 500;
+
+    color: var(--color-text);
+}
+
+.input,
+.select {
+    width: 100%;
+    height: 42px;
+
+    padding: 0 12px;
+    box-sizing: border-box;
+
+    font: inherit;
+    color: var(--color-text);
+
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+
+    outline: none;
+
+    transition:
+        border-color 150ms ease,
+        box-shadow 150ms ease;
+}
+
+.input:hover,
+.select:hover {
+    border-color: var(--color-text-soft);
+}
+
+.input:focus,
+.select:focus {
+    border-color: var(--seb-green-dark-1);
+
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 2px;
+}
+
+.select {
+    cursor: pointer;
+}
+
+.actionGrid {
+    grid-column: 1 / -1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-top: 8px;
+}
+
+.formButton {
+    min-width: 150px;
+}
+
+.formButton:hover {
+    background-color: var(--color-hover-light);
+}
+
+.formButton:focus-visible {
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 2px;
+}
+
+.success,
+.error {
+    width: 100%;
+
+    margin: 0;
+
+    padding: 10px 12px;
+    box-sizing: border-box;
+
+    font-size: var(--font-size-md);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.success {
+    color: var(--seb-green-dark-2);
+}
+
+.error {
+    color: var(--color-error);
+}
+
+@media (max-width: 700px) {
+    .layout {
+        padding: var(--spacing-lg);
+    }
+
+    .form {
+        grid-template-columns: 1fr;
+
+        padding: var(--spacing-lg);
+    }
+
+    .heading,
+    .actionGrid {
+        grid-column: 1;
+    }
+
+    .formButton {
+        width: 100%;
+    }
+}

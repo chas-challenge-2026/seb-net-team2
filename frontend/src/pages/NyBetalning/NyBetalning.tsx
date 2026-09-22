@@ -29,6 +29,7 @@ export function NyBetalning() {
     const [ isSubmitting, setIsSubmitting] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isReviewOpen, setIsReviewOpen] = useState(false)
+    const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null)
 
     const selectedAccount = accounts.find(account => account.id === form.fromAccountId,)
 
@@ -45,12 +46,14 @@ export function NyBetalning() {
         }))
         setSubmitted(false)
         setError(null)
+        setIdempotencyKey(null)
     }
 
     function clearForm() {
         setForm(initialForm)
         setSubmitted(false)
         setError(null)
+        setIdempotencyKey(null)
     }
     
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -87,6 +90,12 @@ export function NyBetalning() {
         }
 
         const validatedForm = validation.data
+        const paymentIdempotencyKey = idempotencyKey ?? crypto.randomUUID()
+
+        if (!idempotencyKey) {
+            setIdempotencyKey(paymentIdempotencyKey)
+        }
+
         setIsReviewOpen(false)
         setIsSubmitting(true)
 
@@ -97,10 +106,11 @@ export function NyBetalning() {
                 amount: Number(validatedForm.amount),
                 currency: 'SEK',
                 reference: validatedForm.reference,
-            })
+            }, paymentIdempotencyKey)
 
             setSubmitted(true)
             setForm(initialForm)
+            setIdempotencyKey(null)
         } catch {
             setError('Could not create the payment. Please try again.')
         } finally {

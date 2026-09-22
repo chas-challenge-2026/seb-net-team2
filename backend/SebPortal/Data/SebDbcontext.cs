@@ -17,7 +17,7 @@ namespace SebPortal.Data
         public DbSet<AuditEntries> AuditEntries => Set<AuditEntries>();
         public DbSet<ApprovalLimit> ApprovalLimits => Set<ApprovalLimit>();
         public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
-
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // seed.sql använder snake_case kolumn-/tabellnamn — utan den här mappningen
@@ -153,6 +153,41 @@ namespace SebPortal.Data
 
                 e.HasIndex(x => x.Key)
                     .IsUnique();
+            });
+            modelBuilder.Entity<RefreshToken>(e =>
+            {
+                e.ToTable("refresh_tokens");
+
+                e.Property(x => x.Id)
+                    .HasColumnName("id");
+
+                e.Property(x => x.UserId)
+                    .HasColumnName("user_id");
+
+                e.Property(x => x.TokenHash)
+                    .HasColumnName("token_hash")
+                    .HasMaxLength(64)
+                    .IsRequired();
+
+                e.Property(x => x.CreatedAt)
+                    .HasColumnName("created_at");
+
+                e.Property(x => x.ExpiresAt)
+                    .HasColumnName("expires_at");
+
+                e.Property(x => x.RevokedAt)
+                    .HasColumnName("revoked_at");
+
+                e.Property(x => x.ReplacedByTokenId)
+                    .HasColumnName("replaced_by_token_id");
+
+                e.HasIndex(x => x.TokenHash)
+                    .IsUnique();
+
+                e.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

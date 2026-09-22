@@ -12,6 +12,11 @@
     align-items: center;
 }
 
+.navbar__brandLink {
+    display: flex;
+    align-items: center;
+}
+
 .navbar__logo {
     display: block;
     width: 4.25rem;
@@ -26,6 +31,12 @@
     list-style: none;
     margin: 0;
     padding: 0;
+}
+
+.navbar__user {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
 }
 
 .navbar__link {

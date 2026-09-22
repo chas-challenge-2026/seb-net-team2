@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import Card from '../../components/Card/Card'
 import { useAuditLog } from '../../hooks/useAuditLog'
 import styles from './Granskningslogg.module.css'
 
@@ -82,6 +83,7 @@ export function Granskningslogg() {
                 <p className={styles.intro}>Event log from the database (note: some events are only logged to a file).</p>
             </header>
 
+            <Card>
             <div className={styles.infoBanner}>
                 <strong>Note:</strong> This view only shows events stored in the database.
                 Some events (e.g. batch payments and partial approval steps) are only logged to{' '}
@@ -206,6 +208,7 @@ export function Granskningslogg() {
                     )}
                 </div>
             )}
+            </Card>
 
             <p className={styles.footnote}>
                 Showing the latest 200 entries. For the full log, also see <code>/tmp/audit.log</code> on the server.
