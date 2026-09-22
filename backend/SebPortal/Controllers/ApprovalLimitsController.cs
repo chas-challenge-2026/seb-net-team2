@@ -30,12 +30,12 @@ public class ApprovalLimitsController: ControllerBase
         return Ok(response);
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = UserRoles.Admin)]
     [HttpPost]
     public async Task<ActionResult<ApprovalLimitResponseDTO>> CreateApprovalLimit([FromBody] CreateApprovalLimitDTO dto)
     {
         var tenantId = GetUserTenantId();
-        var userEmail = User.FindFirst("email")?.Value ?? "System"; // Get from token
+        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System"; // Get from token
         var createdLimit = await _approvalLimitService.CreateApprovalLimitAsync(tenantId, userEmail, dto);
         return CreatedAtAction(nameof(GetApprovalLimits), new { id = createdLimit.Id }, createdLimit);
     }
@@ -44,7 +44,7 @@ public class ApprovalLimitsController: ControllerBase
     public async Task<ActionResult<ApprovalLimitResponseDTO>> UpdateApprovalLimit(int id, [FromBody] UpdateApprovalLimitDTO dto)
     {
         var tenantId = GetUserTenantId();
-        var userEmail = User.FindFirst("email")?.Value ?? "System"; // Get from token
+        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System"; // Get from token
         var updatedLimit = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userEmail, dto);
         return Ok(updatedLimit);
     }
