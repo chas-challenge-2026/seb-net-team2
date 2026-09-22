@@ -128,14 +128,11 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
     options.MapInboundClaims = false;
-    var validationParameters =
-    JwtTokenValidation.Create(
+    options.TokenValidationParameters = JwtTokenValidation.Create(
         jwtSecret,
         jwtIssuer,
         jwtAudience
     );
-    validationParameters.RoleClaimType = "Role";
-    options.TokenValidationParameters = validationParameters;
 });
 builder.Services.AddAuthorization();
 
