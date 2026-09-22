@@ -1,18 +1,16 @@
-import {
-    useEffect,
-    useState,
-} from "react";
-
 import { Link } from "@tanstack/react-router";
 
-import { getApprovalLimits } from "../../../services/approvalLimitsService";
+import {
+    useQuery,
+} from "@tanstack/react-query";
 
-import type { ApprovalLimit } from "../../../schemas/approvalLimitsSchema";
-
-
-import styles from "./ApprovalLimits.module.css";
+import {
+    getApprovalLimits,
+} from "../../../services/approvalLimitsService";
 
 import Skeleton from "../../../components/LoadingState/Skeleton";
+
+import styles from "./ApprovalLimits.module.css";
 
 function ApprovalLimitSkeleton() {
     return (
@@ -67,36 +65,14 @@ function ApprovalLimitSkeleton() {
 }
 
 export default function ApprovalLimits() {
-    const [limits, setLimits] =
-        useState<ApprovalLimit[]>([]);
-
-    const [error, setError] =
-        useState("");
-
-    const [isLoading, setIsLoading] =
-        useState(true);
-
-    useEffect(() => {
-        async function loadApprovalLimits() {
-            try {
-                setError("");
-                setIsLoading(true);
-
-                const limits =
-                    await getApprovalLimits();
-
-                setLimits(limits);
-            } catch {
-                setError(
-                    "Unable to load approval limits."
-                );
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        void loadApprovalLimits();
-    }, []);
+    const {
+        data: limits = [],
+        isPending,
+        isError,
+    } = useQuery({
+        queryKey: ["approvalLimits"],
+        queryFn: getApprovalLimits,
+    });
 
     function formatAmount(amount: number) {
         return amount.toLocaleString(
@@ -145,22 +121,29 @@ export default function ApprovalLimits() {
                             Approval rules
                         </h2>
 
-                        <p>
-                            {limits.length}{" "}
-                            {limits.length === 1
-                                ? "rule"
-                                : "rules"}
-                        </p>
+                        {!isPending &&
+                            !isError && (
+                                <p>
+                                    {limits.length}{" "}
+                                    {limits.length === 1
+                                        ? "rule"
+                                        : "rules"}
+                                </p>
+                            )}
                     </div>
                 </div>
 
-                {isLoading && (
+                {isPending && (
                     <div
-                        className={styles.skeletonList}
+                        className={
+                            styles.skeletonList
+                        }
                         role="status"
                         aria-label="Loading approval limits"
                     >
-                        {Array.from({ length: 5 }).map(
+                        {Array.from({
+                            length: 5,
+                        }).map(
                             (_, index) => (
                                 <ApprovalLimitSkeleton
                                     key={index}
@@ -170,19 +153,20 @@ export default function ApprovalLimits() {
                     </div>
                 )}
 
-                {error && (
+                {isError && (
                     <div
                         className={
                             styles.errorState
                         }
                         role="alert"
                     >
-                        {error}
+                        Unable to load approval
+                        limits.
                     </div>
                 )}
 
-                {!isLoading &&
-                    !error &&
+                {!isPending &&
+                    !isError &&
                     limits.length === 0 && (
                         <div
                             className={
@@ -201,8 +185,8 @@ export default function ApprovalLimits() {
                         </div>
                     )}
 
-                {!isLoading &&
-                    !error &&
+                {!isPending &&
+                    !isError &&
                     limits.length > 0 && (
                         <div
                             className={

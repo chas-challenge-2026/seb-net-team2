@@ -1,6 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
+
 import { Link } from "@tanstack/react-router";
+
+import {
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query";
 
 import Button from "../../../components/Button/Button";
 import PasswordInput from "../../../components/PasswordInput/PasswordInput";
@@ -16,8 +22,18 @@ import type { UserRole } from "../../../schemas/userSchema";
 
 import styles from "./CreateUser.module.css";
 
+function getErrorMessage(error: unknown) {
+    if (error instanceof AppError) {
+        return error.detail ?? error.message;
+    }
+
+    return "Unable to create user.";
+}
+
 export default function CreateUser() {
     const { user } = useAuth();
+
+    const queryClient = useQueryClient();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -26,67 +42,41 @@ export default function CreateUser() {
     const [role, setRole] =
         useState<UserRole>("User");
 
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
+    const createMutation = useMutation({
+        mutationFn: createUser,
 
-    const [isCreating, setIsCreating] =
-        useState(false);
-
-    async function handleSubmit(
-        event: FormEvent<HTMLFormElement>
-    ) {
-        event.preventDefault();
-
-        if (!user) {
-            setError(
-                "Unable to determine the current user."
-            );
-            return;
-        }
-
-        setError("");
-        setSuccess("");
-        setIsCreating(true);
-
-        try {
-            const createdUser =
-                await createUser({
-                    tenantId: user.tenantId,
-                    name: name.trim(),
-                    email: email.trim(),
-                    password,
-                    role,
-                });
-
-            setSuccess(
-                `${createdUser.name} was created successfully.`
-            );
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ["users"],
+            });
 
             setName("");
             setEmail("");
             setPassword("");
             setRole("User");
-        } catch (error) {
-            if (error instanceof AppError) {
-                setError(
-                    error.detail ??
-                    error.message
-                );
+        },
+    });
 
-                return;
-            }
+    function handleSubmit(
+        event: FormEvent<HTMLFormElement>
+    ) {
+        event.preventDefault();
 
-            setError(
-                "Unable to create user."
-            );
-        } finally {
-            setIsCreating(false);
+        if (!user) {
+            return;
         }
+
+        createMutation.mutate({
+            tenantId: user.tenantId,
+            name: name.trim(),
+            email: email.trim(),
+            password,
+            role,
+        });
     }
 
     return (
         <div className={styles.layout}>
-
             <header className={styles.pageHeader}>
                 <h1>Create user</h1>
 
@@ -130,7 +120,9 @@ export default function CreateUser() {
                                 )
                             }
                             autoComplete="name"
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             required
                         />
                     </div>
@@ -156,7 +148,9 @@ export default function CreateUser() {
                             }
                             autoComplete="email"
                             inputMode="email"
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             required
                         />
                     </div>
@@ -179,7 +173,9 @@ export default function CreateUser() {
                                 )
                             }
                             autoComplete="new-password"
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             required
                         />
                     </div>
@@ -197,7 +193,9 @@ export default function CreateUser() {
                             name="role"
                             className={styles.select}
                             value={role}
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             onChange={(event) =>
                                 setRole(
                                     event.target
@@ -223,21 +221,37 @@ export default function CreateUser() {
                         </select>
                     </div>
 
-                    {success && (
+                    {createMutation.isSuccess && (
                         <div
                             className={styles.success}
                             role="status"
                         >
-                            {success}
+                            {
+                                createMutation.data
+                                    .name
+                            }{" "}
+                            was created successfully.
                         </div>
                     )}
 
-                    {error && (
+                    {createMutation.isError && (
                         <div
                             className={styles.error}
                             role="alert"
                         >
-                            {error}
+                            {getErrorMessage(
+                                createMutation.error
+                            )}
+                        </div>
+                    )}
+
+                    {!user && (
+                        <div
+                            className={styles.error}
+                            role="alert"
+                        >
+                            Unable to determine
+                            the current user.
                         </div>
                     )}
 
@@ -258,9 +272,12 @@ export default function CreateUser() {
                             className={
                                 styles.formButton
                             }
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending ||
+                                !user
+                            }
                         >
-                            {isCreating ? (
+                            {createMutation.isPending ? (
                                 <span
                                     className={
                                         styles.loadingButton

@@ -1,47 +1,68 @@
-import styles from "./Users.module.css";
-import { useState, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
-import { getAllUsers } from "../../../services/authService";
-import type { ReadUser } from "../../../schemas/userSchema";
+import {
+    Link,
+} from "@tanstack/react-router";
+
+import {
+    useQuery,
+} from "@tanstack/react-query";
+
+import {
+    getAllUsers,
+} from "../../../services/authService";
 
 import Card from "../../../components/Card/Card";
 import Skeleton from "../../../components/LoadingState/Skeleton";
 
-export default function Users() {
-    const [users, setUsers] =
-        useState<ReadUser[]>([]);
+import styles from "./Users.module.css";
 
+function UserSkeleton() {
+    return (
+        <div className={styles.userSkeleton}>
+            <Skeleton
+                width="40px"
+                height="40px"
+                radius="50%"
+            />
+
+            <div
+                className={
+                    styles.userSkeletonInfo
+                }
+            >
+                <Skeleton
+                    width="160px"
+                    height="16px"
+                />
+
+                <Skeleton
+                    width="240px"
+                    height="13px"
+                />
+            </div>
+
+            <Skeleton
+                width="80px"
+                height="26px"
+                radius="999px"
+            />
+        </div>
+    );
+}
+
+export default function Users() {
     const [search, setSearch] =
         useState("");
 
-    const [error, setError] =
-        useState("");
-
-    const [isLoading, setIsLoading] =
-        useState(true);
-
-    useEffect(() => {
-        async function getUsers() {
-            try {
-                setError("");
-
-                const users =
-                    await getAllUsers();
-
-
-                setUsers(users);
-            } catch {
-                setError(
-                    "Unable to load users."
-                );
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        void getUsers();
-    }, []);
+    const {
+        data: users = [],
+        isPending,
+        isError,
+    } = useQuery({
+        queryKey: ["users"],
+        queryFn: getAllUsers,
+    });
 
     const filteredUsers =
         users.filter((user) => {
@@ -60,40 +81,6 @@ export default function Users() {
                     .includes(searchValue)
             );
         });
-
-    function UserSkeleton() {
-        return (
-            <div className={styles.userSkeleton}>
-                <Skeleton
-                    width="40px"
-                    height="40px"
-                    radius="50%"
-                />
-
-                <div
-                    className={
-                        styles.userSkeletonInfo
-                    }
-                >
-                    <Skeleton
-                        width="160px"
-                        height="16px"
-                    />
-
-                    <Skeleton
-                        width="240px"
-                        height="13px"
-                    />
-                </div>
-
-                <Skeleton
-                    width="80px"
-                    height="26px"
-                    radius="999px"
-                />
-            </div>
-        );
-    }
 
     return (
         <div className={styles.layout}>
@@ -129,7 +116,7 @@ export default function Users() {
                             type="search"
                             placeholder="Search by name, email or role..."
                             value={search}
-                            disabled={isLoading}
+                            disabled={isPending}
                             onChange={(event) =>
                                 setSearch(
                                     event.target.value
@@ -139,7 +126,7 @@ export default function Users() {
                         />
                     </div>
 
-                    {!isLoading && !error && (
+                    {!isPending && !isError && (
                         <span className={styles.userCount}>
                             {filteredUsers.length}{" "}
                             {filteredUsers.length === 1
@@ -149,7 +136,7 @@ export default function Users() {
                     )}
                 </div>
 
-                {isLoading && (
+                {isPending && (
                     <div
                         className={styles.skeletonList}
                         role="status"
@@ -165,28 +152,31 @@ export default function Users() {
                     </div>
                 )}
 
-                {error && (
+                {isError && (
                     <div
                         className={styles.errorState}
                         role="alert"
                     >
-                        <p>{error}</p>
+                        <p>
+                            Unable to load users.
+                        </p>
                     </div>
                 )}
 
-                {!isLoading &&
-                    !error &&
+                {!isPending &&
+                    !isError &&
                     filteredUsers.length === 0 && (
                         <div className={styles.emptyState}>
                             <h2>No users found</h2>
+
                             <p>
                                 Try another search term.
                             </p>
                         </div>
                     )}
 
-                {!isLoading &&
-                    !error &&
+                {!isPending &&
+                    !isError &&
                     filteredUsers.length > 0 && (
                         <div className={styles.userList}>
                             {filteredUsers.map(

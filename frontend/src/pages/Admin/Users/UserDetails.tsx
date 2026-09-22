@@ -1,7 +1,4 @@
-import {
-    useEffect,
-    useState,
-} from "react";
+import { useState } from "react";
 
 import {
     Link,
@@ -9,9 +6,16 @@ import {
     useParams,
 } from "@tanstack/react-router";
 
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query";
+
 import Button from "../../../components/Button/Button";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 import Modal from "../../../components/Modal/Modal";
+import Skeleton from "../../../components/LoadingState/Skeleton";
 
 import { AppError } from "../../../errors/AppError";
 
@@ -20,13 +24,7 @@ import {
     getUserById,
 } from "../../../services/authService";
 
-import type {
-    ReadUser,
-} from "../../../schemas/userSchema";
-
 import styles from "./UserDetails.module.css";
-
-import Skeleton from "../../../components/LoadingState/Skeleton";
 
 function UserDetailsSkeleton() {
     return (
@@ -64,7 +62,11 @@ function UserDetailsSkeleton() {
                         height="22px"
                     />
 
-                    <div className={styles.sectionDescriptionSkeleton}>
+                    <div
+                        className={
+                            styles.sectionDescriptionSkeleton
+                        }
+                    >
                         <Skeleton
                             width="280px"
                             height="14px"
@@ -127,94 +129,71 @@ function UserDetailsSkeleton() {
     );
 }
 
+function getErrorMessage(
+    error: unknown,
+    fallback: string
+) {
+    if (error instanceof AppError) {
+        return error.detail ?? error.message;
+    }
+
+    return fallback;
+}
+
 export default function UserDetails() {
     const { userId } = useParams({
         from: "/admin/users/$userId",
     });
 
     const navigate = useNavigate();
-
-    const [user, setUser] =
-        useState<ReadUser | null>(null);
-
-    const [error, setError] =
-        useState("");
-
-    const [isLoading, setIsLoading] =
-        useState(true);
-
-    const [isDeleting, setIsDeleting] =
-        useState(false);
+    const queryClient = useQueryClient();
 
     const [
         isDeleteModalOpen,
         setIsDeleteModalOpen,
     ] = useState(false);
 
-    useEffect(() => {
-        async function loadUser() {
-            try {
-                setError("");
-                setIsLoading(true);
+    const {
+        data: user,
+        isPending,
+        isError,
+        error: loadError,
+    } = useQuery({
+        queryKey: [
+            "user",
+            Number(userId),
+        ],
+        queryFn: () =>
+            getUserById(Number(userId)),
+    });
 
-                const fetchedUser =
-                    await getUserById(
-                        Number(userId)
-                    );
+    const deleteMutation = useMutation({
+        mutationFn: deleteUserById,
 
-                setUser(fetchedUser);
-            } catch (error) {
-                if (error instanceof AppError) {
-                    setError(
-                        error.detail ??
-                        error.message
-                    );
-                } else {
-                    setError(
-                        "Unable to load user."
-                    );
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        void loadUser();
-    }, [userId]);
-
-    async function handleDeleteUser() {
-        if (!user) {
-            return;
-        }
-
-        setError("");
-        setIsDeleting(true);
-
-        try {
-            await deleteUserById(user.id);
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ["users"],
+            });
 
             await navigate({
                 to: "/admin/users",
             });
-        } catch (error) {
-            if (error instanceof AppError) {
-                setError(
-                    error.detail ??
-                    error.message
-                );
-            } else {
-                setError(
-                    "Unable to delete user."
-                );
-            }
+        },
 
+        onError: () => {
             setIsDeleteModalOpen(false);
-        } finally {
-            setIsDeleting(false);
+        },
+    });
+
+    function handleDeleteUser() {
+        if (!user) {
+            return;
         }
+
+        deleteMutation.mutate(user.id);
     }
 
-    if (isLoading) {
+    if (isPending) {
         return (
             <div
                 role="status"
@@ -225,27 +204,21 @@ export default function UserDetails() {
         );
     }
 
-    if (!user) {
+    if (isError || !user) {
         return (
             <div className={styles.errorState}>
                 <p role="alert">
-                    {error || "User could not be found."}
+                    {getErrorMessage(
+                        loadError,
+                        "User could not be found."
+                    )}
                 </p>
-
-                <Link
-                    to="/admin/users"
-                    className={styles.backLink}
-                >
-                    ← Back to users
-                </Link>
             </div>
         );
     }
 
     return (
         <div className={styles.layout}>
-
-
             <header className={styles.pageHeader}>
                 <div>
                     <h1>{user.name}</h1>
@@ -270,7 +243,9 @@ export default function UserDetails() {
                     <Button
                         size="medium"
                         variant="danger"
-                        disabled={isDeleting}
+                        disabled={
+                            deleteMutation.isPending
+                        }
                         onClick={() =>
                             setIsDeleteModalOpen(true)
                         }
@@ -280,12 +255,15 @@ export default function UserDetails() {
                 </div>
             </header>
 
-            {error && (
+            {deleteMutation.isError && (
                 <div
                     className={styles.error}
                     role="alert"
                 >
-                    {error}
+                    {getErrorMessage(
+                        deleteMutation.error,
+                        "Unable to delete user."
+                    )}
                 </div>
             )}
 
@@ -312,6 +290,7 @@ export default function UserDetails() {
 
                     <div className={styles.detailItem}>
                         <dt>Role</dt>
+
                         <dd>
                             <span
                                 className={
@@ -334,7 +313,9 @@ export default function UserDetails() {
                 isOpen={isDeleteModalOpen}
                 title="Delete user"
                 onClose={() => {
-                    if (!isDeleting) {
+                    if (
+                        !deleteMutation.isPending
+                    ) {
                         setIsDeleteModalOpen(false);
                     }
                 }}
@@ -343,9 +324,13 @@ export default function UserDetails() {
                         <Button
                             size="medium"
                             variant="square"
-                            disabled={isDeleting}
+                            disabled={
+                                deleteMutation.isPending
+                            }
                             onClick={() =>
-                                setIsDeleteModalOpen(false)
+                                setIsDeleteModalOpen(
+                                    false
+                                )
                             }
                         >
                             Cancel
@@ -354,10 +339,14 @@ export default function UserDetails() {
                         <Button
                             size="medium"
                             variant="danger"
-                            disabled={isDeleting}
-                            onClick={handleDeleteUser}
+                            disabled={
+                                deleteMutation.isPending
+                            }
+                            onClick={
+                                handleDeleteUser
+                            }
                         >
-                            {isDeleting ? (
+                            {deleteMutation.isPending ? (
                                 <span
                                     className={
                                         styles.deletingContent

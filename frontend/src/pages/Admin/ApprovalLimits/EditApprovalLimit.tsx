@@ -1,5 +1,4 @@
 import {
-    useEffect,
     useState,
     type FormEvent,
 } from "react";
@@ -10,116 +9,153 @@ import {
     useParams,
 } from "@tanstack/react-router";
 
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query";
+
 import Button from "../../../components/Button/Button";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 import Modal from "../../../components/Modal/Modal";
 
+import {
+    deleteApprovalLimit,
+    getApprovalLimits,
+    updateApprovalLimit,
+} from "../../../services/approvalLimitsService";
 
-import { deleteApprovalLimit, getApprovalLimits, updateApprovalLimit } from "../../../services/approvalLimitsService";
+import {
+    updateApprovalLimitSchema,
+} from "../../../schemas/approvalLimitsSchema";
 
-import { updateApprovalLimitSchema } from "../../../schemas/approvalLimitsSchema";
+import type {
+    ApprovalLimit,
+    UpdateApprovalLimit,
+} from "../../../schemas/approvalLimitsSchema";
 
 import { AppError } from "../../../errors/AppError";
 
 import styles from "./EditApprovalLimit.module.css";
 
-export default function EditApprovalLimit() {
-    const { limitId } = useParams({
-        from: "/admin/approval-limits/$limitId/edit",
-    });
+function getErrorMessage(
+    error: unknown,
+    fallback: string
+) {
+    if (error instanceof AppError) {
+        return error.detail ?? error.message;
+    }
 
+    return fallback;
+}
+
+type EditApprovalLimitFormProps = {
+    limit: ApprovalLimit;
+};
+
+function EditApprovalLimitForm({
+    limit,
+}: EditApprovalLimitFormProps) {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     const [minAmount, setMinAmount] =
-        useState("");
+        useState(
+            limit.minAmount.toString()
+        );
 
     const [
         requiredApprovals,
         setRequiredApprovals,
-    ] = useState("");
+    ] = useState(
+        limit.requiredApprovals.toString()
+    );
 
     const [description, setDescription] =
-        useState("");
+        useState(limit.description);
 
-    const [error, setError] =
-        useState("");
-
-    const [success, setSuccess] =
-        useState("");
-
-    const [isLoading, setIsLoading] =
-        useState(true);
-
-    const [isUpdating, setIsUpdating] =
-        useState(false);
-
-    const [isDeleting, setIsDeleting] =
-        useState(false);
+    const [
+        validationError,
+        setValidationError,
+    ] = useState("");
 
     const [
         isDeleteModalOpen,
         setIsDeleteModalOpen,
     ] = useState(false);
 
-    useEffect(() => {
-        async function loadApprovalLimit() {
-            try {
-                setError("");
-                setIsLoading(true);
+    const updateMutation = useMutation({
+        mutationFn: (
+            data: UpdateApprovalLimit
+        ) =>
+            updateApprovalLimit(
+                limit.id,
+                data
+            ),
 
-                const limits =
-                    await getApprovalLimits();
+        onSuccess: (updatedLimit) => {
+            setMinAmount(
+                updatedLimit.minAmount.toString()
+            );
 
-                const limit = limits.find(
-                    (limit) =>
-                        limit.id === Number(limitId)
-                );
+            setRequiredApprovals(
+                updatedLimit.requiredApprovals.toString()
+            );
 
-                if (!limit) {
-                    setError(
-                        "Approval limit could not be found."
-                    );
+            setDescription(
+                updatedLimit.description
+            );
 
-                    return;
-                }
+            queryClient.setQueryData<
+                ApprovalLimit[]
+            >(
+                ["approvalLimits"],
+                (currentLimits) =>
+                    currentLimits?.map(
+                        (currentLimit) =>
+                            currentLimit.id ===
+                                updatedLimit.id
+                                ? updatedLimit
+                                : currentLimit
+                    )
+            );
+        },
+    });
 
-                setMinAmount(
-                    limit.minAmount.toString()
-                );
+    const deleteMutation = useMutation({
+        mutationFn: () =>
+            deleteApprovalLimit(limit.id),
 
-                setRequiredApprovals(
-                    limit.requiredApprovals.toString()
-                );
+        onSuccess: async () => {
+            queryClient.setQueryData<
+                ApprovalLimit[]
+            >(
+                ["approvalLimits"],
+                (currentLimits) =>
+                    currentLimits?.filter(
+                        (currentLimit) =>
+                            currentLimit.id !==
+                            limit.id
+                    )
+            );
 
-                setDescription(
-                    limit.description
-                );
-            } catch (error) {
-                if (error instanceof AppError) {
-                    setError(
-                        error.detail ??
-                        error.message
-                    );
-                } else {
-                    setError(
-                        "Unable to load approval limit."
-                    );
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        }
+            await navigate({
+                to: "/admin/approval-limits",
+            });
+        },
 
-        void loadApprovalLimit();
-    }, [limitId]);
+        onError: () => {
+            setIsDeleteModalOpen(false);
+        },
+    });
 
-    async function handleUpdate(
+    function handleUpdate(
         event: FormEvent<HTMLFormElement>
     ) {
         event.preventDefault();
 
-        setError("");
-        setSuccess("");
+        setValidationError("");
+        updateMutation.reset();
 
         const result =
             updateApprovalLimitSchema.safeParse({
@@ -134,98 +170,25 @@ export default function EditApprovalLimit() {
             });
 
         if (!result.success) {
-            setError(
+            setValidationError(
                 "Please enter valid approval limit values."
             );
 
             return;
         }
 
-        setIsUpdating(true);
-
-        try {
-            const updatedLimit =
-                await updateApprovalLimit(
-                    Number(limitId),
-                    result.data
-                );
-
-            setMinAmount(
-                updatedLimit.minAmount.toString()
-            );
-
-            setRequiredApprovals(
-                updatedLimit.requiredApprovals.toString()
-            );
-
-            setDescription(
-                updatedLimit.description
-            );
-
-            setSuccess(
-                "Approval limit updated successfully."
-            );
-        } catch (error) {
-            if (error instanceof AppError) {
-                setError(
-                    error.detail ??
-                    error.message
-                );
-            } else {
-                setError(
-                    "Unable to update approval limit."
-                );
-            }
-        } finally {
-            setIsUpdating(false);
-        }
-    }
-
-    async function handleDelete() {
-        setError("");
-        setIsDeleting(true);
-
-        try {
-            await deleteApprovalLimit(
-                Number(limitId)
-            );
-
-            await navigate({
-                to: "/admin/approval-limits",
-            });
-        } catch (error) {
-            if (error instanceof AppError) {
-                setError(
-                    error.detail ??
-                    error.message
-                );
-            } else {
-                setError(
-                    "Unable to delete approval limit."
-                );
-            }
-
-            setIsDeleteModalOpen(false);
-        } finally {
-            setIsDeleting(false);
-        }
-    }
-
-    if (isLoading) {
-        return (
-            <div
-                className={styles.loadingState}
-                role="status"
-                aria-live="polite"
-            >
-                <LoadingWheel size="medium" />
-
-                <p>
-                    Loading approval limit...
-                </p>
-            </div>
+        updateMutation.mutate(
+            result.data
         );
     }
+
+    function handleDelete() {
+        deleteMutation.mutate();
+    }
+
+    const isBusy =
+        updateMutation.isPending ||
+        deleteMutation.isPending;
 
     return (
         <div className={styles.layout}>
@@ -253,10 +216,7 @@ export default function EditApprovalLimit() {
                 <Button
                     size="medium"
                     variant="danger"
-                    disabled={
-                        isUpdating ||
-                        isDeleting
-                    }
+                    disabled={isBusy}
                     onClick={() =>
                         setIsDeleteModalOpen(true)
                     }
@@ -298,7 +258,7 @@ export default function EditApprovalLimit() {
                             step="0.01"
                             className={styles.input}
                             value={minAmount}
-                            disabled={isUpdating}
+                            disabled={isBusy}
                             onChange={(event) =>
                                 setMinAmount(
                                     event.target.value
@@ -333,7 +293,7 @@ export default function EditApprovalLimit() {
                             step="1"
                             className={styles.input}
                             value={requiredApprovals}
-                            disabled={isUpdating}
+                            disabled={isBusy}
                             onChange={(event) =>
                                 setRequiredApprovals(
                                     event.target.value
@@ -372,7 +332,7 @@ export default function EditApprovalLimit() {
                                 styles.textarea
                             }
                             value={description}
-                            disabled={isUpdating}
+                            disabled={isBusy}
                             onChange={(event) =>
                                 setDescription(
                                     event.target.value
@@ -382,25 +342,48 @@ export default function EditApprovalLimit() {
                         />
                     </div>
 
-                    {success && (
+                    {updateMutation.isSuccess && (
                         <div
                             className={
                                 styles.success
                             }
                             role="status"
                         >
-                            {success}
+                            Approval limit updated
+                            successfully.
                         </div>
                     )}
 
-                    {error && (
+                    {validationError && (
                         <div
-                            className={
-                                styles.error
-                            }
+                            className={styles.error}
                             role="alert"
                         >
-                            {error}
+                            {validationError}
+                        </div>
+                    )}
+
+                    {updateMutation.isError && (
+                        <div
+                            className={styles.error}
+                            role="alert"
+                        >
+                            {getErrorMessage(
+                                updateMutation.error,
+                                "Unable to update approval limit."
+                            )}
+                        </div>
+                    )}
+
+                    {deleteMutation.isError && (
+                        <div
+                            className={styles.error}
+                            role="alert"
+                        >
+                            {getErrorMessage(
+                                deleteMutation.error,
+                                "Unable to delete approval limit."
+                            )}
                         </div>
                     )}
 
@@ -418,12 +401,12 @@ export default function EditApprovalLimit() {
                             type="submit"
                             variant="square"
                             size="medium"
-                            disabled={isUpdating}
+                            disabled={isBusy}
                             className={
                                 styles.formButton
                             }
                         >
-                            {isUpdating ? (
+                            {updateMutation.isPending ? (
                                 <span
                                     className={
                                         styles.loadingButton
@@ -445,7 +428,9 @@ export default function EditApprovalLimit() {
                 isOpen={isDeleteModalOpen}
                 title="Delete approval limit"
                 onClose={() => {
-                    if (!isDeleting) {
+                    if (
+                        !deleteMutation.isPending
+                    ) {
                         setIsDeleteModalOpen(false);
                     }
                 }}
@@ -454,9 +439,13 @@ export default function EditApprovalLimit() {
                         <Button
                             size="medium"
                             variant="square"
-                            disabled={isDeleting}
+                            disabled={
+                                deleteMutation.isPending
+                            }
                             onClick={() =>
-                                setIsDeleteModalOpen(false)
+                                setIsDeleteModalOpen(
+                                    false
+                                )
                             }
                         >
                             Cancel
@@ -465,10 +454,12 @@ export default function EditApprovalLimit() {
                         <Button
                             size="medium"
                             variant="danger"
-                            disabled={isDeleting}
+                            disabled={
+                                deleteMutation.isPending
+                            }
                             onClick={handleDelete}
                         >
-                            {isDeleting ? (
+                            {deleteMutation.isPending ? (
                                 <span
                                     className={
                                         styles.loadingButton
@@ -495,5 +486,77 @@ export default function EditApprovalLimit() {
                 </p>
             </Modal>
         </div>
+    );
+}
+
+export default function EditApprovalLimit() {
+    const { limitId } = useParams({
+        from: "/admin/approval-limits/$limitId/edit",
+    });
+
+    const id = Number(limitId);
+
+    const {
+        data: limit,
+        isPending,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["approvalLimits"],
+        queryFn: getApprovalLimits,
+
+        select: (limits) =>
+            limits.find(
+                (limit) =>
+                    limit.id === id
+            ),
+    });
+
+    if (isPending) {
+        return (
+            <div
+                className={styles.loadingState}
+                role="status"
+                aria-live="polite"
+            >
+                <LoadingWheel size="medium" />
+
+                <p>
+                    Loading approval limit...
+                </p>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div
+                className={styles.error}
+                role="alert"
+            >
+                {getErrorMessage(
+                    error,
+                    "Unable to load approval limit."
+                )}
+            </div>
+        );
+    }
+
+    if (!limit) {
+        return (
+            <div
+                className={styles.error}
+                role="alert"
+            >
+                Approval limit could not be found.
+            </div>
+        );
+    }
+
+    return (
+        <EditApprovalLimitForm
+            key={limit.id}
+            limit={limit}
+        />
     );
 }

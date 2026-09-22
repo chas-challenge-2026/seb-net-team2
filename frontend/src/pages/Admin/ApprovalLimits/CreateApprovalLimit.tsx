@@ -5,6 +5,11 @@ import {
 
 import { Link } from "@tanstack/react-router";
 
+import {
+    useMutation,
+    useQueryClient,
+} from "@tanstack/react-query";
+
 import Button from "../../../components/Button/Button";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 
@@ -16,7 +21,17 @@ import { AppError } from "../../../errors/AppError";
 
 import styles from "./CreateApprovalLimit.module.css";
 
+function getErrorMessage(error: unknown) {
+    if (error instanceof AppError) {
+        return error.detail ?? error.message;
+    }
+
+    return "Unable to create approval limit.";
+}
+
 export default function CreateApprovalLimit() {
+    const queryClient = useQueryClient();
+
     const [minAmount, setMinAmount] =
         useState("");
 
@@ -28,76 +43,59 @@ export default function CreateApprovalLimit() {
     const [description, setDescription] =
         useState("");
 
-    const [error, setError] =
-        useState("");
+    const [
+        validationError,
+        setValidationError,
+    ] = useState("");
 
-    const [success, setSuccess] =
-        useState("");
+    const createMutation = useMutation({
+        mutationFn: createApprovalLimit,
 
-    const [isCreating, setIsCreating] =
-        useState(false);
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ["approvalLimits"],
+            });
 
-    async function handleSubmit(
+            setMinAmount("");
+            setRequiredApprovals("");
+            setDescription("");
+        },
+    });
+
+    function handleSubmit(
         event: FormEvent<HTMLFormElement>
     ) {
         event.preventDefault();
 
-        setError("");
-        setSuccess("");
+        setValidationError("");
+        createMutation.reset();
 
         const result =
             createApprovalLimitSchema.safeParse({
                 minAmount: Number(minAmount),
+
                 requiredApprovals:
                     Number(requiredApprovals),
+
                 description:
                     description.trim(),
             });
 
         if (!result.success) {
-            setError(
+            setValidationError(
                 "Please enter valid approval limit values."
             );
+
             return;
         }
 
-        setIsCreating(true);
-
-        try {
-            const createdLimit =
-                await createApprovalLimit(
-                    result.data
-                );
-
-            setSuccess(
-                `Approval limit "${createdLimit.description}" was created successfully.`
-            );
-
-            setMinAmount("");
-            setRequiredApprovals("");
-            setDescription("");
-        } catch (error) {
-            if (error instanceof AppError) {
-                setError(
-                    error.detail ??
-                    error.message
-                );
-
-                return;
-            }
-
-            setError(
-                "Unable to create approval limit."
-            );
-        } finally {
-            setIsCreating(false);
-        }
+        createMutation.mutate(
+            result.data
+        );
     }
 
     return (
         <div className={styles.layout}>
-
-
             <header className={styles.pageHeader}>
                 <h1>
                     Create approval limit
@@ -142,7 +140,9 @@ export default function CreateApprovalLimit() {
                             step="0.01"
                             className={styles.input}
                             value={minAmount}
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             onChange={(event) =>
                                 setMinAmount(
                                     event.target.value
@@ -179,7 +179,9 @@ export default function CreateApprovalLimit() {
                             step="1"
                             className={styles.input}
                             value={requiredApprovals}
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             onChange={(event) =>
                                 setRequiredApprovals(
                                     event.target.value
@@ -218,7 +220,9 @@ export default function CreateApprovalLimit() {
                                 styles.textarea
                             }
                             value={description}
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             onChange={(event) =>
                                 setDescription(
                                     event.target.value
@@ -230,25 +234,40 @@ export default function CreateApprovalLimit() {
                         />
                     </div>
 
-                    {success && (
+                    {createMutation.isSuccess && (
                         <div
                             className={
                                 styles.success
                             }
                             role="status"
                         >
-                            {success}
+                            Approval limit "
+                            {
+                                createMutation.data
+                                    .description
+                            }
+                            " was created
+                            successfully.
                         </div>
                     )}
 
-                    {error && (
+                    {validationError && (
                         <div
-                            className={
-                                styles.error
-                            }
+                            className={styles.error}
                             role="alert"
                         >
-                            {error}
+                            {validationError}
+                        </div>
+                    )}
+
+                    {createMutation.isError && (
+                        <div
+                            className={styles.error}
+                            role="alert"
+                        >
+                            {getErrorMessage(
+                                createMutation.error
+                            )}
                         </div>
                     )}
 
@@ -266,12 +285,14 @@ export default function CreateApprovalLimit() {
                             type="submit"
                             variant="square"
                             size="medium"
-                            disabled={isCreating}
+                            disabled={
+                                createMutation.isPending
+                            }
                             className={
                                 styles.formButton
                             }
                         >
-                            {isCreating ? (
+                            {createMutation.isPending ? (
                                 <span
                                     className={
                                         styles.loadingButton
