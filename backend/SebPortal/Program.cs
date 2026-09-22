@@ -127,8 +127,8 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.MapInboundClaims = false;
-    var validationParameters =
+    options.MapInboundClaims = true;
+    options.TokenValidationParameters = 
     JwtTokenValidation.Create(
         jwtSecret,
         jwtIssuer,

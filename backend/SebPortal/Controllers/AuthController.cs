@@ -30,12 +30,16 @@ namespace SebPortal.Api.Controllers
         public IActionResult GetCurrentUser()
         {
             var userId = User.FindFirst("UserId")?.Value;
-            var role = User.FindFirst("Role")?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
             var tenantId = User.FindFirst("TenantId")?.Value;
+            var name = User.FindFirst(ClaimTypes.Name)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
             return Ok(new
             {
                 UserId = userId,
+                Name = name,
+                Email = email,
                 Role = role,
                 TenantId = tenantId
             });
