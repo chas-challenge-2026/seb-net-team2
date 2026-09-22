@@ -78,6 +78,9 @@ namespace SebPortal.Api.Services
                 _context.Payments.Add(payment);
 
                 await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
                 var notificationDTO = new NotificationMessageDTO
                 {
                     TenantId = user.TenantId,
@@ -87,8 +90,6 @@ namespace SebPortal.Api.Services
                 };
 
                 await _notificationService.SendNotificationMessageAsync(notificationDTO);
-
-                await transaction.CommitAsync();
 
                 return payment;
             }
