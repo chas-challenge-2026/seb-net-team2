@@ -204,6 +204,37 @@
     outline-offset: -2px;
 }
 
+/* Skeleton */
+
+.skeletonList {
+    display: flex;
+    flex-direction: column;
+}
+
+.userSkeleton {
+    display: grid;
+
+    grid-template-columns:
+        44px minmax(0, 1fr) 100px;
+
+    align-items: center;
+
+    gap: var(--spacing-md);
+
+    padding:
+        var(--spacing-md) var(--spacing-lg);
+
+    border-bottom:
+        1px solid var(--color-border-light);
+}
+
+.userSkeletonInfo {
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--spacing-sm);
+}
+
 /* User information */
 
 .avatar {

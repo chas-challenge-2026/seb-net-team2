@@ -9,9 +9,62 @@ import { getApprovalLimits } from "../../../services/approvalLimitsService";
 
 import type { ApprovalLimit } from "../../../schemas/approvalLimitsSchema";
 
-import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 
 import styles from "./ApprovalLimits.module.css";
+
+import Skeleton from "../../../components/LoadingState/Skeleton";
+
+function ApprovalLimitSkeleton() {
+    return (
+        <div className={styles.limitRow}>
+            <div className={styles.limitInfo}>
+                <Skeleton
+                    width="120px"
+                    height="18px"
+                />
+
+                <Skeleton
+                    width="220px"
+                    height="14px"
+                />
+            </div>
+
+            <div className={styles.approvals}>
+                <Skeleton
+                    width="40px"
+                    height="18px"
+                />
+
+                <Skeleton
+                    width="70px"
+                    height="13px"
+                />
+            </div>
+
+            <div className={styles.modified}>
+                <Skeleton
+                    width="90px"
+                    height="13px"
+                />
+
+                <Skeleton
+                    width="120px"
+                    height="15px"
+                />
+
+                <Skeleton
+                    width="140px"
+                    height="12px"
+                />
+            </div>
+
+            <Skeleton
+                width="16px"
+                height="24px"
+            />
+        </div>
+    );
+}
 
 export default function ApprovalLimits() {
     const [limits, setLimits] =
@@ -103,18 +156,17 @@ export default function ApprovalLimits() {
 
                 {isLoading && (
                     <div
-                        className={
-                            styles.loadingState
-                        }
+                        className={styles.skeletonList}
                         role="status"
-                        aria-live="polite"
+                        aria-label="Loading approval limits"
                     >
-                        <LoadingWheel size="medium" />
-
-                        <p>
-                            Loading approval
-                            limits...
-                        </p>
+                        {Array.from({ length: 5 }).map(
+                            (_, index) => (
+                                <ApprovalLimitSkeleton
+                                    key={index}
+                                />
+                            )
+                        )}
                     </div>
                 )}
 

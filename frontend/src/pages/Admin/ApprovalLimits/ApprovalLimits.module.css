@@ -67,6 +67,13 @@
     outline-offset: 2px;
 }
 
+/* Skeleton */
+
+.skeletonList {
+    display: flex;
+    flex-direction: column;
+}
+
 /* Panel */
 
 .limitsSection {

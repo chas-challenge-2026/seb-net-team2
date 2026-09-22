@@ -6,7 +6,7 @@ import { getAllUsers } from "../../../services/authService";
 import type { ReadUser } from "../../../schemas/userSchema";
 
 import Card from "../../../components/Card/Card";
-import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
+import Skeleton from "../../../components/LoadingState/Skeleton";
 
 export default function Users() {
     const [users, setUsers] =
@@ -28,6 +28,7 @@ export default function Users() {
 
                 const users =
                     await getAllUsers();
+
 
                 setUsers(users);
             } catch {
@@ -59,6 +60,40 @@ export default function Users() {
                     .includes(searchValue)
             );
         });
+
+    function UserSkeleton() {
+        return (
+            <div className={styles.userSkeleton}>
+                <Skeleton
+                    width="40px"
+                    height="40px"
+                    radius="50%"
+                />
+
+                <div
+                    className={
+                        styles.userSkeletonInfo
+                    }
+                >
+                    <Skeleton
+                        width="160px"
+                        height="16px"
+                    />
+
+                    <Skeleton
+                        width="240px"
+                        height="13px"
+                    />
+                </div>
+
+                <Skeleton
+                    width="80px"
+                    height="26px"
+                    radius="999px"
+                />
+            </div>
+        );
+    }
 
     return (
         <div className={styles.layout}>
@@ -116,11 +151,17 @@ export default function Users() {
 
                 {isLoading && (
                     <div
-                        className={styles.loadingState}
+                        className={styles.skeletonList}
                         role="status"
+                        aria-label="Loading users"
                     >
-                        <LoadingWheel size="medium" />
-                        <p>Loading users...</p>
+                        {Array.from({ length: 5 }).map(
+                            (_, index) => (
+                                <UserSkeleton
+                                    key={index}
+                                />
+                            )
+                        )}
                     </div>
                 )}
 

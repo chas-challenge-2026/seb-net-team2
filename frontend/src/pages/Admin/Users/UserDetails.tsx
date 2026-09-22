@@ -26,6 +26,107 @@ import type {
 
 import styles from "./UserDetails.module.css";
 
+import Skeleton from "../../../components/LoadingState/Skeleton";
+
+function UserDetailsSkeleton() {
+    return (
+        <div className={styles.layout}>
+            <header className={styles.pageHeader}>
+                <div className={styles.headerSkeleton}>
+                    <Skeleton
+                        width="220px"
+                        height="32px"
+                    />
+
+                    <Skeleton
+                        width="260px"
+                        height="14px"
+                    />
+                </div>
+
+                <div className={styles.headerActions}>
+                    <Skeleton
+                        width="100px"
+                        height="40px"
+                    />
+
+                    <Skeleton
+                        width="110px"
+                        height="40px"
+                    />
+                </div>
+            </header>
+
+            <section className={styles.detailsSection}>
+                <div className={styles.sectionHeader}>
+                    <Skeleton
+                        width="180px"
+                        height="22px"
+                    />
+
+                    <div className={styles.sectionDescriptionSkeleton}>
+                        <Skeleton
+                            width="280px"
+                            height="14px"
+                        />
+                    </div>
+                </div>
+
+                <div className={styles.detailsGrid}>
+                    <div className={styles.detailItem}>
+                        <Skeleton
+                            width="50px"
+                            height="13px"
+                        />
+
+                        <Skeleton
+                            width="160px"
+                            height="18px"
+                        />
+                    </div>
+
+                    <div className={styles.detailItem}>
+                        <Skeleton
+                            width="50px"
+                            height="13px"
+                        />
+
+                        <Skeleton
+                            width="220px"
+                            height="18px"
+                        />
+                    </div>
+
+                    <div className={styles.detailItem}>
+                        <Skeleton
+                            width="40px"
+                            height="13px"
+                        />
+
+                        <Skeleton
+                            width="80px"
+                            height="26px"
+                            radius="999px"
+                        />
+                    </div>
+
+                    <div className={styles.detailItem}>
+                        <Skeleton
+                            width="70px"
+                            height="13px"
+                        />
+
+                        <Skeleton
+                            width="60px"
+                            height="18px"
+                        />
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+}
+
 export default function UserDetails() {
     const { userId } = useParams({
         from: "/admin/users/$userId",
@@ -116,13 +217,10 @@ export default function UserDetails() {
     if (isLoading) {
         return (
             <div
-                className={styles.loadingState}
                 role="status"
-                aria-live="polite"
+                aria-label="Loading user"
             >
-                <LoadingWheel size="medium" />
-
-                <p>Loading user...</p>
+                <UserDetailsSkeleton />
             </div>
         );
     }
