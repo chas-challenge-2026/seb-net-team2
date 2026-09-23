@@ -197,6 +197,7 @@ namespace SebPortal.Api.Services
 
             var sortedLimits = limitsToCheck.OrderBy(l => l.MinAmount).ToList();
 
+            // 4. Control that all limits have at least 1 requiredApprovals
             foreach (var limit in sortedLimits)
             {
                 if (limit.RequiredApprovals < 1)
@@ -205,7 +206,7 @@ namespace SebPortal.Api.Services
                 }
             }
 
-            // 4. Control hierarcy: Higher amount MUST demand more requiredApprovals
+            // 5. Control hierarcy: Higher amount MUST demand more requiredApprovals
             for (int i = 0; i < sortedLimits.Count - 1; i++)
             {
                 var current = sortedLimits[i];

@@ -25,6 +25,12 @@ namespace SebPortal.Api.Controllers
             _refreshTokenService = refreshTokenService;
         }
 
+        /// <summary>
+        /// Retrieves details about the currently authenticated user based on JWT claims.
+        /// </summary>
+        /// <returns>User details including ID, name, email, role, and tenant ID.</returns>
+        /// <response code="200">Returns the user details.</response>
+        /// <response code="401">Unauthorized if the user is not authenticated.</response>
         [Authorize]
         [HttpGet("me")]
         public IActionResult GetCurrentUser()
@@ -45,6 +51,14 @@ namespace SebPortal.Api.Controllers
             });
         }
 
+        /// <summary>
+        /// Authenticates a user with credentials and returns tokens and user info.
+        /// </summary>
+        /// <param name="dto">The login credentials (email and password).</param>
+        /// <returns>Authentication tokens and user details.</returns>
+        /// <response code="200">Successfully authenticated and returns tokens/user info.</response>
+        /// <response code="400">Invalid login request data.</response>
+        /// <response code="401">Unauthorized if credentials are incorrect.</response>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO dto)
         {
@@ -55,6 +69,14 @@ namespace SebPortal.Api.Controllers
             return Ok(response);
             
         }
+
+        /// <summary>
+        /// Logs out the user by revoking their refresh token.
+        /// </summary>
+        /// <param name="dto">The refresh token request data.</param>
+        /// <returns>No content if successful.</returns>
+        /// <response code="204">The refresh token was successfully revoked.</response>
+        /// <response code="401">Unauthorized if the refresh token is invalid.</response>
         [HttpPost("logout")]
         public async Task<IActionResult> Logout([FromBody] RefreshTokenRequestDTO dto)
         {
@@ -67,6 +89,14 @@ namespace SebPortal.Api.Controllers
 
             return NoContent();
         }
+
+        /// <summary>
+        /// Generates a new access token using a valid refresh token.
+        /// </summary>
+        /// <param name="dto">The refresh token request data.</param>
+        /// <returns>New authentication tokens.</returns>
+        /// <response code="200">Returns the new tokens.</response>
+        /// <response code="401">Unauthorized if the refresh token is invalid or expired.</response>
         [HttpPost("refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDTO dto)
         {

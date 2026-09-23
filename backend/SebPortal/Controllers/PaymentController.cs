@@ -27,6 +27,15 @@ namespace SebPortal.Api.Controllers
             return int.TryParse(claim, out var userId) ? userId : null;
         }
 
+        /// <summary>
+        /// Creates a new payment for the authenticated initiator.
+        /// </summary>
+        /// <param name="dto">The payment creation details.</param>
+        /// <param name="idempotencyKey">The idempotency key header to prevent duplicate requests.</param>
+        /// <returns>The created payment details.</returns>
+        /// <response code="201">The payment was successfully created.</response>
+        /// <response code="400">Invalid input data or insufficient balance.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
         [HttpPost]
         [Authorize(Roles = UserRoles.Initiator)]
         [ServiceFilter(typeof(IdempotencyFilter))]
@@ -42,6 +51,13 @@ namespace SebPortal.Api.Controllers
 
         }
 
+        /// <summary>
+        /// Retrieves a specific payment by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the payment.</param>
+        /// <returns>The payment details.</returns>
+        /// <response code="200">Returns the payment details.</response>
+        /// <response code="404">The payment was not found.</response>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentById(int id)
         {
@@ -53,6 +69,12 @@ namespace SebPortal.Api.Controllers
             return Ok(MapToResponseDto(payment));
         }
 
+        /// <summary>
+        /// Retrieves all payments created by the currently authenticated user.
+        /// </summary>
+        /// <returns>A list of the user's payments.</returns>
+        /// <response code="200">Returns the list of payments.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
         [HttpGet("mine")]
         public async Task<IActionResult> GetMyPayments()
         {

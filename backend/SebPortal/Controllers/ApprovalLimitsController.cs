@@ -21,6 +21,12 @@ public class ApprovalLimitsController: ControllerBase
         _approvalLimitService = approvalLimitService;
     }
 
+    /// <summary>
+    /// Retrieves all ordered approval limits for the current tenant.
+    /// </summary>
+    /// <returns>A list of approval limits.</returns>
+    /// <response code="200">Returns the list of approval limits.</response>
+    /// <response code="401">Unauthorized if the user is not authenticated.</response>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ApprovalLimitResponseDTO>>> GetApprovalLimits()
     {
@@ -30,6 +36,14 @@ public class ApprovalLimitsController: ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Creates a new approval limit for the tenant.
+    /// </summary>
+    /// <param name="dto">The approval limit details to create.</param>
+    /// <returns>The created approval limit.</returns>
+    /// <response code="201">The approval limit was successfully created.</response>
+    /// <response code="400">Invalid input data or hierarchy rules violated.</response>
+    /// <response code="401">Unauthorized if the user ID claim is missing.</response>
     [Authorize(Roles = UserRoles.Admin)]
     [HttpPost]
     public async Task<ActionResult<ApprovalLimitResponseDTO>> CreateApprovalLimit([FromBody] CreateApprovalLimitDTO dto)
@@ -44,6 +58,16 @@ public class ApprovalLimitsController: ControllerBase
         return CreatedAtAction(nameof(GetApprovalLimits), new { id = createdLimit.Id }, createdLimit);
     }
 
+    /// <summary>
+    /// Updates an existing approval limit. Only the fields you provide in the request body will be updated; other fields will remain unchanged.
+    /// </summary>
+    /// <param name="id">The ID of the approval limit to update.</param>
+    /// <param name="dto">The updated approval limit details.</param>
+    /// <returns>The updated approval limit.</returns>
+    /// <response code="200">The approval limit was successfully updated.</response>
+    /// <response code="400">Invalid input data or hierarchy rules violated.</response>
+    /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+    /// <response code="404">The approval limit was not found.</response>
     [HttpPatch("{id:int}")]
     public async Task<ActionResult<ApprovalLimitResponseDTO>> UpdateApprovalLimit(int id, [FromBody] UpdateApprovalLimitDTO dto)
     {
@@ -57,6 +81,14 @@ public class ApprovalLimitsController: ControllerBase
         return Ok(updatedLimit);
     }
 
+    /// <summary>
+    /// Deletes an approval limit by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the approval limit to delete.</param>
+    /// <returns>No content if successful.</returns>
+    /// <response code="204">The approval limit was successfully deleted.</response>
+    /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+    /// <response code="404">The approval limit was not found.</response>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteApprovalLimit(int id)
     {
@@ -81,7 +113,7 @@ public class ApprovalLimitsController: ControllerBase
             return tenantId;
         }
 
-        // Fallback/standard om saknas i utveckling (t.ex. Tenant 1)
+        // Fallback/standard if missing in development (e.g., Tenant 1)
         return 1;
     }
 
