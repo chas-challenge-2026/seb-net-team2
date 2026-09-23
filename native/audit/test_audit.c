@@ -52,6 +52,30 @@ static void tamper_line(int line_no, void (*mutate)(char *line))
     fclose(file);
 }
 
+static void remove_first_line(void)
+{
+    FILE *file = fopen("audit.log", "r");
+    assert_non_null(file);
+
+    char line[1024];
+
+    assert_non_null(fgets(line, sizeof(line), file));
+
+    FILE *temp = fopen("audit.tmp", "w");
+    assert_non_null(temp);
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        fputs(line, temp);
+    }
+
+    fclose(file);
+    fclose(temp);
+
+    assert_int_equal(remove("audit.log"), 0);
+    assert_int_equal(rename("audit.tmp", "audit.log"), 0);
+}
+
 static void mutate_action(char *line)
 {
     char *action = strstr(line, "CREATE_PAYMENT");
@@ -70,6 +94,22 @@ static void mutate_prev_hash(char *line)
     prev_sep[1] = (prev_sep[1] == '0') ? '1' : '0';
 
     *hmac_sep = '|';
+}
+
+static void mutate_hmac(char *line)
+{
+    char *hmac = strrchr(line, '|');
+    assert_non_null(hmac);
+    hmac[1] = (hmac[1] == '0') ? '1' : '0';
+}
+
+static void remove_hmac(char *line)
+{
+    char *hmac = strrchr(line, '|');
+    assert_non_null(hmac);
+
+    *hmac = '\n';
+    hmac[1] = '\0';
 }
 
 static void test_append_success(void **state)
@@ -101,6 +141,47 @@ static void test_description_too_long(void **state)
 
     FILE *file = fopen("audit.log", "r");
     assert_null(file);
+}
+
+static void test_empty_description(void **state)
+{
+    remove("audit.log");
+
+    assert_int_equal(
+        audit_append("audit.log", secret_key, 1,
+                     "EMPTY_DESCRIPTION", 100, ""),
+        0);
+
+    assert_int_equal(
+        audit_verify("audit.log", secret_key),
+        -1);
+}
+
+static void test_multiple_entries(void **state)
+{
+    remove("audit.log");
+
+    for (int i = 1; i <= 10; i++)
+    {
+        assert_int_equal(
+            audit_append("audit.log", secret_key, i,
+                         "TEST_EVENT", i, "Test event"),
+            0);
+    }
+
+    assert_int_equal(
+        audit_verify("audit.log", secret_key),
+        -1);
+}
+
+static void test_corrupt_log_line(void **state)
+{
+    setup_test_log(state);
+    tamper_line(1, remove_hmac);
+
+    assert_int_equal(
+        audit_verify("audit.log", secret_key),
+        1);
 }
 
 static void test_notification_events(void **state)
@@ -162,6 +243,23 @@ static void test_tampered_previous_hash(void **state)
         2);
 }
 
+static void test_tampered_hmac(void **state)
+{
+    tamper_line(1, mutate_hmac);
+
+    assert_int_equal(
+        audit_verify("audit.log", secret_key),
+        1);
+}
+static void test_removed_first_line(void **state)
+{
+    setup_test_log(state);
+    remove_first_line();
+
+    assert_int_equal(
+        audit_verify("audit.log", secret_key),
+        1);
+}
 int main(void)
 {
     secret_key = getenv("AUDIT_SIGNING_KEY");
@@ -170,11 +268,16 @@ int main(void)
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_append_success),
         cmocka_unit_test(test_description_too_long),
+        cmocka_unit_test(test_empty_description),
+        cmocka_unit_test(test_multiple_entries),
         cmocka_unit_test(test_notification_events),
         cmocka_unit_test_setup(test_valid_log, setup_test_log),
         cmocka_unit_test_setup(test_tampered_action, setup_test_log),
         cmocka_unit_test_setup(test_wrong_key, setup_test_log),
         cmocka_unit_test_setup(test_tampered_previous_hash, setup_test_log),
+        cmocka_unit_test(test_removed_first_line),
+        cmocka_unit_test_setup(test_tampered_hmac, setup_test_log),
+        cmocka_unit_test(test_corrupt_log_line),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
