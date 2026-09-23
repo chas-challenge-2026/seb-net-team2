@@ -5,6 +5,7 @@ import Card from '../../components/Card/Card'
 import Button from '../../components/Button/Button'
 import { createPayment } from '../../services/accountService'
 import { paymentSchema, type PaymentForm } from "../../schemas/paymentSchema"
+import { useAuth } from "../../hooks/useAuth"
 
 
 const initialForm: PaymentForm = {
@@ -18,7 +19,8 @@ const initialForm: PaymentForm = {
 
 
 export function NyBetalning() {
-        
+
+    const { user } = useAuth()
     const { 
         data: accounts = [],
         isLoading: isLoadingAccounts,
@@ -101,6 +103,7 @@ export function NyBetalning() {
 
         try {
             await createPayment({
+                tenantId: user?.tenantId ?? 0,
                 fromAccountId: Number(validatedForm.fromAccountId),
                 toIban: validatedForm.iban,
                 amount: Number(validatedForm.amount),

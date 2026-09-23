@@ -12,6 +12,16 @@ export function NotificationBell() {
         void fetchNotifications().then(setNotifications)
     }, [])
 
+    function markAsRead(notificationId: string) {
+        setNotifications(current =>
+            current.map(notification =>
+                notification.id === notificationId
+                    ? { ...notification, isRead: true }
+                    : notification,
+            ),
+        )
+    }
+
     const unreadCount = notifications.filter(
         notification => !notification.isRead,
     ).length
@@ -49,7 +59,10 @@ export function NotificationBell() {
                             className={`${styles.item} ${
                                 !notification.isRead ? styles.unread : ''
                             }`}
-                            onClick={() => setIsOpen(false)}
+                            onClick={() => {
+                                markAsRead(notification.id)
+                                setIsOpen(false)
+                            }}
                             >
                                 <strong>{notification.title}</strong>
                                 <span>{notification.message}</span>
@@ -67,5 +80,4 @@ export function NotificationBell() {
 
 
 }
-
 
