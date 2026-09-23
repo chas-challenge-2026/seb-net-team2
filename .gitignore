@@ -49,5 +49,4 @@ appsettings.Development.json
 **/.env.*
 !**/.env.example
 
-!frontend/.env.development
 !frontend/.env.example
