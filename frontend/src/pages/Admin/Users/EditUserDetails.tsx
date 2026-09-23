@@ -1,10 +1,18 @@
 import {
-    useEffect,
     useState,
     type FormEvent,
 } from "react";
 
-import { useParams } from "@tanstack/react-router";
+import {
+    Link,
+    useParams,
+} from "@tanstack/react-router";
+
+import {
+    useMutation,
+    useQuery,
+    useQueryClient,
+} from "@tanstack/react-query";
 
 import {
     getUserById,
@@ -12,138 +20,116 @@ import {
 } from "../../../services/authService";
 
 import type {
+    ReadUser,
     UserRole,
 } from "../../../schemas/userSchema";
 
 import { AppError } from "../../../errors/AppError";
 
-import Card from "../../../components/Card/Card";
 import Button from "../../../components/Button/Button";
+import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 
 import styles from "./EditUserDetails.module.css";
 
-export default function EditUserDetails() {
-    const { userId } = useParams({
-        from: "/admin/users/$userId/edit",
+function getErrorMessage(
+    error: unknown,
+    fallback: string
+) {
+    if (error instanceof AppError) {
+        return error.detail ?? error.message;
+    }
+
+    return fallback;
+}
+
+type EditUserFormProps = {
+    user: ReadUser;
+};
+
+function EditUserForm({
+    user,
+}: EditUserFormProps) {
+    const queryClient = useQueryClient();
+
+    const [name, setName] =
+        useState(user.name);
+
+    const [email, setEmail] =
+        useState(user.email);
+
+    const [password, setPassword] =
+        useState("");
+
+    const [role, setRole] =
+        useState<UserRole>(user.role);
+
+    const updateMutation = useMutation({
+        mutationFn: () =>
+            updateUserById(user.id, {
+                name: name.trim(),
+                email: email.trim(),
+                role,
+                ...(password && {
+                    password,
+                }),
+            }),
+
+        onSuccess: async (updatedUser) => {
+            setName(updatedUser.name ?? "");
+            setEmail(updatedUser.email ?? "");
+            setRole(updatedUser.role ?? role);
+            setPassword("");
+
+            queryClient.setQueryData(
+                ["user", user.id],
+                updatedUser
+            );
+
+            await queryClient.invalidateQueries({
+                queryKey: ["users"],
+            });
+        },
     });
 
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [role, setRole] =
-        useState<UserRole>("User");
-
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-
-    const [isLoading, setIsLoading] =
-        useState(true);
-
-    const [isUpdating, setIsUpdating] =
-        useState(false);
-
-    useEffect(() => {
-        async function loadUser() {
-            try {
-                setError("");
-                setIsLoading(true);
-
-                const user = await getUserById(
-                    Number(userId)
-                );
-
-                setName(user.name);
-                setEmail(user.email);
-                setRole(user.role);
-            } catch (error) {
-                if (error instanceof AppError) {
-                    setError(
-                        error.detail ??
-                        error.message
-                    );
-                } else {
-                    setError(
-                        "Unable to fetch user."
-                    );
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        loadUser();
-    }, [userId]);
-
-    async function handleUpdateUser(
+    function handleUpdateUser(
         event: FormEvent<HTMLFormElement>
     ) {
         event.preventDefault();
 
-        try {
-            setError("");
-            setSuccess("");
-            setIsUpdating(true);
-
-            const updatedUser =
-                await updateUserById(
-                    Number(userId),
-                    {
-                        name: name.trim(),
-                        email: email.trim(),
-                        role,
-                        ...(password && {
-                            password,
-                        }),
-                    }
-                );
-
-            setName(updatedUser.name ?? "");
-            setEmail(updatedUser.email ?? "");
-            setRole(updatedUser.role as UserRole);
-
-            setPassword("");
-
-            setSuccess(
-                "User updated successfully."
-            );
-        } catch (error) {
-            if (error instanceof AppError) {
-                setError(
-                    error.detail ??
-                    error.message
-                );
-            } else {
-                setError(
-                    "Unable to update user."
-                );
-            }
-        } finally {
-            setIsUpdating(false);
-        }
-    }
-
-    if (isLoading) {
-        return (
-            <div className={styles.loading}>
-                <LoadingWheel size="medium" />
-            </div>
-        );
+        updateMutation.mutate();
     }
 
     return (
         <div className={styles.layout}>
-            <Card variant="default">
-                <h2>
-                    Edit user details
-                </h2>
+            <header className={styles.pageHeader}>
+                <h1>Edit user</h1>
+
+                <p>
+                    Update user information,
+                    password or access role.
+                </p>
+            </header>
+
+            <section className={styles.formSection}>
+                <div className={styles.sectionHeader}>
+                    <h2>User information</h2>
+
+                    <p>
+                        Changes will be applied
+                        to this user account.
+                    </p>
+                </div>
 
                 <form
                     className={styles.form}
                     onSubmit={handleUpdateUser}
                 >
                     <div className={styles.formGroup}>
-                        <label htmlFor="name">
+                        <label
+                            htmlFor="name"
+                            className={styles.label}
+                        >
                             Name
                         </label>
 
@@ -151,7 +137,11 @@ export default function EditUserDetails() {
                             id="name"
                             name="name"
                             type="text"
+                            className={styles.input}
                             value={name}
+                            disabled={
+                                updateMutation.isPending
+                            }
                             onChange={(event) =>
                                 setName(
                                     event.target.value
@@ -162,7 +152,10 @@ export default function EditUserDetails() {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="email">
+                        <label
+                            htmlFor="email"
+                            className={styles.label}
+                        >
                             Email
                         </label>
 
@@ -170,7 +163,11 @@ export default function EditUserDetails() {
                             id="email"
                             name="email"
                             type="email"
+                            className={styles.input}
                             value={email}
+                            disabled={
+                                updateMutation.isPending
+                            }
                             onChange={(event) =>
                                 setEmail(
                                     event.target.value
@@ -181,26 +178,35 @@ export default function EditUserDetails() {
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="password">
+                        <label
+                            htmlFor="password"
+                            className={styles.label}
+                        >
                             New password
                         </label>
 
-                        <input
+                        <PasswordInput
                             id="password"
                             name="password"
-                            type="password"
                             value={password}
+                            disabled={
+                                updateMutation.isPending
+                            }
                             onChange={(event) =>
                                 setPassword(
                                     event.target.value
                                 )
                             }
                             autoComplete="new-password"
+                            placeholder="Leave blank to keep current password"
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label htmlFor="role">
+                        <label
+                            htmlFor="role"
+                            className={styles.label}
+                        >
                             Role
                         </label>
 
@@ -209,6 +215,9 @@ export default function EditUserDetails() {
                             name="role"
                             className={styles.select}
                             value={role}
+                            disabled={
+                                updateMutation.isPending
+                            }
                             onChange={(event) =>
                                 setRole(
                                     event.target
@@ -234,45 +243,122 @@ export default function EditUserDetails() {
                         </select>
                     </div>
 
-                    <Button
-                        type="submit"
-                        variant="square"
-                        size="medium"
-                        disabled={isUpdating}
-                    >
-                        {isUpdating ? (
-                            <span
-                                className={
-                                    styles.updatingContent
-                                }
-                            >
-                                Saving...
-                                <LoadingWheel size="small" />
-                            </span>
-                        ) : (
-                            "Save changes"
-                        )}
-                    </Button>
+                    {updateMutation.isSuccess && (
+                        <div
+                            className={styles.success}
+                            role="status"
+                        >
+                            User updated successfully.
+                        </div>
+                    )}
+
+                    {updateMutation.isError && (
+                        <div
+                            className={styles.error}
+                            role="alert"
+                        >
+                            {getErrorMessage(
+                                updateMutation.error,
+                                "Unable to update user."
+                            )}
+                        </div>
+                    )}
+
+                    <div className={styles.actions}>
+                        <Link
+                            to="/admin/users/$userId"
+                            params={{
+                                userId:
+                                    user.id.toString(),
+                            }}
+                            className={
+                                styles.cancelButton
+                            }
+                        >
+                            Cancel
+                        </Link>
+
+                        <Button
+                            type="submit"
+                            variant="square"
+                            size="medium"
+                            disabled={
+                                updateMutation.isPending
+                            }
+                            className={
+                                styles.formButton
+                            }
+                        >
+                            {updateMutation.isPending ? (
+                                <span
+                                    className={
+                                        styles.loadingButton
+                                    }
+                                >
+                                    <LoadingWheel size="small" />
+                                    Saving...
+                                </span>
+                            ) : (
+                                "Save changes"
+                            )}
+                        </Button>
+                    </div>
                 </form>
-
-                {success && (
-                    <p
-                        className={styles.success}
-                        role="status"
-                    >
-                        {success}
-                    </p>
-                )}
-
-                {error && (
-                    <p
-                        className={styles.error}
-                        role="alert"
-                    >
-                        {error}
-                    </p>
-                )}
-            </Card>
+            </section>
         </div>
+    );
+}
+
+export default function EditUserDetails() {
+    const { userId } = useParams({
+        from: "/admin/users/$userId/edit",
+    });
+
+    const id = Number(userId);
+
+    const {
+        data: user,
+        isPending,
+        isError,
+        error,
+    } = useQuery({
+        queryKey: ["user", id],
+        queryFn: () =>
+            getUserById(id),
+    });
+
+    if (isPending) {
+        return (
+            <div
+                className={styles.loadingState}
+                role="status"
+                aria-live="polite"
+            >
+                <LoadingWheel size="medium" />
+
+                <p>Loading user...</p>
+            </div>
+        );
+    }
+
+    if (isError || !user) {
+        return (
+            <div
+                className={styles.error}
+                role="alert"
+            >
+                {getErrorMessage(
+                    error,
+                    "Unable to fetch user."
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <EditUserForm
+            key={user.id}
+            user={user}
+        />
     );
 }

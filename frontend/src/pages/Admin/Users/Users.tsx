@@ -1,80 +1,259 @@
-import styles from "./Users.module.css";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-import { getAllUsers } from "../../../services/authService";
-import type { ReadUser } from "../../../schemas/userSchema";
+import {
+    Link,
+} from "@tanstack/react-router";
+
+import {
+    useQuery,
+} from "@tanstack/react-query";
+
+import {
+    getAllUsers,
+} from "../../../services/authService";
 
 import Card from "../../../components/Card/Card";
-import { Link } from "@tanstack/react-router";
+import Skeleton from "../../../components/LoadingState/Skeleton";
+
+import styles from "./Users.module.css";
+
+function UserSkeleton() {
+    return (
+        <div className={styles.userSkeleton}>
+            <Skeleton
+                width="40px"
+                height="40px"
+                radius="50%"
+            />
+
+            <div
+                className={
+                    styles.userSkeletonInfo
+                }
+            >
+                <Skeleton
+                    width="160px"
+                    height="16px"
+                />
+
+                <Skeleton
+                    width="240px"
+                    height="13px"
+                />
+            </div>
+
+            <Skeleton
+                width="80px"
+                height="26px"
+                radius="999px"
+            />
+        </div>
+    );
+}
 
 export default function Users() {
+    const [search, setSearch] =
+        useState("");
 
-
-
-    const [users, setUsers] = useState<ReadUser[]>([]);
-    const [search, setSearch] = useState("");
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        async function getUsers() {
-            try {
-                const users = await getAllUsers();
-
-                setUsers(users);
-            } catch {
-                setError("Unable to load users.");
-            }
-        }
-
-        getUsers();
-    }, []);
-
-
-
-    const filteredUsers = users.filter((user) => {
-        const searchValue = search.toLowerCase();
-
-        return (
-            user.name.toLowerCase().includes(searchValue) ||
-            user.email.toLowerCase().includes(searchValue) ||
-            user.role.toLowerCase().includes(searchValue)
-        );
+    const {
+        data: users = [],
+        isPending,
+        isError,
+    } = useQuery({
+        queryKey: ["users"],
+        queryFn: getAllUsers,
     });
+
+    const filteredUsers =
+        users.filter((user) => {
+            const searchValue =
+                search.toLowerCase();
+
+            return (
+                user.name
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                user.email
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                user.role
+                    .toLowerCase()
+                    .includes(searchValue)
+            );
+        });
 
     return (
         <div className={styles.layout}>
-            <h1 className={styles.header}>
-                Users
-            </h1>
+            <header className={styles.pageHeader}>
+                <div>
+                    <h1>Users</h1>
 
-            <input
-                type="text"
-                placeholder="Search for user..."
-                value={search}
-                onChange={(event) =>
-                    setSearch(event.target.value)
-                }
-            />
+                    <p className={styles.description}>
+                        Manage users and their roles.
+                    </p>
+                </div>
 
-            {error && <p>{error}</p>}
-
-            {filteredUsers.map((user) => (
                 <Link
-                    key={user.id}
-                    to="/admin/users/$userId"
-                    params={{
-                        userId: user.id.toString(),
-                    }}
-                    className={styles.userLink}
+                    to="/admin/users/create"
+                    className={styles.createButton}
                 >
-                    <Card
-                        variant="default"
-                        className={styles.userCard}
-                    >
-                        {user.name} - {user.email} - {user.role}
-                    </Card>
+                    Create user
                 </Link>
-            ))}
+            </header>
+
+            <section className={styles.usersSection}>
+                <div className={styles.toolbar}>
+                    <div className={styles.searchWrapper}>
+                        <label
+                            htmlFor="user-search"
+                            className={styles.searchLabel}
+                        >
+                            Search users
+                        </label>
+
+                        <input
+                            id="user-search"
+                            type="search"
+                            placeholder="Search by name, email or role..."
+                            value={search}
+                            disabled={isPending}
+                            onChange={(event) =>
+                                setSearch(
+                                    event.target.value
+                                )
+                            }
+                            className={styles.searchInput}
+                        />
+                    </div>
+
+                    {!isPending && !isError && (
+                        <span className={styles.userCount}>
+                            {filteredUsers.length}{" "}
+                            {filteredUsers.length === 1
+                                ? "user"
+                                : "users"}
+                        </span>
+                    )}
+                </div>
+
+                {isPending && (
+                    <div
+                        className={styles.skeletonList}
+                        role="status"
+                        aria-label="Loading users"
+                    >
+                        {Array.from({ length: 5 }).map(
+                            (_, index) => (
+                                <UserSkeleton
+                                    key={index}
+                                />
+                            )
+                        )}
+                    </div>
+                )}
+
+                {isError && (
+                    <div
+                        className={styles.errorState}
+                        role="alert"
+                    >
+                        <p>
+                            Unable to load users.
+                        </p>
+                    </div>
+                )}
+
+                {!isPending &&
+                    !isError &&
+                    filteredUsers.length === 0 && (
+                        <div className={styles.emptyState}>
+                            <h2>No users found</h2>
+
+                            <p>
+                                Try another search term.
+                            </p>
+                        </div>
+                    )}
+
+                {!isPending &&
+                    !isError &&
+                    filteredUsers.length > 0 && (
+                        <div className={styles.userList}>
+                            {filteredUsers.map(
+                                (user) => (
+                                    <Link
+                                        key={user.id}
+                                        to="/admin/users/$userId"
+                                        params={{
+                                            userId:
+                                                user.id.toString(),
+                                        }}
+                                        className={
+                                            styles.userLink
+                                        }
+                                    >
+                                        <Card
+                                            variant="default"
+                                            className={
+                                                styles.userCard
+                                            }
+                                        >
+                                            <div
+                                                className={
+                                                    styles.avatar
+                                                }
+                                                aria-hidden="true"
+                                            >
+                                                {user.name
+                                                    .charAt(0)
+                                                    .toUpperCase()}
+                                            </div>
+
+                                            <div
+                                                className={
+                                                    styles.userInfo
+                                                }
+                                            >
+                                                <strong
+                                                    className={
+                                                        styles.userName
+                                                    }
+                                                >
+                                                    {user.name}
+                                                </strong>
+
+                                                <span
+                                                    className={
+                                                        styles.userEmail
+                                                    }
+                                                >
+                                                    {user.email}
+                                                </span>
+                                            </div>
+
+                                            <span
+                                                className={
+                                                    styles.roleBadge
+                                                }
+                                            >
+                                                {user.role}
+                                            </span>
+
+                                            <span
+                                                className={
+                                                    styles.chevron
+                                                }
+                                                aria-hidden="true"
+                                            >
+                                                ›
+                                            </span>
+                                        </Card>
+                                    </Link>
+                                )
+                            )}
+                        </div>
+                    )}
+            </section>
         </div>
     );
 }

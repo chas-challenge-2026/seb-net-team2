@@ -3,14 +3,14 @@ import React, {
   useId,
   useRef,
   useState,
-} from 'react';
+} from "react";
 
-import { Link } from '@tanstack/react-router';
+import { Link } from "@tanstack/react-router";
 
-import { useAuth } from '../hooks/useAuth';
-import { useApprovals } from '../hooks/useApprovals';
+import { useAuth } from "../hooks/useAuth";
+import { useApprovals } from "../hooks/useApprovals";
 
-import styles from './Sidebar.module.css';
+import styles from "./Sidebar.module.css";
 
 export interface SidebarProps {
   onLogout?: () => void;
@@ -23,30 +23,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
   onToggleCollapsed,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] =
+    useState(false);
 
   const sidebarId = useId();
 
   const { user } = useAuth();
 
-  const { data: approvals } = useApprovals();
-  const pendingApprovalCount = (approvals ?? []).filter((payment) => payment.status === 'pending').length;
+  const { data: approvals } =
+    useApprovals();
 
-  const [badgePulsing, setBadgePulsing] = useState(false);
-  const previousPendingCount = useRef(pendingApprovalCount);
+  const pendingApprovalCount =
+    (approvals ?? []).filter(
+      (payment) =>
+        payment.status === "pending"
+    ).length;
+
+  const [
+    badgePulsing,
+    setBadgePulsing,
+  ] = useState(false);
+
+  const previousPendingCount =
+    useRef(pendingApprovalCount);
 
   useEffect(() => {
-    if (pendingApprovalCount > previousPendingCount.current) {
+    if (
+      pendingApprovalCount >
+      previousPendingCount.current
+    ) {
       setBadgePulsing(true);
-      const timeout = setTimeout(() => setBadgePulsing(false), 300);
-      previousPendingCount.current = pendingApprovalCount;
-      return () => clearTimeout(timeout);
+
+      const timeout = setTimeout(
+        () => setBadgePulsing(false),
+        300
+      );
+
+      previousPendingCount.current =
+        pendingApprovalCount;
+
+      return () =>
+        clearTimeout(timeout);
     }
-    previousPendingCount.current = pendingApprovalCount;
+
+    previousPendingCount.current =
+      pendingApprovalCount;
   }, [pendingApprovalCount]);
 
   function toggleMobileSidebar() {
-    setIsOpen((previous) => !previous);
+    setIsOpen(
+      (previous) => !previous
+    );
   }
 
   function handleMobileNavClick() {
@@ -57,19 +84,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     function closeOnEscape(
       event: KeyboardEvent
     ) {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setIsOpen(false);
       }
     }
 
     window.addEventListener(
-      'keydown',
+      "keydown",
       closeOnEscape
     );
 
     return () => {
       window.removeEventListener(
-        'keydown',
+        "keydown",
         closeOnEscape
       );
     };
@@ -79,7 +106,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       <button
         type="button"
-        className={styles['hamburger-btn']}
+        className={
+          styles["hamburger-btn"]
+        }
         onClick={toggleMobileSidebar}
         aria-label="Menu"
         aria-controls={sidebarId}
@@ -90,8 +119,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {isOpen && (
         <div
-          className={styles['sidebar-backdrop']}
-          onClick={toggleMobileSidebar}
+          className={
+            styles["sidebar-backdrop"]
+          }
+          onClick={
+            toggleMobileSidebar
+          }
         />
       )}
 
@@ -99,25 +132,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
         id={sidebarId}
         className={`
           ${styles.sidebar}
-          ${isOpen ? styles.open : ''}
-          ${collapsed ? styles.collapsed : ''}
+          ${isOpen ? styles.open : ""}
+          ${collapsed ? styles.collapsed : ""}
         `}
       >
         <button
           type="button"
-          className={styles['collapse-toggle']}
+          className={
+            styles["collapse-toggle"]
+          }
           onClick={onToggleCollapsed}
           aria-label={
             collapsed
-              ? 'Expand sidebar'
-              : 'Collapse sidebar'
+              ? "Expand sidebar"
+              : "Collapse sidebar"
           }
           aria-expanded={!collapsed}
           aria-controls={sidebarId}
         >
           <svg
             className={
-              styles['collapse-toggle-icon']
+              styles[
+              "collapse-toggle-icon"
+              ]
             }
             viewBox="0 0 16 16"
             width="14"
@@ -135,125 +172,244 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </svg>
         </button>
 
-        <nav className={styles['sidebar-nav']}>
+        <nav
+          className={
+            styles["sidebar-nav"]
+          }
+        >
           <Link
             to="/dashboard"
-            activeOptions={{ exact: true }}
-            className={styles['nav-item']}
-            activeProps={{
-              className: `${styles['nav-item']} ${styles.active}`,
+            activeOptions={{
+              exact: true,
             }}
-            onClick={handleMobileNavClick}
+            className={
+              styles["nav-item"]
+            }
+            activeProps={{
+              className: `${styles["nav-item"]} ${styles.active}`,
+            }}
+            onClick={
+              handleMobileNavClick
+            }
           >
-            <span>Dashboard</span>
+            <span>
+              Dashboard
+            </span>
           </Link>
 
-          {(user?.role === 'Initiator' ||
-            user?.role === 'Admin') && (
+          {(user?.role ===
+            "Initiator" ||
+            user?.role ===
+            "Admin") && (
               <>
                 <Link
                   to="/ny-betalning"
-                  activeOptions={{ exact: true }}
-                  className={styles['nav-item']}
-                  activeProps={{
-                    className: `${styles['nav-item']} ${styles.active}`,
+                  activeOptions={{
+                    exact: true,
                   }}
-                  onClick={handleMobileNavClick}
+                  className={
+                    styles["nav-item"]
+                  }
+                  activeProps={{
+                    className: `${styles["nav-item"]} ${styles.active}`,
+                  }}
+                  onClick={
+                    handleMobileNavClick
+                  }
                 >
-                  <span>New payment</span>
+                  <span>
+                    New payment
+                  </span>
                 </Link>
 
                 <Link
                   to="/batch"
-                  activeOptions={{ exact: true }}
-                  className={styles['nav-item']}
-                  activeProps={{
-                    className: `${styles['nav-item']} ${styles.active}`,
+                  activeOptions={{
+                    exact: true,
                   }}
-                  onClick={handleMobileNavClick}
+                  className={
+                    styles["nav-item"]
+                  }
+                  activeProps={{
+                    className: `${styles["nav-item"]} ${styles.active}`,
+                  }}
+                  onClick={
+                    handleMobileNavClick
+                  }
                 >
-                  <span>Batch upload</span>
+                  <span>
+                    Batch upload
+                  </span>
                 </Link>
               </>
             )}
 
-          {(user?.role === 'Attestant' ||
-            user?.role === 'Admin') && (
+          {(user?.role ===
+            "Attestant" ||
+            user?.role ===
+            "Admin") && (
               <Link
                 to="/attestkorg"
-                activeOptions={{ exact: true }}
-                className={styles['nav-item']}
-                activeProps={{
-                  className: `${styles['nav-item']} ${styles.active}`,
+                activeOptions={{
+                  exact: true,
                 }}
-                onClick={handleMobileNavClick}
+                className={
+                  styles["nav-item"]
+                }
+                activeProps={{
+                  className: `${styles["nav-item"]} ${styles.active}`,
+                }}
+                onClick={
+                  handleMobileNavClick
+                }
               >
-                <span>Approval inbox</span>
+                <span>
+                  Approval inbox
+                </span>
 
-                {pendingApprovalCount > 0 && (
-                  <span className={`${styles.badge} ${badgePulsing ? styles.pulse : ''}`}>
-                    {pendingApprovalCount}
-                  </span>
-                )}
+                {pendingApprovalCount >
+                  0 && (
+                    <span
+                      className={`${styles.badge} ${badgePulsing
+                        ? styles.pulse
+                        : ""
+                        }`}
+                    >
+                      {
+                        pendingApprovalCount
+                      }
+                    </span>
+                  )}
               </Link>
             )}
 
-          {user?.role === 'Admin' && (
-            <>
-              <Link
-                to="/granskningslogg"
-                activeOptions={{ exact: true }}
-                className={styles['nav-item']}
-                activeProps={{
-                  className: `${styles['nav-item']} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
+          {user?.role ===
+            "Admin" && (
+              <div
+                className={
+                  styles[
+                  "admin-section"
+                  ]
+                }
               >
-                <span>Audit log</span>
-              </Link>
+                <span
+                  className={
+                    styles[
+                    "section-label"
+                    ]
+                  }
+                >
+                  ADMIN
+                </span>
 
-              <Link
-                to="/admin"
-                activeOptions={{ exact: true }}
-                className={styles['nav-item']}
-                activeProps={{
-                  className: `${styles['nav-item']} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
-              >
-                <span>Administration</span>
-              </Link>
-            </>
-          )}
+                <Link
+                  to="/granskningslogg"
+                  activeOptions={{
+                    exact: true,
+                  }}
+                  className={
+                    styles[
+                    "nav-item"
+                    ]
+                  }
+                  activeProps={{
+                    className: `${styles["nav-item"]} ${styles.active}`,
+                  }}
+                  onClick={
+                    handleMobileNavClick
+                  }
+                >
+                  <span>
+                    Audit log
+                  </span>
+                </Link>
+
+                <Link
+                  to="/admin"
+                  activeOptions={{
+                    exact: true,
+                  }}
+                  className={
+                    styles[
+                    "nav-item"
+                    ]
+                  }
+                  activeProps={{
+                    className: `${styles["nav-item"]} ${styles.active}`,
+                  }}
+                  onClick={
+                    handleMobileNavClick
+                  }
+                >
+                  <span>
+                    Administration
+                  </span>
+                </Link>
+              </div>
+            )}
 
           <Link
             to="/profil"
-            activeOptions={{ exact: true }}
-            className={styles['nav-item']}
-            activeProps={{
-              className: `${styles['nav-item']} ${styles.active}`,
+            activeOptions={{
+              exact: true,
             }}
-            onClick={handleMobileNavClick}
+            className={
+              styles["nav-item"]
+            }
+            activeProps={{
+              className: `${styles["nav-item"]} ${styles.active}`,
+            }}
+            onClick={
+              handleMobileNavClick
+            }
           >
-            <span>My profile</span>
+            <span>
+              My profile
+            </span>
           </Link>
         </nav>
 
-        <div className={styles['sidebar-footer']}>
-          <div className={styles['user-info']}>
+        <div
+          className={
+            styles["sidebar-footer"]
+          }
+        >
+          <div
+            className={
+              styles["user-info"]
+            }
+          >
             {user?.name && (
-              <span className={styles['user-name']}>
+              <span
+                className={
+                  styles[
+                  "user-name"
+                  ]
+                }
+              >
                 {user.name}
               </span>
             )}
 
             {user?.email && (
-              <span className={styles['user-email']}>
+              <span
+                className={
+                  styles[
+                  "user-email"
+                  ]
+                }
+              >
                 {user.email}
               </span>
             )}
 
-            <span className={styles['user-role']}>
+            <span
+              className={
+                styles[
+                "user-role"
+                ]
+              }
+            >
               {user?.role}
             </span>
           </div>
@@ -261,7 +417,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {onLogout ? (
             <button
               type="button"
-              className={styles['logout-btn']}
+              className={
+                styles[
+                "logout-btn"
+                ]
+              }
               onClick={onLogout}
             >
               Log out
@@ -269,8 +429,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ) : (
             <Link
               to="/logout"
-              className={styles['logout-link']}
-              onClick={handleMobileNavClick}
+              className={
+                styles[
+                "logout-link"
+                ]
+              }
+              onClick={
+                handleMobileNavClick
+              }
             >
               Log out
             </Link>

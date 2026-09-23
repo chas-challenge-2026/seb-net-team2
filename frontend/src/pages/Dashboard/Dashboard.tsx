@@ -1,7 +1,7 @@
 import { useAccounts } from "../../hooks/useAccounts"
 import { usePayments } from "../../hooks/usePayments"
 import { useAuth } from "../../hooks/useAuth"
-import { getCurrentUser } from "../../services/authService";
+
 import styles from './Dashboard.module.css'
 
 export function Dashboard() {
@@ -9,13 +9,7 @@ export function Dashboard() {
     const { data: payments, isLoading: loadingPayments } = usePayments()
     const { user } = useAuth()
 
-    async function testExpiredSession() {
-        try {
-            await getCurrentUser();
-        } catch (error) {
-            console.error(error);
-        }
-    }
+
 
     if (accountsError) return <p>Something went wrong.</p>
 
@@ -25,11 +19,7 @@ export function Dashboard() {
                 <h1>Welcome, {user?.email ?? 'user'}</h1>
                 <p>Company name</p>
 
-                <button
-                    onClick={testExpiredSession}
-                >
-                    Test expired session
-                </button>
+
             </header>
 
             <section>

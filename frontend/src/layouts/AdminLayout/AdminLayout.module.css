@@ -32,8 +32,43 @@
     display: flex;
     flex-direction: column;
 
-    gap: 6px;
+    gap: var(--spacing-md);
 }
+
+/* Navigation sections */
+
+.section {
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--spacing-xs);
+}
+
+.sectionHeading {
+    margin: 0;
+
+    padding: 8px 12px 6px;
+
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    border-bottom:
+        1px solid var(--color-border-light);
+}
+
+.sectionLinks {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+/* Links */
 
 .navigation a {
     width: 100%;
@@ -56,7 +91,7 @@
 }
 
 .navigation a:hover {
-    background-color: var(--color-hover-light);
+    background-color: var(--color-200);
 }
 
 .navigation a:focus-visible {
@@ -71,6 +106,8 @@
 
     font-weight: 600;
 }
+
+/* Content */
 
 .content {
     width: 100%;
@@ -115,6 +152,14 @@
     }
 
     .navigation {
+        gap: var(--spacing-md);
+    }
+
+    .section {
+        gap: var(--spacing-xs);
+    }
+
+    .sectionLinks {
         flex-direction: row;
 
         gap: 8px;
@@ -122,12 +167,17 @@
         overflow-x: auto;
     }
 
-    .navigation a {
+    .navigation>a,
+    .sectionLinks a {
         width: auto;
 
         flex-shrink: 0;
 
         white-space: nowrap;
+    }
+
+    .sectionHeading {
+        padding-left: 0;
     }
 
     .content {

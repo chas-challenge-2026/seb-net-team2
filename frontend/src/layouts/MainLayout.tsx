@@ -1,35 +1,65 @@
-import { Outlet } from '@tanstack/react-router'
-import { useState } from 'react'
+import {
+    Outlet,
+    useRouterState,
+} from "@tanstack/react-router";
 
-import { NavigationBar } from '../components/Navbar'
-import { Sidebar } from '../components/Sidebar'
+import { useState } from "react";
 
-import styles from '../components/Sidebar.module.css'
+import { NavigationBar } from "../components/Navbar";
+import { Sidebar } from "../components/Sidebar";
+
+import { useAuth } from "../hooks/useAuth";
+
+import styles from "../components/Sidebar.module.css";
 
 export function MainLayout() {
-    const [collapsed, setCollapsed] = useState(false)
+    const { isAuthenticated } = useAuth();
+
+    const pathname = useRouterState({
+        select: (state) =>
+            state.location.pathname,
+    });
+
+    const isAdminRoute =
+        pathname.startsWith("/admin");
+
+    const [collapsed, setCollapsed] =
+        useState(false);
 
     function handleToggleCollapsed() {
-        setCollapsed((current) => !current)
+        setCollapsed(
+            (current) => !current
+        );
     }
+
+    const showSidebar =
+        isAuthenticated && !isAdminRoute;
 
     return (
         <>
             <NavigationBar />
 
-            <Sidebar
-                collapsed={collapsed}
-                onToggleCollapsed={handleToggleCollapsed}
-            />
+            {showSidebar && (
+                <Sidebar
+                    collapsed={collapsed}
+                    onToggleCollapsed={
+                        handleToggleCollapsed
+                    }
+                />
+            )}
 
             <main
-                className={`${styles.content} ${collapsed
-                    ? styles.contentCollapsed
-                    : ''
-                    }`}
+                className={
+                    showSidebar
+                        ? `${styles.content} ${collapsed
+                            ? styles.contentCollapsed
+                            : ""
+                        }`
+                        : ""
+                }
             >
                 <Outlet />
             </main>
         </>
-    )
+    );
 }

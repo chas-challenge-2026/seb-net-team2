@@ -26,6 +26,9 @@ import './index.css'
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout'
 import UserDetails from './pages/Admin/Users/UserDetails'
 import EditUserDetails from './pages/Admin/Users/EditUserDetails'
+import ApprovalLimits from './pages/Admin/ApprovalLimits/ApprovalLimits'
+import CreateApprovalLimit from './pages/Admin/ApprovalLimits/CreateApprovalLimit'
+import EditApprovalLimit from './pages/Admin/ApprovalLimits/EditApprovalLimit'
 
 const rootRoute = createRootRoute({ component: MainLayout })
 
@@ -48,12 +51,18 @@ const createUserRoute = createRoute({ getParentRoute: () => adminRoute, path: "/
 const usersRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users", component: Users })
 const userDetailRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users/$userId", component: UserDetails })
 const editUserRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users/$userId/edit", component: EditUserDetails })
+const approvalLimitsRoute = createRoute({ getParentRoute: () => adminRoute, path: "/approval-limits", component: ApprovalLimits })
+const createApprovalLimitsRoute = createRoute({ getParentRoute: () => adminRoute, path: "/approval-limits/create", component: CreateApprovalLimit })
+const editApprovalLimitRoute = createRoute({ getParentRoute: () => adminRoute, path: "/approval-limits/$limitId/edit", component: EditApprovalLimit })
 
 const adminRouteTree = adminRoute.addChildren([
   createUserRoute,
   usersRoute,
   userDetailRoute,
-  editUserRoute
+  editUserRoute,
+  approvalLimitsRoute,
+  createApprovalLimitsRoute,
+  editApprovalLimitRoute,
 ]);
 
 const routeTree = rootRoute.addChildren([

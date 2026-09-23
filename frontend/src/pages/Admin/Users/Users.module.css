@@ -1,33 +1,384 @@
-.userCard {
-    width: 500px;
-    height: 200px;
+.layout {
+    width: 100%;
+    max-width: 1100px;
+
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+
+    box-sizing: border-box;
 }
 
-.userLink {
-    display: block;
+/* Page header */
 
-    width: fit-content;
-    max-width: 100%;
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
 
-    color: inherit;
+    gap: var(--spacing-lg);
+
+    margin-bottom: var(--spacing-xl);
+}
+
+.pageHeader h1 {
+    margin: 0;
+
+    font-size: 2rem;
+    font-weight: 600;
+
+    color: var(--color-text);
+}
+
+.description {
+    margin: var(--spacing-xs) 0 0;
+
+    color: var(--color-text-soft);
+}
+
+/* Create user */
+
+.createButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 40px;
+
+    padding: 0 var(--spacing-lg);
+
+    border-radius: var(--radius-sm);
+
+    background-color: var(--seb-green-dark-1);
+    color: white;
+
+    font-weight: 600;
     text-decoration: none;
 
-    border-radius: var(--radius-md);
+    transition:
+        background-color 0.15s ease,
+        transform 0.15s ease;
 }
 
-* .userLink:focus-visible {
-    outline: 2px solid var(--seb-green-dark-1);
+.createButton:hover {
+    background-color: var(--seb-green-dark-2);
+}
+
+.createButton:focus-visible {
+    outline: 3px solid var(--seb-green);
     outline-offset: 2px;
 }
 
-.userCard {
-    cursor: pointer;
+/* Main admin panel */
 
-    transition:
-        background-color 150ms ease,
-        border-color 150ms ease;
+.usersSection {
+    background-color: var(--color-surface);
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+
+    overflow: hidden;
 }
 
-.userCard:hover {
-    background-color: var(--color-hover-light);
+/* Toolbar */
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    gap: var(--spacing-lg);
+
+    padding: var(--spacing-lg);
+
+    border-bottom: 1px solid var(--color-border-light);
+
+    background-color: var(--color-300);
+}
+
+.searchWrapper {
+    width: 100%;
+    max-width: 420px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--spacing-xs);
+}
+
+.searchLabel {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+
+    color: var(--color-text);
+}
+
+.searchInput {
+    width: 100%;
+    height: 42px;
+
+    padding: 0 var(--spacing-md);
+
+    box-sizing: border-box;
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    background-color: var(--color-surface);
+    color: var(--color-text);
+
+    font: inherit;
+}
+
+.searchInput::placeholder {
+    color: var(--placeholder-grey);
+}
+
+.searchInput:focus {
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: 1px;
+}
+
+.searchInput:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.userCount {
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-md);
+
+    white-space: nowrap;
+}
+
+/* User list */
+
+.userList {
+    display: flex;
+    flex-direction: column;
+}
+
+.userLink {
+    color: inherit;
+    text-decoration: none;
+}
+
+.userCard {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns:
+        44px minmax(0, 1fr) auto 24px;
+
+    align-items: center;
+
+    gap: var(--spacing-md);
+
+    padding: var(--spacing-md) var(--spacing-lg);
+
+    box-sizing: border-box;
+
+    border: 0;
+    border-bottom: 1px solid var(--color-border-light);
+    border-radius: 0;
+
+    box-shadow: none;
+
+    transition: background-color 0.15s ease;
+}
+
+.userLink:last-child .userCard {
+    border-bottom: 0;
+}
+
+.userLink:hover .userCard {
+    background-color: var(--color-200);
+}
+
+.userLink:focus-visible {
+    outline: none;
+}
+
+.userLink:focus-visible .userCard {
+    outline: 2px solid var(--seb-green-dark-1);
+    outline-offset: -2px;
+}
+
+/* Skeleton */
+
+.skeletonList {
+    display: flex;
+    flex-direction: column;
+}
+
+.userSkeleton {
+    display: grid;
+
+    grid-template-columns:
+        44px minmax(0, 1fr) 100px;
+
+    align-items: center;
+
+    gap: var(--spacing-md);
+
+    padding:
+        var(--spacing-md) var(--spacing-lg);
+
+    border-bottom:
+        1px solid var(--color-border-light);
+}
+
+.userSkeletonInfo {
+    display: flex;
+    flex-direction: column;
+
+    gap: var(--spacing-sm);
+}
+
+/* User information */
+
+.avatar {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background-color: var(--color-100);
+
+    color: var(--color-text);
+
+    font-weight: 600;
+}
+
+.userInfo {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.userName {
+    overflow: hidden;
+
+    color: var(--color-text);
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.userEmail {
+    overflow: hidden;
+
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-md);
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Role */
+
+.roleBadge {
+    padding: 5px 10px;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-pill);
+
+    background-color: var(--color-background);
+
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.chevron {
+    color: var(--color-text-soft);
+
+    font-size: 1.5rem;
+}
+
+/* States */
+
+.loadingState,
+.emptyState,
+.errorState {
+    min-height: 180px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: var(--spacing-sm);
+
+    padding: var(--spacing-xl);
+
+    box-sizing: border-box;
+
+    text-align: center;
+}
+
+.loadingState {
+    color: var(--color-text-soft);
+}
+
+.emptyState h2,
+.emptyState p {
+    margin: 0;
+}
+
+.emptyState p {
+    color: var(--color-text-soft);
+}
+
+.errorState {
+    color: var(--color-error);
+}
+
+/* Responsive */
+
+@media (max-width: 700px) {
+    .layout {
+        padding: var(--spacing-md);
+    }
+
+    .pageHeader {
+        flex-direction: column;
+    }
+
+    .createButton {
+        width: 100%;
+    }
+
+    .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .searchWrapper {
+        max-width: none;
+    }
+
+    .userCard {
+        grid-template-columns:
+            40px minmax(0, 1fr) 20px;
+    }
+
+    .roleBadge {
+        grid-column: 2;
+        width: fit-content;
+    }
+
+    .chevron {
+        grid-column: 3;
+        grid-row: 1 / 3;
+    }
 }
