@@ -1,12 +1,14 @@
 import React, {
   useEffect,
   useId,
+  useRef,
   useState,
 } from 'react';
 
 import { Link } from '@tanstack/react-router';
 
 import { useAuth } from '../hooks/useAuth';
+import { useApprovals } from '../hooks/useApprovals';
 
 import styles from './Sidebar.module.css';
 
@@ -26,6 +28,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const sidebarId = useId();
 
   const { user } = useAuth();
+
+  const { data: approvals } = useApprovals();
+  const pendingApprovalCount = (approvals ?? []).filter((payment) => payment.status === 'pending').length;
+
+  const [badgePulsing, setBadgePulsing] = useState(false);
+  const previousPendingCount = useRef(pendingApprovalCount);
+
+  useEffect(() => {
+    if (pendingApprovalCount > previousPendingCount.current) {
+      setBadgePulsing(true);
+      const timeout = setTimeout(() => setBadgePulsing(false), 300);
+      previousPendingCount.current = pendingApprovalCount;
+      return () => clearTimeout(timeout);
+    }
+    previousPendingCount.current = pendingApprovalCount;
+  }, [pendingApprovalCount]);
 
   function toggleMobileSidebar() {
     setIsOpen((previous) => !previous);
@@ -172,9 +190,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               >
                 <span>Approval inbox</span>
 
-                <span className={styles.badge}>
-                  2
-                </span>
+                {pendingApprovalCount > 0 && (
+                  <span className={`${styles.badge} ${badgePulsing ? styles.pulse : ''}`}>
+                    {pendingApprovalCount}
+                  </span>
+                )}
               </Link>
             )}
 
