@@ -4,6 +4,7 @@ using SebPortal.Api.Authorization;
 using SebPortal.Api.Dtos;
 using SebPortal.Api.Filters;
 using SebPortal.Api.Services;
+using SebPortal.Models;
 
 
 namespace SebPortal.Api.Controllers
@@ -36,7 +37,9 @@ namespace SebPortal.Api.Controllers
                 return Unauthorized("Saknar giltigt UserId-claim i token.");
 
             var payment = await _createPaymentService.CreatePaymentAsync(dto, userId.Value);
-            return CreatedAtAction(nameof(GetPaymentById), new { id = payment.Id }, payment);
+            var responseDTO = MapToResponseDto(payment);
+            return CreatedAtAction(nameof(GetPaymentById), new { id = responseDTO.Id }, responseDTO);
+
         }
 
         [HttpGet("{id}")]
@@ -47,7 +50,7 @@ namespace SebPortal.Api.Controllers
             {
                 return NotFound();
             }
-            return Ok(payment);
+            return Ok(MapToResponseDto(payment));
         }
 
         [HttpGet("mine")]
@@ -58,7 +61,22 @@ namespace SebPortal.Api.Controllers
                 return Unauthorized("Saknar giltigt UserId-claim i token.");
 
             var payments = await _createPaymentService.GetPaymentsByUserId(userId.Value);
-            return Ok(payments);
+            return Ok(payments.Select(MapToResponseDto));
+        }
+
+        private static CreatePaymentResponseDTO MapToResponseDto(Payment payment)
+        {
+            return new CreatePaymentResponseDTO
+            {
+                Id = payment.Id,
+                FromAccountId = payment.FromAccountId,
+                ToIban = payment.ToIban,
+                Amount = payment.Amount,
+                Currency = payment.Currency,
+                Reference = payment.Reference,
+                Status = payment.Status,
+                CreatedAt = payment.CreatedAt
+            };
         }
     }
 }

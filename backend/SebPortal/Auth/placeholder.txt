@@ -1,6 +1,0 @@
-﻿namespace SebPortal.Api.Auth
-{
-    public class placeholder
-    {
-    }
-}
