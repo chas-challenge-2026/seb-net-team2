@@ -197,17 +197,25 @@ namespace SebPortal.Api.Services
 
             var sortedLimits = limitsToCheck.OrderBy(l => l.MinAmount).ToList();
 
+            foreach (var limit in sortedLimits)
+            {
+                if (limit.RequiredApprovals < 1)
+                {
+                    throw new InvalidOperationException($"Minst 1 attestant krävs för att skapa en attestbeloppgräns.");
+                }
+            }
+
             // 4. Control hierarcy: Higher amount MUST demand more requiredApprovals
             for (int i = 0; i < sortedLimits.Count - 1; i++)
             {
                 var current = sortedLimits[i];
                 var next = sortedLimits[i + 1];
 
-                if (current.RequiredApprovals > next.RequiredApprovals)
+                if (current.RequiredApprovals >= next.RequiredApprovals)
                 {
                     throw new InvalidOperationException(
                         $"Ogiltig hierarki: Beloppgränsen {current.MinAmount} kräver {current.RequiredApprovals} attestanter, " +
-                        $"medan den högre gränsen {next.MinAmount} endast kräver {next.RequiredApprovals}. Högre belopp måste kräva fler attestanter.");
+                        $"medan den högre gränsen {next.MinAmount} kräver {next.RequiredApprovals} attestanter. Lägre belopp måste kräva färre attestanter än det högre beloppet.");
                 }
             }
         }
