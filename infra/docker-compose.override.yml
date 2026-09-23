@@ -4,6 +4,7 @@ services:
       - "8081:8081"
     environment:
       Jwt__Secret: "local-development-secret-change-before-production-2026"
+      ASPNETCORE_ENVIRONMENT: Development
   db:
     ports:
       - "5433:5432"

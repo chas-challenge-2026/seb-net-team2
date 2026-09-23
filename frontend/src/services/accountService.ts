@@ -1,4 +1,6 @@
 
+import { z } from 'zod'
+
 import { apiRequest } from './apiRequest'
 import { createdPaymentSchema, type CreatedPayment } from '../schemas/paymentSchema'
 
@@ -32,15 +34,44 @@ export async function fetchAccounts(): Promise<Account[]> {
     ]
 }
 
-export async function fetchRecentPayments(): Promise<Payment[]> {
-    return [
-        { id: '1', date: '2026-08-13', toIban: 'SE8550000000054910000003', reference: 'Invoice #1042', amount: 15000, currency: 'SEK', status: 'Completed' },
-        { id: '2', date: '2026-08-13', toIban: 'SE8550000000054910000004', reference: 'Invoice #1043', amount: 75000, currency: 'SEK', status: 'Pending approval' },
+function mapPaymentStatus(status: string): Payment['status'] {
+    switch (status) {
+        case 'completed':
+            return 'Completed'
+        case 'rejected':
+            return 'Rejected'
+        default:
+            return 'Pending approval'
+    }
+}
 
-    ]
+export async function fetchRecentPayments(): Promise<Payment[]> {
+    const apiUrl = import.meta.env.VITE_API_URL
+
+    if (!apiUrl) {
+        throw new Error('VITE_API_URL is not configured.')
+    }
+
+    const payments = await apiRequest(
+        `${apiUrl}/api/Payment/mine`,
+        z.array(createdPaymentSchema),
+    )
+
+    return payments
+        .map((payment) => ({
+            id: String(payment.id),
+            date: payment.createdAt.slice(0, 10),
+            toIban: payment.toIban,
+            reference: payment.reference,
+            amount: payment.amount,
+            currency: payment.currency,
+            status: mapPaymentStatus(payment.status),
+        }))
+        .sort((a, b) => b.date.localeCompare(a.date))
 }
 
 export type CreatePaymentRequest = {
+    tenantId: number
     fromAccountId: number
     toIban: string
     amount: number
