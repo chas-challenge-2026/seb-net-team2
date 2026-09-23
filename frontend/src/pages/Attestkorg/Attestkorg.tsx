@@ -1,22 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { APPROVALS_QUERY_KEY, useApprovals } from '../../hooks/useApprovals'
+import type { Payment } from '../../services/approvalService'
 import styles from './Attestkorg.module.css'
 
 const COMMENT_MAX_LENGTH = 300
-
-type Payment = {
-    id: string
-    recipient: string
-    reference: string
-    amount: number
-    currency: string
-    toIban: string
-    fromAccount: string
-    submittedBy: string
-    submittedAt: string
-    status: 'pending' | 'completed' | 'rejected'
-    comment?: string
-    decidedAt?: string
-}
 
 type SortOption = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 type HistoryStatusFilter = 'all' | 'completed' | 'rejected'
@@ -41,35 +29,9 @@ function sortPayments(payments: Payment[], sortOption: SortOption, dateField: 's
     })
 }
 
-const initialPayments: Payment[] = [
-    {
-        id: 'PAY-1043',
-        recipient: 'Malmö Bygg AB',
-        reference: 'Invoice #1043',
-        amount: 75000,
-        currency: 'SEK',
-        toIban: 'SE85 5000 0000 0549 1000 0003',
-        fromAccount: 'Operating account',
-        submittedBy: 'Lisa Svensson',
-        submittedAt: '2026-08-13',
-        status: 'pending',
-    },
-    {
-        id: 'PAY-1044',
-        recipient: 'Nordic Office Supply AB',
-        reference: 'Invoice #1044',
-        amount: 125000,
-        currency: 'SEK',
-        toIban: 'SE85 5000 0000 0549 1000 0004',
-        fromAccount: 'Operating account',
-        submittedBy: 'Lisa Svensson',
-        submittedAt: '2026-08-14',
-        status: 'pending',
-    },
-]
-
 export function Attestkorg() {
-    const [payments, setPayments] = useState(initialPayments)
+    const { data: payments } = useApprovals()
+    const queryClient = useQueryClient()
     const [pendingSort, setPendingSort] = useState<SortOption>('date-desc')
     const [historyStatusFilter, setHistoryStatusFilter] = useState<HistoryStatusFilter>('all')
     const [historySort, setHistorySort] = useState<SortOption>('date-desc')
@@ -114,23 +76,27 @@ export function Attestkorg() {
     }, [confirmAction])
 
     const updatePayment = (id: string, status: Payment['status'], comment?: string) => {
-        setPayments((currentPayments) => currentPayments.map((payment) => (
-            payment.id === id
-                ? { ...payment, status, comment, decidedAt: new Date().toISOString().slice(0, 10) }
-                : payment
-        )))
+        queryClient.setQueryData<Payment[]>(APPROVALS_QUERY_KEY, (currentPayments) => (
+            (currentPayments ?? []).map((payment) => (
+                payment.id === id
+                    ? { ...payment, status, comment, decidedAt: new Date().toISOString().slice(0, 10) }
+                    : payment
+            ))
+        ))
     }
 
     const updateComment = (id: string, comment: string) => {
-        setPayments((currentPayments) => currentPayments.map((payment) => (
-            payment.id === id ? { ...payment, comment } : payment
-        )))
+        queryClient.setQueryData<Payment[]>(APPROVALS_QUERY_KEY, (currentPayments) => (
+            (currentPayments ?? []).map((payment) => (
+                payment.id === id ? { ...payment, comment } : payment
+            ))
+        ))
     }
 
-    const pendingPayments = payments.filter((payment) => payment.status === 'pending')
+    const pendingPayments = (payments ?? []).filter((payment) => payment.status === 'pending')
     const sortedPendingPayments = sortPayments(pendingPayments, pendingSort, 'submittedAt')
 
-    const handledPayments = payments.filter((payment) => payment.status !== 'pending')
+    const handledPayments = (payments ?? []).filter((payment) => payment.status !== 'pending')
     const filteredHandledPayments = handledPayments.filter((payment) => (
         historyStatusFilter === 'all' ? true : payment.status === historyStatusFilter
     ))

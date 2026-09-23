@@ -140,5 +140,24 @@ namespace SebPortal.Api.Services
         {
             return _approvalRepository.GetPendingStepsForAttestantAsync(paymentId, attestantId);
         }
+
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(int attestantId)
+        {
+            var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId);
+
+            return steps.Select(step => new PendingApprovalStepDTO
+            {
+                StepId = step.Id,
+                StepNumber = step.StepNumber,
+                PaymentId = step.PaymentId,
+                Amount = step.Payment.Amount,
+                Currency = step.Payment.Currency,
+                ToIban = step.Payment.ToIban,
+                Reference = step.Payment.Reference,
+                CreatedByUserId = step.Payment.CreatedByUserId,
+                CreatedByUserName = step.Payment.CreatedByUser.Name,
+                PaymentCreatedAt = step.Payment.CreatedAt
+            });
+        }
     }
 }

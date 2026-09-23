@@ -66,5 +66,16 @@ namespace SebPortal.Api.Controllers
             var steps = await _approvalService.GetPendingStepsForAttestantAsync(paymentId, userId.Value);
             return Ok(steps);
         }
+
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPendingApprovals()
+        {
+            var userId = GetCurrentUserId();
+            if (userId == null)
+                return Unauthorized("Saknar giltigt UserId-claim i token.");
+
+            var steps = await _approvalService.GetPendingStepsForAttestantAsync(userId.Value);
+            return Ok(steps);
+        }
     }
 }

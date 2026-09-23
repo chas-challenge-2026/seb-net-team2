@@ -1,12 +1,14 @@
 import React, {
   useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 
 import { Link } from "@tanstack/react-router";
 
 import { useAuth } from "../hooks/useAuth";
+import { useApprovals } from "../hooks/useApprovals";
 
 import styles from "./Sidebar.module.css";
 
@@ -21,14 +23,57 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
   onToggleCollapsed,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] =
+    useState(false);
 
   const sidebarId = useId();
 
   const { user } = useAuth();
 
+  const { data: approvals } =
+    useApprovals();
+
+  const pendingApprovalCount =
+    (approvals ?? []).filter(
+      (payment) =>
+        payment.status === "pending"
+    ).length;
+
+  const [
+    badgePulsing,
+    setBadgePulsing,
+  ] = useState(false);
+
+  const previousPendingCount =
+    useRef(pendingApprovalCount);
+
+  useEffect(() => {
+    if (
+      pendingApprovalCount >
+      previousPendingCount.current
+    ) {
+      setBadgePulsing(true);
+
+      const timeout = setTimeout(
+        () => setBadgePulsing(false),
+        300
+      );
+
+      previousPendingCount.current =
+        pendingApprovalCount;
+
+      return () =>
+        clearTimeout(timeout);
+    }
+
+    previousPendingCount.current =
+      pendingApprovalCount;
+  }, [pendingApprovalCount]);
+
   function toggleMobileSidebar() {
-    setIsOpen((previous) => !previous);
+    setIsOpen(
+      (previous) => !previous
+    );
   }
 
   function handleMobileNavClick() {
@@ -61,7 +106,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       <button
         type="button"
-        className={styles["hamburger-btn"]}
+        className={
+          styles["hamburger-btn"]
+        }
         onClick={toggleMobileSidebar}
         aria-label="Menu"
         aria-controls={sidebarId}
@@ -75,17 +122,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className={
             styles["sidebar-backdrop"]
           }
-          onClick={toggleMobileSidebar}
+          onClick={
+            toggleMobileSidebar
+          }
         />
       )}
 
       <aside
         id={sidebarId}
         className={`
-                    ${styles.sidebar}
-                    ${isOpen ? styles.open : ""}
-                    ${collapsed ? styles.collapsed : ""}
-                `}
+          ${styles.sidebar}
+          ${isOpen ? styles.open : ""}
+          ${collapsed ? styles.collapsed : ""}
+        `}
       >
         <button
           type="button"
@@ -148,8 +197,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </span>
           </Link>
 
-          {(user?.role === "Initiator" ||
-            user?.role === "Admin") && (
+          {(user?.role ===
+            "Initiator" ||
+            user?.role ===
+            "Admin") && (
               <>
                 <Link
                   to="/ny-betalning"
@@ -193,8 +244,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </>
             )}
 
-          {(user?.role === "Attestant" ||
-            user?.role === "Admin") && (
+          {(user?.role ===
+            "Attestant" ||
+            user?.role ===
+            "Admin") && (
               <Link
                 to="/attestkorg"
                 activeOptions={{
@@ -214,79 +267,86 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   Approval inbox
                 </span>
 
-                <span
-                  className={
-                    styles.badge
-                  }
-                >
-                  2
-                </span>
+                {pendingApprovalCount >
+                  0 && (
+                    <span
+                      className={`${styles.badge} ${badgePulsing
+                        ? styles.pulse
+                        : ""
+                        }`}
+                    >
+                      {
+                        pendingApprovalCount
+                      }
+                    </span>
+                  )}
               </Link>
             )}
 
-          {user?.role === "Admin" && (
-            <div
-              className={
-                styles[
-                "admin-section"
-                ]
-              }
-            >
-              <span
+          {user?.role ===
+            "Admin" && (
+              <div
                 className={
                   styles[
-                  "section-label"
+                  "admin-section"
                   ]
                 }
               >
-                ADMIN
-              </span>
-
-              <Link
-                to="/granskningslogg"
-                activeOptions={{
-                  exact: true,
-                }}
-                className={
-                  styles[
-                  "nav-item"
-                  ]
-                }
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={
-                  handleMobileNavClick
-                }
-              >
-                <span>
-                  Audit log
+                <span
+                  className={
+                    styles[
+                    "section-label"
+                    ]
+                  }
+                >
+                  ADMIN
                 </span>
-              </Link>
 
-              <Link
-                to="/admin"
-                activeOptions={{
-                  exact: true,
-                }}
-                className={
-                  styles[
-                  "nav-item"
-                  ]
-                }
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={
-                  handleMobileNavClick
-                }
-              >
-                <span>
-                  Administration
-                </span>
-              </Link>
-            </div>
-          )}
+                <Link
+                  to="/granskningslogg"
+                  activeOptions={{
+                    exact: true,
+                  }}
+                  className={
+                    styles[
+                    "nav-item"
+                    ]
+                  }
+                  activeProps={{
+                    className: `${styles["nav-item"]} ${styles.active}`,
+                  }}
+                  onClick={
+                    handleMobileNavClick
+                  }
+                >
+                  <span>
+                    Audit log
+                  </span>
+                </Link>
+
+                <Link
+                  to="/admin"
+                  activeOptions={{
+                    exact: true,
+                  }}
+                  className={
+                    styles[
+                    "nav-item"
+                    ]
+                  }
+                  activeProps={{
+                    className: `${styles["nav-item"]} ${styles.active}`,
+                  }}
+                  onClick={
+                    handleMobileNavClick
+                  }
+                >
+                  <span>
+                    Administration
+                  </span>
+                </Link>
+              </div>
+            )}
 
           <Link
             to="/profil"
