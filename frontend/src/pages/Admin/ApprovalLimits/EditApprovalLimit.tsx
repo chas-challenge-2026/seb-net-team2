@@ -192,14 +192,6 @@ function EditApprovalLimitForm({
 
     return (
         <div className={styles.layout}>
-            <div className={styles.breadcrumb}>
-                <Link
-                    to="/admin/approval-limits"
-                    className={styles.backLink}
-                >
-                    ← Approval limits
-                </Link>
-            </div>
 
             <header className={styles.pageHeader}>
                 <div>
