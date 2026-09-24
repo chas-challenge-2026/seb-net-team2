@@ -146,43 +146,43 @@ VALUES
 
 -- Audit log
 INSERT INTO audit_entries
-    (user_id, action, entity_type, entity_id, description, created_at)
+    (user_id, tenant_id, action, entity_type, entity_id, description, created_at)
 VALUES
 -- Tenant 1
-(1,  'CREATE_PAYMENT', 'payment', 1,  'Skapade betalning 15000 SEK till SE3550000000054910000003',  NOW() - INTERVAL '30 days'),
-(1,  'CREATE_PAYMENT', 'payment', 2,  'Skapade betalning 75000 SEK till SE0850000000054910000004',  NOW() - INTERVAL '2 days'),
-(2,  'CREATE_PAYMENT', 'payment', 3,  'Skapade betalning 32000 SEK till SE8730000000011122230001',  NOW() - INTERVAL '20 days'),
-(1,  'CREATE_PAYMENT', 'payment', 4,  'Skapade betalning 250000 SEK till SE6030000000011122230002', NOW() - INTERVAL '3 days'),
-(3,  'APPROVE_STEP',   'payment', 4,  'Steg 1 för betalning 4 godkändes',                           NOW() - INTERVAL '2 days'),
-(2,  'CREATE_PAYMENT', 'payment', 5,  'Skapade betalning 120000 SEK till SE3330000000011122230003', NOW() - INTERVAL '14 days'),
-(4,  'APPROVE_STEP',   'payment', 5,  'Steg 1 för betalning 5 godkändes',                           NOW() - INTERVAL '13 days'),
-(1,  'CREATE_PAYMENT', 'payment', 6,  'Skapade betalning 60000 SEK till SE0630000000011122230004',  NOW() - INTERVAL '10 days'),
-(3,  'REJECT_STEP',    'payment', 6,  'Steg 1 för betalning 6 avslogs',                             NOW() - INTERVAL '9 days'),
-(2,  'CREATE_PAYMENT', 'payment', 7,  'Skapade betalning 300000 SEK till SE7630000000011122230005', NOW() - INTERVAL '7 days'),
-(4,  'REJECT_STEP',    'payment', 7,  'Steg 1 för betalning 7 avslogs',                             NOW() - INTERVAL '6 days'),
-(2,  'CREATE_PAYMENT', 'payment', 8,  'Skapade betalning 55000 SEK till SE8730000000011122230001',  NOW() - INTERVAL '1 day'),
+(1, 1,  'CREATE_PAYMENT', 'payment', 1,  'Skapade betalning 15000 SEK till SE3550000000054910000003',  NOW() - INTERVAL '30 days'),
+(1, 1,  'CREATE_PAYMENT', 'payment', 2,  'Skapade betalning 75000 SEK till SE0850000000054910000004',  NOW() - INTERVAL '2 days'),
+(2, 1,  'CREATE_PAYMENT', 'payment', 3,  'Skapade betalning 32000 SEK till SE8730000000011122230001',  NOW() - INTERVAL '20 days'),
+(1, 1,  'CREATE_PAYMENT', 'payment', 4,  'Skapade betalning 250000 SEK till SE6030000000011122230002', NOW() - INTERVAL '3 days'),
+(3, 1,  'APPROVE_STEP',   'payment', 4,  'Steg 1 för betalning 4 godkändes',                           NOW() - INTERVAL '2 days'),
+(2, 1,  'CREATE_PAYMENT', 'payment', 5,  'Skapade betalning 120000 SEK till SE3330000000011122230003', NOW() - INTERVAL '14 days'),
+(4, 1,  'APPROVE_STEP',   'payment', 5,  'Steg 1 för betalning 5 godkändes',                           NOW() - INTERVAL '13 days'),
+(1, 1,  'CREATE_PAYMENT', 'payment', 6,  'Skapade betalning 60000 SEK till SE0630000000011122230004',  NOW() - INTERVAL '10 days'),
+(3, 1,  'REJECT_STEP',    'payment', 6,  'Steg 1 för betalning 6 avslogs',                             NOW() - INTERVAL '9 days'),
+(2, 1,  'CREATE_PAYMENT', 'payment', 7,  'Skapade betalning 300000 SEK till SE7630000000011122230005', NOW() - INTERVAL '7 days'),
+(4, 1,  'REJECT_STEP',    'payment', 7,  'Steg 1 för betalning 7 avslogs',                             NOW() - INTERVAL '6 days'),
+(2, 1,  'CREATE_PAYMENT', 'payment', 8,  'Skapade betalning 55000 SEK till SE8730000000011122230001',  NOW() - INTERVAL '1 day'),
 
 -- Tenant 2
-(7,  'CREATE_PAYMENT', 'payment', 9,  'Skapade betalning 12000 SEK till SE5412000000077788890001',  NOW() - INTERVAL '25 days'),
-(7,  'CREATE_PAYMENT', 'payment', 10, 'Skapade betalning 40000 SEK till SE2712000000077788890002',  NOW() - INTERVAL '2 days'),
-(7,  'CREATE_PAYMENT', 'payment', 11, 'Skapade betalning 150000 SEK till SE9712000000077788890003', NOW() - INTERVAL '4 days'),
-(7,  'CREATE_PAYMENT', 'payment', 12, 'Skapade betalning 80000 SEK till SE7012000000077788890004',  NOW() - INTERVAL '18 days'),
-(9,  'APPROVE_STEP',   'payment', 12, 'Steg 1 för betalning 12 godkändes',                          NOW() - INTERVAL '17 days'),
-(7,  'CREATE_PAYMENT', 'payment', 13, 'Skapade betalning 30000 SEK till SE4312000000077788890005',  NOW() - INTERVAL '9 days'),
-(8,  'REJECT_STEP',    'payment', 13, 'Steg 1 för betalning 13 avslogs',                            NOW() - INTERVAL '8 days'),
+(7, 2,  'CREATE_PAYMENT', 'payment', 9,  'Skapade betalning 12000 SEK till SE5412000000077788890001',  NOW() - INTERVAL '25 days'),
+(7, 2,  'CREATE_PAYMENT', 'payment', 10, 'Skapade betalning 40000 SEK till SE2712000000077788890002',  NOW() - INTERVAL '2 days'),
+(7, 2,  'CREATE_PAYMENT', 'payment', 11, 'Skapade betalning 150000 SEK till SE9712000000077788890003', NOW() - INTERVAL '4 days'),
+(7, 2,  'CREATE_PAYMENT', 'payment', 12, 'Skapade betalning 80000 SEK till SE7012000000077788890004',  NOW() - INTERVAL '18 days'),
+(9, 2,  'APPROVE_STEP',   'payment', 12, 'Steg 1 för betalning 12 godkändes',                          NOW() - INTERVAL '17 days'),
+(7, 2,  'CREATE_PAYMENT', 'payment', 13, 'Skapade betalning 30000 SEK till SE4312000000077788890005',  NOW() - INTERVAL '9 days'),
+(8, 2,  'REJECT_STEP',    'payment', 13, 'Steg 1 för betalning 13 avslogs',                            NOW() - INTERVAL '8 days'),
 
 -- Tenant 3
-(11, 'CREATE_PAYMENT', 'payment', 14, 'Skapade betalning 45000 SEK till SE8730000000011122230001',  NOW() - INTERVAL '28 days'),
-(11, 'CREATE_PAYMENT', 'payment', 15, 'Skapade betalning 95000 SEK till SE6030000000011122230002',  NOW() - INTERVAL '15 days'),
-(11, 'CREATE_PAYMENT', 'payment', 16, 'Skapade betalning 180000 SEK till SE3330000000011122230003', NOW() - INTERVAL '1 day'),
-(11, 'CREATE_PAYMENT', 'payment', 17, 'Skapade betalning 750000 SEK till SE0630000000011122230004', NOW() - INTERVAL '5 days'),
-(13, 'APPROVE_STEP',   'payment', 17, 'Steg 1 för betalning 17 godkändes',                          NOW() - INTERVAL '4 days'),
+(11, 3, 'CREATE_PAYMENT', 'payment', 14, 'Skapade betalning 45000 SEK till SE8730000000011122230001',  NOW() - INTERVAL '28 days'),
+(11, 3, 'CREATE_PAYMENT', 'payment', 15, 'Skapade betalning 95000 SEK till SE6030000000011122230002',  NOW() - INTERVAL '15 days'),
+(11, 3, 'CREATE_PAYMENT', 'payment', 16, 'Skapade betalning 180000 SEK till SE3330000000011122230003', NOW() - INTERVAL '1 day'),
+(11, 3, 'CREATE_PAYMENT', 'payment', 17, 'Skapade betalning 750000 SEK till SE0630000000011122230004', NOW() - INTERVAL '5 days'),
+(13, 3, 'APPROVE_STEP',   'payment', 17, 'Steg 1 för betalning 17 godkändes',                          NOW() - INTERVAL '4 days'),
 
 -- Tenant 4
-(15, 'CREATE_PAYMENT', 'payment', 18, 'Skapade betalning 8500 SEK till SE5412000000077788890001',   NOW() - INTERVAL '22 days'),
-(15, 'CREATE_PAYMENT', 'payment', 19, 'Skapade betalning 35000 SEK till SE2712000000077788890002',  NOW() - INTERVAL '2 days'),
-(15, 'CREATE_PAYMENT', 'payment', 20, 'Skapade betalning 22000 SEK till SE9712000000077788890003',  NOW() - INTERVAL '12 days'),
-(16, 'APPROVE_STEP',   'payment', 20, 'Steg 1 för betalning 20 godkändes',                          NOW() - INTERVAL '11 days');
+(15, 4, 'CREATE_PAYMENT', 'payment', 18, 'Skapade betalning 8500 SEK till SE5412000000077788890001',   NOW() - INTERVAL '22 days'),
+(15, 4, 'CREATE_PAYMENT', 'payment', 19, 'Skapade betalning 35000 SEK till SE2712000000077788890002',  NOW() - INTERVAL '2 days'),
+(15, 4, 'CREATE_PAYMENT', 'payment', 20, 'Skapade betalning 22000 SEK till SE9712000000077788890003',  NOW() - INTERVAL '12 days'),
+(16, 4, 'APPROVE_STEP',   'payment', 20, 'Steg 1 för betalning 20 godkändes',                          NOW() - INTERVAL '11 days');
 
 
 -- Approval limits
