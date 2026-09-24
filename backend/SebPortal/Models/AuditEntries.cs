@@ -5,6 +5,8 @@ namespace SebPortal.Models
     public class AuditEntries
     {
         public int Id { get; set; }
+        public int TenantId { get; set; }
+        public Tenant Tenant { get; set; } = null!; // Navigation property to Tenants
         public int UserId { get; set; }
         public User User { get; set; } = null!; // Navigation property to Users
         [Required]
