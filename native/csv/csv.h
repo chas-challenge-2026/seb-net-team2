@@ -2,6 +2,7 @@
 #define __CSV_H_
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /*
     CSV-parser: ska hantera batchfiler på 10 000+ rader med parallell 
@@ -12,6 +13,7 @@
 
 typedef enum
 {
+    Csv_Error_Success,
     Csv_Error_Content_Is_NULL = -10, // Happens if someone tries to pass a NULL ptr as content.
     Csv_Error_Out_Csv_Is_NULL, // Happens if someone tries to pass a NULL ptr as out_csv.
     Csv_Error_Content_Length_Is_Invalid, // Happens if content length is too short (<= 0).
@@ -21,8 +23,8 @@ typedef enum
 typedef struct 
 {
     void** data;
+    size_t data_capacity;
     size_t data_length;
-    bool has_headers;
 } Csv;
 
 // Parsar CSV-innehåll. Allokerar och returnerar array av CsvRow.
