@@ -21,7 +21,10 @@ export async function apiRequest<T extends z.ZodType>(
 
     const token = getAuthToken();
 
-    if (token && !headers.has("Authorization")) {
+    if (
+        token &&
+        !headers.has("Authorization")
+    ) {
         headers.set(
             "Authorization",
             `Bearer ${token}`
@@ -53,11 +56,14 @@ export async function apiRequest<T extends z.ZodType>(
         throw await createAppError(response);
     }
 
-    if (response.status === 204) {
+    const text = await response.text();
+
+    if (!text.trim()) {
         return schema.parse(undefined);
     }
 
-    const data: unknown = await response.json();
+    const data: unknown =
+        JSON.parse(text);
 
     return schema.parse(data);
 }

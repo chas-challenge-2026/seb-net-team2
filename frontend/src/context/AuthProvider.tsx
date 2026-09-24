@@ -31,11 +31,13 @@ const useMockAuth =
     import.meta.env.VITE_MOCK_AUTH === "true";
 
 const mockUser: AuthUser = {
-    userId: 1,
+    id: 1,
     name: "Mock Admin",
     email: "admin@example.com",
     role: "Admin",
     tenantId: 1,
+    tenantName: "Mock Tenant",
+    pendingApprovalsCount: 0,
 };
 
 export function AuthProvider({
