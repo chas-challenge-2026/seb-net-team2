@@ -5,17 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
+#include <ctype.h>
 
-typedef enum
-{
-    Row_Data_From_Account_Id = 0,
-    Row_Data_To_Iban,
-    Row_Data_Amount,
-    Row_Data_Reference
-} RowData;
-
-static bool is_end_of_line(char* curr)
+static bool is_end_of_line(char *curr)
 {
     if (curr[0] == '\r')
     {
@@ -27,160 +19,59 @@ static bool is_end_of_line(char* curr)
     return false;
 }
 
-static void remove_quotes(char* start, int length)
+Csv_Error csv_parse(const char* content, int content_len, Csv* out_csv)
 {
-    printf("Length: %d\n", length);
-
-    if (start[0] == '"' && start[length - 1] == '"')
+    if (content == NULL)
     {
-        start[0] = ' ';
-        start[length - 1] = 0;
-        start++;
-    }
-}
-
-
-CsvRow* parse_csv(const char* content, int content_len, int* rows_out)
-{
-    CsvRow* rows = (CsvRow*)malloc(sizeof(CsvRow) * 500);
-    if (rows == NULL)
-    {
-        return NULL;
-    }
-    memset(rows, 0, sizeof(CsvRow) * 500);
-
-    char* buffer = (char*)malloc(content_len + 1);
-    if (buffer == NULL)
-    {
-        rows->valid = 0;
-        snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Slut på heap memory");
-        return NULL;
+        return Csv_Error_Content_Is_NULL;
     }
 
-    memcpy(buffer, content, content_len);
-    buffer[content_len] = '\0';
+    if (out_csv == NULL)
+    {
+        return Csv_Error_Out_Csv_Is_NULL;
+    }
+    memset(out_csv, 0, sizeof(Csv));
 
-    char* start = buffer;
-    char* current = start;
-    int length = 0;
+    if (content_len <= 0)
+    {
+        return Csv_Error_Content_Length_Is_Invalid;
+    }
 
-    size_t current_length = 0;
-    size_t full_length = content_len;
+    size_t buffer_alloc_size = sizeof(char) * content_len + 1;
+    char* buffer = (char*)malloc(buffer_alloc_size);
+    memcpy(buffer, content, buffer_alloc_size - 1);
+    buffer[buffer_alloc_size - 1] = '\0';
 
-    bool is_headers = true;
+    int start = 0;
+    int current = 0;
 
-    int fields = 0;
-    int index = 0;
-    int inner_index = 0;
+    out_csv->data = (void*)malloc(sizeof(void*) * 8);
+    memset(out_csv->data, 0, sizeof(void*) * 8);
+
 
     while (true)
     {
-        if (current_length >= full_length)
+        if (buffer[current] == ',')
         {
-            if (!is_headers && inner_index == Row_Data_Reference)
+            if (isalpha(start) != 0)
             {
-                snprintf(rows[index].reference, CSV_REFERENCE_LENGTH, "%s", start);
-
-                if (fields != 3)
-                {
-                    rows->valid = 0;
-                    snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Fields matchar inte header fields");
-                    return rows;
-                }
-                index++;
-            }
-
-            rows->valid = 1;
-            *rows_out = index;
-            return rows;
-        }
-
-        if (is_headers)
-        {
-            if (is_end_of_line(current))
-            {
-                current = &current[2];
-                start = current;
-                current_length += 2;
-                is_headers = false;
                 
-                continue;
-            }
-
-            current++;
-            current_length++;
-            continue;
-        }
-
-        bool eol = is_end_of_line(current);
-        if (eol || current[0] == ',')
-        {
-            char* temp;
-            current[0] = '\0';
-
-            switch (inner_index)
-            {
-            case Row_Data_From_Account_Id:
-                remove_quotes(start, length);
-                rows[index].from_account_id = strtol(start, &temp, 10);
-                break;
-            case Row_Data_To_Iban:
-                remove_quotes(start, length);
-                snprintf(rows[index].to_iban, CSV_TO_IBAN_LENGTH, "%s", start);
-                break;
-            case Row_Data_Amount:
-                rows[index].amount = strtod(start, &temp);
-                break;
-            case Row_Data_Reference:
-                snprintf(rows[index].reference, CSV_REFERENCE_LENGTH, "%s", start);
-
-                break;
-            default:
-                rows->valid = 0;
-                snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Inner index är utanför range");
-                return rows;
-                break;
-            }
-
-            if (eol) 
-            {
-                if (fields != 3)
-                {
-                    snprintf(rows->error, CSV_ERROR_LENGTH, "%s\n", "ERROR: Fields matchar inte header fields");
-                    rows->valid = 0;
-                    return rows;
-                }
-
-                current += 2;
-                current_length += 2;
-                start = current;
-                index++;
-                inner_index = 0;
-                fields = 0;
-            } 
-            else 
-            { // comma
-                fields++;
-                current += 1;
-                current_length += 1;
-                start = current;
-                inner_index++;
             }
         }
-        else
-        {
-            current_length++;
-            current++;
-            length++;
-        }
+
+        current++;
     }
-    return rows;
+
+
+
+
+    return 0;
 }
 
-void free_csv_rows(CsvRow* rows)
+void csv_free(Csv* csv)
 {
-    if (rows != NULL)
+    if (csv->data != NULL)
     {
-        free(rows);
+        free(csv->data);
     }
 }
