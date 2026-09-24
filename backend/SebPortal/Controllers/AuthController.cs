@@ -16,13 +16,16 @@ namespace SebPortal.Api.Controllers
     {
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
-        private readonly IRefreshTokenService _refreshTokenService; 
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public AuthController(IUserService userService, IConfiguration configuration, IRefreshTokenService refreshTokenService)
+        private readonly ICurrentUserService _currentUserService;
+
+        public AuthController(IUserService userService, IConfiguration configuration, IRefreshTokenService refreshTokenService, ICurrentUserService currentUserService)
         {
             _userService = userService;
             _configuration = configuration;
             _refreshTokenService = refreshTokenService;
+            _currentUserService = currentUserService;
         }
 
         /// <summary>
@@ -33,22 +36,19 @@ namespace SebPortal.Api.Controllers
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         [Authorize]
         [HttpGet("me")]
-        public IActionResult GetCurrentUser()
+        public async Task<IActionResult> GetCurrentUser()
         {
-            var userId = User.FindFirst("UserId")?.Value;
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-            var tenantId = User.FindFirst("TenantId")?.Value;
-            var name = User.FindFirst(ClaimTypes.Name)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userIdClaim = User.FindFirst("UserId")?.Value;
 
-            return Ok(new
-            {
-                UserId = userId,
-                Name = name,
-                Email = email,
-                Role = role,
-                TenantId = tenantId
-            });
+            if (!int.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            var currentUser = await _currentUserService.GetCurrentUserAsync(userId);
+
+            if (currentUser == null)
+                return NotFound();
+
+            return Ok(currentUser);
         }
 
         /// <summary>
