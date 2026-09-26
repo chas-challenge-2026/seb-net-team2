@@ -120,6 +120,33 @@
     transform: translateY(-1px);
 }
 
+.card.cardOverdue,
+.card.cardOverdue:hover {
+    border-left-color: var(--color-error);
+}
+
+.overdueBanner {
+    margin-bottom: 1.25rem;
+    padding: 12px 16px;
+    border: 1px solid var(--color-error);
+    border-left-width: 4px;
+    border-radius: var(--radius-md);
+    color: var(--color-error);
+    font-size: var(--font-size-md);
+    background: #fef3f2;
+}
+
+.overdue {
+    display: inline-block;
+    margin: 8px 0 0;
+    padding: 2px 10px;
+    border: 1px solid var(--color-error);
+    border-radius: var(--radius-pill);
+    color: var(--color-error);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
 .cardHeader {
     display: flex;
     align-items: flex-start;

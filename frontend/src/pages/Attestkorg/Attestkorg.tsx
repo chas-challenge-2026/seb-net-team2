@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { APPROVALS_QUERY_KEY, useApprovals } from '../../hooks/useApprovals'
 import type { Payment } from '../../services/approvalService'
+import { OVERDUE_AFTER_DAYS, daysWaiting, isOverdue } from '../../utils/approvalReminders'
 import styles from './Attestkorg.module.css'
 
 const COMMENT_MAX_LENGTH = 300
@@ -32,7 +33,7 @@ function sortPayments(payments: Payment[], sortOption: SortOption, dateField: 's
 export function Attestkorg() {
     const { data: payments } = useApprovals()
     const queryClient = useQueryClient()
-    const [pendingSort, setPendingSort] = useState<SortOption>('date-desc')
+    const [pendingSort, setPendingSort] = useState<SortOption>('date-asc')
     const [historyStatusFilter, setHistoryStatusFilter] = useState<HistoryStatusFilter>('all')
     const [historySort, setHistorySort] = useState<SortOption>('date-desc')
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null)
@@ -94,7 +95,10 @@ export function Attestkorg() {
     }
 
     const pendingPayments = (payments ?? []).filter((payment) => payment.status === 'pending')
+    // Overdue approvals always come first; the chosen sort applies within each group.
     const sortedPendingPayments = sortPayments(pendingPayments, pendingSort, 'submittedAt')
+        .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)))
+    const overdueCount = pendingPayments.filter(isOverdue).length
 
     const handledPayments = (payments ?? []).filter((payment) => payment.status !== 'pending')
     const filteredHandledPayments = handledPayments.filter((payment) => (
@@ -143,6 +147,17 @@ export function Attestkorg() {
                 </span>
             </header>
 
+            {overdueCount > 0 && (
+                <div className={styles.overdueBanner} role="status">
+                    <strong>
+                        {overdueCount === 1
+                            ? '1 payment has'
+                            : `${overdueCount} payments have`} been waiting more than {OVERDUE_AFTER_DAYS} days.
+                    </strong>{' '}
+                    They are shown first in the list below.
+                </div>
+            )}
+
             {pendingPayments.length > 0 && (
                 <div className={styles.toolbar}>
                     <div className={styles.filterField}>
@@ -163,13 +178,18 @@ export function Attestkorg() {
 
             <div className={styles.list}>
                 {sortedPendingPayments.length > 0 ? sortedPendingPayments.map((payment) => (
-                    <article className={styles.card} key={payment.id} aria-labelledby={`${payment.id}-recipient`}>
+                    <article
+                        className={`${styles.card} ${isOverdue(payment) ? styles.cardOverdue : ''}`}
+                        key={payment.id} aria-labelledby={`${payment.id}-recipient`}>
                         <div className={styles.cardHeader}>
                             <div>
                                 <p className={`${styles.paymentId} ${styles[`status-${payment.status}`]}`}>
                                     {statusLabels[payment.status]}
                                 </p>
                                 <h2 id={`${payment.id}-recipient`}>{payment.recipient}</h2>
+                                {isOverdue(payment) && (
+                                    <p className={styles.overdue}>Waiting {daysWaiting(payment)} days</p>
+                                )}
                             </div>
                             <strong>{formatAmount(payment)}</strong>
                         </div>
