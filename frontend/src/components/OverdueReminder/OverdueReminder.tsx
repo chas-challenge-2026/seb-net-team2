@@ -26,11 +26,11 @@ function saveDismissed() {
 
 export function OverdueReminder() {
     const { user } = useAuth()
-    const { data: approvals } = useApprovals()
+    const canApprove = user?.role === 'Attestant' || user?.role === 'Admin'
+    const { data: approvals } = useApprovals(canApprove)
     const [dismissed, setDismissed] = useState(readDismissed)
     const pathname = useRouterState({ select: (state) => state.location.pathname })
 
-    const canApprove = user?.role === 'Attestant' || user?.role === 'Admin'
     const overdueCount = countOverdue(approvals)
 
     // The approval inbox shows its own banner, so the toast would be redundant there.

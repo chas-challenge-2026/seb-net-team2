@@ -9,11 +9,13 @@ export const userRoleSchema = z.enum([
 ]);
 
 export const currentUserSchema = z.object({
-    userId: z.coerce.number(),
-    name: z.string().optional(),
-    email: z.string().email().optional(),
+    id: z.number(),
+    name: z.string(),
+    email: z.string().email(),
     role: userRoleSchema,
-    tenantId: z.coerce.number(),
+    tenantId: z.number(),
+    tenantName: z.string(),
+    pendingApprovalsCount: z.number(),
 });
 
 export const readUserSchema = z.object({
