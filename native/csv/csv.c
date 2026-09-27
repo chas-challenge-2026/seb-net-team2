@@ -1,22 +1,7 @@
-#define _GNU_SOURCE
-
 #include "csv.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
-static bool is_end_of_line(char *curr)
-{
-    if (curr[0] == '\r')
-    {
-        if (curr[1] == '\n')
-        {
-            return true;
-        }
-    }
-    return false;
-}
 
 static void add_to_data(Csv* csv, void* data)
 {
@@ -32,8 +17,172 @@ static void add_to_data(Csv* csv, void* data)
     csv->data_length++;
 }
 
+void csv_free(Csv* csv)
+{
+    if (csv == NULL || csv->data == NULL)
+    {
+        return;
+    }
+
+    for (size_t i = 0; i < csv->data_length; i++)
+    {
+        free(csv->data[i]);
+    }
+    free(csv->data);
+    csv->data = NULL;
+    csv->data_length = 0;
+    csv->data_capacity = 0;
+}
+
+static Csv_Error fail_parse(Csv* csv, char* buffer)
+{
+    csv_free(csv);
+    free(buffer);
+    memset(csv, 0, sizeof(*csv));
+    return Csv_Error_Invalid_Parsing;
+}
+
+static bool is_integer_text(const char* text, size_t length)
+{
+    if (length == 0)
+    {
+        return false;
+    }
+    for (size_t i = 0; i < length; i++)
+    {
+        if (text[i] < '0' || text[i] > '9')
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+static bool is_decimal_text(const char* text, size_t length)
+{
+    size_t i = 0;
+
+    while (i < length && text[i] >= '0' && text[i] <= '9')
+    {
+        i++;
+    }
+    if (i == 0 || i >= length || text[i] != '.')
+    {
+        return false;
+    }
+
+    i++;
+    if (i >= length)
+    {
+        return false;
+    }
+    while (i < length && text[i] >= '0' && text[i] <= '9')
+    {
+        i++;
+    }
+    return i == length;
+}
+
+// This saves the actual element data and adds it on csv->data.
+static Csv_Error emit_field(Csv* csv, const char* buffer, int start, int end)
+{
+    bool quoted = end > start && buffer[start] == '"';
+    char* text = NULL;
+    size_t length = 0;
+
+    if (quoted)
+    {
+        int inner_start = start + 1;
+        int inner_end = end - 1;
+        size_t pos = 0;
+
+        if (inner_end < inner_start || buffer[end - 1] != '"')
+        {
+            return Csv_Error_Invalid_Parsing;
+        }
+
+        length = 0;
+        for (int i = inner_start; i < inner_end; i++)
+        {
+            length++;
+            if (buffer[i] == '"' && i + 1 < inner_end && buffer[i + 1] == '"')
+            {
+                i++;
+            }
+        }
+
+        text = (char*)malloc(length + 1);
+        if (text == NULL)
+        {
+            return Csv_Error_Invalid_Parsing;
+        }
+
+        for (int i = inner_start; i < inner_end; i++)
+        {
+            text[pos++] = buffer[i];
+            if (buffer[i] == '"' && i + 1 < inner_end && buffer[i + 1] == '"')
+            {
+                i++;
+            }
+        }
+        text[pos] = '\0';
+        length = pos;
+    }
+    else
+    {
+        length = (size_t)(end - start);
+        text = (char*)malloc(length + 1);
+        if (text == NULL)
+        {
+            return Csv_Error_Invalid_Parsing;
+        }
+        if (length > 0)
+        {
+            memcpy(text, buffer + start, length);
+        }
+        text[length] = '\0';
+    }
+
+    if (is_integer_text(text, length))
+    {
+        int* stored = (int*)malloc(sizeof(int));
+        if (stored == NULL)
+        {
+            free(text);
+            return Csv_Error_Invalid_Parsing;
+        }
+        *stored = (int)strtol(text, NULL, 10);
+        free(text);
+        add_to_data(csv, stored);
+        return Csv_Error_Success;
+    }
+    else if (is_decimal_text(text, length))
+    {
+        double* stored = (double*)malloc(sizeof(double));
+        if (stored == NULL)
+        {
+            free(text);
+            return Csv_Error_Invalid_Parsing;
+        }
+        *stored = strtod(text, NULL);
+        free(text);
+        add_to_data(csv, stored);
+        return Csv_Error_Success;
+    }
+
+    add_to_data(csv, text);
+    return Csv_Error_Success;
+}
+
 Csv_Error csv_parse(const char* content, int content_len, Csv* out_csv)
 {
+    char* buffer = NULL;
+    int start = 0;
+    int current = 0;
+    bool in_quotes = false;
+    bool require_delimiter = false;
+    bool ended_on_record_separator = false;
+
     if (content == NULL)
     {
         return Csv_Error_Content_Is_NULL;
@@ -43,6 +192,7 @@ Csv_Error csv_parse(const char* content, int content_len, Csv* out_csv)
     {
         return Csv_Error_Out_Csv_Is_NULL;
     }
+
     memset(out_csv, 0, sizeof(Csv));
 
     if (content_len <= 0)
@@ -50,98 +200,124 @@ Csv_Error csv_parse(const char* content, int content_len, Csv* out_csv)
         return Csv_Error_Content_Length_Is_Invalid;
     }
 
-    size_t buffer_alloc_size = sizeof(char) * content_len + 1;
-    char* buffer = (char*)malloc(buffer_alloc_size);
-    memcpy(buffer, content, buffer_alloc_size - 1);
-    buffer[buffer_alloc_size - 1] = '\0';
+    buffer = (char*)malloc((size_t)content_len + 1);
+    if (buffer == NULL)
+    {
+        return Csv_Error_Invalid_Parsing;
+    }
 
-    int start = 0;
-    int current = 0;
+    memcpy(buffer, content, (size_t)content_len);
+    buffer[content_len] = '\0';
 
     out_csv->data_length = 0;
     out_csv->data_capacity = 8;
     out_csv->data = (void**)malloc(sizeof(void*) * out_csv->data_capacity);
+    if (out_csv->data == NULL)
+    {
+        free(buffer);
+        memset(out_csv, 0, sizeof(Csv));
+        return Csv_Error_Invalid_Parsing;
+    }
     memset(out_csv->data, 0, sizeof(void*) * out_csv->data_capacity);
 
     while (true)
     {
-        if (current > content_len)
+        char c;
+
+        if (current == content_len)
         {
+            if (in_quotes)
+            {
+                return fail_parse(out_csv, buffer);
+            }
+
+            /* We do not create an empty field, as there is no point. */
+            if (!(start == content_len && ended_on_record_separator))
+            {
+                if (emit_field(out_csv, buffer, start, current) != Csv_Error_Success)
+                {
+                    return fail_parse(out_csv, buffer);
+                }
+            }
+            free(buffer);
             return Csv_Error_Success;
         }
 
-        bool is_eol = is_end_of_line(&buffer[current]);
-        if (buffer[current] == ',' || is_eol)
-        {//from_account_i
-            // text
+        c = buffer[current];
 
-            //printf("Checking alpha [%c]\n", buffer[start]);
-            if (isalpha(buffer[start]) != 0)
+        if (in_quotes)
+        {
+            if (c == '"')
             {
-
-                char* text = (char*)malloc(sizeof(char) * (current - start) + 1);
-                memcpy(text, &buffer[start], (current - start));
-                text[(current-start)] = '\0';
-                printf("Hello test: [%s] | length: %d\n", text, current - start );
-                add_to_data(out_csv, (void*)text);
-                
-                if (!is_eol)
-                    start = current + 1; // a comma is just 1 character so we need to add 1.
-                else
+                if (current + 1 < content_len && buffer[current + 1] == '"')
                 {
-                    start = current + 2; // eol is 2 characters so we need to add 2.
-                    printf("Found EOL[%d]!\n", start);
+                    current += 2;
+                    continue;
                 }
+                in_quotes = false;
+                require_delimiter = true;
+                current++;
+                continue;
             }
-            else if (isdigit(buffer[start]) != 0)
+            current++;
+            continue;
+        }
+
+        if (c == '"' && current == start)
+        {
+            in_quotes = true;
+            current++;
+            continue;
+        }
+
+        if (c == ',')
+        {
+            if (emit_field(out_csv, buffer, start, current) != Csv_Error_Success)
             {
-                bool is_decimal = false;
-                for (size_t i = start; i < current; i++)
-                {
-                    if (buffer[i] == '.')
-                    {
-                        is_decimal = true;
-                        break;
-                    }
-                }
-
-                char temp_buffer[current - start + 1];
-                memcpy(temp_buffer, &buffer[start], current - start);
-                temp_buffer[current - start] = '\0';
-
-                printf("Decimal/Digit buffer: [%s]\n", temp_buffer);
-                char* temp;
-
-                if (is_decimal)
-                {
-                    double* decimal_value = (double*)malloc(sizeof(double));
-                    *decimal_value = strtod(temp_buffer, &temp);
-
-                    add_to_data(out_csv, (void*)decimal_value);
-                }
-                else 
-                {
-                    int* value = (int*)malloc(sizeof(int));
-                    *value = strtol(temp_buffer, &temp, 10);
-
-                    add_to_data(out_csv, (void*)value);
-                }
-
-                
-                start = current + 1;
+                return fail_parse(out_csv, buffer);
             }
+            start = current + 1;
+            ended_on_record_separator = false;
+            require_delimiter = false;
+            current++;
+            continue;
+        }
+
+        if (c == '\n')
+        {
+            if (emit_field(out_csv, buffer, start, current) != Csv_Error_Success)
+            {
+                return fail_parse(out_csv, buffer);
+            }
+            start = current + 1;
+            ended_on_record_separator = true;
+            require_delimiter = false;
+            current++;
+            continue;
+        }
+
+        if (c == '\r')
+        {
+            if (current + 1 < content_len && buffer[current + 1] == '\n')
+            {
+                if (emit_field(out_csv, buffer, start, current) != Csv_Error_Success)
+                {
+                    return fail_parse(out_csv, buffer);
+                }
+                start = current + 2;
+                ended_on_record_separator = true;
+                require_delimiter = false;
+                current += 2;
+                continue;
+            }
+            return fail_parse(out_csv, buffer);
+        }
+
+        if (require_delimiter || c == '"')
+        {
+            return fail_parse(out_csv, buffer);
         }
 
         current++;
-    }
-
-    return Csv_Error_Success;
-}
-
-void csv_free(Csv* csv)
-{
-    if (csv->data != NULL)
-    {
-        free(csv->data);
     }
 }

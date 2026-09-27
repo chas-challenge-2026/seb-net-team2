@@ -13,7 +13,7 @@
 
 typedef enum
 {
-    Csv_Error_Success,
+    Csv_Error_Success = 0,
     Csv_Error_Content_Is_NULL = -10, // Happens if someone tries to pass a NULL ptr as content.
     Csv_Error_Out_Csv_Is_NULL, // Happens if someone tries to pass a NULL ptr as out_csv.
     Csv_Error_Content_Length_Is_Invalid, // Happens if content length is too short (<= 0).
@@ -27,11 +27,13 @@ typedef struct
     size_t data_length;
 } Csv;
 
-// Parsar CSV-innehåll. Allokerar och returnerar array av CsvRow.
-// rows_out: antal rader (exkl. header)
-// Anroparen ansvarar för att frigöra minnet med free_csv_rows().
-
+// Parsar CSV-innehåll. Allokerar och returnerar error Kod (0 eller Csv_Error_Success vid success).
+// content: CSV strängen att parsa
+// content_len: Längden på CSV length.
+// out_csv: Det parsade CSV resultatet
 Csv_Error csv_parse(const char* content, int content_len, Csv* out_csv);
+
+// free:ar rows->data o dess indexes.
 void csv_free(Csv* rows);
 
 
