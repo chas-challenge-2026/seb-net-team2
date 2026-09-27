@@ -65,8 +65,7 @@ int iban_mod97(const char* iban) {
         remainder = (remainder * 10 + iban_converted[i]) % 97;
     }
 
-    printf("Rearranged: %s\n", iban_rearranged);
-    printf("Result: %i\n", remainder);
+    // printf("Result: %i\n", remainder);
 
-    return 0;
+    return remainder;
 }
