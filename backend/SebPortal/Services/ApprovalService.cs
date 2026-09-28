@@ -3,6 +3,7 @@ using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Data;
 using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Authorization;
 
 namespace SebPortal.Api.Services
 {
@@ -147,6 +148,24 @@ namespace SebPortal.Api.Services
             var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId);
 
             return steps.Select(step => new PendingApprovalStepDTO
+            {
+                StepId = step.Id,
+                StepNumber = step.StepNumber,
+                PaymentId = step.PaymentId,
+                Amount = step.Payment.Amount,
+                Currency = step.Payment.Currency,
+                ToIban = step.Payment.ToIban,
+                Reference = step.Payment.Reference,
+                CreatedByUserId = step.Payment.CreatedByUserId,
+                CreatedByUserName = step.Payment.CreatedByUser.Name,
+                PaymentCreatedAt = step.Payment.CreatedAt
+            });
+        }
+
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForTenantAsync(int tenantId)
+        {
+            var allTenantsteps = await _approvalRepository.GetPendingStepsForTenantAsync(tenantId);
+            return allTenantsteps.Select(step => new PendingApprovalStepDTO
             {
                 StepId = step.Id,
                 StepNumber = step.StepNumber,

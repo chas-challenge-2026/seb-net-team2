@@ -98,9 +98,17 @@ namespace SebPortal.Api.Controllers
             var userId = GetCurrentUserId();
             if (userId == null)
                 return Unauthorized("Saknar giltigt UserId-claim i token.");
-
-            var steps = await _approvalService.GetPendingStepsForAttestantAsync(userId.Value);
-            return Ok(steps);
+            if (User.IsInRole(UserRoles.Admin))
+            {
+                var tenantIdClaim = User.FindFirst("TenantId")?.Value;
+                if (string.IsNullOrEmpty(tenantIdClaim) || !int.TryParse(tenantIdClaim, out var tenantId))
+                    return Unauthorized("Saknar giltigt TenantId-claim i token.");
+                var allPendingSteps = await _approvalService.GetPendingStepsForTenantAsync(tenantId);
+                return Ok(allPendingSteps);
+            }
+            
+            var attestantSteps = await _approvalService.GetPendingStepsForAttestantAsync(userId.Value);
+            return Ok(attestantSteps);
         }
     }
 }
