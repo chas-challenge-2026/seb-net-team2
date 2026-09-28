@@ -37,7 +37,9 @@ namespace SebPortal.Api.Controllers
             if (userId == null)
                 return Unauthorized("Saknar giltigt UserId-claim i token.");
 
-            var result = await _approvalService.DecideAsync(dto, userId.Value);
+            var isAdmin = User.IsInRole(UserRoles.Admin);
+
+            var result = await _approvalService.DecideAsync(dto, userId.Value, isAdmin);
 
             return result switch
             {

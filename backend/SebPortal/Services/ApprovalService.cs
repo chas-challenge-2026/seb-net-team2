@@ -32,7 +32,7 @@ namespace SebPortal.Api.Services
         }
 
         // This method handles the decision-making process for an approval step.
-        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId)
+        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId, bool isAdmin)
         {
             // Validate the decision provided in the DTO
             if (!ValidDecisions.Contains(dto.Decision))
@@ -44,7 +44,7 @@ namespace SebPortal.Api.Services
                 return ApprovalStepValidationResult.StepNotFound;
 
             // Retrieve the associated payment for the approval step
-            var validation = ValidateApprovalStep(approvalStep.Payment, approvalStep, currentUserId);
+            var validation = ValidateApprovalStep(approvalStep.Payment, approvalStep, currentUserId, isAdmin);
             if (validation != ApprovalStepValidationResult.Valid)
                 return validation;
 
@@ -102,7 +102,7 @@ namespace SebPortal.Api.Services
         }
 
         // This method validates the approval step against the payment and the current user.
-        public ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId)
+        public ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId, bool isAdmin)
         {
             // Validate that the approval step belongs to the payment
             if (approvalStep.PaymentId != payment.Id)
@@ -117,7 +117,7 @@ namespace SebPortal.Api.Services
             if (payment.CreatedByUserId == currentUserId)
                 return ApprovalStepValidationResult.CannotApproveOwnPayment;
             // Validate that the current user is the assigned attestant for the approval step
-            if (approvalStep.AttestantId != currentUserId)
+            if (approvalStep.AttestantId != currentUserId && !isAdmin)
                 return ApprovalStepValidationResult.NotAssignedAttestant;
 
             return ApprovalStepValidationResult.Valid;

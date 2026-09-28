@@ -6,8 +6,8 @@ namespace SebPortal.Api.Services
     public interface IApprovalService
     {
         
-        ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId);
-        Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId);
+        ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId, bool isAdmin);
+        Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId, bool isAdmin);
         Task<ApprovalStep?> GetApprovalStepByIdAsync(int id);
         Task<IEnumerable<ApprovalStep>> GetApprovalStepsByPaymentIdAsync(int paymentId);
         Task<bool> UpdateApprovalStepAsync(ApprovalStep approvalStep);
