@@ -82,6 +82,7 @@ namespace SebPortal.Api.Services
                 await _auditRepository.AddEntryAsync(new AuditEntries
                 {
                     UserId = currentUserId,
+                    TenantId = approvalStep.Payment.TenantId,
                     Action = dto.Decision == "approved" ? "APPROVE_STEP" : "REJECT_STEP",
                     EntityType = "payment",
                     EntityId = approvalStep.PaymentId,
