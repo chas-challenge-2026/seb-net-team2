@@ -8,12 +8,46 @@ int validate_iban(const char* iban, int* error_out) {
 }
 
 int validate_bic(const char* bic) {
+    if (!bic) { return -1; }
 
+    size_t length = strlen(bic);
+    if (length != 8 && length != 11) { return 0;}
+
+    const char* bic_ptr = bic;
+
+    // Bank + Country code format
+    int i = 0;
+    for (i = 0; i < 6; i++) {
+        char index_as_val = toupper((unsigned char)(*bic_ptr));
+        if (index_as_val >= 'A' && index_as_val <= 'Z') {
+            bic_ptr++;
+            continue;
+        } else {
+            return 0;
+        }
+    }
+
+    // Location code + optional branch code format
+
+    for (i = 6; i < length; i++) {
+        char index_as_val = toupper((unsigned char)(*bic_ptr));
+        if (index_as_val >= 'A' && index_as_val <= 'Z') {
+            bic_ptr++;
+            continue;
+        } else if (index_as_val >= '0' && index_as_val <= '9') {
+            bic_ptr++;
+            continue;
+        } else {
+            return 0;
+        }
+    }
 
     return 1;
 }
 
 int iban_mod97(const char* iban) {
+    if (!iban) { return -1; }
+
     char iban_rearranged[35];
     memset(iban_rearranged, 0, sizeof(iban_rearranged));
 
@@ -55,17 +89,16 @@ int iban_mod97(const char* iban) {
         iban_ptr++; 
         j++;
     }
+
     // Update len to match expanded length
     iban_len = j;
 
-    // modulus
+    // Modulus 97
     int remainder = 0;
     
     for (i = 0; i < iban_len; i++) {
         remainder = (remainder * 10 + iban_converted[i]) % 97;
     }
-
-    // printf("Result: %i\n", remainder);
 
     return remainder;
 }
