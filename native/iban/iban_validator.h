@@ -1,5 +1,5 @@
-#ifndef __IBAN_H_
-#define __IBAN_H_
+#ifndef __IBAN_VALIDATOR_H_
+#define __IBAN_VALIDATOR_H_
 
 #include <stdio.h>
 #include <stdlib.h>

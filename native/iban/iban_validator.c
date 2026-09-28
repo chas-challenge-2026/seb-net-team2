@@ -1,8 +1,80 @@
-#include "iban.h"
+#include "iban_validator.h"
 
+const char* VALID_COUNTRY_CODES[] = {
+"AL", "AD", "AT", "AZ", "BH", "BY", "BE", "BA", "BR", "BG",
+"BI", "CR", "HR", "CY", "CZ", "DK", "DJ", "DO", "EG", "SV",
+"EE", "FK", "FO", "FI", "FR", "GE", "DE", "GI", "GR", "GL",
+"GT", "HN", "HU", "IS", "IQ", "IE", "IL", "IT", "JO", "KZ",
+"XK", "KW", "LV", "LB", "LY", "LI", "LT", "LU", "MT", "MR",
+"MU", "MD", "MC", "MN", "ME", "NL", "NI", "MK", "NO", "PK",
+"PS", "PL", "PT", "QA", "RO", "RU", "LC", "SM", "ST", "SA",
+"RS", "SC", "SK", "SI", "SO", "ES", "VA", "SD", "OM", "SE",
+"CH", "TL", "TN", "TR", "UA", "AE", "GB", "VG", "YE"
+};
+
+const int NUM_COUNTRY_CODES = sizeof(VALID_COUNTRY_CODES) / sizeof(VALID_COUNTRY_CODES[0]);
 
 int validate_iban(const char* iban, int* error_out) {
+    if (!iban || !error_out) { return -1; }
 
+    // Length
+    size_t length = strlen(iban);
+
+    if (length < 15 || length > 34) {
+        *error_out = 1;
+        return 0;
+    }
+
+    // Invalid characters
+    const char* iban_ptr = iban;
+    for (int i = 0; i < 2; i++){
+        if (!isalpha((unsigned char)(*iban_ptr))) {
+            *error_out = 3;
+            return 0;
+        } else {
+            iban_ptr++;
+        }
+    }
+    for (int i = 2; i < 4; i++){
+        if (!isdigit((unsigned char)(*iban_ptr))) {
+            *error_out = 3;
+            return 0;
+        } else {
+            iban_ptr++;
+        }
+    }
+    for (int i = 4; i < length; i++){
+        if (!isalnum((unsigned char)(*iban_ptr))) {
+            *error_out = 3;
+            return 0;
+        } else {
+            iban_ptr++;
+        }
+    }
+
+    // Country code
+    char country_code[3];
+    country_code[0] = toupper((unsigned char)iban[0]);
+    country_code[1] = toupper((unsigned char)iban[1]);
+    country_code[2] = '\0';
+
+    int cc_match = 0;
+    for (int i = 0; i < NUM_COUNTRY_CODES; i++) {
+        if (strcmp(country_code, VALID_COUNTRY_CODES[i]) == 0) {
+            cc_match = 1;
+            break;
+        }
+    }
+    if (!cc_match) {
+        *error_out = 2;
+        return 0;
+    }
+
+    // MOD97 Checksum
+    if (iban_mod97(iban) != 1) {
+        *error_out = 4;
+        return 0;
+    }
 
     return 1;
 }
