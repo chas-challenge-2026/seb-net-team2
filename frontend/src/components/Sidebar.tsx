@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 
 import { useAuth } from "../hooks/useAuth";
 import { useApprovals } from "../hooks/useApprovals";
+import { countOverdue } from "../utils/approvalReminders";
 
 import styles from "./Sidebar.module.css";
 
@@ -31,6 +32,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { data: approvals } = useApprovals(canViewApprovals);
 
   const pendingApprovalCount = approvals?.length ?? 0;
+  const overdueApprovalCount = countOverdue(approvals);
+
+  const badgeLabel =
+    overdueApprovalCount > 0
+      ? `${pendingApprovalCount} pending, ${overdueApprovalCount} overdue`
+      : `${pendingApprovalCount} pending`;
 
   const previousPendingCount = useRef(pendingApprovalCount);
 
@@ -182,7 +189,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {pendingApprovalCount > 0 && (
                 <span
                   className={`${styles.badge} ${badgePulsing ? styles.pulse : ""
-                    }`}
+                    } ${overdueApprovalCount > 0 ? styles.overdue : ""}`}
+                  title={badgeLabel}
+                  aria-label={badgeLabel}
                 >
                   {pendingApprovalCount}
                 </span>

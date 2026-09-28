@@ -7,6 +7,7 @@ import { useState } from "react";
 
 import { NavigationBar } from "../components/Navbar";
 import { Sidebar } from "../components/Sidebar";
+import { OverdueReminder } from "../components/OverdueReminder/OverdueReminder";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -60,6 +61,8 @@ export function MainLayout() {
             >
                 <Outlet />
             </main>
+
+            {isAuthenticated && <OverdueReminder />}
         </>
     );
 }

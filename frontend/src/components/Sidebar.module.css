@@ -207,6 +207,10 @@
 }
 
 
+.badge.overdue {
+  background-color: var(--color-error);
+}
+
 .badge.pulse {
   animation: badge-pulse 0.3s ease;
 }

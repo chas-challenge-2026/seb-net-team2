@@ -24,6 +24,12 @@ import type {
 
 import { AppError } from "../../errors/AppError";
 
+import {
+    OVERDUE_AFTER_DAYS,
+    daysWaiting,
+    isOverdue,
+} from "../../utils/approvalReminders";
+
 import styles from "./Attestkorg.module.css";
 
 const COMMENT_MAX_LENGTH = 300;
@@ -218,11 +224,19 @@ export function Attestkorg() {
             },
         });
 
+    // Overdue approvals always come first; the chosen sort applies within each group.
     const sortedApprovals =
         sortApprovals(
             approvals,
             pendingSort
+        ).sort(
+            (a, b) =>
+                Number(isOverdue(b)) -
+                Number(isOverdue(a))
         );
+
+    const overdueCount =
+        approvals.filter(isOverdue).length;
 
     function closeConfirm() {
         if (
@@ -502,6 +516,27 @@ export function Attestkorg() {
                 </div>
             )}
 
+            {overdueCount > 0 && (
+                <div
+                    className={
+                        styles.overdueBanner
+                    }
+                    role="status"
+                >
+                    <strong>
+                        {overdueCount === 1
+                            ? "1 payment has"
+                            : `${overdueCount} payments have`}{" "}
+                        been waiting more
+                        than{" "}
+                        {OVERDUE_AFTER_DAYS}{" "}
+                        days.
+                    </strong>{" "}
+                    They are shown first
+                    in the list below.
+                </div>
+            )}
+
             {decisionMutation.isError && (
                 <div
                     className={
@@ -583,9 +618,12 @@ export function Attestkorg() {
                     sortedApprovals.map(
                         (approval) => (
                             <article
-                                className={
-                                    styles.card
-                                }
+                                className={`${styles.card} ${isOverdue(
+                                    approval
+                                )
+                                        ? styles.cardOverdue
+                                        : ""
+                                    }`}
                                 key={
                                     approval.stepId
                                 }
@@ -618,6 +656,22 @@ export function Attestkorg() {
                                                 approval.paymentId
                                             }
                                         </h2>
+
+                                        {isOverdue(
+                                            approval
+                                        ) && (
+                                                <p
+                                                    className={
+                                                        styles.overdue
+                                                    }
+                                                >
+                                                    Waiting{" "}
+                                                    {daysWaiting(
+                                                        approval
+                                                    )}{" "}
+                                                    days
+                                                </p>
+                                            )}
                                     </div>
 
                                     <strong>
