@@ -1,6 +1,9 @@
 #ifndef __CSV_H_
 #define __CSV_H_
 
+#include <stdbool.h>
+#include <stdio.h>
+
 /*
     CSV-parser: ska hantera batchfiler på 10 000+ rader med parallell 
     körning. En ren .NET-implementation är tillräcklig för v1:s 500-radersgräns 
@@ -8,25 +11,30 @@
 
 */
 
-#define CSV_TO_IBAN_LENGTH 35
-#define CSV_REFERENCE_LENGTH 101
-#define CSV_ERROR_LENGTH 256
+typedef enum
+{
+    Csv_Error_Success = 0,
+    Csv_Error_Content_Is_NULL = -10, // Happens if someone tries to pass a NULL ptr as content.
+    Csv_Error_Out_Csv_Is_NULL, // Happens if someone tries to pass a NULL ptr as out_csv.
+    Csv_Error_Content_Length_Is_Invalid, // Happens if content length is too short (<= 0).
+    Csv_Error_Invalid_Parsing, // Happens when the CSV file is formatted wrong so parsing it wont work.
+} Csv_Error;
 
-typedef struct {
-    int     from_account_id;
-    char    to_iban[CSV_TO_IBAN_LENGTH];
-    double  amount;
-    char    reference[CSV_REFERENCE_LENGTH];
-    int     valid;         // 1 = ok, 0 = parsningsfel
-    char    error[CSV_ERROR_LENGTH];    // felmeddelande om valid == 0
-} CsvRow;
+typedef struct 
+{
+    void** data;
+    size_t data_capacity;
+    size_t data_length;
+} Csv;
 
-// Parsar CSV-innehåll. Allokerar och returnerar array av CsvRow.
-// rows_out: antal rader (exkl. header)
-// Anroparen ansvarar för att frigöra minnet med free_csv_rows().
-CsvRow* parse_csv(const char* content, int content_len, int* rows_out);
+// Parsar CSV-innehåll. Allokerar och returnerar error Kod (0 eller Csv_Error_Success vid success).
+// content: CSV strängen att parsa
+// content_len: Längden på CSV length.
+// out_csv: Det parsade CSV resultatet
+Csv_Error csv_parse(const char* content, int content_len, Csv* out_csv);
 
-void free_csv_rows(CsvRow* rows);
+// free:ar rows->data o dess indexes.
+void csv_free(Csv* rows);
 
 
 #endif
