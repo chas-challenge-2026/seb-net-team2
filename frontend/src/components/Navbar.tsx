@@ -5,7 +5,7 @@ import styles from './Navbar.module.css'
 
 export function NavigationBar() {
     return (
-        <nav className={styles.navbar}>
+        <nav className={styles.navbar} aria-label="Primary navigation">
             <div className={styles.navbar__brand}>
                 <Link to="/dashboard" className={styles.navbar__brandLink} aria-label="Go to dashboard">
                     <img
