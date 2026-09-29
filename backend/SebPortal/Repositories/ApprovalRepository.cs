@@ -17,6 +17,7 @@ namespace SebPortal.Api.Repositories
         {
             return await _dbContext.ApprovalSteps
                 .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 

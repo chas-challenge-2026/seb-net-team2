@@ -16,19 +16,22 @@ namespace SebPortal.Api.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAuditRepository _auditRepository;
         private readonly SebDbContext _context;
+        private readonly INotificationService _notificationService;
 
         public ApprovalService(
             IApprovalRepository approvalRepository,
             IPaymentRepository paymentRepository,
             IAccountRepository accountRepository,
             IAuditRepository auditRepository,
-            SebDbContext context)
+            SebDbContext context,
+            INotificationService notificationService)
         {
             _approvalRepository = approvalRepository;
             _paymentRepository = paymentRepository;
             _accountRepository = accountRepository;
             _auditRepository = auditRepository;
             _context = context;
+            _notificationService = notificationService;
         }
 
         // This method handles the decision-making process for an approval step.
@@ -78,6 +81,17 @@ namespace SebPortal.Api.Services
                 {
                     await _paymentRepository.RejectPaymentAsync(approvalStep.PaymentId);
                     await _accountRepository.RefundAsync(approvalStep.Payment.FromAccountId, approvalStep.Payment.Amount);
+
+                    ////if payment is rejected, notify initiator
+                    var notificationDTO = new NotificationMessageDTO
+                    {
+                        TenantId = approvalStep.Payment.TenantId,
+                        RecipientEmail = approvalStep.Payment.CreatedByUser.Email, 
+                        Subject = "Betalning avslagen",
+                        Message = $"Betalningen med referens '{approvalStep.Payment.Reference}' har avslagits."
+                    };
+
+                    await _notificationService.SendNotificationMessageAsync(notificationDTO);
                 }
 
                 await _auditRepository.AddEntryAsync(new AuditEntries
