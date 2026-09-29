@@ -93,14 +93,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {isOpen && (
-        <div
+        <button
+          type="button"
           className={styles["sidebar-backdrop"]}
+          aria-label="Close menu"
           onClick={toggleMobileSidebar}
         />
       )}
 
       <aside
         id={sidebarId}
+        aria-label="Secondary navigation"
         className={`
                     ${styles.sidebar}
                     ${isOpen ? styles.open : ""}
@@ -133,7 +136,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </svg>
         </button>
 
-        <nav className={styles["sidebar-nav"]}>
+        <nav
+          aria-label="Secondary navigation links"
+          className={styles["sidebar-nav"]}
+        >
           <Link
             to="/dashboard"
             activeOptions={{ exact: true }}
