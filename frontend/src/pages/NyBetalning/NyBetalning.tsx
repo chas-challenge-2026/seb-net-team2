@@ -1,10 +1,10 @@
 import { type FormEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
-
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
-
 import { createPayment } from "../../services/accountService";
 import { paymentSchema, type PaymentForm } from "../../schemas/paymentSchema";
 
@@ -20,13 +20,9 @@ const initialForm: PaymentForm = {
 };
 
 export function NyBetalning() {
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
-
-    const {
-        data: accounts = [],
-        isLoading: isLoadingAccounts,
-        isError: accountsError,
-    } = useAccounts();
+    const { data: accounts = [], isLoading: isLoadingAccounts, isError: accountsError } = useAccounts();
 
     const [form, setForm] = useState(initialForm);
     const [submitted, setSubmitted] = useState(false);
@@ -35,18 +31,12 @@ export function NyBetalning() {
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
 
-    const selectedAccount = accounts.find(
-        (account) => account.id === form.fromAccountId
-    );
-
+    const selectedAccount = accounts.find((account) => account.id === form.fromAccountId);
     const amount = Number(form.amount) || 0;
+    const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
 
     function updateField(field: keyof PaymentForm, value: string) {
-        setForm((current) => ({
-            ...current,
-            [field]: value,
-        }));
-
+        setForm((current) => ({ ...current, [field]: value }));
         setSubmitted(false);
         setError(null);
         setIdempotencyKey(null);
@@ -63,7 +53,7 @@ export function NyBetalning() {
         event.preventDefault();
 
         if (!selectedAccount) {
-            setError("Select an account.");
+            setError(t("payment.errors.selectAccount"));
             return;
         }
 
@@ -75,7 +65,7 @@ export function NyBetalning() {
         }
 
         if (amount > selectedAccount.balance) {
-            setError("The payment amount exceeds the account balance.");
+            setError(t("payment.errors.insufficientBalance"));
             return;
         }
 
@@ -89,7 +79,7 @@ export function NyBetalning() {
 
         if (!validation.success || !selectedAccount) {
             setIsReviewOpen(false);
-            setError("Please review the payment details and try again.");
+            setError(t("payment.errors.reviewDetails"));
             return;
         }
 
@@ -120,7 +110,7 @@ export function NyBetalning() {
             setForm(initialForm);
             setIdempotencyKey(null);
         } catch {
-            setError("Could not create the payment. Please try again.");
+            setError(t("payment.errors.createFailed"));
         } finally {
             setIsSubmitting(false);
         }
@@ -130,9 +120,9 @@ export function NyBetalning() {
         <div className={styles.page}>
             <header className={styles.header}>
                 <div>
-                    <span className={styles.eyebrow}>PAYMENTS</span>
-                    <h1>Create a new payment</h1>
-                    <p>Send a secure payment from your company account.</p>
+                    <span className={styles.eyebrow}>{t("payment.eyebrow")}</span>
+                    <h1>{t("payment.title")}</h1>
+                    <p>{t("payment.description")}</p>
                 </div>
             </header>
 
@@ -143,67 +133,57 @@ export function NyBetalning() {
                             <div className={styles.number}>01</div>
 
                             <div>
-                                <h2>Payment details</h2>
-                                <p>Enter the recipient and payment amount.</p>
+                                <h2>{t("payment.details.title")}</h2>
+                                <p>{t("payment.details.description")}</p>
                             </div>
                         </div>
 
                         <label>
-                            From account
+                            {t("payment.fields.fromAccount")}
                             <select
                                 value={form.fromAccountId}
                                 disabled={isLoadingAccounts || accountsError || isSubmitting}
-                                onChange={(event) =>
-                                    updateField("fromAccountId", event.target.value)
-                                }
+                                onChange={(event) => updateField("fromAccountId", event.target.value)}
                             >
                                 {isLoadingAccounts && (
-                                    <option>Loading accounts...</option>
+                                    <option>{t("payment.loadingAccounts")}</option>
                                 )}
 
                                 {accounts.map((account) => (
                                     <option key={account.id} value={account.id}>
-                                        {account.name} ·{" "}
-                                        {account.balance.toLocaleString("en-SE")}{" "}
-                                        {account.currency}
+                                        {account.name} · {account.balance.toLocaleString(locale)} {account.currency}
                                     </option>
                                 ))}
                             </select>
 
                             {accountsError && (
-                                <p className={styles.fieldError}>
-                                    Could not load accounts.
-                                </p>
+                                <p className={styles.fieldError}>{t("payment.errors.loadAccounts")}</p>
                             )}
                         </label>
 
                         <label>
-                            Recipient
+                            {t("payment.fields.recipient")}
                             <input
                                 required
                                 value={form.recipient}
-                                placeholder="Company or person"
-                                onChange={(event) =>
-                                    updateField("recipient", event.target.value)
-                                }
+                                placeholder={t("payment.placeholders.recipient")}
+                                onChange={(event) => updateField("recipient", event.target.value)}
                             />
                         </label>
 
                         <label>
-                            IBAN
+                            {t("payment.fields.iban")}
                             <input
                                 required
                                 value={form.iban}
                                 placeholder="SE00 0000 0000 0000 0000 0000"
-                                onChange={(event) =>
-                                    updateField("iban", event.target.value)
-                                }
+                                onChange={(event) => updateField("iban", event.target.value)}
                             />
                         </label>
 
                         <div className={styles.fieldGrid}>
                             <label>
-                                Amount
+                                {t("payment.fields.amount")}
                                 <div className={styles.amountInput}>
                                     <input
                                         required
@@ -212,41 +192,37 @@ export function NyBetalning() {
                                         type="number"
                                         value={form.amount}
                                         placeholder="0.00"
-                                        onChange={(event) =>
-                                            updateField("amount", event.target.value)
-                                        }
+                                        onChange={(event) => updateField("amount", event.target.value)}
                                     />
                                     <span>SEK</span>
                                 </div>
                             </label>
 
                             <label>
-                                Reference
+                                {t("payment.fields.reference")}
                                 <input
                                     value={form.reference}
-                                    placeholder="Invoice or OCR"
-                                    onChange={(event) =>
-                                        updateField("reference", event.target.value)
-                                    }
+                                    placeholder={t("payment.placeholders.reference")}
+                                    onChange={(event) => updateField("reference", event.target.value)}
                                 />
                             </label>
                         </div>
 
                         <label>
-                            Message <span className={styles.optional}>Optional</span>
+                            {t("payment.fields.message")}{" "}
+                            <span className={styles.optional}>{t("payment.optional")}</span>
+
                             <textarea
                                 rows={3}
                                 value={form.message}
-                                placeholder="Write a message to the recipient"
-                                onChange={(event) =>
-                                    updateField("message", event.target.value)
-                                }
+                                placeholder={t("payment.placeholders.message")}
+                                onChange={(event) => updateField("message", event.target.value)}
                             />
                         </label>
 
                         {submitted && (
                             <div className={styles.success}>
-                                The payment has been created successfully.
+                                {t("payment.success")}
                             </div>
                         )}
 
@@ -255,26 +231,17 @@ export function NyBetalning() {
                         )}
 
                         <div className={styles.actions}>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="medium"
-                                onClick={clearForm}
-                            >
-                                Clear form
+                            <Button type="button" variant="ghost" size="medium" onClick={clearForm}>
+                                {t("payment.actions.clear")}
                             </Button>
 
                             <Button
                                 type="submit"
                                 variant="primary"
                                 size="medium"
-                                disabled={
-                                    isSubmitting ||
-                                    isLoadingAccounts ||
-                                    accountsError
-                                }
+                                disabled={isSubmitting || isLoadingAccounts || accountsError}
                             >
-                                Review payment
+                                {t("payment.actions.review")}
                                 <span aria-hidden="true">→</span>
                             </Button>
                         </div>
@@ -282,65 +249,55 @@ export function NyBetalning() {
                 </Card>
 
                 <Card
-                    title="Summary"
+                    title={t("payment.summary.title")}
                     variant="primary"
                     className={styles.summary}
                 >
                     <div className={styles.summaryAmount}>
-                        <span>Amount to pay</span>
+                        <span>{t("payment.summary.amountToPay")}</span>
                         <strong>
-                            {amount.toLocaleString("en-SE", {
-                                minimumFractionDigits: 2,
-                            })}{" "}
-                            SEK
+                            {amount.toLocaleString(locale, { minimumFractionDigits: 2 })} SEK
                         </strong>
                     </div>
 
                     <div className={styles.summaryRow}>
-                        <span>Recipient</span>
-                        <strong>{form.recipient || "Not specified"}</strong>
+                        <span>{t("payment.fields.recipient")}</span>
+                        <strong>{form.recipient || t("payment.summary.notSpecified")}</strong>
                     </div>
 
                     <div className={styles.summaryRow}>
-                        <span>Recipient IBAN</span>
-                        <strong>{form.iban || "Not specified"}</strong>
+                        <span>{t("payment.summary.recipientIban")}</span>
+                        <strong>{form.iban || t("payment.summary.notSpecified")}</strong>
                     </div>
 
                     <div className={styles.summaryRow}>
-                        <span>Reference</span>
-                        <strong>{form.reference || "Not specified"}</strong>
+                        <span>{t("payment.fields.reference")}</span>
+                        <strong>{form.reference || t("payment.summary.notSpecified")}</strong>
                     </div>
 
                     <div className={styles.summaryRow}>
-                        <span>From account</span>
+                        <span>{t("payment.fields.fromAccount")}</span>
                         <strong>
-                            {selectedAccount?.name ?? "Select an account"}
+                            {selectedAccount?.name ?? t("payment.summary.selectAccount")}
                         </strong>
                     </div>
 
                     <div className={styles.summaryRow}>
-                        <span>Balance after payment</span>
+                        <span>{t("payment.summary.balanceAfterPayment")}</span>
                         <strong>
                             {selectedAccount
-                                ? (selectedAccount.balance - amount).toLocaleString("en-SE")
+                                ? (selectedAccount.balance - amount).toLocaleString(locale)
                                 : "0"}{" "}
                             SEK
                         </strong>
                     </div>
 
                     <div className={styles.approval}>
-                        <span className={styles.approvalIcon} aria-hidden="true">
-                            ✓
-                        </span>
+                        <span className={styles.approvalIcon} aria-hidden="true">✓</span>
 
                         <div>
-                            <strong>
-                                Approval requirements are determined automatically
-                            </strong>
-                            <p>
-                                The payment will follow the approval rules configured
-                                for its amount.
-                            </p>
+                            <strong>{t("payment.approval.title")}</strong>
+                            <p>{t("payment.approval.description")}</p>
                         </div>
                     </div>
                 </Card>
@@ -362,42 +319,36 @@ export function NyBetalning() {
                         aria-modal="true"
                         aria-labelledby="review-payment-title"
                     >
-                        <p className={styles.eyebrow}>FINAL CHECK</p>
-                        <h2 id="review-payment-title">Review payment</h2>
-
-                        <p className={styles.reviewIntro}>
-                            Check the details before creating this payment.
-                        </p>
+                        <p className={styles.eyebrow}>{t("payment.review.eyebrow")}</p>
+                        <h2 id="review-payment-title">{t("payment.review.title")}</h2>
+                        <p className={styles.reviewIntro}>{t("payment.review.description")}</p>
 
                         <div className={styles.reviewDetails}>
                             <div>
-                                <span>Recipient</span>
+                                <span>{t("payment.fields.recipient")}</span>
                                 <strong>{form.recipient}</strong>
                             </div>
 
                             <div>
-                                <span>IBAN</span>
+                                <span>{t("payment.fields.iban")}</span>
                                 <strong>{form.iban}</strong>
                             </div>
 
                             <div>
-                                <span>Amount</span>
+                                <span>{t("payment.fields.amount")}</span>
                                 <strong>
-                                    {amount.toLocaleString("en-SE", {
-                                        minimumFractionDigits: 2,
-                                    })}{" "}
-                                    SEK
+                                    {amount.toLocaleString(locale, { minimumFractionDigits: 2 })} SEK
                                 </strong>
                             </div>
 
                             <div>
-                                <span>From account</span>
+                                <span>{t("payment.fields.fromAccount")}</span>
                                 <strong>{selectedAccount?.name}</strong>
                             </div>
 
                             {form.reference && (
                                 <div>
-                                    <span>Reference</span>
+                                    <span>{t("payment.fields.reference")}</span>
                                     <strong>{form.reference}</strong>
                                 </div>
                             )}
@@ -410,7 +361,7 @@ export function NyBetalning() {
                                 size="medium"
                                 onClick={() => setIsReviewOpen(false)}
                             >
-                                Go back
+                                {t("payment.actions.goBack")}
                             </Button>
 
                             <Button
@@ -420,7 +371,9 @@ export function NyBetalning() {
                                 onClick={confirmPayment}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? "Creating..." : "Confirm payment"}
+                                {isSubmitting
+                                    ? t("payment.actions.creating")
+                                    : t("payment.actions.confirm")}
                             </Button>
                         </div>
                     </section>
