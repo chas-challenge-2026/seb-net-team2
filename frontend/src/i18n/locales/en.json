@@ -136,8 +136,9 @@
             "decision": "Unable to process the approval decision."
         },
         "feedback": {
-            "approved": "Payment was approved successfully.",
-            "rejected": "Payment was rejected successfully."
+            "approved": "{{reference}} ({{amount}}) was approved.",
+            "rejected": "{{reference}} ({{amount}}) was rejected.",
+            "alreadyHandled": "This payment has already been handled. The list has been updated."
         },
         "sort": {
             "label": "Sort by",
@@ -147,19 +148,23 @@
             "amountLow": "Amount: low to high"
         },
         "card": {
-            "approvalStep": "Approval step {{step}}",
-            "payment": "Payment #{{id}}",
             "waitingDays_one": "Waiting {{count}} day",
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
             "submitted": "Submitted",
-            "toIban": "To IBAN"
+            "toIban": "To IBAN",
+            "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
+            "waitingToday": "Submitted today",
+            "dualApproval": "Dual approval – this payment requires two attestants"
         },
         "comment": {
             "label": "Comment",
             "optional": "(optional)",
-            "placeholder": "Add a comment"
+            "placeholder": "Add a comment",
+            "rejectReasonLabel": "Reason for rejection",
+            "required": "(required)",
+            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters."
         },
         "actions": {
             "reject": "Reject",
@@ -175,9 +180,9 @@
         "modal": {
             "approveTitle": "Approve payment?",
             "rejectTitle": "Reject payment?",
-            "approveDescription": "Approve payment",
-            "rejectDescription": "Reject payment",
-            "of": "of"
+            "approveDescription": "Check the details before you approve. The decision cannot be undone.",
+            "rejectDescription": "Check the details and explain why the payment is rejected.",
+            "amount": "Amount"
         }
     },
     "batch": {
@@ -450,7 +455,7 @@
         "description": "Get an email when payments are waiting for your approval, so they don't get stuck.",
         "emailEnabled": "Send me an email when a payment has waited too long for my approval",
         "recipient": "Reminders are sent to",
-        "remindAfter": "Remind me after",
+        "remindAfter": "Email me after",
         "dayCount_one": "{{count}} day",
         "dayCount_other": "{{count}} days",
         "success": "Reminder settings saved.",
@@ -460,7 +465,8 @@
         "errors": {
             "save": "Unable to save reminder settings.",
             "load": "Unable to load reminder settings."
-        }
+        },
+        "inAppNote": "Reminders in the app are always shown after {{days}} days."
     },
     "saveInvest": {
         "eyebrow": "SAVINGS & INVESTMENTS",
@@ -529,6 +535,14 @@
             "accountCreated": "Savings account created.",
             "goalCreated": "Savings goal created.",
             "accountOpened": "Account details opened."
+        }
+    },
+    "profilePage": {
+        "title": "My profile",
+        "description": "Your account details and settings.",
+        "details": {
+            "title": "Account details",
+            "company": "Company"
         }
     }
 }

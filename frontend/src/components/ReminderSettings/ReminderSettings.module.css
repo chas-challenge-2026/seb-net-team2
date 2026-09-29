@@ -59,6 +59,11 @@
     font-weight: 600;
 }
 
+.note {
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+}
+
 .field select {
     width: fit-content;
     min-width: 140px;
