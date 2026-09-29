@@ -1,13 +1,19 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using SebPortal.Api.Authorization;
+using SebPortal.Api.Dtos;
 using SebPortal.Api.Services;
 
 namespace SebPortal.Api.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
+    [Authorize]
     public class AccountsController : ControllerBase
     {
-        private readonly AccountService _accountService;
+        private readonly IAccountService _accountService;
 
-        public AccountsController(AccountService accountService)
+        public AccountsController(IAccountService accountService)
         {
             _accountService = accountService;
         }
@@ -19,7 +25,7 @@ namespace SebPortal.Api.Controllers
         /// <response code="200">Returns the list of accounts.</response>
         /// <response code="401">Unauthorized if the tenant ID claim is missing or invalid.</response>
         [HttpGet]
-        public async Task<IActionResult> GetAccounts()
+        public async Task<IActionResult> GetAccountsByTenantId()
         {
             var tenantClaim = User.FindFirst("TenantId")?.Value;
             if (!int.TryParse(tenantClaim, out var tenantId))

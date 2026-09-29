@@ -1,6 +1,7 @@
-﻿using SebPortal.Models;
+﻿using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
-using SebPortal.Api.Dtos;
+using SebPortal.Models;
+using System.Security.Principal;
 
 namespace SebPortal.Api.Services
 {
@@ -18,7 +19,7 @@ namespace SebPortal.Api.Services
             _generateIban = generateIban;
         }
 
-        public async Task<Account> CreateAccountAsync(CreateAccountDTO dto)
+        public async Task<AccountResponseDTO> CreateAccountAsync(CreateAccountDTO dto)
         {
 
             var createdAccount = new Account
@@ -34,17 +35,54 @@ namespace SebPortal.Api.Services
                 throw new Exception("IBAN already exists. Please try again.");
             }
 
-            return await _accountRepository.CreateAccountAsync(createdAccount);
+            var newAccount = await _accountRepository.CreateAccountAsync(createdAccount);
+            
+            return new AccountResponseDTO
+            {
+                Id = newAccount.Id,
+                TenantId = newAccount.TenantId,
+                AccountName = newAccount.AccountName,
+                Iban = newAccount.Iban,
+                Balance = newAccount.Balance,
+                Currency = newAccount.Currency
+            };
         }
 
-        public async Task<Account?> GetAccountByIdAsync(int accountId)
+        public async Task<AccountResponseDTO?> GetAccountByIdAsync(int accountId)
         {
-            return await _accountRepository.GetAccountByIdAsync(accountId);
+            var account = await _accountRepository.GetAccountByIdAsync(accountId);
+            if (account == null)
+            {
+                return null;
+            }
+            return new AccountResponseDTO
+            {
+                Id = account.Id,
+                TenantId = account.TenantId,
+                AccountName = account.AccountName,
+                Iban = account.Iban,
+                Balance = account.Balance,
+                Currency = account.Currency
+            };
         }
 
-        public async Task<IEnumerable<Account>> GetAccountsByTenantIdAsync(int tenantId)
+        public async Task<IEnumerable<AccountResponseDTO>> GetAccountsByTenantIdAsync(int tenantId)
         {
-            return await _accountRepository.GetAccountsByTenantIdAsync(tenantId);
+            var accounts = await _accountRepository.GetAccountsByTenantIdAsync(tenantId);
+            if (accounts == null)
+            {
+                return Enumerable.Empty<AccountResponseDTO>();
+            }
+            
+            return accounts.Select(account => new AccountResponseDTO
+            {
+                Id = account.Id,
+                TenantId = account.TenantId,
+                AccountName = account.AccountName,
+                Iban = account.Iban,
+                Balance = account.Balance,
+                Currency = account.Currency
+            });
         }
 
         public async Task UpdateAccountAsync(Account account)
