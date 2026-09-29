@@ -1,69 +1,97 @@
-import { useState } from 'react'
-import { Link, useRouterState } from '@tanstack/react-router'
-import { useApprovals } from '../../hooks/useApprovals'
-import { useAuth } from '../../hooks/useAuth'
-import { OVERDUE_AFTER_DAYS, countOverdue } from '../../utils/approvalReminders'
-import styles from './OverdueReminder.module.css'
+import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
-// Shown once per browser session, so the reminder doesn't nag on every page change.
-const DISMISSED_KEY = 'overdueReminderDismissed'
+import { useApprovals } from "../../hooks/useApprovals";
+import { useAuth } from "../../hooks/useAuth";
+import { OVERDUE_AFTER_DAYS, countOverdue } from "../../utils/approvalReminders";
+
+import styles from "./OverdueReminder.module.css";
+
+const DISMISSED_KEY = "overdueReminderDismissed";
 
 function readDismissed(): boolean {
     try {
-        return sessionStorage.getItem(DISMISSED_KEY) === 'true'
+        return sessionStorage.getItem(DISMISSED_KEY) === "true";
     } catch {
-        return false
+        return false;
     }
 }
 
 function saveDismissed() {
     try {
-        sessionStorage.setItem(DISMISSED_KEY, 'true')
+        sessionStorage.setItem(DISMISSED_KEY, "true");
     } catch {
-        // Storage can be unavailable (e.g. private mode); the toast then just reappears next load.
+        // Storage can be unavailable; the reminder then reappears next load.
     }
 }
 
 export function OverdueReminder() {
-    const { user } = useAuth()
-    const canApprove = user?.role === 'Attestant' || user?.role === 'Admin'
-    const { data: approvals } = useApprovals(canApprove)
-    const [dismissed, setDismissed] = useState(readDismissed)
-    const pathname = useRouterState({ select: (state) => state.location.pathname })
+    const { t } = useTranslation();
+    const { user } = useAuth();
 
-    const overdueCount = countOverdue(approvals)
+    const canApprove =
+        user?.role === "Attestant" ||
+        user?.role === "Admin";
 
-    // The approval inbox shows its own banner, so the toast would be redundant there.
-    if (!canApprove || dismissed || overdueCount === 0 || pathname === '/attestkorg') {
-        return null
+    const { data: approvals } = useApprovals(canApprove);
+    const [dismissed, setDismissed] = useState(readDismissed);
+
+    const pathname = useRouterState({
+        select: (state) => state.location.pathname,
+    });
+
+    const overdueCount = countOverdue(approvals);
+
+    if (
+        !canApprove ||
+        dismissed ||
+        overdueCount === 0 ||
+        pathname === "/attestkorg"
+    ) {
+        return null;
     }
 
     function dismiss() {
-        saveDismissed()
-        setDismissed(true)
+        saveDismissed();
+        setDismissed(true);
     }
 
     return (
-        <div className={styles.toast} role="status" aria-live="polite">
+        <div
+            className={styles.toast}
+            role="status"
+            aria-live="polite"
+        >
             <div className={styles.body}>
-                <strong className={styles.title}>Reminder: approvals waiting</strong>
+                <strong className={styles.title}>
+                    {t("overdueReminder.title")}
+                </strong>
+
                 <p className={styles.message}>
-                    {overdueCount === 1
-                        ? '1 payment has'
-                        : `${overdueCount} payments have`} been waiting more than {OVERDUE_AFTER_DAYS} days for your approval.
+                    {t("overdueReminder.message", {
+                        count: overdueCount,
+                        days: OVERDUE_AFTER_DAYS,
+                    })}
                 </p>
-                <Link to="/attestkorg" className={styles.link} onClick={dismiss}>
-                    Go to approval inbox
+
+                <Link
+                    to="/attestkorg"
+                    className={styles.link}
+                    onClick={dismiss}
+                >
+                    {t("overdueReminder.goToInbox")}
                 </Link>
             </div>
+
             <button
                 type="button"
                 className={styles.close}
                 onClick={dismiss}
-                aria-label="Dismiss reminder"
+                aria-label={t("overdueReminder.dismiss")}
             >
                 ×
             </button>
         </div>
-    )
+    );
 }

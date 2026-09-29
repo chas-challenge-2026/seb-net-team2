@@ -1,54 +1,38 @@
-import { useState } from "react";
-import type { FormEvent } from "react";
-
+import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
-
-import {
-    useMutation,
-    useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import Button from "../../../components/Button/Button";
 import PasswordInput from "../../../components/PasswordInput/PasswordInput";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
-
 import { useAuth } from "../../../hooks/useAuth";
-
 import { createUser } from "../../../services/authService";
-
 import { AppError } from "../../../errors/AppError";
-
 import type { UserRole } from "../../../schemas/userSchema";
 
 import styles from "./CreateUser.module.css";
 
-function getErrorMessage(error: unknown) {
-    if (error instanceof AppError) {
-        return error.detail ?? error.message;
-    }
-
-    return "Unable to create user.";
+function getErrorMessage(error: unknown, fallback: string) {
+    if (error instanceof AppError) return error.detail ?? error.message;
+    return fallback;
 }
 
 export default function CreateUser() {
+    const { t } = useTranslation();
     const { user } = useAuth();
-
     const queryClient = useQueryClient();
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
-    const [role, setRole] =
-        useState<UserRole>("User");
+    const [role, setRole] = useState<UserRole>("User");
 
     const createMutation = useMutation({
         mutationFn: createUser,
 
         onSuccess: async () => {
-            await queryClient.invalidateQueries({
-                queryKey: ["users"],
-            });
+            await queryClient.invalidateQueries({ queryKey: ["users"] });
 
             setName("");
             setEmail("");
@@ -57,14 +41,10 @@ export default function CreateUser() {
         },
     });
 
-    function handleSubmit(
-        event: FormEvent<HTMLFormElement>
-    ) {
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!user) {
-            return;
-        }
+        if (!user) return;
 
         createMutation.mutate({
             tenantId: user.tenantId,
@@ -78,34 +58,20 @@ export default function CreateUser() {
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
-                <h1>Create user</h1>
-
-                <p>
-                    Add a new user and assign
-                    their access role.
-                </p>
+                <h1>{t("users.create.title")}</h1>
+                <p>{t("users.create.description")}</p>
             </header>
 
             <section className={styles.formSection}>
                 <div className={styles.sectionHeader}>
-                    <h2>User information</h2>
-
-                    <p>
-                        Enter the user's details
-                        and select their role.
-                    </p>
+                    <h2>{t("users.form.title")}</h2>
+                    <p>{t("users.create.formDescription")}</p>
                 </div>
 
-                <form
-                    className={styles.form}
-                    onSubmit={handleSubmit}
-                >
+                <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.formGroup}>
-                        <label
-                            htmlFor="name"
-                            className={styles.label}
-                        >
-                            Name
+                        <label htmlFor="name" className={styles.label}>
+                            {t("users.form.name")}
                         </label>
 
                         <input
@@ -114,25 +80,16 @@ export default function CreateUser() {
                             type="text"
                             className={styles.input}
                             value={name}
-                            onChange={(event) =>
-                                setName(
-                                    event.target.value
-                                )
-                            }
+                            onChange={(event) => setName(event.target.value)}
                             autoComplete="name"
-                            disabled={
-                                createMutation.isPending
-                            }
+                            disabled={createMutation.isPending}
                             required
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label
-                            htmlFor="email"
-                            className={styles.label}
-                        >
-                            Email
+                        <label htmlFor="email" className={styles.label}>
+                            {t("users.form.email")}
                         </label>
 
                         <input
@@ -141,51 +98,34 @@ export default function CreateUser() {
                             type="email"
                             className={styles.input}
                             value={email}
-                            onChange={(event) =>
-                                setEmail(
-                                    event.target.value
-                                )
-                            }
+                            onChange={(event) => setEmail(event.target.value)}
                             autoComplete="email"
                             inputMode="email"
-                            disabled={
-                                createMutation.isPending
-                            }
+                            disabled={createMutation.isPending}
                             required
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label
-                            htmlFor="password"
-                            className={styles.label}
-                        >
-                            Password
+                        <label htmlFor="password" className={styles.label}>
+                            {t("users.form.password")}
                         </label>
 
                         <PasswordInput
                             id="password"
                             name="password"
                             value={password}
-                            onChange={(event) =>
-                                setPassword(
-                                    event.target.value
-                                )
-                            }
+                            onChange={(event) => setPassword(event.target.value)}
                             autoComplete="new-password"
-                            disabled={
-                                createMutation.isPending
-                            }
+                            placeholder={t("users.form.password")}
+                            disabled={createMutation.isPending}
                             required
                         />
                     </div>
 
                     <div className={styles.formGroup}>
-                        <label
-                            htmlFor="role"
-                            className={styles.label}
-                        >
-                            Role
+                        <label htmlFor="role" className={styles.label}>
+                            {t("users.form.role")}
                         </label>
 
                         <select
@@ -193,101 +133,53 @@ export default function CreateUser() {
                             name="role"
                             className={styles.select}
                             value={role}
-                            disabled={
-                                createMutation.isPending
-                            }
-                            onChange={(event) =>
-                                setRole(
-                                    event.target
-                                        .value as UserRole
-                                )
-                            }
+                            disabled={createMutation.isPending}
+                            onChange={(event) => setRole(event.target.value as UserRole)}
                         >
-                            <option value="User">
-                                User
-                            </option>
-
-                            <option value="Initiator">
-                                Initiator
-                            </option>
-
-                            <option value="Attestant">
-                                Attestant
-                            </option>
-
-                            <option value="Admin">
-                                Admin
-                            </option>
+                            <option value="User">{t("users.roles.User")}</option>
+                            <option value="Initiator">{t("users.roles.Initiator")}</option>
+                            <option value="Attestant">{t("users.roles.Attestant")}</option>
+                            <option value="Admin">{t("users.roles.Admin")}</option>
                         </select>
                     </div>
 
                     {createMutation.isSuccess && (
-                        <div
-                            className={styles.success}
-                            role="status"
-                        >
-                            {
-                                createMutation.data
-                                    .name
-                            }{" "}
-                            was created successfully.
+                        <div className={styles.success} role="status">
+                            {t("users.create.success", { name: createMutation.data.name })}
                         </div>
                     )}
 
                     {createMutation.isError && (
-                        <div
-                            className={styles.error}
-                            role="alert"
-                        >
-                            {getErrorMessage(
-                                createMutation.error
-                            )}
+                        <div className={styles.error} role="alert">
+                            {getErrorMessage(createMutation.error, t("users.errors.create"))}
                         </div>
                     )}
 
                     {!user && (
-                        <div
-                            className={styles.error}
-                            role="alert"
-                        >
-                            Unable to determine
-                            the current user.
+                        <div className={styles.error} role="alert">
+                            {t("users.errors.currentUser")}
                         </div>
                     )}
 
                     <div className={styles.actions}>
-                        <Link
-                            to="/admin/users"
-                            className={
-                                styles.cancelButton
-                            }
-                        >
-                            Cancel
+                        <Link to="/admin/users" className={styles.cancelButton}>
+                            {t("common.cancel")}
                         </Link>
 
                         <Button
                             type="submit"
                             variant="square"
                             size="medium"
-                            className={
-                                styles.formButton
-                            }
-                            disabled={
-                                createMutation.isPending ||
-                                !user
-                            }
+                            className={styles.formButton}
+                            disabled={createMutation.isPending || !user}
                         >
                             {createMutation.isPending ? (
-                                <span
-                                    className={
-                                        styles.loadingButton
-                                    }
-                                >
+                                <span className={styles.loadingButton}>
                                     <LoadingWheel size="small" />
-                                    Creating...
+                                    {t("users.create.creating")}
                                 </span>
                             ) : (
-                                "Create user"
+                                t("users.create.submit")
                             )}
                         </Button>
                     </div>

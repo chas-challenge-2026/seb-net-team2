@@ -1,6 +1,7 @@
 import Button from "../Button/Button";
 
 import styles from "./CustomerTypeSelector.module.css";
+import { useTranslation } from "react-i18next";
 
 export type CustomerType = "private" | "company";
 
@@ -13,6 +14,9 @@ export default function CustomerTypeSelector({
     value,
     onChange,
 }: CustomerTypeSelectorProps) {
+
+    const { t } = useTranslation();
+
     return (
         <div
             className={`${styles.selector} ${value === "company"
@@ -30,7 +34,7 @@ export default function CustomerTypeSelector({
                 onClick={() => onChange("private")}
                 aria-pressed={value === "private"}
             >
-                Private
+                {t("login.private")}
             </Button>
 
             <Button
@@ -41,7 +45,7 @@ export default function CustomerTypeSelector({
                 onClick={() => onChange("company")}
                 aria-pressed={value === "company"}
             >
-                Company
+                {t("login.company")}
             </Button>
         </div>
     );

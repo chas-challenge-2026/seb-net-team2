@@ -1,6 +1,8 @@
 import { useState } from "react";
 import type { InputHTMLAttributes } from "react";
 
+import { useTranslation } from "react-i18next";
+
 import Button from "../Button/Button";
 
 import styles from "./PasswordInput.module.css";
@@ -16,7 +18,7 @@ export default function PasswordInput({
     id,
     name = "password",
     autoComplete = "current-password",
-    placeholder = "Password",
+    placeholder,
     ...rest
 }: PasswordInputProps) {
     const [isPasswordVisible, setIsPasswordVisible] =
@@ -26,6 +28,8 @@ export default function PasswordInput({
         setIsPasswordVisible((previous) => !previous);
     }
 
+    const { t } = useTranslation();
+
     return (
         <div className={styles.passwordWrapper}>
             <input
@@ -34,7 +38,7 @@ export default function PasswordInput({
                 name={name}
                 type={isPasswordVisible ? "text" : "password"}
                 autoComplete={autoComplete}
-                placeholder={placeholder}
+                placeholder={placeholder ?? t("login.password")}
                 className={styles.input}
             />
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Navigate } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import Card from "../../components/Card/Card";
 import CustomerTypeSelector, {
@@ -9,21 +10,15 @@ import LoadingWheel from "../../components/LoadingState/LoadingWheel";
 
 import PrivateLogin from "./PrivateLogin";
 import CompanyLogin from "./CompanyLogin";
-
 import { useAuth } from "../../hooks/useAuth";
 
 import styles from "./Login.module.css";
 
 export default function Login() {
-    const [customerType, setCustomerType] =
-        useState<CustomerType>("private");
+    const [customerType, setCustomerType] = useState<CustomerType>("private");
 
-    const {
-        user,
-        isAuthenticated,
-        isInitializing,
-        sessionExpired,
-    } = useAuth();
+    const { t } = useTranslation();
+    const { user, isAuthenticated, isInitializing, sessionExpired } = useAuth();
 
     if (isInitializing) {
         return (
@@ -43,10 +38,7 @@ export default function Login() {
 
     return (
         <div className={styles.layout}>
-            <Card
-                variant="image"
-                className={styles.centeredCard}
-            >
+            <Card variant="image" className={styles.centeredCard}>
                 <div className={styles.selectorContainer}>
                     <CustomerTypeSelector
                         value={customerType}
@@ -56,7 +48,6 @@ export default function Login() {
 
                 <div className={styles.line} />
 
-
                 {customerType === "private" ? (
                     <PrivateLogin />
                 ) : (
@@ -64,11 +55,8 @@ export default function Login() {
                 )}
 
                 {sessionExpired && (
-                    <p
-                        className={styles.sessionExpired}
-                        role="status"
-                    >
-                        Your session has expired. Please log in again.
+                    <p className={styles.sessionExpired} role="status">
+                        {t("session.sessionExpired")}
                     </p>
                 )}
             </Card>
