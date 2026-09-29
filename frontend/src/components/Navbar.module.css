@@ -34,9 +34,10 @@
 }
 
 .navbar__actions {
+    margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--spacing-md);
 }
 
 .navbar__link {
