@@ -1,0 +1,241 @@
+﻿using Microsoft.AspNetCore.Authorization.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using SebPortal.Api.Services;
+using SebPortal.Api.Repositories;
+using Microsoft.EntityFrameworkCore;
+using SebPortal.Models;
+using SebPortal.Data;
+using Xunit;
+using Moq;
+
+namespace SebPortal.Tests;
+
+public class ApprovalEngineServiceTests : IDisposable 
+{
+    private readonly Mock<IApprovalLimitRepository> _mockLimitRepository;
+    private readonly Mock<IUserRepository> _mockUserRepository;
+    private readonly ApprovalEngineService _service;
+    private readonly SebDbContext _context;
+
+    public ApprovalEngineServiceTests()
+    {
+        _mockLimitRepository = new Mock<IApprovalLimitRepository>();
+        _mockUserRepository = new Mock<IUserRepository>();
+        var options = new DbContextOptionsBuilder<SebDbContext>()
+                    .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                    .Options;
+
+        _context = new SebDbContext(options);
+
+        // Rules for attenstants:
+        var sampleLimits = new List<ApprovalLimit>
+        {
+            new() { Id = 1, TenantId = 1, MinAmount = 50000m, RequiredApprovals = 1, Description = "Enkelattest" },
+            new() { Id = 2, TenantId = 1, MinAmount = 200000m, RequiredApprovals = 2, Description = "Dubbelattest" }
+        };
+
+        _mockLimitRepository
+            .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
+            .ReturnsAsync(sampleLimits);
+
+        var sampleAttestants = new List<User>
+        {
+            new() { Id = 1, TenantId = 1, Name = "Johan Berg", Email = "johan@malmobygg.se", PasswordHash = "hash", Role = "attestant" },
+            new() { Id = 2, TenantId = 1, Name = "Sara Ek", Email = "sara@malmobygg.se", PasswordHash = "hash", Role = "attestant" }
+        };
+
+        _mockUserRepository
+            .Setup(repo => repo.GetAttestantsByTenantIdAsync(It.IsAny<int>()))
+            .ReturnsAsync(sampleAttestants);
+
+        _service = new ApprovalEngineService(_mockLimitRepository.Object, _mockUserRepository.Object, _context);
+    }
+
+    //Runs automatically after each test to clean up database
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_BelowThreshold_ExecuteDirecly()
+    {
+        // Arrange
+        var payment = new Payment { Id = 101, TenantId = 1, Amount = 30000m, ToIban = "SE123456789", Reference = "Lön" };
+
+        // Act
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+
+        // Assert
+        Assert.False(requiresApproval);
+        Assert.Equal("completed", payment.Status);
+        Assert.Empty(await _context.ApprovalSteps.ToListAsync());
+    }
+
+    [Fact]
+    public async Task ProcessPAymentApprovalAsync_MatchesFirstLimit_OneApprover()
+    {
+        // Arrange
+        var payment = new Payment { Id = 102, TenantId = 1, Amount = 75000m, ToIban = "SE123456789", Reference = "Lön" };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
+        
+        // Act
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+        // ProcessPaymentApprovalAsync sparar inte längre själv — det gör
+        // anroparen (CreatePaymentService, i en gemensam transaktion), så
+        // testet måste spara explicit innan det kan läsa tillbaka stegen.
+        await _context.SaveChangesAsync();
+
+        // Assert
+        Assert.True(requiresApproval);
+        Assert.Equal("pending_approval", payment.Status);
+
+        var steps = await _context.ApprovalSteps.Where(s => s.PaymentId == payment.Id).ToListAsync();
+        Assert.Single(steps);
+        Assert.Equal(1, steps.First().StepNumber);
+        Assert.Equal("pending", steps.First().Status);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_MatchesHighestThreshold_TwoApprovers()
+    {
+        // Arrange
+        var payment = new Payment { Id = 103, TenantId = 1, Amount = 250000m, ToIban = "SE123456789", Reference = "Investering" };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+        await _context.SaveChangesAsync();
+
+        // Assert
+        Assert.True(requiresApproval);
+        Assert.Equal("pending_approval", payment.Status);
+
+        var steps = await _context.ApprovalSteps
+            .Where(s => s.PaymentId == payment.Id)
+            .OrderBy(s => s.StepNumber)
+            .ToListAsync();
+
+        Assert.Equal(2, steps.Count);
+        Assert.Equal(1, steps[0].StepNumber);
+        Assert.Equal(2, steps[1].StepNumber);
+        Assert.All(steps, step => Assert.Equal("pending", step.Status));
+        Assert.NotEqual(steps[0].AttestantId, steps[1].AttestantId);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_FewerAttestantsThanRequiredApprovals_Throws()
+    {
+        // Arrange: only one attestant available, but the applicable limit requires two
+        _mockUserRepository
+            .Setup(repo => repo.GetAttestantsByTenantIdAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<User>
+            {
+                new() { Id = 1, TenantId = 1, Name = "Johan Berg", Email = "johan@malmobygg.se", PasswordHash = "hash", Role = "attestant" }
+            });
+
+        var payment = new Payment { Id = 105, TenantId = 1, Amount = 250000m, ToIban = "SE123456789", Reference = "Investering" };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await _service.ProcessPaymentApprovalAsync(payment);
+        });
+
+        Assert.Contains("attestant", exception.Message);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_CreatorIsOneOfTheAttestants_ExcludesCreatorFromAssignment()
+    {
+        // Arrange: creator (Id 1) also holds the attestant role, but only one approval is required.
+        // The step must go to the other attestant (Id 2), never back to the creator.
+        var payment = new Payment { Id = 106, TenantId = 1, Amount = 75000m, ToIban = "SE123456789", Reference = "Lön", CreatedByUserId = 1 };
+
+        _context.Payments.Add(payment);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+        await _context.SaveChangesAsync();
+
+        // Assert
+        Assert.True(requiresApproval);
+
+        var steps = await _context.ApprovalSteps.Where(s => s.PaymentId == payment.Id).ToListAsync();
+        Assert.Single(steps);
+        Assert.Equal(2, steps.First().AttestantId);
+        Assert.NotEqual(payment.CreatedByUserId, steps.First().AttestantId);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_CreatorIsOnlyAttestant_Throws()
+    {
+        // Arrange: the only attestant available is also the payment's creator, so
+        // after excluding them there is no one left to assign the step to.
+        _mockUserRepository
+            .Setup(repo => repo.GetAttestantsByTenantIdAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<User>
+            {
+                new() { Id = 1, TenantId = 1, Name = "Johan Berg", Email = "johan@malmobygg.se", PasswordHash = "hash", Role = "attestant" }
+            });
+
+        var payment = new Payment { Id = 107, TenantId = 1, Amount = 75000m, ToIban = "SE123456789", Reference = "Lön", CreatedByUserId = 1 };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await _service.ProcessPaymentApprovalAsync(payment);
+        });
+
+        Assert.Contains("attestant", exception.Message);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_ExcludingCreatorLeavesTooFewAttestants_Throws()
+    {
+        // Arrange: two attestants in total, but one of them is the creator, and the
+        // applicable limit requires two approvals - only one candidate remains after exclusion.
+        _mockUserRepository
+            .Setup(repo => repo.GetAttestantsByTenantIdAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<User>
+            {
+                new() { Id = 1, TenantId = 1, Name = "Johan Berg", Email = "johan@malmobygg.se", PasswordHash = "hash", Role = "attestant" },
+                new() { Id = 2, TenantId = 1, Name = "Sara Ek", Email = "sara@malmobygg.se", PasswordHash = "hash", Role = "attestant" }
+            });
+
+        var payment = new Payment { Id = 108, TenantId = 1, Amount = 250000m, ToIban = "SE123456789", Reference = "Investering", CreatedByUserId = 1 };
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await _service.ProcessPaymentApprovalAsync(payment);
+        });
+
+        Assert.Contains("exklusive betalningens skapare", exception.Message);
+    }
+
+    [Fact]
+    public async Task ProcessPaymentApprovalAsync_NoLimitsConfigured_ExcecutesDirectly()
+    {
+        //Arrange
+        _mockLimitRepository
+            .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
+            .ReturnsAsync(new List<ApprovalLimit>());
+
+        var payment = new Payment { Id = 104, TenantId = 1, Amount = 100000m, ToIban = "SE123456789", Reference = "Överföring" };
+
+        //Act 
+        var requiresApproval = await _service.ProcessPaymentApprovalAsync(payment);
+
+        //Assert
+        Assert.False(requiresApproval);
+        Assert.Equal("completed", payment.Status);
+        Assert.Empty(await _context.ApprovalSteps.ToListAsync());
+    }
+}
+

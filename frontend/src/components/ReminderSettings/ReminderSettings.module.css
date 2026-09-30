@@ -1,0 +1,115 @@
+.section {
+    max-width: 640px;
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.section h2 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-xl);
+}
+
+.intro {
+    margin: var(--spacing-sm) 0 var(--spacing-lg);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+}
+
+.form {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+.checkboxRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+}
+
+.checkboxRow input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--seb-green-dark-1);
+}
+
+.recipient {
+    margin: calc(-1 * var(--spacing-sm)) 0 0;
+    padding-left: calc(18px + var(--spacing-sm));
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+    overflow-wrap: anywhere;
+}
+
+.field {
+    display: grid;
+    gap: var(--spacing-xs);
+}
+
+.field label {
+    color: var(--placeholder-grey);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.note {
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+}
+
+.field select {
+    width: fit-content;
+    min-width: 140px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-md);
+    background: var(--color-surface);
+}
+
+.field select:disabled {
+    color: var(--placeholder-grey);
+    background: var(--color-hover-light);
+}
+
+.checkboxRow input:focus-visible,
+.field select:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+}
+
+.success,
+.error {
+    margin: 0;
+    font-size: var(--font-size-md);
+}
+
+.success {
+    color: var(--seb-green-dark-2);
+}
+
+.error {
+    color: var(--color-error);
+}

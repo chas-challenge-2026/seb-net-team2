@@ -1,0 +1,164 @@
+.page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 5rem;
+}
+
+.header,
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1.5rem;
+}
+
+.header { margin-bottom: 2rem; }
+
+.actionMessage {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--seb-green-dark-2);
+    background: #eef8ed;
+    color: #245526;
+    font-size: 0.9rem;
+}
+
+.actionMessage button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(10 28 18 / 52%);
+}
+
+.modal {
+    position: relative;
+    display: grid;
+    gap: 1rem;
+    width: min(100%, 30rem);
+    padding: 2rem;
+    border: 1px solid #dce5df;
+    background: #fff;
+    color: #163226;
+    box-shadow: 0 20px 50px rgb(0 0 0 / 22%);
+}
+
+.modal h2 { margin: 0; }
+
+.closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    border: 0;
+    background: transparent;
+    color: #68756e;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modalLabel {
+    display: grid;
+    gap: 0.4rem;
+    color: #34483b;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.modalLabel input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #cbd8ce;
+    border-radius: 4px;
+    font: inherit;
+}
+
+.eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--seb-green-dark-2);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+
+.header h1 { margin: 0 0 0.5rem; color: #163226; font-size: clamp(2rem, 4vw, 3rem); }
+.header p, .sectionHeader p, .muted { margin: 0; color: #68756e; }
+
+.tabs {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #dce5df;
+}
+
+.tabs button {
+    padding: 0.8rem 0;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #68756e;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.tabs button:hover, .tabs .activeTab { border-bottom-color: var(--seb-green-dark-2); color: #163226; }
+
+.heroCard {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+    background: #163226;
+    color: white;
+}
+
+.heroCard span, .heroMetric span, .cardLabel { display: block; color: #aeb8b2; font-size: 0.8rem; }
+.heroCard strong { display: block; margin: 0.5rem 0; font-size: 2.4rem; }
+.heroCard p { margin: 0; color: #b9cabe; }
+.heroMetric { align-self: end; text-align: right; }
+.heroMetric strong { font-size: 1.25rem; color: #a9dc91; }
+
+.sectionHeader { margin-bottom: 1rem; }
+.sectionHeader h2 { margin: 0 0 0.3rem; color: #163226; }
+.accountGrid, .goalGrid, .contentGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.accountCard { gap: 0.8rem; }
+.accountCard > strong { display: block; color: #163226; font-size: 1.5rem; }
+.rate, .positive { color: var(--seb-green-dark-2); font-size: 0.85rem; font-weight: 700; }
+.investmentTotal { color: #163226; font-size: 2rem; font-weight: 800; }
+
+.allocation { display: flex; justify-content: space-between; padding: 0.9rem 0; border-bottom: 1px solid #e5ebe6; }
+.allocation span { display: flex; align-items: center; gap: 0.5rem; }
+.allocation i { width: 0.7rem; height: 0.7rem; border-radius: 50%; }
+.equity { background: #176b45; }
+.funds { background: #72a889; }
+.bonds { background: #b8c8bf; }
+.goalAmounts { display: flex; justify-content: space-between; gap: 1rem; }
+.goalAmounts strong { color: #163226; }
+.goalAmounts span { color: #68756e; }
+.progressTrack { height: 0.6rem; margin: 1.2rem 0 0.5rem; overflow: hidden; background: #e5ebe6; }
+.progressTrack div { height: 100%; background: var(--seb-green-dark-2); }
+
+@media (max-width: 760px) {
+    .page { padding: 1.5rem 1rem 3rem; }
+    .header, .sectionHeader, .heroCard { display: block; }
+    .header > button, .sectionHeader > button { margin-top: 1rem; }
+    .heroMetric { margin-top: 2rem; text-align: left; }
+    .accountGrid, .goalGrid, .contentGrid { grid-template-columns: 1fr; }
+}

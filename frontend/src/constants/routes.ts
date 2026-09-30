@@ -1,9 +1,12 @@
-export const navLinks: { to: string; label: string }[] = [
-    { to: '/', label: 'Översikt' },
-    { to: '/ny-betalning', label: 'Ny betalning' },
-    { to: '/attestkorg', label: 'Attestkorg' },
-    { to: '/batch', label: 'Batch' },
-    { to: '/granskningslogg', label: 'Granskningslogg' },
-    { to: '/profil', label: 'Inloggad' },
-    { to: '/logga-ut', label: 'Logga ut' },
-]
+export const navigationLinks: {
+    to: string;
+    labelKey: string;
+}[] = [
+        { to: '/dashboard', labelKey: 'navigation.dashboard' },
+        { to: '/ny-betalning', labelKey: 'navigation.newPayment' },
+        { to: '/spara-investera', labelKey: 'navigation.saveInvest' },
+        { to: '/batch', labelKey: 'navigation.batchPayments' },
+        { to: '/granskningslogg', labelKey: 'navigation.auditLog' },
+        { to: '/profil', labelKey: 'navigation.profile' },
+        { to: '/logout', labelKey: 'navigation.logout' },
+    ]

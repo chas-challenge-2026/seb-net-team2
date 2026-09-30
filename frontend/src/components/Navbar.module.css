@@ -7,6 +7,23 @@
     border-bottom: 1px solid #e0e0e0;
 }
 
+.navbar__brand {
+    display: flex;
+    align-items: center;
+}
+
+.navbar__brandLink {
+    display: flex;
+    align-items: center;
+}
+
+.navbar__logo {
+    display: block;
+    width: 4.25rem;
+    height: 2.4rem;
+    object-fit: cover;
+}
+
 .navbar__links {
     display: flex;
     flex: 1;
@@ -16,6 +33,13 @@
     padding: 0;
 }
 
+.navbar__actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
 .navbar__link {
     font-weight: 500;
     padding: 0.25rem 0;
@@ -23,4 +47,10 @@
 
 .navbar__link--active {
     border-bottom: 2px solid currentColor;
+}
+
+.navbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }

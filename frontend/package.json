@@ -10,9 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.102.8",
     "@tanstack/react-router": "^1.170.32",
+    "flag-icons": "^7.5.0",
+    "i18next": "^26.4.2",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-i18next": "^17.0.15",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -1,6 +1,0 @@
-﻿namespace SebPortal.Api.Middleware
-{
-    public class placeholder
-    {
-    }
-}
