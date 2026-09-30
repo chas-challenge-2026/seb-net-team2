@@ -99,40 +99,47 @@ public static bool ValidateIban(string iban)
 
 ## Modul 3: Audit-signering (append-only, tamper-evident)
 
-**Fil:** `audit_signer.c` / `audit_signer.h`  
-**Kompilering:** `gcc -O2 -shared -fPIC -o libauditsigner.so audit_signer.c -lssl -lcrypto`
+**Filer:** `audit/audit.c` / `audit/audit.h`
+**Kompilering:** `make libauditsigner.so`
 
 ### Format
 
-Varje loggrad: `TIMESTAMP|USER_ID|ACTION|ENTITY_ID|DESCRIPTION|PREV_HASH|HMAC`
+Varje loggrad:
 
-- `PREV_HASH`: SHA256 av föregående rads hela innehåll (hex)
-- `HMAC`: HMAC-SHA256(rad_utan_hmac, secret_key) (hex)
-- Första radens `PREV_HASH` = `0000...0000` (64 nollor)
+`TIMESTAMP|USER_ID|ACTION|ENTITY_ID|DESCRIPTION|PREV_HASH|HMAC`
+
+- `PREV_HASH`: SHA256 av föregående loggrads hela innehåll, som hex-sträng.
+- `HMAC`: HMAC-SHA256 av loggraden utan HMAC-fältet, som hex-sträng.
+- Första radens `PREV_HASH` består av 64 nollor.
+- Varje efterföljande rad länkas till föregående rad genom `PREV_HASH`.
 
 ### API
 
 ```c
-// Lägg till en loggrad. Hämtar föregående hash från log_path automatiskt.
-// Returnerar 0 vid lyckat skrivande, -1 vid fel.
 int audit_append(
-    const char* log_path,
-    const char* secret_key,
+    const char *log_path,
+    const char *secret_key,
     int user_id,
-    const char* action,
+    const char *action,
     int entity_id,
-    const char* description
-);
+    const char *description);
 
-// Verifiera hela loggfilen. Returnerar -1 om ok, annars radnummer för
-// första trasiga posten (1-indexerat).
-int audit_verify(const char* log_path, const char* secret_key);
+int audit_verify(
+    const char *log_path,
+    const char *secret_key);
 ```
 
-### Säkerhetskrav
-- `secret_key` ska aldrig lagras i källkod — läses från miljövariabel `AUDIT_SIGNING_KEY`
-- Filen ska öppnas med `O_APPEND | O_SYNC` för att förhindra partiella skrivningar
-- Verifiering ska köras vid applikationsstart och rapporteras i healthcheck
+`audit_append()` returnerar `0` vid lyckad skrivning och `-1` vid fel.
+
+`audit_verify()` returnerar `-1` om loggen är giltig, annars radnumret för den första felaktiga posten.
+
+### Säkerhet och testning
+
+- Secret key lagras inte i källkoden.
+- Testmiljön använder `AUDIT_SIGNING_KEY`.
+- Loggen skrivs med `O_APPEND | O_SYNC`.
+- HMAC-SHA256 och SHA256-hashkedja används för integritet.
+- Testa med `make audit-test`.
 
 ---
 
