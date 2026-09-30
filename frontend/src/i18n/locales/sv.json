@@ -136,8 +136,9 @@
             "decision": "Det gick inte att behandla attestbeslutet."
         },
         "feedback": {
-            "approved": "Betalningen godkändes.",
-            "rejected": "Betalningen avvisades."
+            "approved": "{{reference}} ({{amount}}) godkändes.",
+            "rejected": "{{reference}} ({{amount}}) avvisades.",
+            "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats."
         },
         "sort": {
             "label": "Sortera efter",
@@ -147,19 +148,23 @@
             "amountLow": "Belopp: lägst till högst"
         },
         "card": {
-            "approvalStep": "Atteststeg {{step}}",
-            "payment": "Betalning #{{id}}",
             "waitingDays_one": "Väntat {{count}} dag",
             "waitingDays_other": "Väntat {{count}} dagar",
             "reference": "Referens",
             "submittedBy": "Skickad av",
             "submitted": "Skickad",
-            "toIban": "Till IBAN"
+            "toIban": "Till IBAN",
+            "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
+            "waitingToday": "Skickad i dag",
+            "dualApproval": "Dubbelattest – betalningen kräver två attestanter"
         },
         "comment": {
             "label": "Kommentar",
             "optional": "(valfritt)",
-            "placeholder": "Lägg till en kommentar"
+            "placeholder": "Lägg till en kommentar",
+            "rejectReasonLabel": "Anledning till avvisning",
+            "required": "(obligatoriskt)",
+            "rejectReasonHint": "Initiativtagaren ser din motivering. Minst {{min}} tecken."
         },
         "actions": {
             "reject": "Avvisa",
@@ -175,9 +180,9 @@
         "modal": {
             "approveTitle": "Godkänn betalning?",
             "rejectTitle": "Avvisa betalning?",
-            "approveDescription": "Godkänn betalning",
-            "rejectDescription": "Avvisa betalning",
-            "of": "på"
+            "approveDescription": "Kontrollera uppgifterna innan du godkänner. Beslutet går inte att ångra.",
+            "rejectDescription": "Kontrollera uppgifterna och förklara varför betalningen avvisas.",
+            "amount": "Belopp"
         }
     },
     "batch": {
@@ -450,7 +455,7 @@
         "description": "Få ett e-postmeddelande när betalningar har väntat på din attest för länge, så att de inte blir liggande.",
         "emailEnabled": "Skicka ett e-postmeddelande när en betalning har väntat för länge på min attest",
         "recipient": "Påminnelser skickas till",
-        "remindAfter": "Påminn mig efter",
+        "remindAfter": "Skicka e-post efter",
         "dayCount_one": "{{count}} dag",
         "dayCount_other": "{{count}} dagar",
         "success": "Påminnelseinställningarna sparades.",
@@ -460,7 +465,8 @@
         "errors": {
             "save": "Det gick inte att spara påminnelseinställningarna.",
             "load": "Det gick inte att ladda påminnelseinställningarna."
-        }
+        },
+        "inAppNote": "Påminnelser i appen visas alltid efter {{days}} dagar."
     },
     "saveInvest": {
         "eyebrow": "SPARANDE & INVESTERINGAR",
@@ -529,6 +535,14 @@
             "accountCreated": "Sparkontot skapades.",
             "goalCreated": "Sparmålet skapades.",
             "accountOpened": "Kontouppgifterna öppnades."
+        }
+    },
+    "profilePage": {
+        "title": "Min profil",
+        "description": "Dina kontouppgifter och inställningar.",
+        "details": {
+            "title": "Kontouppgifter",
+            "company": "Företag"
         }
     }
 }

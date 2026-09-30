@@ -145,6 +145,24 @@
         var(--color-error);
 }
 
+.feedbackInfo {
+    border-color:
+        var(--color-primary);
+
+    background-color:
+        #eef6fb;
+
+    color:
+        var(--color-primary);
+}
+
+.feedback:focus-visible {
+    outline:
+        3px solid var(--seb-green);
+
+    outline-offset: 2px;
+}
+
 .feedbackClose {
     flex-shrink: 0;
 
@@ -352,6 +370,24 @@
     font-weight: 600;
 }
 
+.waiting {
+    display: inline-block;
+    margin: 8px 0 0;
+    padding: 2px 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.dualApproval {
+    margin: 8px 0 0;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
 .overdueBanner {
     margin-bottom: 1.25rem;
     padding: 12px 16px;
@@ -554,6 +590,14 @@
     opacity: 0.7;
 }
 
+.commentHint {
+    color:
+        var(--placeholder-grey);
+
+    font-size:
+        var(--font-size-sm);
+}
+
 .commentCount {
     justify-self: end;
 
@@ -712,7 +756,9 @@
 
 .modal {
     width: 100%;
-    max-width: 420px;
+    max-width: 480px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
 
     padding:
         var(--spacing-lg);
@@ -749,6 +795,60 @@
 
     font-size: 15px;
     line-height: 1.5;
+}
+
+.modalDetails {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2,
+            minmax(0, 1fr));
+
+    gap:
+        var(--spacing-md) var(--spacing-lg);
+
+    margin:
+        0 0 var(--spacing-lg);
+
+    padding:
+        var(--spacing-md);
+
+    border-radius:
+        var(--radius-sm);
+
+    background-color:
+        var(--color-hover-light);
+}
+
+.modalDetails dt {
+    margin-bottom:
+        var(--spacing-xs);
+
+    color:
+        var(--placeholder-grey);
+
+    font-size:
+        var(--font-size-sm);
+
+    font-weight: 500;
+}
+
+.modalDetails dd {
+    margin: 0;
+
+    color:
+        var(--color-text);
+
+    font-size:
+        var(--font-size-md);
+
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+    .modalDetails {
+        grid-template-columns: 1fr;
+    }
 }
 
 .modalActions {

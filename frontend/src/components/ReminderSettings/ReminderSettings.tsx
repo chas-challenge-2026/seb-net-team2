@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useReminderSettings, useUpdateReminderSettings } from "../../hooks/useReminderSettings";
 
 import type { ReminderSettings as ReminderSettingsData } from "../../services/reminderService";
+import { OVERDUE_AFTER_DAYS } from "../../utils/approvalReminders";
 
 import Button from "../Button/Button";
 import LoadingWheel from "../LoadingState/LoadingWheel";
@@ -56,6 +57,7 @@ function ReminderSettingsForm({ settings }: { settings: ReminderSettingsData }) 
 
                 <select
                     id="reminder-days"
+                    aria-describedby="reminder-days-note"
                     value={overdueAfterDays}
                     disabled={!emailEnabled || updateMutation.isPending}
                     onChange={(event) => {
@@ -69,6 +71,10 @@ function ReminderSettingsForm({ settings }: { settings: ReminderSettingsData }) 
                         </option>
                     ))}
                 </select>
+
+                <span id="reminder-days-note" className={styles.note}>
+                    {t("reminderSettings.inAppNote", { days: OVERDUE_AFTER_DAYS })}
+                </span>
             </div>
 
             {updateMutation.isSuccess && (
