@@ -77,7 +77,7 @@ public class CreatePaymentServiceIntegrationTests
             var mockNotificationService = new Mock<INotificationService>();
             var approvalEngineService = new ApprovalEngineService(mockLimitRepository.Object, mockUserRepository.Object, context);
 
-            var service = new CreatePaymentService(userRepository, paymentRepository, approvalEngineService, mockNotificationService.Object, context);
+            var service = new CreatePaymentService(userRepository, paymentRepository, approvalEngineService, mockNotificationService.Object, new AuditRepository(context), context);
 
             var dto = new CreatePaymentDTO
             {
@@ -103,5 +103,101 @@ public class CreatePaymentServiceIntegrationTests
 
         Assert.Equal(1000m, accountAfter.Balance);
         Assert.Equal(0, paymentCount);
+        Assert.Equal(0, await verificationContext.AuditEntries.CountAsync());
+    }
+
+    [Fact]
+    public async Task CreatePaymentAsync_BelowApprovalLimit_LogsCreateAndExecute()
+    {
+        // Arrange
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
+
+        int paymentId;
+        int tenantId;
+        int userId;
+
+        await using (var context = new SebDbContext(options))
+        {
+            await context.Database.EnsureCreatedAsync();
+
+            var tenant = new Tenant { Name = "Test Tenant" };
+            context.Tenants.Add(tenant);
+            await context.SaveChangesAsync();
+
+            var user = new User
+            {
+                TenantId = tenant.Id,
+                Name = "Test User",
+                Email = "test@example.com",
+                PasswordHash = "testhash",
+                Role = UserRoles.Initiator
+            };
+
+            var account = new Account
+            {
+                TenantId = tenant.Id,
+                AccountName = "Test Account",
+                Iban = "SE3550000000054910000003",
+                Balance = 1000m,
+                Currency = "SEK"
+            };
+
+            context.Users.Add(user);
+            context.Accounts.Add(account);
+            await context.SaveChangesAsync();
+
+            tenantId = tenant.Id;
+            userId = user.Id;
+
+            // No limits means the payment is executed immediately
+            var mockLimitRepository = new Mock<IApprovalLimitRepository>();
+            mockLimitRepository
+                .Setup(repo => repo.GetOrderedLimitsAsync(It.IsAny<int>()))
+                .ReturnsAsync(new List<ApprovalLimit>());
+            var approvalEngineService = new ApprovalEngineService(mockLimitRepository.Object, new Mock<IUserRepository>().Object, context);
+
+            var service = new CreatePaymentService(
+                new UserRepository(context),
+                new PaymentRepository(context),
+                approvalEngineService,
+                new Mock<INotificationService>().Object,
+                new AuditRepository(context),
+                context);
+
+            // Act
+            var payment = await service.CreatePaymentAsync(new CreatePaymentDTO
+            {
+                FromAccountId = account.Id,
+                ToIban = "SE4550000000054910000004",
+                Amount = 500m,
+                Currency = "SEK",
+                Reference = "Faktura 123"
+            }, user.Id);
+
+            paymentId = payment.Id;
+        }
+
+        // Assert
+        await using var verificationContext = new SebDbContext(options);
+
+        var entries = await verificationContext.AuditEntries
+            .Where(e => e.EntityType == AuditEntityTypes.Payment && e.EntityId == paymentId)
+            .OrderBy(e => e.Id)
+            .ToListAsync();
+
+        Assert.Equal(new[] { AuditActions.CreatePayment, AuditActions.ExecutePayment }, entries.Select(e => e.Action));
+        Assert.All(entries, e =>
+        {
+            Assert.Equal(tenantId, e.TenantId);
+            Assert.Equal(userId, e.UserId);
+        });
+
+        var createDetails = entries[0].Details!;
+        Assert.Contains("\"fromAccountName\":\"Test Account\"", createDetails);
+        Assert.Contains("\"toIban\":\"SE4550000000054910000004\"", createDetails);
+        Assert.Contains("\"balanceAfter\":500", createDetails);
     }
 }

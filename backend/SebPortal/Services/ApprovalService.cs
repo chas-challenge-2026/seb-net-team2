@@ -63,30 +63,82 @@ namespace SebPortal.Api.Services
                     return ApprovalStepValidationResult.StepAlreadyDecided;
                 }
 
+                var payment = approvalStep.Payment;
+                var steps = await _approvalRepository.GetApprovalStepsByPaymentIdAsync(approvalStep.PaymentId);
+
+                await _auditRepository.AddEntryAsync(new AuditEntries
+                {
+                    TenantId = payment.TenantId,
+                    UserId = currentUserId,
+                    Action = dto.Decision == "approved" ? AuditActions.ApproveStep : AuditActions.RejectStep,
+                    EntityType = AuditEntityTypes.Payment,
+                    EntityId = approvalStep.PaymentId,
+                    Description = $"Steg {approvalStep.StepNumber} för betalning {approvalStep.PaymentId} {(dto.Decision == "approved" ? "godkändes" : "avslogs")}",
+                    Details = AuditEntries.ToDetailsJson(new
+                    {
+                        stepId = approvalStep.Id,
+                        approvalStep.StepNumber,
+                        totalSteps = steps.Count(),
+                        decision = dto.Decision,
+                        dto.Comment,
+                        payment.Amount,
+                        payment.Currency
+                    })
+                });
+
                 if (dto.Decision == "approved")
                 {
-                    var remainingSteps = await _approvalRepository.GetApprovalStepsByPaymentIdAsync(approvalStep.PaymentId);
-                    var stillPending = remainingSteps.Any(s => s.Status == "pending");
+                    var stillPending = steps.Any(s => s.Status == "pending");
 
                     if (!stillPending)
                     {
                         await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId);
+
+                        await _auditRepository.AddEntryAsync(new AuditEntries
+                        {
+                            TenantId = payment.TenantId,
+                            UserId = currentUserId,
+                            Action = AuditActions.ExecutePayment,
+                            EntityType = AuditEntityTypes.Payment,
+                            EntityId = approvalStep.PaymentId,
+                            Description = $"Betalning {approvalStep.PaymentId} genomfördes: {payment.Amount} {payment.Currency} till {payment.ToIban}",
+                            Details = AuditEntries.ToDetailsJson(new
+                            {
+                                payment.Amount,
+                                payment.Currency,
+                                payment.FromAccountId,
+                                payment.ToIban,
+                                payment.Reference,
+                                status = "completed",
+                                automatic = false
+                            })
+                        });
                     }
                 }
                 else
                 {
                     await _paymentRepository.RejectPaymentAsync(approvalStep.PaymentId);
-                    await _accountRepository.RefundAsync(approvalStep.Payment.FromAccountId, approvalStep.Payment.Amount);
-                }
+                    await _accountRepository.RefundAsync(payment.FromAccountId, payment.Amount);
 
-                await _auditRepository.AddEntryAsync(new AuditEntries
-                {
-                    UserId = currentUserId,
-                    Action = dto.Decision == "approved" ? "APPROVE_STEP" : "REJECT_STEP",
-                    EntityType = "payment",
-                    EntityId = approvalStep.PaymentId,
-                    Description = $"Steg {approvalStep.StepNumber} för betalning {approvalStep.PaymentId} {(dto.Decision == "approved" ? "godkändes" : "avslogs")}"
-                });
+                    await _auditRepository.AddEntryAsync(new AuditEntries
+                    {
+                        TenantId = payment.TenantId,
+                        UserId = currentUserId,
+                        Action = AuditActions.RejectPayment,
+                        EntityType = AuditEntityTypes.Payment,
+                        EntityId = approvalStep.PaymentId,
+                        Description = $"Betalning {approvalStep.PaymentId} avslogs och {payment.Amount} {payment.Currency} återfördes till konto {payment.FromAccountId}",
+                        Details = AuditEntries.ToDetailsJson(new
+                        {
+                            payment.Amount,
+                            payment.Currency,
+                            payment.FromAccountId,
+                            refundedAmount = payment.Amount,
+                            status = "rejected",
+                            rejectedAtStep = approvalStep.StepNumber
+                        })
+                    });
+                }
 
                 await transaction.CommitAsync();
             }
