@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { useAccounts } from "../../hooks/useAccounts"
 import { usePayments } from "../../hooks/usePayments"
 import { useAuth } from "../../hooks/useAuth"
@@ -9,17 +10,33 @@ export function Dashboard() {
     const { data: payments, isLoading: loadingPayments } = usePayments()
     const { user } = useAuth()
 
-
+    const firstName = user?.name.trim().split(/\s+/)[0] || 'there'
+    const today = new Date()
+    const formattedDate = new Intl.DateTimeFormat('en-GB', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    }).format(today)
 
     if (accountsError) return <p>Something went wrong.</p>
 
     return (
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
-                <h1>Welcome, {user?.email ?? 'user'}</h1>
-                <p>Company name</p>
-
-
+                <div className={styles.dashboard__intro}>
+                    <h1>Good morning, {firstName}</h1>
+                    <p>
+                        {user?.tenantName && <>{user.tenantName} <span aria-hidden="true">·</span> </>}
+                        <time dateTime={today.toISOString().slice(0, 10)}>{formattedDate}</time>
+                    </p>
+                </div>
+                <Link to="/ny-betalning" className={styles.createPaymentLink}>
+                    <span>Create payment</span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M4 10h12M10 4l6 6-6 6" />
+                    </svg>
+                </Link>
             </header>
 
             <section>
