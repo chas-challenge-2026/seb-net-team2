@@ -1,5 +1,5 @@
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
 import { useAuth } from "../../hooks/useAuth";
@@ -12,15 +12,35 @@ export function Dashboard() {
     const { data: payments, isLoading: loadingPayments } = usePayments();
     const { user } = useAuth();
 
-    const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
+    const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
+    const today = new Date();
+    const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-GB";
+    const formattedDate = new Intl.DateTimeFormat(locale, {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+    }).format(today);
+    const dateTime = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
     if (accountsError) return <p>{t("dashboard.errors.generic")}</p>;
 
     return (
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
-                <h1>{t("dashboard.welcome", { user: user?.email ?? t("dashboard.user") })}</h1>
-                <p>{t("dashboard.companyName")}</p>
+                <div className={styles.dashboard__intro}>
+                    <h1>{t("dashboard.greeting", { user: firstName })}</h1>
+                    <p>
+                        {user?.tenantName && <>{user.tenantName} <span aria-hidden="true">·</span> </>}
+                        <time dateTime={dateTime}>{formattedDate}</time>
+                    </p>
+                </div>
+                <Link to="/ny-betalning" className={styles.createPaymentLink}>
+                    <span>{t("dashboard.createPayment")}</span>
+                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                        <path d="M4 10h12M10 4l6 6-6 6" />
+                    </svg>
+                </Link>
             </header>
 
             <section>

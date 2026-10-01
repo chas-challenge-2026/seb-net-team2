@@ -46,6 +46,8 @@
     },
     "dashboard": {
         "welcome": "Welcome, {{user}}",
+        "greeting": "Good morning, {{user}}",
+        "createPayment": "Create payment",
         "user": "user",
         "companyName": "Company name",
         "accounts": "Accounts",

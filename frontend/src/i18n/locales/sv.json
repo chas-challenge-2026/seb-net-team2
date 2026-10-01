@@ -46,6 +46,8 @@
     },
     "dashboard": {
         "welcome": "Välkommen, {{user}}",
+        "greeting": "God morgon, {{user}}",
+        "createPayment": "Skapa betalning",
         "user": "användare",
         "companyName": "Företagsnamn",
         "accounts": "Konton",
