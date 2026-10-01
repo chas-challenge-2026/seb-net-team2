@@ -1,13 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
-import {
-    useQuery,
-} from "@tanstack/react-query";
-
-import {
-    getApprovalLimits,
-} from "../../../services/approvalLimitsService";
-
+import { getApprovalLimits } from "../../../services/approvalLimitsService";
 import Skeleton from "../../../components/LoadingState/Skeleton";
 
 import styles from "./ApprovalLimits.module.css";
@@ -16,283 +11,136 @@ function ApprovalLimitSkeleton() {
     return (
         <div className={styles.limitRow}>
             <div className={styles.limitInfo}>
-                <Skeleton
-                    width="120px"
-                    height="18px"
-                />
-
-                <Skeleton
-                    width="220px"
-                    height="14px"
-                />
+                <Skeleton width="120px" height="18px" />
+                <Skeleton width="220px" height="14px" />
             </div>
 
             <div className={styles.approvals}>
-                <Skeleton
-                    width="40px"
-                    height="18px"
-                />
-
-                <Skeleton
-                    width="70px"
-                    height="13px"
-                />
+                <Skeleton width="40px" height="18px" />
+                <Skeleton width="70px" height="13px" />
             </div>
 
             <div className={styles.modified}>
-                <Skeleton
-                    width="90px"
-                    height="13px"
-                />
-
-                <Skeleton
-                    width="120px"
-                    height="15px"
-                />
-
-                <Skeleton
-                    width="140px"
-                    height="12px"
-                />
+                <Skeleton width="90px" height="13px" />
+                <Skeleton width="120px" height="15px" />
+                <Skeleton width="140px" height="12px" />
             </div>
 
-            <Skeleton
-                width="16px"
-                height="24px"
-            />
+            <Skeleton width="16px" height="24px" />
         </div>
     );
 }
 
 export default function ApprovalLimits() {
-    const {
-        data: limits = [],
-        isPending,
-        isError,
-    } = useQuery({
+    const { t, i18n } = useTranslation();
+    const { data: limits = [], isPending, isError } = useQuery({
         queryKey: ["approvalLimits"],
         queryFn: getApprovalLimits,
     });
 
+    const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
+
     function formatAmount(amount: number) {
-        return amount.toLocaleString(
-            "sv-SE",
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2,
-            }
-        );
+        return amount.toLocaleString(locale, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2,
+        });
     }
 
     function formatDate(date: string) {
-        return new Date(
-            date
-        ).toLocaleString("sv-SE");
+        return new Date(date).toLocaleString(locale);
     }
 
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
                 <div>
-                    <h1>Approval limits</h1>
-
-                    <p>
-                        Manage rules for required
-                        payment approvals.
-                    </p>
+                    <h1>{t("approvalLimits.list.title")}</h1>
+                    <p>{t("approvalLimits.list.description")}</p>
                 </div>
 
-                <Link
-                    to="/admin/approval-limits/create"
-                    className={
-                        styles.createButton
-                    }
-                >
-                    Create approval limit
+                <Link to="/admin/approval-limits/create" className={styles.createButton}>
+                    {t("approvalLimits.list.create")}
                 </Link>
             </header>
 
-            <section
-                className={styles.limitsSection}
-            >
+            <section className={styles.limitsSection}>
                 <div className={styles.toolbar}>
                     <div>
-                        <h2>
-                            Approval rules
-                        </h2>
+                        <h2>{t("approvalLimits.list.rules")}</h2>
 
-                        {!isPending &&
-                            !isError && (
-                                <p>
-                                    {limits.length}{" "}
-                                    {limits.length === 1
-                                        ? "rule"
-                                        : "rules"}
-                                </p>
-                            )}
+                        {!isPending && !isError && (
+                            <p>{t("approvalLimits.list.ruleCount", { count: limits.length })}</p>
+                        )}
                     </div>
                 </div>
 
                 {isPending && (
                     <div
-                        className={
-                            styles.skeletonList
-                        }
+                        className={styles.skeletonList}
                         role="status"
-                        aria-label="Loading approval limits"
+                        aria-label={t("approvalLimits.list.loading")}
                     >
-                        {Array.from({
-                            length: 5,
-                        }).map(
-                            (_, index) => (
-                                <ApprovalLimitSkeleton
-                                    key={index}
-                                />
-                            )
-                        )}
+                        {Array.from({ length: 5 }).map((_, index) => (
+                            <ApprovalLimitSkeleton key={index} />
+                        ))}
                     </div>
                 )}
 
                 {isError && (
-                    <div
-                        className={
-                            styles.errorState
-                        }
-                        role="alert"
-                    >
-                        Unable to load approval
-                        limits.
+                    <div className={styles.errorState} role="alert">
+                        {t("approvalLimits.list.errors.load")}
                     </div>
                 )}
 
-                {!isPending &&
-                    !isError &&
-                    limits.length === 0 && (
-                        <div
-                            className={
-                                styles.emptyState
-                            }
-                        >
-                            <h2>
-                                No approval limits
-                            </h2>
+                {!isPending && !isError && limits.length === 0 && (
+                    <div className={styles.emptyState}>
+                        <h2>{t("approvalLimits.list.empty.title")}</h2>
+                        <p>{t("approvalLimits.list.empty.description")}</p>
+                    </div>
+                )}
 
-                            <p>
-                                Create an approval
-                                limit to get
-                                started.
-                            </p>
-                        </div>
-                    )}
+                {!isPending && !isError && limits.length > 0 && (
+                    <div className={styles.limitList}>
+                        {limits.map((limit) => (
+                            <Link
+                                key={limit.id}
+                                to="/admin/approval-limits/$limitId/edit"
+                                params={{ limitId: limit.id.toString() }}
+                                className={styles.limitLink}
+                            >
+                                <article className={styles.limitRow}>
+                                    <div className={styles.limitInfo}>
+                                        <strong className={styles.amount}>
+                                            {formatAmount(limit.minAmount)}
+                                        </strong>
 
-                {!isPending &&
-                    !isError &&
-                    limits.length > 0 && (
-                        <div
-                            className={
-                                styles.limitList
-                            }
-                        >
-                            {limits.map(
-                                (limit) => (
-                                    <Link
-                                        key={limit.id}
-                                        to="/admin/approval-limits/$limitId/edit"
-                                        params={{
-                                            limitId:
-                                                limit.id.toString(),
-                                        }}
-                                        className={
-                                            styles.limitLink
-                                        }
-                                    >
-                                        <article
-                                            className={
-                                                styles.limitRow
-                                            }
-                                        >
-                                            <div
-                                                className={
-                                                    styles.limitInfo
-                                                }
-                                            >
-                                                <strong
-                                                    className={
-                                                        styles.amount
-                                                    }
-                                                >
-                                                    {formatAmount(
-                                                        limit.minAmount
-                                                    )}
-                                                </strong>
+                                        <span className={styles.description}>
+                                            {limit.description}
+                                        </span>
+                                    </div>
 
-                                                <span
-                                                    className={
-                                                        styles.description
-                                                    }
-                                                >
-                                                    {
-                                                        limit.description
-                                                    }
-                                                </span>
-                                            </div>
+                                    <div className={styles.approvals}>
+                                        <strong>{limit.requiredApprovals}</strong>
+                                        <span>
+                                            {t("approvalLimits.list.approvalCount", {
+                                                count: limit.requiredApprovals,
+                                            })}
+                                        </span>
+                                    </div>
 
-                                            <div
-                                                className={
-                                                    styles.approvals
-                                                }
-                                            >
-                                                <strong>
-                                                    {
-                                                        limit.requiredApprovals
-                                                    }
-                                                </strong>
+                                    <div className={styles.modified}>
+                                        <span>{t("approvalLimits.list.lastModified")}</span>
+                                        <strong>{limit.lastModifiedBy}</strong>
+                                        <small>{formatDate(limit.lastModifiedAt)}</small>
+                                    </div>
 
-                                                <span>
-                                                    {limit.requiredApprovals ===
-                                                        1
-                                                        ? "approval"
-                                                        : "approvals"}
-                                                </span>
-                                            </div>
-
-                                            <div
-                                                className={
-                                                    styles.modified
-                                                }
-                                            >
-                                                <span>
-                                                    Last
-                                                    modified
-                                                </span>
-
-                                                <strong>
-                                                    {
-                                                        limit.lastModifiedBy
-                                                    }
-                                                </strong>
-
-                                                <small>
-                                                    {formatDate(
-                                                        limit.lastModifiedAt
-                                                    )}
-                                                </small>
-                                            </div>
-
-                                            <span
-                                                className={
-                                                    styles.chevron
-                                                }
-                                                aria-hidden="true"
-                                            >
-                                                ›
-                                            </span>
-                                        </article>
-                                    </Link>
-                                )
-                            )}
-                        </div>
-                    )}
+                                    <span className={styles.chevron} aria-hidden="true">›</span>
+                                </article>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </section>
         </div>
     );

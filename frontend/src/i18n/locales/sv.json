@@ -1,0 +1,548 @@
+{
+    "common": {
+        "loading": "Laddar...",
+        "cancel": "Avbryt",
+        "clear": "Rensa",
+        "close": "Stäng",
+        "done": "Klar"
+    },
+    "navigation": {
+        "dashboard": "Översikt",
+        "newPayment": "Ny betalning",
+        "saveInvest": "Spara & investera",
+        "batchPayments": "Batchbetalningar",
+        "auditLog": "Granskningslogg",
+        "profile": "Profil",
+        "logout": "Logga ut",
+        "goToDashboard": "Gå till översikten"
+    },
+    "login": {
+        "private": "Privat",
+        "company": "Bolag",
+        "email": "E-post",
+        "password": "Lösenord",
+        "login": "Logga in",
+        "missingCredentials": "Ange både e-post och lösenord.",
+        "generic": "Något gick fel."
+    },
+    "session": {
+        "sessionExpired": "Din session har gått ut. Logga in igen."
+    },
+    "sidebar": {
+        "menu": "Meny",
+        "expand": "Expandera sidomeny",
+        "collapse": "Minimera sidomeny",
+        "dashboard": "Översikt",
+        "newPayment": "Ny betalning",
+        "batchUpload": "Batchuppladdning",
+        "approvalInbox": "Attestkorg",
+        "admin": "ADMIN",
+        "auditLog": "Granskningslogg",
+        "administration": "Administration",
+        "myProfile": "Min profil",
+        "logout": "Logga ut",
+        "approvalsPending": "{{pending}} väntande",
+        "approvalsWithOverdue": "{{pending}} väntande, {{overdue}} försenade"
+    },
+    "dashboard": {
+        "welcome": "Välkommen, {{user}}",
+        "user": "användare",
+        "companyName": "Företagsnamn",
+        "accounts": "Konton",
+        "recentPayments": "Senaste betalningar",
+        "errors": {
+            "generic": "Något gick fel."
+        },
+        "table": {
+            "date": "Datum",
+            "recipientIban": "Mottagarens IBAN",
+            "reference": "Referens",
+            "amount": "Belopp",
+            "status": "Status"
+        },
+        "status": {
+            "completed": "Slutförd",
+            "pending": "Väntande"
+        }
+    },
+    "payment": {
+        "eyebrow": "BETALNINGAR",
+        "title": "Skapa en ny betalning",
+        "description": "Skicka en säker betalning från ditt företagskonto.",
+        "details": {
+            "title": "Betalningsuppgifter",
+            "description": "Ange mottagare och betalningsbelopp."
+        },
+        "fields": {
+            "fromAccount": "Från konto",
+            "recipient": "Mottagare",
+            "iban": "IBAN",
+            "amount": "Belopp",
+            "reference": "Referens",
+            "message": "Meddelande"
+        },
+        "placeholders": {
+            "recipient": "Företag eller person",
+            "reference": "Faktura eller OCR",
+            "message": "Skriv ett meddelande till mottagaren"
+        },
+        "optional": "Valfritt",
+        "loadingAccounts": "Laddar konton...",
+        "success": "Betalningen har skapats.",
+        "errors": {
+            "selectAccount": "Välj ett konto.",
+            "insufficientBalance": "Betalningsbeloppet överstiger kontots saldo.",
+            "reviewDetails": "Kontrollera betalningsuppgifterna och försök igen.",
+            "createFailed": "Det gick inte att skapa betalningen. Försök igen.",
+            "loadAccounts": "Det gick inte att ladda konton."
+        },
+        "actions": {
+            "clear": "Rensa formulär",
+            "review": "Granska betalning",
+            "goBack": "Gå tillbaka",
+            "creating": "Skapar...",
+            "confirm": "Bekräfta betalning"
+        },
+        "summary": {
+            "title": "Sammanfattning",
+            "amountToPay": "Belopp att betala",
+            "recipientIban": "Mottagarens IBAN",
+            "notSpecified": "Ej angivet",
+            "selectAccount": "Välj ett konto",
+            "balanceAfterPayment": "Saldo efter betalning"
+        },
+        "approval": {
+            "title": "Attestkrav bestäms automatiskt",
+            "description": "Betalningen följer de attestregler som är konfigurerade för dess belopp."
+        },
+        "review": {
+            "eyebrow": "SLUTKONTROLL",
+            "title": "Granska betalning",
+            "description": "Kontrollera uppgifterna innan betalningen skapas."
+        }
+    },
+    "approvalInbox": {
+        "title": "Attestkorg",
+        "description": "Betalningar som väntar på ditt beslut.",
+        "loading": "Laddar attesteringar...",
+        "pendingCount_one": "{{count}} väntande",
+        "pendingCount_other": "{{count}} väntande",
+        "dismissMessage": "Stäng meddelande",
+        "overdueBanner_one": "1 betalning har väntat längre än {{days}} dagar.",
+        "overdueBanner_other": "{{count}} betalningar har väntat längre än {{days}} dagar.",
+        "overdueFirst": "De visas först i listan nedan.",
+        "errors": {
+            "load": "Det gick inte att ladda attesteringarna.",
+            "decision": "Det gick inte att behandla attestbeslutet."
+        },
+        "feedback": {
+            "approved": "{{reference}} ({{amount}}) godkändes.",
+            "rejected": "{{reference}} ({{amount}}) avvisades.",
+            "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats."
+        },
+        "sort": {
+            "label": "Sortera efter",
+            "newest": "Nyaste först",
+            "oldest": "Äldsta först",
+            "amountHigh": "Belopp: högst till lägst",
+            "amountLow": "Belopp: lägst till högst"
+        },
+        "card": {
+            "waitingDays_one": "Väntat {{count}} dag",
+            "waitingDays_other": "Väntat {{count}} dagar",
+            "reference": "Referens",
+            "submittedBy": "Skickad av",
+            "submitted": "Skickad",
+            "toIban": "Till IBAN",
+            "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
+            "waitingToday": "Skickad i dag",
+            "dualApproval": "Dubbelattest – betalningen kräver två attestanter"
+        },
+        "comment": {
+            "label": "Kommentar",
+            "optional": "(valfritt)",
+            "placeholder": "Lägg till en kommentar",
+            "rejectReasonLabel": "Anledning till avvisning",
+            "required": "(obligatoriskt)",
+            "rejectReasonHint": "Initiativtagaren ser din motivering. Minst {{min}} tecken."
+        },
+        "actions": {
+            "reject": "Avvisa",
+            "approve": "Godkänn",
+            "processing": "Behandlar...",
+            "rejectPayment": "Avvisa betalning {{id}}",
+            "approvePayment": "Godkänn betalning {{id}}"
+        },
+        "empty": {
+            "title": "Inga väntande attesteringar",
+            "description": "Det finns inga betalningar som väntar på ditt godkännande."
+        },
+        "modal": {
+            "approveTitle": "Godkänn betalning?",
+            "rejectTitle": "Avvisa betalning?",
+            "approveDescription": "Kontrollera uppgifterna innan du godkänner. Beslutet går inte att ångra.",
+            "rejectDescription": "Kontrollera uppgifterna och förklara varför betalningen avvisas.",
+            "amount": "Belopp"
+        }
+    },
+    "batch": {
+        "eyebrow": "BETALNINGAR",
+        "title": "Batchuppladdning",
+        "description": "Ladda upp flera betalningar samtidigt via en CSV-fil.",
+        "mockMode": "Mockläge",
+        "file": {
+            "title": "CSV-fil",
+            "description": "Välj en fil och ladda sedan upp och behandla den.",
+            "label": "CSV-fil",
+            "hint": "Maximal filstorlek: 1 MB. Kodning: UTF-8."
+        },
+        "actions": {
+            "processing": "Behandlar...",
+            "upload": "Ladda upp och behandla"
+        },
+        "format": {
+            "title": "CSV-format",
+            "description": "Filen måste innehålla följande kolumner:",
+            "warning": "Obs: kommatecken inuti ett fält stöds inte. Undvik referenser som innehåller kommatecken.",
+            "download": "Ladda ner example-batch.csv"
+        },
+        "result": {
+            "title": "Resultat",
+            "processed": "{{succeeded}} av {{total}} betalningar behandlades.",
+            "failed_one": "{{count}} rad misslyckades — se nedan.",
+            "failed_other": "{{count}} rader misslyckades — se nedan."
+        },
+        "table": {
+            "row": "Rad",
+            "toIban": "Till IBAN",
+            "amount": "Belopp",
+            "reference": "Referens",
+            "status": "Status",
+            "success": "Godkänd"
+        },
+        "errors": {
+            "csvOnly": "Endast .csv-filer stöds.",
+            "fileTooLarge": "Filen är större än 1 MB.",
+            "chooseFile": "Välj först en CSV-fil.",
+            "accountsLoading": "Kontoinformationen laddas fortfarande — försök igen om en stund.",
+            "header": "CSV-rubriken måste vara exakt: {{header}}",
+            "empty": "CSV-filen är tom eller innehåller inga datarader.",
+            "columns": "Förväntade 4 kolumner men fick {{count}}. Kommatecken inuti ett fält stöds inte.",
+            "unknownAccount": "Okänt from_account_id '{{id}}'",
+            "invalidIban": "Ogiltigt IBAN '{{iban}}'",
+            "invalidAmount": "Ogiltigt belopp '{{amount}}'"
+        }
+    },
+    "auditLog": {
+        "title": "Granskningslogg",
+        "description": "Händelselogg från databasen (obs: vissa händelser loggas endast till en fil).",
+        "note": {
+            "title": "Obs:",
+            "description": "Den här vyn visar endast händelser som lagras i databasen. Vissa händelser, såsom batchbetalningar och delvisa atteststeg, loggas endast till",
+            "descriptionEnd": "och visas därför inte här."
+        },
+        "filters": {
+            "user": "Användare",
+            "allUsers": "Alla användare",
+            "eventType": "Händelsetyp",
+            "allEvents": "Alla händelser",
+            "fromDate": "Från datum",
+            "toDate": "Till datum",
+            "clear": "Rensa filter"
+        },
+        "table": {
+            "caption": "Händelser i granskningsloggen",
+            "timestamp": "Tidpunkt",
+            "user": "Användare",
+            "event": "Händelse",
+            "entity": "Entitet",
+            "description": "Beskrivning"
+        },
+        "states": {
+            "loading": "Laddar granskningsloggen...",
+            "error": "Det gick inte att ladda granskningsloggen.",
+            "noMatches": "Inga poster i granskningsloggen matchar filtret.",
+            "empty": "Inga poster hittades i granskningsloggen."
+        },
+        "pagination": {
+            "showing": "Visar {{visible}} av {{total}} poster",
+            "showMore": "Visa fler"
+        },
+        "footnote": {
+            "start": "Visar de senaste 200 posterna. För hela loggen, se även",
+            "end": "på servern."
+        }
+    },
+    "approvalLimits": {
+        "list": {
+            "title": "Attestgränser",
+            "description": "Hantera regler för obligatorisk attest av betalningar.",
+            "create": "Skapa attestgräns",
+            "rules": "Attestregler",
+            "ruleCount_one": "{{count}} regel",
+            "ruleCount_other": "{{count}} regler",
+            "loading": "Laddar attestgränser",
+            "lastModified": "Senast ändrad",
+            "approvalCount_one": "attest",
+            "approvalCount_other": "attester",
+            "empty": {
+                "title": "Inga attestgränser",
+                "description": "Skapa en attestgräns för att komma igång."
+            },
+            "errors": {
+                "load": "Det gick inte att ladda attestgränserna."
+            }
+        },
+        "form": {
+            "title": "Attestregel",
+            "minAmount": "Minimibelopp",
+            "minAmountHelp": "Betalningar från detta belopp använder denna attestregel.",
+            "minAmountEditHelp": "Betalningar från detta belopp använder denna regel.",
+            "requiredApprovals": "Antal attester",
+            "requiredApprovalsHelp": "Antal attester som krävs för regeln.",
+            "description": "Beskrivning",
+            "descriptionPlaceholder": "Exempel: Betalningar över 50 000 kräver två attester."
+        },
+        "create": {
+            "title": "Skapa attestgräns",
+            "description": "Ange när en betalning kräver ytterligare attester.",
+            "formDescription": "Ange minimibelopp och antal attester som krävs.",
+            "submit": "Skapa attestgräns",
+            "creating": "Skapar...",
+            "success": "Attestgränsen \"{{description}}\" skapades."
+        },
+        "edit": {
+            "title": "Redigera attestgräns",
+            "description": "Uppdatera attestregeln för betalningar.",
+            "formDescription": "Ändra minimibelopp, antal attester eller beskrivning.",
+            "delete": "Ta bort gräns",
+            "save": "Spara ändringar",
+            "saving": "Sparar...",
+            "success": "Attestgränsen uppdaterades.",
+            "loading": "Laddar attestgräns..."
+        },
+        "deleteModal": {
+            "title": "Ta bort attestgräns",
+            "confirm": "Är du säker på att du vill ta bort denna attestgräns?",
+            "warning": "Den här åtgärden går inte att ångra.",
+            "deleting": "Tar bort..."
+        },
+        "errors": {
+            "validation": "Ange giltiga värden för attestgränsen.",
+            "create": "Det gick inte att skapa attestgränsen.",
+            "update": "Det gick inte att uppdatera attestgränsen.",
+            "delete": "Det gick inte att ta bort attestgränsen.",
+            "loadOne": "Det gick inte att ladda attestgränsen.",
+            "notFound": "Attestgränsen kunde inte hittas."
+        }
+    },
+    "users": {
+        "roles": {
+            "User": "Användare",
+            "Initiator": "Initiator",
+            "Attestant": "Attestant",
+            "Admin": "Admin"
+        },
+        "form": {
+            "title": "Användarinformation",
+            "name": "Namn",
+            "email": "E-post",
+            "password": "Lösenord",
+            "role": "Roll"
+        },
+        "list": {
+            "title": "Användare",
+            "description": "Hantera användare och deras roller.",
+            "create": "Skapa användare",
+            "searchLabel": "Sök användare",
+            "searchPlaceholder": "Sök efter namn, e-post eller roll...",
+            "userCount_one": "{{count}} användare",
+            "userCount_other": "{{count}} användare",
+            "loading": "Laddar användare",
+            "empty": {
+                "title": "Inga användare hittades",
+                "description": "Prova en annan sökning."
+            }
+        },
+        "create": {
+            "title": "Skapa användare",
+            "description": "Lägg till en ny användare och tilldela en behörighetsroll.",
+            "formDescription": "Ange användarens uppgifter och välj en roll.",
+            "submit": "Skapa användare",
+            "creating": "Skapar...",
+            "success": "{{name}} skapades."
+        },
+        "edit": {
+            "title": "Redigera användare",
+            "description": "Uppdatera användarinformation, lösenord eller behörighetsroll.",
+            "formDescription": "Ändringarna tillämpas på detta användarkonto.",
+            "newPassword": "Nytt lösenord",
+            "passwordPlaceholder": "Lämna tomt för att behålla nuvarande lösenord",
+            "save": "Spara ändringar",
+            "saving": "Sparar...",
+            "success": "Användaren uppdaterades.",
+            "loading": "Laddar användare..."
+        },
+        "details": {
+            "description": "Visa och hantera användaruppgifter.",
+            "sectionDescription": "Konto- och behörighetsinformation för användaren.",
+            "edit": "Redigera användare",
+            "delete": "Ta bort användare",
+            "tenantId": "Tenant-ID",
+            "loading": "Laddar användare"
+        },
+        "deleteModal": {
+            "title": "Ta bort användare",
+            "confirm": "Är du säker på att du vill ta bort",
+            "warning": "Den här åtgärden går inte att ångra.",
+            "deleting": "Tar bort..."
+        },
+        "errors": {
+            "load": "Det gick inte att ladda användarna.",
+            "create": "Det gick inte att skapa användaren.",
+            "update": "Det gick inte att uppdatera användaren.",
+            "delete": "Det gick inte att ta bort användaren.",
+            "fetch": "Det gick inte att hämta användaren.",
+            "notFound": "Användaren kunde inte hittas.",
+            "currentUser": "Det gick inte att identifiera den aktuella användaren."
+        }
+    },
+    "admin": {
+        "navigation": {
+            "title": "Administration",
+            "overview": "Översikt",
+            "users": "Användare",
+            "allUsers": "Alla användare",
+            "createUser": "Skapa användare",
+            "approvalLimits": "Attestgränser",
+            "allApprovalLimits": "Alla attestgränser",
+            "createApprovalLimit": "Skapa attestgräns"
+        },
+        "dashboard": {
+            "title": "Administration",
+            "description": "Hantera användare, roller och attestinställningar för betalningar.",
+            "statsLabel": "Administrationsöversikt",
+            "users": "Användare",
+            "administrators": "Administratörer",
+            "approvalLimits": "Attestgränser",
+            "viewUsers": "Visa användare",
+            "viewApprovalLimits": "Visa attestgränser",
+            "quickActions": "Snabbåtgärder",
+            "quickActionsDescription": "Vanliga administrativa åtgärder.",
+            "createUser": "Skapa användare",
+            "createApprovalLimit": "Skapa attestgräns",
+            "error": "Viss administrationsdata kunde inte laddas."
+        }
+    },
+    "notifications": {
+        "title": "Notiser",
+        "buttonLabel_one": "Notiser, {{count}} oläst",
+        "buttonLabel_other": "Notiser, {{count}} olästa",
+        "unreadCount_one": "{{count}} oläst",
+        "unreadCount_other": "{{count}} olästa",
+        "markAllAsRead": "Markera alla som lästa",
+        "empty": "Du har inga notiser."
+    },
+    "overdueReminder": {
+        "title": "Påminnelse: väntande attester",
+        "message_one": "1 betalning har väntat längre än {{days}} dagar på din attest.",
+        "message_other": "{{count}} betalningar har väntat längre än {{days}} dagar på din attest.",
+        "goToInbox": "Gå till attestkorgen",
+        "dismiss": "Stäng påminnelsen"
+    },
+    "reminderSettings": {
+        "title": "Attestpåminnelser",
+        "description": "Få ett e-postmeddelande när betalningar har väntat på din attest för länge, så att de inte blir liggande.",
+        "emailEnabled": "Skicka ett e-postmeddelande när en betalning har väntat för länge på min attest",
+        "recipient": "Påminnelser skickas till",
+        "remindAfter": "Skicka e-post efter",
+        "dayCount_one": "{{count}} dag",
+        "dayCount_other": "{{count}} dagar",
+        "success": "Påminnelseinställningarna sparades.",
+        "saving": "Sparar...",
+        "save": "Spara inställningar",
+        "loading": "Laddar inställningar...",
+        "errors": {
+            "save": "Det gick inte att spara påminnelseinställningarna.",
+            "load": "Det gick inte att ladda påminnelseinställningarna."
+        },
+        "inAppNote": "Påminnelser i appen visas alltid efter {{days}} dagar."
+    },
+    "saveInvest": {
+        "eyebrow": "SPARANDE & INVESTERINGAR",
+        "title": "Spara och investera",
+        "description": "Bygg din ekonomiska framtid med enkla och flexibla alternativ.",
+        "navigation": "Navigation för sparande",
+        "dismissMessage": "Stäng meddelande",
+        "tabs": {
+            "savings": "Sparande",
+            "investments": "Investeringar",
+            "goals": "Sparmål"
+        },
+        "actions": {
+            "openAccount": "Öppna ett sparkonto",
+            "showLess": "Visa mindre",
+            "viewAll": "Visa alla",
+            "manageAccount": "Hantera konto",
+            "addGoal": "Lägg till sparmål",
+            "createAccount": "Skapa konto",
+            "createGoal": "Skapa mål"
+        },
+        "savings": {
+            "totalSaved": "Totalt sparat",
+            "acrossAccounts": "På dina sparkonton",
+            "interestEarned": "Intjänad ränta i år",
+            "accountsTitle": "Dina sparkonton",
+            "accountsDescription": "Hantera ditt sparande och dina räntor.",
+            "interestRate": "ränta"
+        },
+        "investments": {
+            "overview": "Investeringsöversikt",
+            "portfolioValue": "Nuvarande portföljvärde",
+            "thisYear": "i år",
+            "allocation": "Portföljfördelning",
+            "equities": "Aktier",
+            "funds": "Fonder",
+            "bonds": "Obligationer"
+        },
+        "goals": {
+            "title": "Dina sparmål",
+            "description": "Följ utvecklingen mot det du sparar till.",
+            "of": "av",
+            "complete": "{{progress}}% klart"
+        },
+        "modals": {
+            "account": {
+                "eyebrow": "NYTT KONTO",
+                "title": "Öppna ett sparkonto",
+                "description": "Skapa ett mock-sparkonto för att se det i din översikt.",
+                "name": "Kontonamn",
+                "placeholder": "t.ex. Resekassa"
+            },
+            "goal": {
+                "eyebrow": "NYTT MÅL",
+                "title": "Lägg till ett sparmål",
+                "name": "Namn på mål",
+                "placeholder": "t.ex. Ny bil",
+                "target": "Målbelopp"
+            },
+            "manage": {
+                "eyebrow": "KONTO",
+                "interestRate": "Ränta: {{rate}}"
+            }
+        },
+        "messages": {
+            "accountCreated": "Sparkontot skapades.",
+            "goalCreated": "Sparmålet skapades.",
+            "accountOpened": "Kontouppgifterna öppnades."
+        }
+    },
+    "profilePage": {
+        "title": "Min profil",
+        "description": "Dina kontouppgifter och inställningar.",
+        "details": {
+            "title": "Kontouppgifter",
+            "company": "Företag"
+        }
+    }
+}

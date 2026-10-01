@@ -203,6 +203,8 @@ namespace SebPortal.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TenantId");
+
                     b.HasIndex("UserId");
 
                     b.HasIndex("EntityType", "EntityId");

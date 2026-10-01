@@ -1,189 +1,230 @@
-import { type ChangeEvent, type FormEvent, useRef, useState } from 'react'
-import { useAccounts } from '../../hooks/useAccounts'
-import styles from './Batch.module.css'
-import Card from '../../components/Card/Card'
-import Button from '../../components/Button/Button'
-import { z } from "zod"
+import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+import { z } from "zod";
 
-const MAX_FILE_SIZE_BYTES = 1024 * 1024
-const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/
-const EXPECTED_HEADER = ['from_account_id', 'to_iban', 'amount', 'reference']
+import { useAccounts } from "../../hooks/useAccounts";
+import Card from "../../components/Card/Card";
+import Button from "../../components/Button/Button";
+
+import styles from "./Batch.module.css";
+
+const MAX_FILE_SIZE_BYTES = 1024 * 1024;
+const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
+const EXPECTED_HEADER = ["from_account_id", "to_iban", "amount", "reference"];
+
 const EXAMPLE_CSV = `from_account_id,to_iban,amount,reference
 1,SE8550000000054910000003,5000.00,Faktura #2001
-1,SE8550000000054910000005,12500.00,Faktura #2002`
-
-const csvFileSchema = z.object({
-    name: z.string().refine(
-        name => name.toLowerCase().endsWith('.csv'),
-        { message: 'Only .csv files are supported.' }
-    ),
-    size: z.number().max(MAX_FILE_SIZE_BYTES, 'The file is larger than 1 MB.'),
-})
-
-
+1,SE8550000000054910000005,12500.00,Faktura #2002`;
 
 type BatchRow = {
-    rowNumber: number
-    toIban: string
-    amount: number
-    reference: string
-    success: boolean
-    error?: string
-}
+    rowNumber: number;
+    toIban: string;
+    amount: number;
+    reference: string;
+    success: boolean;
+    error?: string;
+};
 
 function splitCsvLines(content: string): string[] {
-    return content.split(/\r?\n/).filter(line => line.trim().length > 0)
+    return content.split(/\r?\n/).filter((line) => line.trim().length > 0);
 }
 
 function isValidHeader(headerLine: string): boolean {
-    const columns = headerLine.split(',').map(column => column.trim().toLowerCase())
+    const columns = headerLine.split(",").map((column) => column.trim().toLowerCase());
+
     return (
         columns.length === EXPECTED_HEADER.length &&
         columns.every((column, index) => column === EXPECTED_HEADER[index])
-    )
+    );
 }
 
-function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRow[] {
+function parseBatchRows(dataLines: string[], validAccountIds: string[], t: TFunction): BatchRow[] {
     return dataLines.map((line, index) => {
-        const rowNumber = index + 2 // +1 for header row, +1 for 1-based numbering
-        const parts = line.split(',').map(part => part.trim())
+        const rowNumber = index + 2;
+        const parts = line.split(",").map((part) => part.trim());
 
         if (parts.length !== 4) {
             return {
                 rowNumber,
-                toIban: parts[1] ?? '',
+                toIban: parts[1] ?? "",
                 amount: 0,
-                reference: parts[3] ?? '',
+                reference: parts[3] ?? "",
                 success: false,
-                error: `Expected 4 columns, got ${parts.length}. Commas inside a field are not supported.`,
-            }
+                error: t("batch.errors.columns", { count: parts.length }),
+            };
         }
 
-        const [fromAccountId, toIbanRaw, amountRaw, reference] = parts
-        const toIban = toIbanRaw.replace(/\s/g, '').toUpperCase()
+        const [fromAccountId, toIbanRaw, amountRaw, reference] = parts;
+        const toIban = toIbanRaw.replace(/\s/g, "").toUpperCase();
 
         if (!validAccountIds.includes(fromAccountId)) {
-            return { rowNumber, toIban, amount: 0, reference, success: false, error: `Unknown from_account_id '${fromAccountId}'` }
+            return {
+                rowNumber,
+                toIban,
+                amount: 0,
+                reference,
+                success: false,
+                error: t("batch.errors.unknownAccount", { id: fromAccountId }),
+            };
         }
 
         if (!IBAN_PATTERN.test(toIban)) {
-            return { rowNumber, toIban, amount: 0, reference, success: false, error: `Invalid IBAN '${toIbanRaw}'` }
+            return {
+                rowNumber,
+                toIban,
+                amount: 0,
+                reference,
+                success: false,
+                error: t("batch.errors.invalidIban", { iban: toIbanRaw }),
+            };
         }
 
-        const amount = Number(amountRaw)
+        const amount = Number(amountRaw);
+
         if (!Number.isFinite(amount) || amount <= 0) {
-            return { rowNumber, toIban, amount: 0, reference, success: false, error: `Invalid amount '${amountRaw}'` }
+            return {
+                rowNumber,
+                toIban,
+                amount: 0,
+                reference,
+                success: false,
+                error: t("batch.errors.invalidAmount", { amount: amountRaw }),
+            };
         }
 
-        return { rowNumber, toIban, amount, reference, success: true }
-    })
+        return { rowNumber, toIban, amount, reference, success: true };
+    });
 }
 
 export function Batch() {
-    const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts()
-    const [file, setFile] = useState<File | null>(null)
-    const [fileError, setFileError] = useState<string | null>(null)
-    const [results, setResults] = useState<BatchRow[] | null>(null)
-    const [isProcessing, setIsProcessing] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    const { t, i18n } = useTranslation();
+    const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts();
+
+    const [file, setFile] = useState<File | null>(null);
+    const [fileError, setFileError] = useState<string | null>(null);
+    const [results, setResults] = useState<BatchRow[] | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
+
+    const csvFileSchema = z.object({
+        name: z.string().refine(
+            (name) => name.toLowerCase().endsWith(".csv"),
+            { message: t("batch.errors.csvOnly") }
+        ),
+        size: z.number().max(MAX_FILE_SIZE_BYTES, t("batch.errors.fileTooLarge")),
+    });
 
     function resetFileInput() {
-        setFile(null)
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ''
-        }
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     }
 
     function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-        const selected = event.target.files?.[0] ?? null
-        setResults(null)
+        const selected = event.target.files?.[0] ?? null;
+        setResults(null);
 
         if (!selected) {
-            setFile(null)
-            setFileError(null)
-            return
+            setFile(null);
+            setFileError(null);
+            return;
         }
 
-        const result = csvFileSchema.safeParse(selected)
+        const result = csvFileSchema.safeParse(selected);
+
         if (!result.success) {
-            resetFileInput()
-            setFileError(result.error.issues[0].message)
-            return
+            resetFileInput();
+            setFileError(result.error.issues[0].message);
+            return;
         }
 
-        setFile(selected)
-        setFileError(null)
-        // Move focus off the file input so a subsequent Enter submits the form
-        // instead of reopening the native file picker.
-        document.getElementById('batch-submit')?.focus()
+        setFile(selected);
+        setFileError(null);
+
+        document.getElementById("batch-submit")?.focus();
     }
 
     function handleClear() {
-        resetFileInput()
-        setFileError(null)
-        setResults(null)
+        resetFileInput();
+        setFileError(null);
+        setResults(null);
     }
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault()
+        event.preventDefault();
+
         if (!file) {
-            setFileError('Choose a CSV file first.')
-            return
-        }
-        if (isLoadingAccounts) {
-            setFileError('Account data is still loading — try again in a moment.')
-            return
+            setFileError(t("batch.errors.chooseFile"));
+            return;
         }
 
-        setIsProcessing(true)
-        const content = await file.text()
-        const lines = splitCsvLines(content)
+        if (isLoadingAccounts) {
+            setFileError(t("batch.errors.accountsLoading"));
+            return;
+        }
+
+        setIsProcessing(true);
+
+        const content = await file.text();
+        const lines = splitCsvLines(content);
 
         if (lines.length === 0 || !isValidHeader(lines[0])) {
-            setFileError(`The CSV header must be exactly: ${EXPECTED_HEADER.join(',')}`)
-            setIsProcessing(false)
-            resetFileInput()
-            return
+            setFileError(
+                t("batch.errors.header", {
+                    header: EXPECTED_HEADER.join(","),
+                })
+            );
+
+            setIsProcessing(false);
+            resetFileInput();
+            return;
         }
 
-        const dataLines = lines.slice(1)
+        const dataLines = lines.slice(1);
+
         if (dataLines.length === 0) {
-            setFileError('The CSV file is empty or has no data rows.')
-            setIsProcessing(false)
-            resetFileInput()
-            return
+            setFileError(t("batch.errors.empty"));
+            setIsProcessing(false);
+            resetFileInput();
+            return;
         }
 
-        const validAccountIds = accounts.map(account => account.id)
-        setResults(parseBatchRows(dataLines, validAccountIds))
-        setIsProcessing(false)
-        resetFileInput()
+        const validAccountIds = accounts.map((account) => account.id);
+
+        setResults(parseBatchRows(dataLines, validAccountIds, t));
+        setIsProcessing(false);
+        resetFileInput();
     }
 
     function handleDownloadExample() {
-        const blob = new Blob([EXAMPLE_CSV], { type: 'text/csv' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = 'example-batch.csv'
-        link.click()
-        URL.revokeObjectURL(url)
+        const blob = new Blob([EXAMPLE_CSV], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "example-batch.csv";
+        link.click();
+
+        URL.revokeObjectURL(url);
     }
 
-    const succeeded = results?.filter(row => row.success).length ?? 0
-    const failed = results ? results.length - succeeded : 0
+    const succeeded = results?.filter((row) => row.success).length ?? 0;
+    const failed = results ? results.length - succeeded : 0;
 
     return (
         <div className={styles.page}>
             <header className={styles.header}>
                 <div>
-                    <span className={styles.eyebrow}>PAYMENTS</span>
-                    <h1>Batch upload</h1>
-                    <p>Upload multiple payments at once via a CSV file.</p>
+                    <span className={styles.eyebrow}>{t("batch.eyebrow")}</span>
+                    <h1>{t("batch.title")}</h1>
+                    <p>{t("batch.description")}</p>
                 </div>
+
                 <div className={styles.headerBadge}>
                     <span className={styles.statusDot} />
-                    Mock mode
+                    {t("batch.mockMode")}
                 </div>
             </header>
 
@@ -191,15 +232,21 @@ export function Batch() {
                 <Card>
                     <form onSubmit={handleSubmit}>
                         <div className={styles.sectionHeading}>
-                            <h2>CSV file</h2>
-                            <p>Choose a file, then upload and process it.</p>
+                            <h2>{t("batch.file.title")}</h2>
+                            <p>{t("batch.file.description")}</p>
                         </div>
 
                         <label>
-                            CSV file
-                            <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileChange} />
+                            {t("batch.file.label")}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept=".csv"
+                                onChange={handleFileChange}
+                            />
                         </label>
-                        <p className={styles.hint}>Max file size: 1 MB. Encoding: UTF-8.</p>
+
+                        <p className={styles.hint}>{t("batch.file.hint")}</p>
 
                         {fileError && (
                             <div className={styles.errorBanner} role="alert">
@@ -215,8 +262,9 @@ export function Batch() {
                                 onClick={handleClear}
                                 disabled={!file && !fileError && !results}
                             >
-                                Clear
+                                {t("common.clear")}
                             </Button>
+
                             <Button
                                 id="batch-submit"
                                 type="submit"
@@ -225,58 +273,88 @@ export function Batch() {
                                 disabled={!file || isProcessing || isLoadingAccounts}
                                 aria-busy={isProcessing}
                             >
-                                {isProcessing ? 'Processing…' : 'Upload and process'}
+                                {isProcessing
+                                    ? t("batch.actions.processing")
+                                    : t("batch.actions.upload")}
                             </Button>
                         </div>
                     </form>
                 </Card>
 
-                <Card title="CSV format" className={styles.formatCard}>
-                    <p>The file must have the following columns:</p>
+                <Card title={t("batch.format.title")} className={styles.formatCard}>
+                    <p>{t("batch.format.description")}</p>
+
                     <pre className={styles.formatExample}>{EXAMPLE_CSV}</pre>
+
                     <div className={styles.warning}>
-                        Note: commas inside a field are not supported. Avoid references that contain commas.
+                        {t("batch.format.warning")}
                     </div>
-                    <button type="button" className={styles.exampleLink} onClick={handleDownloadExample}>
-                        Download example-batch.csv
+
+                    <button
+                        type="button"
+                        className={styles.exampleLink}
+                        onClick={handleDownloadExample}
+                    >
+                        {t("batch.format.download")}
                     </button>
                 </Card>
             </div>
 
             {results && (
-                <Card title="Result" className={styles.resultsCard}>
+                <Card title={t("batch.result.title")} className={styles.resultsCard}>
                     <p
                         className={failed > 0 ? styles.resultWarning : styles.resultOk}
                         role="status"
                         aria-live="polite"
                     >
-                        {succeeded} of {results.length} payments processed.
-                        {failed > 0 && ` ${failed} row(s) failed — see below.`}
+                        {t("batch.result.processed", {
+                            succeeded,
+                            total: results.length,
+                        })}
+
+                        {failed > 0 && (
+                            <>
+                                {" "}
+                                {t("batch.result.failed", { count: failed })}
+                            </>
+                        )}
                     </p>
 
                     <div className={styles.tableWrapper}>
                         <table className={styles.table}>
                             <thead>
                                 <tr>
-                                    <th scope="col">Row</th>
-                                    <th scope="col">To IBAN</th>
-                                    <th scope="col">Amount</th>
-                                    <th scope="col">Reference</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">{t("batch.table.row")}</th>
+                                    <th scope="col">{t("batch.table.toIban")}</th>
+                                    <th scope="col">{t("batch.table.amount")}</th>
+                                    <th scope="col">{t("batch.table.reference")}</th>
+                                    <th scope="col">{t("batch.table.status")}</th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                {results.map(row => (
+                                {results.map((row) => (
                                     <tr key={row.rowNumber}>
                                         <td>{row.rowNumber}</td>
-                                        <td>{row.toIban || '—'}</td>
-                                        <td>{row.success ? row.amount.toLocaleString('en-SE', { minimumFractionDigits: 2 }) : '—'}</td>
-                                        <td>{row.reference || '—'}</td>
+                                        <td>{row.toIban || "—"}</td>
+                                        <td>
+                                            {row.success
+                                                ? row.amount.toLocaleString(locale, {
+                                                    minimumFractionDigits: 2,
+                                                })
+                                                : "—"}
+                                        </td>
+                                        <td>{row.reference || "—"}</td>
+
                                         <td>
                                             {row.success ? (
-                                                <span className={styles.statusSuccess}>✓ Success</span>
+                                                <span className={styles.statusSuccess}>
+                                                    ✓ {t("batch.table.success")}
+                                                </span>
                                             ) : (
-                                                <span className={styles.statusError}>✕ {row.error}</span>
+                                                <span className={styles.statusError}>
+                                                    ✕ {row.error}
+                                                </span>
                                             )}
                                         </td>
                                     </tr>
@@ -287,5 +365,5 @@ export function Batch() {
                 </Card>
             )}
         </div>
-    )
+    );
 }

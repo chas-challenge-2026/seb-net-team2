@@ -38,6 +38,10 @@ export function MainLayout() {
 
     return (
         <>
+            <a className="skip-link" href="#main-content">
+                Skip to main content
+            </a>
+
             <NavigationBar />
 
             {showSidebar && (
@@ -50,6 +54,9 @@ export function MainLayout() {
             )}
 
             <main
+                id="main-content"
+                tabIndex={-1}
+                aria-label="Main content"
                 className={
                     showSidebar
                         ? `${styles.content} ${collapsed

@@ -33,10 +33,11 @@
     padding: 0;
 }
 
-.navbar__user {
+.navbar__actions {
+    margin-left: auto;
     display: flex;
     align-items: center;
-    margin-left: auto;
+    gap: var(--spacing-md);
 }
 
 .navbar__link {
@@ -46,4 +47,10 @@
 
 .navbar__link--active {
     border-bottom: 2px solid currentColor;
+}
+
+.navbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }

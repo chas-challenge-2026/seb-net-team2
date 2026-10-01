@@ -36,7 +36,6 @@ export default function CompanyRegistration() {
                     htmlFor="company-register-name"
                     className={styles.label}
                 >
-                    Company name
                 </label>
 
                 <input

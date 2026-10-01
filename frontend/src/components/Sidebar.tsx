@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../hooks/useAuth";
 import { useApprovals } from "../hooks/useApprovals";
@@ -18,6 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
   onToggleCollapsed,
 }) => {
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -36,8 +38,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const badgeLabel =
     overdueApprovalCount > 0
-      ? `${pendingApprovalCount} pending, ${overdueApprovalCount} overdue`
-      : `${pendingApprovalCount} pending`;
+      ? t("sidebar.approvalsWithOverdue", {
+        pending: pendingApprovalCount,
+        overdue: overdueApprovalCount,
+      })
+      : t("sidebar.approvalsPending", {
+        pending: pendingApprovalCount,
+      });
 
   const previousPendingCount = useRef(pendingApprovalCount);
 
@@ -85,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         type="button"
         className={styles["hamburger-btn"]}
         onClick={toggleMobileSidebar}
-        aria-label="Menu"
+        aria-label={t("sidebar.menu")}
         aria-controls={sidebarId}
         aria-expanded={isOpen}
       >
@@ -93,25 +100,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       {isOpen && (
-        <div
+        <button
+          type="button"
           className={styles["sidebar-backdrop"]}
+          aria-label="Close menu"
           onClick={toggleMobileSidebar}
         />
       )}
 
       <aside
         id={sidebarId}
+        aria-label="Secondary navigation"
         className={`
-                    ${styles.sidebar}
-                    ${isOpen ? styles.open : ""}
-                    ${collapsed ? styles.collapsed : ""}
-                `}
+          ${styles.sidebar}
+          ${isOpen ? styles.open : ""}
+          ${collapsed ? styles.collapsed : ""}
+        `}
       >
         <button
           type="button"
           className={styles["collapse-toggle"]}
           onClick={onToggleCollapsed}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={
+            collapsed
+              ? t("sidebar.expand")
+              : t("sidebar.collapse")
+          }
           aria-expanded={!collapsed}
           aria-controls={sidebarId}
         >
@@ -133,7 +147,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </svg>
         </button>
 
-        <nav className={styles["sidebar-nav"]}>
+        <nav
+          aria-label="Secondary navigation links"
+          className={styles["sidebar-nav"]}
+        >
           <Link
             to="/dashboard"
             activeOptions={{ exact: true }}
@@ -143,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             onClick={handleMobileNavClick}
           >
-            <span>Dashboard</span>
+            <span>{t("sidebar.dashboard")}</span>
           </Link>
 
           {user?.role === "Initiator" && (
@@ -157,7 +174,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 onClick={handleMobileNavClick}
               >
-                <span>New payment</span>
+                <span>{t("sidebar.newPayment")}</span>
               </Link>
 
               <Link
@@ -169,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 onClick={handleMobileNavClick}
               >
-                <span>Batch upload</span>
+                <span>{t("sidebar.batchUpload")}</span>
               </Link>
             </>
           )}
@@ -184,12 +201,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }}
               onClick={handleMobileNavClick}
             >
-              <span>Approval inbox</span>
+              <span>{t("sidebar.approvalInbox")}</span>
 
               {pendingApprovalCount > 0 && (
                 <span
                   className={`${styles.badge} ${badgePulsing ? styles.pulse : ""
-                    } ${overdueApprovalCount > 0 ? styles.overdue : ""}`}
+                    } ${overdueApprovalCount > 0 ? styles.overdue : ""
+                    }`}
                   title={badgeLabel}
                   aria-label={badgeLabel}
                 >
@@ -202,7 +220,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {user?.role === "Admin" && (
             <div className={styles["admin-section"]}>
               <span className={styles["section-label"]}>
-                ADMIN
+                {t("sidebar.admin")}
               </span>
 
               <Link
@@ -214,7 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 onClick={handleMobileNavClick}
               >
-                <span>Audit log</span>
+                <span>{t("sidebar.auditLog")}</span>
               </Link>
 
               <Link
@@ -226,7 +244,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 onClick={handleMobileNavClick}
               >
-                <span>Administration</span>
+                <span>{t("sidebar.administration")}</span>
               </Link>
             </div>
           )}
@@ -240,7 +258,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             onClick={handleMobileNavClick}
           >
-            <span>My profile</span>
+            <span>{t("sidebar.myProfile")}</span>
           </Link>
         </nav>
 
@@ -269,7 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={styles["logout-btn"]}
               onClick={onLogout}
             >
-              Log out
+              {t("sidebar.logout")}
             </button>
           ) : (
             <Link
@@ -277,7 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className={styles["logout-link"]}
               onClick={handleMobileNavClick}
             >
-              Log out
+              {t("sidebar.logout")}
             </Link>
           )}
         </div>

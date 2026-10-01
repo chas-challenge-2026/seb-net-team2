@@ -3,6 +3,7 @@ using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Data;
 using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Authorization;
 
 namespace SebPortal.Api.Services
 {
@@ -15,23 +16,26 @@ namespace SebPortal.Api.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAuditRepository _auditRepository;
         private readonly SebDbContext _context;
+        private readonly INotificationService _notificationService;
 
         public ApprovalService(
             IApprovalRepository approvalRepository,
             IPaymentRepository paymentRepository,
             IAccountRepository accountRepository,
             IAuditRepository auditRepository,
-            SebDbContext context)
+            SebDbContext context,
+            INotificationService notificationService)
         {
             _approvalRepository = approvalRepository;
             _paymentRepository = paymentRepository;
             _accountRepository = accountRepository;
             _auditRepository = auditRepository;
             _context = context;
+            _notificationService = notificationService;
         }
 
         // This method handles the decision-making process for an approval step.
-        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId)
+        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId, bool isAdmin)
         {
             // Validate the decision provided in the DTO
             if (!ValidDecisions.Contains(dto.Decision))
@@ -43,7 +47,7 @@ namespace SebPortal.Api.Services
                 return ApprovalStepValidationResult.StepNotFound;
 
             // Retrieve the associated payment for the approval step
-            var validation = ValidateApprovalStep(approvalStep.Payment, approvalStep, currentUserId);
+            var validation = ValidateApprovalStep(approvalStep.Payment, approvalStep, currentUserId, isAdmin);
             if (validation != ApprovalStepValidationResult.Valid)
                 return validation;
 
@@ -118,6 +122,7 @@ namespace SebPortal.Api.Services
                 else
                 {
                     await _paymentRepository.RejectPaymentAsync(approvalStep.PaymentId);
+
                     await _accountRepository.RefundAsync(payment.FromAccountId, payment.Amount);
 
                     await _auditRepository.AddEntryAsync(new AuditEntries
@@ -138,6 +143,17 @@ namespace SebPortal.Api.Services
                             rejectedAtStep = approvalStep.StepNumber
                         })
                     });
+
+                    ////if payment is rejected, notify initiator
+                    var notificationDTO = new NotificationMessageDTO
+                    {
+                        TenantId = payment.TenantId,
+                        RecipientEmail = payment.CreatedByUser.Email,
+                        Subject = "Betalning avslagen",
+                        Message = $"Betalningen med referens '{payment.Reference}' har avslagits."
+                    };
+
+                    await _notificationService.SendNotificationMessageAsync(notificationDTO);
                 }
 
                 await transaction.CommitAsync();
@@ -152,7 +168,7 @@ namespace SebPortal.Api.Services
         }
 
         // This method validates the approval step against the payment and the current user.
-        public ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId)
+        public ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId, bool isAdmin)
         {
             // Validate that the approval step belongs to the payment
             if (approvalStep.PaymentId != payment.Id)
@@ -167,7 +183,7 @@ namespace SebPortal.Api.Services
             if (payment.CreatedByUserId == currentUserId)
                 return ApprovalStepValidationResult.CannotApproveOwnPayment;
             // Validate that the current user is the assigned attestant for the approval step
-            if (approvalStep.AttestantId != currentUserId)
+            if (approvalStep.AttestantId != currentUserId && !isAdmin)
                 return ApprovalStepValidationResult.NotAssignedAttestant;
 
             return ApprovalStepValidationResult.Valid;
@@ -198,6 +214,24 @@ namespace SebPortal.Api.Services
             var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId);
 
             return steps.Select(step => new PendingApprovalStepDTO
+            {
+                StepId = step.Id,
+                StepNumber = step.StepNumber,
+                PaymentId = step.PaymentId,
+                Amount = step.Payment.Amount,
+                Currency = step.Payment.Currency,
+                ToIban = step.Payment.ToIban,
+                Reference = step.Payment.Reference,
+                CreatedByUserId = step.Payment.CreatedByUserId,
+                CreatedByUserName = step.Payment.CreatedByUser.Name,
+                PaymentCreatedAt = step.Payment.CreatedAt
+            });
+        }
+
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForTenantAsync(int tenantId)
+        {
+            var allTenantsteps = await _approvalRepository.GetPendingStepsForTenantAsync(tenantId);
+            return allTenantsteps.Select(step => new PendingApprovalStepDTO
             {
                 StepId = step.Id,
                 StepNumber = step.StepNumber,
