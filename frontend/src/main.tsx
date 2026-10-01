@@ -2,6 +2,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createRouter, createRootRoute, createRoute, RouterProvider } from '@tanstack/react-router'
+import './i18n/i18n';
+import "flag-icons/css/flag-icons.min.css";
 import { MainLayout } from './layouts/MainLayout'
 import { AuthProvider } from './context/AuthProvider'
 import { Dashboard } from './pages/Dashboard/Dashboard';
@@ -29,6 +31,7 @@ import EditUserDetails from './pages/Admin/Users/EditUserDetails'
 import ApprovalLimits from './pages/Admin/ApprovalLimits/ApprovalLimits'
 import CreateApprovalLimit from './pages/Admin/ApprovalLimits/CreateApprovalLimit'
 import EditApprovalLimit from './pages/Admin/ApprovalLimits/EditApprovalLimit'
+import AdminDashboard from './pages/Admin/AdminDashboard/AdminDashboard';
 
 const rootRoute = createRootRoute({ component: MainLayout })
 
@@ -47,6 +50,7 @@ const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: "/reg
 
 // ADMIN ROUTES
 const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: "/admin", component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><AdminLayout /></RoleProtectedRoute> })
+const adminDashboardRoute = createRoute({ getParentRoute: () => adminRoute, path: "/", component: AdminDashboard });
 const createUserRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users/create", component: CreateUser })
 const usersRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users", component: Users })
 const userDetailRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users/$userId", component: UserDetails })
@@ -56,6 +60,7 @@ const createApprovalLimitsRoute = createRoute({ getParentRoute: () => adminRoute
 const editApprovalLimitRoute = createRoute({ getParentRoute: () => adminRoute, path: "/approval-limits/$limitId/edit", component: EditApprovalLimit })
 
 const adminRouteTree = adminRoute.addChildren([
+  adminDashboardRoute,
   createUserRoute,
   usersRoute,
   userDetailRoute,

@@ -179,6 +179,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<string>("Details")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("details");
+
                     b.Property<int>("EntityId")
                         .HasColumnType("integer")
                         .HasColumnName("entity_id");
@@ -189,6 +193,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("entity_type");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer")
+                        .HasColumnName("tenant_id");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
@@ -196,6 +204,10 @@ namespace SebPortal.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.HasIndex("TenantId", "DateTime");
 
                     b.ToTable("audit_entries", (string)null);
                 });
@@ -515,11 +527,19 @@ namespace SebPortal.Api.Migrations
 
             modelBuilder.Entity("SebPortal.Models.AuditEntries", b =>
                 {
+                    b.HasOne("SebPortal.Models.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SebPortal.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Tenant");
 
                     b.Navigation("User");
                 });

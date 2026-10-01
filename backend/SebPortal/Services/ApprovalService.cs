@@ -3,6 +3,7 @@ using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Data;
 using Microsoft.EntityFrameworkCore;
+using SebPortal.Api.Authorization;
 
 namespace SebPortal.Api.Services
 {
@@ -15,23 +16,26 @@ namespace SebPortal.Api.Services
         private readonly IAccountRepository _accountRepository;
         private readonly IAuditRepository _auditRepository;
         private readonly SebDbContext _context;
+        private readonly INotificationService _notificationService;
 
         public ApprovalService(
             IApprovalRepository approvalRepository,
             IPaymentRepository paymentRepository,
             IAccountRepository accountRepository,
             IAuditRepository auditRepository,
-            SebDbContext context)
+            SebDbContext context,
+            INotificationService notificationService)
         {
             _approvalRepository = approvalRepository;
             _paymentRepository = paymentRepository;
             _accountRepository = accountRepository;
             _auditRepository = auditRepository;
             _context = context;
+            _notificationService = notificationService;
         }
 
         // This method handles the decision-making process for an approval step.
-        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId)
+        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId, bool isAdmin)
         {
             // Validate the decision provided in the DTO
             if (!ValidDecisions.Contains(dto.Decision))
@@ -43,7 +47,7 @@ namespace SebPortal.Api.Services
                 return ApprovalStepValidationResult.StepNotFound;
 
             // Retrieve the associated payment for the approval step
-            var validation = ValidateApprovalStep(approvalStep.Payment, approvalStep, currentUserId);
+            var validation = ValidateApprovalStep(approvalStep.Payment, approvalStep, currentUserId, isAdmin);
             if (validation != ApprovalStepValidationResult.Valid)
                 return validation;
 
@@ -63,30 +67,94 @@ namespace SebPortal.Api.Services
                     return ApprovalStepValidationResult.StepAlreadyDecided;
                 }
 
+                var payment = approvalStep.Payment;
+                var steps = await _approvalRepository.GetApprovalStepsByPaymentIdAsync(approvalStep.PaymentId);
+
+                await _auditRepository.AddEntryAsync(new AuditEntries
+                {
+                    TenantId = payment.TenantId,
+                    UserId = currentUserId,
+                    Action = dto.Decision == "approved" ? AuditActions.ApproveStep : AuditActions.RejectStep,
+                    EntityType = AuditEntityTypes.Payment,
+                    EntityId = approvalStep.PaymentId,
+                    Description = $"Steg {approvalStep.StepNumber} för betalning {approvalStep.PaymentId} {(dto.Decision == "approved" ? "godkändes" : "avslogs")}",
+                    Details = AuditEntries.ToDetailsJson(new
+                    {
+                        stepId = approvalStep.Id,
+                        approvalStep.StepNumber,
+                        totalSteps = steps.Count(),
+                        decision = dto.Decision,
+                        dto.Comment,
+                        payment.Amount,
+                        payment.Currency
+                    })
+                });
+
                 if (dto.Decision == "approved")
                 {
-                    var remainingSteps = await _approvalRepository.GetApprovalStepsByPaymentIdAsync(approvalStep.PaymentId);
-                    var stillPending = remainingSteps.Any(s => s.Status == "pending");
+                    var stillPending = steps.Any(s => s.Status == "pending");
 
                     if (!stillPending)
                     {
                         await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId);
+
+                        await _auditRepository.AddEntryAsync(new AuditEntries
+                        {
+                            TenantId = payment.TenantId,
+                            UserId = currentUserId,
+                            Action = AuditActions.ExecutePayment,
+                            EntityType = AuditEntityTypes.Payment,
+                            EntityId = approvalStep.PaymentId,
+                            Description = $"Betalning {approvalStep.PaymentId} genomfördes: {payment.Amount} {payment.Currency} till {payment.ToIban}",
+                            Details = AuditEntries.ToDetailsJson(new
+                            {
+                                payment.Amount,
+                                payment.Currency,
+                                payment.FromAccountId,
+                                payment.ToIban,
+                                payment.Reference,
+                                status = "completed",
+                                automatic = false
+                            })
+                        });
                     }
                 }
                 else
                 {
                     await _paymentRepository.RejectPaymentAsync(approvalStep.PaymentId);
-                    await _accountRepository.RefundAsync(approvalStep.Payment.FromAccountId, approvalStep.Payment.Amount);
-                }
 
-                await _auditRepository.AddEntryAsync(new AuditEntries
-                {
-                    UserId = currentUserId,
-                    Action = dto.Decision == "approved" ? "APPROVE_STEP" : "REJECT_STEP",
-                    EntityType = "payment",
-                    EntityId = approvalStep.PaymentId,
-                    Description = $"Steg {approvalStep.StepNumber} för betalning {approvalStep.PaymentId} {(dto.Decision == "approved" ? "godkändes" : "avslogs")}"
-                });
+                    await _accountRepository.RefundAsync(payment.FromAccountId, payment.Amount);
+
+                    await _auditRepository.AddEntryAsync(new AuditEntries
+                    {
+                        TenantId = payment.TenantId,
+                        UserId = currentUserId,
+                        Action = AuditActions.RejectPayment,
+                        EntityType = AuditEntityTypes.Payment,
+                        EntityId = approvalStep.PaymentId,
+                        Description = $"Betalning {approvalStep.PaymentId} avslogs och {payment.Amount} {payment.Currency} återfördes till konto {payment.FromAccountId}",
+                        Details = AuditEntries.ToDetailsJson(new
+                        {
+                            payment.Amount,
+                            payment.Currency,
+                            payment.FromAccountId,
+                            refundedAmount = payment.Amount,
+                            status = "rejected",
+                            rejectedAtStep = approvalStep.StepNumber
+                        })
+                    });
+
+                    ////if payment is rejected, notify initiator
+                    var notificationDTO = new NotificationMessageDTO
+                    {
+                        TenantId = payment.TenantId,
+                        RecipientEmail = payment.CreatedByUser.Email,
+                        Subject = "Betalning avslagen",
+                        Message = $"Betalningen med referens '{payment.Reference}' har avslagits."
+                    };
+
+                    await _notificationService.SendNotificationMessageAsync(notificationDTO);
+                }
 
                 await transaction.CommitAsync();
             }
@@ -100,7 +168,7 @@ namespace SebPortal.Api.Services
         }
 
         // This method validates the approval step against the payment and the current user.
-        public ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId)
+        public ApprovalStepValidationResult ValidateApprovalStep(Payment payment, ApprovalStep approvalStep, int currentUserId, bool isAdmin)
         {
             // Validate that the approval step belongs to the payment
             if (approvalStep.PaymentId != payment.Id)
@@ -115,7 +183,7 @@ namespace SebPortal.Api.Services
             if (payment.CreatedByUserId == currentUserId)
                 return ApprovalStepValidationResult.CannotApproveOwnPayment;
             // Validate that the current user is the assigned attestant for the approval step
-            if (approvalStep.AttestantId != currentUserId)
+            if (approvalStep.AttestantId != currentUserId && !isAdmin)
                 return ApprovalStepValidationResult.NotAssignedAttestant;
 
             return ApprovalStepValidationResult.Valid;
@@ -146,6 +214,24 @@ namespace SebPortal.Api.Services
             var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId);
 
             return steps.Select(step => new PendingApprovalStepDTO
+            {
+                StepId = step.Id,
+                StepNumber = step.StepNumber,
+                PaymentId = step.PaymentId,
+                Amount = step.Payment.Amount,
+                Currency = step.Payment.Currency,
+                ToIban = step.Payment.ToIban,
+                Reference = step.Payment.Reference,
+                CreatedByUserId = step.Payment.CreatedByUserId,
+                CreatedByUserName = step.Payment.CreatedByUser.Name,
+                PaymentCreatedAt = step.Payment.CreatedAt
+            });
+        }
+
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForTenantAsync(int tenantId)
+        {
+            var allTenantsteps = await _approvalRepository.GetPendingStepsForTenantAsync(tenantId);
+            return allTenantsteps.Select(step => new PendingApprovalStepDTO
             {
                 StepId = step.Id,
                 StepNumber = step.StepNumber,

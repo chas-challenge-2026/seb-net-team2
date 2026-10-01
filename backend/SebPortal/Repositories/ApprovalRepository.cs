@@ -17,6 +17,7 @@ namespace SebPortal.Api.Repositories
         {
             return await _dbContext.ApprovalSteps
                 .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
@@ -42,6 +43,16 @@ namespace SebPortal.Api.Repositories
                 .Include(s => s.Payment)
                     .ThenInclude(p => p.CreatedByUser)
                 .Where(s => s.AttestantId == attestantId && s.Status == "pending" && s.Payment.Status == "pending_approval")
+                .OrderBy(s => s.Payment.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ApprovalStep>> GetPendingStepsForTenantAsync(int tenantId)
+        {
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .Where(s => s.Payment.TenantId == tenantId && s.Status == "pending" && s.Payment.Status == "pending_approval")
                 .OrderBy(s => s.Payment.CreatedAt)
                 .ToListAsync();
         }

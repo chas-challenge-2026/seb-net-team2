@@ -153,6 +153,7 @@ namespace SebPortal.Tests
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.UserId == userId &&
+                e.TenantId == tenantId && 
                 e.Action == "CREATE_APPROVAL_LIMIT" &&
                 e.EntityType == "approvalLimit" &&
                 e.EntityId == result.Id)), Times.Once);
@@ -272,6 +273,7 @@ namespace SebPortal.Tests
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.UserId == userId &&
+                e.TenantId == tenantId &&
                 e.Action == "UPDATE_APPROVAL_LIMIT" &&
                 e.EntityType == "approvalLimit" &&
                 e.EntityId == id)), Times.Once);

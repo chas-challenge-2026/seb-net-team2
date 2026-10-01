@@ -1,0 +1,62 @@
+.page {
+    display: grid;
+    gap: var(--spacing-lg);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 720px;
+    padding: 3rem clamp(1rem, 3vw, 2.5rem) 4rem;
+}
+
+.header h1 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.intro {
+    margin: var(--spacing-sm) 0 0;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-lg);
+}
+
+.card {
+    max-width: 640px;
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+}
+
+.card h2 {
+    margin: 0 0 var(--spacing-md);
+    color: var(--color-text);
+    font-size: var(--font-size-xl);
+}
+
+.details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacing-md) var(--spacing-lg);
+    margin: 0;
+}
+
+.details dt {
+    margin-bottom: var(--spacing-xs);
+    color: var(--placeholder-grey);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.details dd {
+    margin: 0;
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .details {
+        grid-template-columns: 1fr;
+    }
+}

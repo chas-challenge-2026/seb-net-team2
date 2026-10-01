@@ -5,9 +5,9 @@ namespace SebPortal.Api.Services
 {
     public interface IAccountService
     {
-        Task<Account> CreateAccountAsync(CreateAccountDTO dto);
-        Task<Account?> GetAccountByIdAsync(int accountId);
-        Task<IEnumerable<Account>> GetAccountsByTenantIdAsync(int tenantId);
-        Task UpdateAccountAsync(Account account);
+        Task<AccountResponseDTO> CreateAccountAsync(CreateAccountDTO dto, int tenantId);
+        Task<AccountResponseDTO?> GetAccountByIdAsync(int accountId, int tenantId);
+        Task<IEnumerable<AccountResponseDTO>> GetAccountsByTenantIdAsync(int tenantId);
+        Task<AccountResponseDTO?> UpdateAccountAsync(int id, int tenantId, UpdateAccountDTO dto);
     }
 }
