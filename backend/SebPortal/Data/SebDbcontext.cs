@@ -110,7 +110,16 @@ namespace SebPortal.Data
                 e.Property(x => x.EntityType).HasColumnName("entity_type");
                 e.Property(x => x.EntityId).HasColumnName("entity_id");
                 e.Property(x => x.Description).HasColumnName("description");
+                e.Property(x => x.Details).HasColumnName("details").HasColumnType("jsonb");
                 e.Property(x => x.DateTime).HasColumnName("created_at");
+
+                // Revisionsloggen får aldrig raderas som bieffekt av att en användare eller tenant tas bort.
+                e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
+
+                // Historik hämtas per tenant och per entitet (t.ex. alla händelser för betalning X).
+                e.HasIndex(x => new { x.TenantId, x.DateTime });
+                e.HasIndex(x => new { x.EntityType, x.EntityId });
             });
 
             modelBuilder.Entity<ApprovalLimit>(e =>

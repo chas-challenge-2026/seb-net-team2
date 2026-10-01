@@ -14,14 +14,16 @@ namespace SebPortal.Api.Services
         private readonly IPaymentRepository _paymentRepository;
         private readonly IApprovalEngineService _approvalEngineService;
         private readonly INotificationService _notificationService;
+        private readonly IAuditRepository _auditRepository;
         private readonly SebDbContext _context;
 
-        public CreatePaymentService(IUserRepository userRepository, IPaymentRepository paymentRepository, IApprovalEngineService approvalEngineService, INotificationService notificationService, SebDbContext context)
+        public CreatePaymentService(IUserRepository userRepository, IPaymentRepository paymentRepository, IApprovalEngineService approvalEngineService, INotificationService notificationService, IAuditRepository auditRepository, SebDbContext context)
         {
             _userRepository = userRepository;
             _paymentRepository = paymentRepository;
             _approvalEngineService = approvalEngineService;
             _notificationService = notificationService;
+            _auditRepository = auditRepository;
             _context = context;
         }
 
@@ -79,6 +81,8 @@ namespace SebPortal.Api.Services
 
                 await _context.SaveChangesAsync();
 
+                await LogPaymentCreatedAsync(payment, userId);
+
                 await transaction.CommitAsync();
 
                 var notificationDTO = new NotificationMessageDTO
@@ -97,6 +101,70 @@ namespace SebPortal.Api.Services
             {
                 await transaction.RollbackAsync();
                 throw;
+            }
+        }
+
+        // Writes CREATE_PAYMENT (and EXECUTE_PAYMENT if no approval was required) inside the caller's transaction.
+        private async Task LogPaymentCreatedAsync(Payment payment, int userId)
+        {
+            var account = await _context.Accounts
+                .AsNoTracking()
+                .Where(a => a.Id == payment.FromAccountId)
+                .Select(a => new { a.AccountName, a.Iban, a.Balance })
+                .SingleAsync();
+
+            var attestants = await _context.ApprovalSteps
+                .AsNoTracking()
+                .Where(s => s.PaymentId == payment.Id)
+                .OrderBy(s => s.StepNumber)
+                .Select(s => new { s.StepNumber, s.AttestantId, attestantName = s.Attestant.Name })
+                .ToListAsync();
+
+            await _auditRepository.AddEntryAsync(new AuditEntries
+            {
+                TenantId = payment.TenantId,
+                UserId = userId,
+                Action = AuditActions.CreatePayment,
+                EntityType = AuditEntityTypes.Payment,
+                EntityId = payment.Id,
+                Description = $"Skapade betalning {payment.Amount} {payment.Currency} till {payment.ToIban}",
+                Details = AuditEntries.ToDetailsJson(new
+                {
+                    payment.Amount,
+                    payment.Currency,
+                    payment.FromAccountId,
+                    fromAccountName = account.AccountName,
+                    fromIban = account.Iban,
+                    balanceAfter = account.Balance,
+                    payment.ToIban,
+                    payment.Reference,
+                    payment.Status,
+                    requiredApprovals = attestants.Count,
+                    attestants
+                })
+            });
+
+            if (payment.Status == "completed")
+            {
+                await _auditRepository.AddEntryAsync(new AuditEntries
+                {
+                    TenantId = payment.TenantId,
+                    UserId = userId,
+                    Action = AuditActions.ExecutePayment,
+                    EntityType = AuditEntityTypes.Payment,
+                    EntityId = payment.Id,
+                    Description = $"Betalning {payment.Id} genomfördes direkt (under attestgräns): {payment.Amount} {payment.Currency} till {payment.ToIban}",
+                    Details = AuditEntries.ToDetailsJson(new
+                    {
+                        payment.Amount,
+                        payment.Currency,
+                        payment.FromAccountId,
+                        payment.ToIban,
+                        payment.Reference,
+                        status = "completed",
+                        automatic = true
+                    })
+                });
             }
         }
 

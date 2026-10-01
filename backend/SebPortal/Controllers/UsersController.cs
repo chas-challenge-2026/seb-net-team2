@@ -76,7 +76,11 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<ReadUserDTO>> CreateUser([FromBody] CreateUserDTO dto)
         {
-            var createdUser = await _userService.CreateUserAsync(dto);
+            var actingUserId = GetCurrentUserId();
+            if (actingUserId == null)
+                return Unauthorized("Saknar giltigt UserId-claim i token.");
+
+            var createdUser = await _userService.CreateUserAsync(dto, actingUserId.Value);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
@@ -95,7 +99,11 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
         {
-            var updatedUser = await _userService.UpdateUserAsync(id, dto);
+            var actingUserId = GetCurrentUserId();
+            if (actingUserId == null)
+                return Unauthorized("Saknar giltigt UserId-claim i token.");
+
+            var updatedUser = await _userService.UpdateUserAsync(id, dto, actingUserId.Value);
             return Ok(updatedUser);
         }
 
@@ -112,8 +120,19 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var result = await _userService.DeleteUserAsync(id);
+            var actingUserId = GetCurrentUserId();
+            if (actingUserId == null)
+                return Unauthorized("Saknar giltigt UserId-claim i token.");
+
+            var result = await _userService.DeleteUserAsync(id, actingUserId.Value);
             return NoContent();
+        }
+
+        // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
+        private int? GetCurrentUserId()
+        {
+            var claim = User.FindFirst("UserId")?.Value;
+            return int.TryParse(claim, out var userId) ? userId : null;
         }
     }
 }
