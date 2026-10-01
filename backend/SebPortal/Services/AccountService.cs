@@ -19,12 +19,12 @@ namespace SebPortal.Api.Services
             _generateIban = generateIban;
         }
 
-        public async Task<AccountResponseDTO> CreateAccountAsync(CreateAccountDTO dto)
+        public async Task<AccountResponseDTO> CreateAccountAsync(CreateAccountDTO dto, int tenantId)
         {
 
             var createdAccount = new Account
             {
-                TenantId = dto.TenantId,
+                TenantId = tenantId,
                 AccountName = dto.AccountName,
                 Iban = _generateIban.GenerateIban(countryCode, bankCode, GenerateRandomAccountNumber())
             };
@@ -36,60 +36,45 @@ namespace SebPortal.Api.Services
             }
 
             var newAccount = await _accountRepository.CreateAccountAsync(createdAccount);
-            
-            return new AccountResponseDTO
-            {
-                Id = newAccount.Id,
-                TenantId = newAccount.TenantId,
-                AccountName = newAccount.AccountName,
-                Iban = newAccount.Iban,
-                Balance = newAccount.Balance,
-                Currency = newAccount.Currency
-            };
+
+            return MapToDto(newAccount);
         }
 
-        public async Task<AccountResponseDTO?> GetAccountByIdAsync(int accountId)
+        public async Task<AccountResponseDTO?> GetAccountByIdAsync(int accountId, int tenantId)
         {
             var account = await _accountRepository.GetAccountByIdAsync(accountId);
-            if (account == null)
+            if (account == null || account.TenantId != tenantId)
             {
                 return null;
             }
-            return new AccountResponseDTO
-            {
-                Id = account.Id,
-                TenantId = account.TenantId,
-                AccountName = account.AccountName,
-                Iban = account.Iban,
-                Balance = account.Balance,
-                Currency = account.Currency
-            };
+            return MapToDto(account);
         }
 
         public async Task<IEnumerable<AccountResponseDTO>> GetAccountsByTenantIdAsync(int tenantId)
         {
             var accounts = await _accountRepository.GetAccountsByTenantIdAsync(tenantId);
-            if (accounts == null)
-            {
-                return Enumerable.Empty<AccountResponseDTO>();
-            }
-            
-            return accounts.Select(account => new AccountResponseDTO
-            {
-                Id = account.Id,
-                TenantId = account.TenantId,
-                AccountName = account.AccountName,
-                Iban = account.Iban,
-                Balance = account.Balance,
-                Currency = account.Currency
-            });
+                       
+            return accounts.Select(MapToDto);
         }
 
-        public async Task UpdateAccountAsync(Account account)
+        public async Task<AccountResponseDTO?> UpdateAccountAsync(int id, int tenantId, UpdateAccountDTO dto)
         {
-            await _accountRepository.UpdateAccountAsync(account);
-        }
+            var account = await _accountRepository.GetAccountByIdAsync(id);
+            if (account == null || account.TenantId != tenantId)
+            {
+                return null;
+            }
 
+            // Update if updated
+            if (!string.IsNullOrWhiteSpace(dto.AccountName))
+            {
+                account.AccountName = dto.AccountName;
+            }
+
+            await _accountRepository.UpdateAccountAsync(account);
+
+            return MapToDto(account);
+        }
         // This method generates a random 17-digit account number
         private string GenerateRandomAccountNumber()
         {
@@ -97,5 +82,16 @@ namespace SebPortal.Api.Services
             long accountNumber = random.NextInt64(10000000000000000, 99999999999999999);
             return accountNumber.ToString();
         }
+
+        //Helpmethod to avoid duplicate code
+        private static AccountResponseDTO MapToDto(Account account) => new()
+        {
+            Id = account.Id,
+            TenantId = account.TenantId,
+            AccountName = account.AccountName,
+            Iban = account.Iban,
+            Balance = account.Balance,
+            Currency = account.Currency
+        };
     }
 }
