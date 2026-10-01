@@ -152,6 +152,16 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    // Migrera och seeda lokal databas (endast Development)
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
+        db.Database.Migrate();
+
+        var seedPath = app.Configuration["Seed:Path"];
+        if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
+            db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
+    }
     app.UseSwagger();
     app.MapScalarApiReference(options =>
     {
