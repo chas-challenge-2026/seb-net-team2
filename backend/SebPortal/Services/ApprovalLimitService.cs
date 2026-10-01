@@ -76,6 +76,7 @@ namespace SebPortal.Api.Services
             await _auditRepository.AddEntryAsync(new AuditEntries
             {
                 UserId = userId,
+                TenantId = tenantId,
                 Action = "CREATE_APPROVAL_LIMIT",
                 EntityType = "approvalLimit",
                 EntityId = limit.Id,
@@ -136,6 +137,7 @@ namespace SebPortal.Api.Services
             await _auditRepository.AddEntryAsync(new AuditEntries
             {
                 UserId = userId,
+                TenantId = tenantId,
                 Action = "UPDATE_APPROVAL_LIMIT",
                 EntityType = "approvalLimit",
                 EntityId = existingLimit.Id,
@@ -166,6 +168,7 @@ namespace SebPortal.Api.Services
             await _auditRepository.AddEntryAsync(new AuditEntries
             {
                 UserId = userId,
+                TenantId = tenantId,
                 Action = "DELETE_APPROVAL_LIMIT",
                 EntityType = "approvalLimit",
                 EntityId = limit.Id,

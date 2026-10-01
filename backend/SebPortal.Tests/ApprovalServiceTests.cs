@@ -15,13 +15,15 @@ namespace SebPortal.Tests
         private readonly Mock<IAuditRepository> _auditRepositoryMock;
         private readonly SebDbContext _context;
         private readonly ApprovalService _service;
-
+        private readonly Mock<INotificationService> _notificationServiceMock;
         public ApprovalServiceTests()
         {
             _approvalRepositoryMock = new Mock<IApprovalRepository>();
             _paymentRepositoryMock = new Mock<IPaymentRepository>();
             _accountRepositoryMock = new Mock<IAccountRepository>();
             _auditRepositoryMock = new Mock<IAuditRepository>();
+            _notificationServiceMock = new Mock<INotificationService>();
+
 
             var options = new DbContextOptionsBuilder<SebDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -33,7 +35,8 @@ namespace SebPortal.Tests
                 _paymentRepositoryMock.Object,
                 _accountRepositoryMock.Object,
                 _auditRepositoryMock.Object,
-                _context);
+                _context,
+                _notificationServiceMock.Object);
         }
 
         public void Dispose()

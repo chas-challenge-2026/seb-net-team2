@@ -104,6 +104,7 @@ namespace SebPortal.Data
             {
                 e.ToTable("audit_entries");
                 e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.TenantId).HasColumnName("tenant_id");
                 e.Property(x => x.UserId).HasColumnName("user_id");
                 e.Property(x => x.Action).HasColumnName("action");
                 e.Property(x => x.EntityType).HasColumnName("entity_type");
