@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 
 import { Link } from "@tanstack/react-router";
+import { LogIn, UserPlus } from "lucide-react";
 
 import Button from "../../components/Button/Button";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
@@ -103,13 +104,17 @@ export default function PrivateRegistration() {
                     size="medium"
                     className={styles.formButton}
                 >
-                    Register
+                    <span className={styles.buttonContent}>
+                        <UserPlus size={17} aria-hidden="true" />
+                        Register
+                    </span>
                 </Button>
 
                 <Link
                     to="/login"
                     className={styles.loginLink}
                 >
+                    <LogIn size={15} aria-hidden="true" />
                     Already have an account? Log in.
                 </Link>
             </div>

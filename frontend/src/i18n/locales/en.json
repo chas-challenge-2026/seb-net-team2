@@ -30,13 +30,19 @@
     },
     "sidebar": {
         "menu": "Menu",
+        "closeMenu": "Close menu",
         "expand": "Expand sidebar",
         "collapse": "Collapse sidebar",
+        "secondaryNavigation": "Sidebar navigation",
+        "navigationLinks": "Navigation links",
         "dashboard": "Dashboard",
+        "payments": "Payments",
         "newPayment": "New payment",
         "batchUpload": "Batch upload",
+        "savings": "Savings",
+        "approvals": "Approvals",
         "approvalInbox": "Approval inbox",
-        "admin": "ADMIN",
+        "admin": "Administration",
         "auditLog": "Audit log",
         "administration": "Administration",
         "myProfile": "My profile",
@@ -64,7 +70,8 @@
         },
         "status": {
             "completed": "Completed",
-            "pending": "Pending"
+            "pending": "Pending",
+            "rejected": "Rejected"
         }
     },
     "payment": {

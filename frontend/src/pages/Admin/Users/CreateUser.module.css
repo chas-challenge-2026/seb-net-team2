@@ -1,9 +1,5 @@
 .layout {
     width: 100%;
-    max-width: 1100px;
-
-    margin: 0 auto;
-    padding: var(--spacing-xl);
 
     box-sizing: border-box;
 }
@@ -35,6 +31,18 @@
 
 .pageHeader {
     margin-bottom: var(--spacing-xl);
+}
+
+.titleRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.titleRow > svg {
+    flex-shrink: 0;
+    margin-top: 4px;
+    color: var(--seb-green-dark-2);
 }
 
 .pageHeader h1 {
@@ -176,11 +184,20 @@
 .error {
     grid-column: 1 / -1;
 
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
     padding: var(--spacing-md);
 
     border-radius: var(--radius-sm);
 
     font-size: var(--font-size-md);
+}
+
+.success svg,
+.error svg {
+    flex-shrink: 0;
 }
 
 .success {
@@ -220,6 +237,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
 
     padding:
         0 var(--spacing-lg);
@@ -252,19 +270,21 @@
     min-width: 150px;
 }
 
+.buttonContent,
 .loadingButton {
     display: inline-flex;
     align-items: center;
-
+    justify-content: center;
     gap: var(--spacing-sm);
+}
+
+.buttonContent svg {
+    flex-shrink: 0;
 }
 
 /* Responsive */
 
 @media (max-width: 700px) {
-    .layout {
-        padding: var(--spacing-md);
-    }
 
     .form {
         grid-template-columns: 1fr;

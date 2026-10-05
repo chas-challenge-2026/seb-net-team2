@@ -47,6 +47,7 @@ export const updateUserSchema = z.object({
 
 export const loginResponseSchema = z.object({
     token: z.string(),
+    refreshToken: z.string(),
     userId: z.number(),
     email: z.string().email(),
     role: userRoleSchema,

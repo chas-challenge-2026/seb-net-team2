@@ -60,3 +60,26 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Icons */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.details dt {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.details dt svg {
+    flex-shrink: 0;
+    color: var(--color-text-soft);
+}

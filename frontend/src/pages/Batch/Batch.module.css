@@ -252,3 +252,53 @@ input[type='file']:focus-visible {
         width: 100%;
     }
 }
+
+/* Icons */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow > svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.titleRow h1 {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.buttonContent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.errorBanner,
+.warning,
+.exampleLink,
+.statusSuccess,
+.statusError {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.errorBanner svg,
+.warning svg,
+.exampleLink svg,
+.statusSuccess svg,
+.statusError svg {
+    flex-shrink: 0;
+}
+
+.warning {
+    align-items: flex-start;
+}
+
+.statusError {
+    align-items: flex-start;
+}

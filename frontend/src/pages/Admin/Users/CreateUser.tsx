@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft, CircleCheck, TriangleAlert, UserPlus } from "lucide-react";
 
 import Button from "../../../components/Button/Button";
 import PasswordInput from "../../../components/PasswordInput/PasswordInput";
@@ -58,8 +59,14 @@ export default function CreateUser() {
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
-                <h1>{t("users.create.title")}</h1>
-                <p>{t("users.create.description")}</p>
+                <div className={styles.titleRow}>
+                    <UserPlus size={28} strokeWidth={2} aria-hidden="true" />
+
+                    <div>
+                        <h1>{t("users.create.title")}</h1>
+                        <p>{t("users.create.description")}</p>
+                    </div>
+                </div>
             </header>
 
             <section className={styles.formSection}>
@@ -145,24 +152,28 @@ export default function CreateUser() {
 
                     {createMutation.isSuccess && (
                         <div className={styles.success} role="status">
-                            {t("users.create.success", { name: createMutation.data.name })}
+                            <CircleCheck size={18} aria-hidden="true" />
+                            <span>{t("users.create.success", { name: createMutation.data.name })}</span>
                         </div>
                     )}
 
                     {createMutation.isError && (
                         <div className={styles.error} role="alert">
-                            {getErrorMessage(createMutation.error, t("users.errors.create"))}
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{getErrorMessage(createMutation.error, t("users.errors.create"))}</span>
                         </div>
                     )}
 
                     {!user && (
                         <div className={styles.error} role="alert">
-                            {t("users.errors.currentUser")}
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{t("users.errors.currentUser")}</span>
                         </div>
                     )}
 
                     <div className={styles.actions}>
                         <Link to="/admin/users" className={styles.cancelButton}>
+                            <ArrowLeft size={17} aria-hidden="true" />
                             {t("common.cancel")}
                         </Link>
 
@@ -179,7 +190,10 @@ export default function CreateUser() {
                                     {t("users.create.creating")}
                                 </span>
                             ) : (
-                                t("users.create.submit")
+                                <span className={styles.buttonContent}>
+                                    <UserPlus size={18} aria-hidden="true" />
+                                    {t("users.create.submit")}
+                                </span>
                             )}
                         </Button>
                     </div>

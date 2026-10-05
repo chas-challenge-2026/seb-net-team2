@@ -1,5 +1,14 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    CircleCheck,
+    Landmark,
+    Plus,
+    Target,
+    TrendingUp,
+    WalletCards,
+    X,
+} from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
@@ -57,18 +66,27 @@ export function SaveInvest() {
             <header className={styles.header}>
                 <div>
                     <p className={styles.eyebrow}>{t("saveInvest.eyebrow")}</p>
-                    <h1>{t("saveInvest.title")}</h1>
+                    <div className={styles.titleRow}>
+                        <Landmark size={28} strokeWidth={2} aria-hidden="true" />
+                        <h1>{t("saveInvest.title")}</h1>
+                    </div>
                     <p>{t("saveInvest.description")}</p>
                 </div>
 
                 <Button size="medium" onClick={() => setModal("account")}>
-                    {t("saveInvest.actions.openAccount")}
+                    <span className={styles.buttonContent}>
+                        <Plus size={17} aria-hidden="true" />
+                        {t("saveInvest.actions.openAccount")}
+                    </span>
                 </Button>
             </header>
 
             {actionMessage && (
                 <div className={styles.actionMessage} role="status">
-                    <span>{actionMessage}</span>
+                    <span className={styles.actionMessageText}>
+                        <CircleCheck size={18} aria-hidden="true" />
+                        {actionMessage}
+                    </span>
 
                     <button
                         type="button"
@@ -87,6 +105,9 @@ export function SaveInvest() {
                         className={activeTab === tab ? styles.activeTab : ""}
                         onClick={() => setActiveTab(tab)}
                     >
+                        {tab === "savings" && <WalletCards size={17} aria-hidden="true" />}
+                        {tab === "investments" && <TrendingUp size={17} aria-hidden="true" />}
+                        {tab === "goals" && <Target size={17} aria-hidden="true" />}
                         {t(`saveInvest.tabs.${tab}`)}
                     </button>
                 ))}
@@ -203,7 +224,10 @@ export function SaveInvest() {
                         </div>
 
                         <Button size="small" onClick={() => setModal("goal")}>
-                            {t("saveInvest.actions.addGoal")}
+                            <span className={styles.buttonContent}>
+                                <Plus size={16} aria-hidden="true" />
+                                {t("saveInvest.actions.addGoal")}
+                            </span>
                         </Button>
                     </div>
 
@@ -249,7 +273,7 @@ export function SaveInvest() {
                             onClick={() => setModal(null)}
                             aria-label={t("common.close")}
                         >
-                            ×
+                            <X size={20} aria-hidden="true" />
                         </button>
 
                         {modal === "account" && (
@@ -289,7 +313,10 @@ export function SaveInvest() {
                                         showActionMessage(t("saveInvest.messages.accountCreated"));
                                     }}
                                 >
-                                    {t("saveInvest.actions.createAccount")}
+                                    <span className={styles.buttonContent}>
+                                        <Plus size={17} aria-hidden="true" />
+                                        {t("saveInvest.actions.createAccount")}
+                                    </span>
                                 </Button>
                             </>
                         )}
@@ -342,7 +369,10 @@ export function SaveInvest() {
                                         showActionMessage(t("saveInvest.messages.goalCreated"));
                                     }}
                                 >
-                                    {t("saveInvest.actions.createGoal")}
+                                    <span className={styles.buttonContent}>
+                                        <Plus size={17} aria-hidden="true" />
+                                        {t("saveInvest.actions.createGoal")}
+                                    </span>
                                 </Button>
                             </>
                         )}

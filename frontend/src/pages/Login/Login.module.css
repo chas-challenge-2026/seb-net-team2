@@ -222,3 +222,22 @@
         margin-right: var(--spacing-lg);
     }
 }
+/* Icons */
+.buttonContent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.buttonContent svg,
+.sessionExpired svg {
+    flex-shrink: 0;
+}
+
+.sessionExpired {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
