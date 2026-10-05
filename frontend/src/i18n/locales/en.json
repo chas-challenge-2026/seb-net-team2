@@ -268,6 +268,33 @@
         "details": {
             "step": "Step {{step}} of {{total}}",
             "comment": "Comment"
+        },
+        "actions": {
+            "CREATE_PAYMENT": "Payment created",
+            "APPROVE_STEP": "Approval step approved",
+            "REJECT_STEP": "Approval step rejected",
+            "EXECUTE_PAYMENT": "Payment executed",
+            "REJECT_PAYMENT": "Payment rejected",
+            "CREATE_USER": "User created",
+            "UPDATE_USER": "User updated",
+            "DELETE_USER": "User deleted",
+            "CREATE_APPROVAL_LIMIT": "Approval limit created",
+            "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
+            "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
+        },
+        "entityTypes": {
+            "payment": "Payment #{{id}}",
+            "user": "User #{{id}}",
+            "approvalLimit": "Approval limit #{{id}}"
+        },
+        "history": {
+            "title": "History: {{entity}}",
+            "description": "Everything that has happened, oldest first.",
+            "showHistory": "Show history for {{entity}}",
+            "loading": "Loading history...",
+            "error": "Could not load the history.",
+            "empty": "No events found.",
+            "by": "by {{user}}"
         }
     },
     "approvalLimits": {

@@ -43,3 +43,12 @@ export async function fetchAuditLog(
 
     return apiRequest(`${API_URL}/api/audit?${params}`, auditPageSchema);
 }
+
+// Full history for one item, e.g. payment 4. 200 is the backend's page size cap,
+// which is far more events than a single payment gets.
+export async function fetchEntityHistory(entityType: string, entityId: number) {
+    return apiRequest(
+        `${API_URL}/api/audit/${encodeURIComponent(entityType)}/${entityId}?pageSize=200`,
+        auditPageSchema
+    );
+}

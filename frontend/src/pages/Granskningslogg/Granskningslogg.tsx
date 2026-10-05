@@ -3,37 +3,32 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import Card from "../../components/Card/Card";
-import { useAuditLog } from "../../hooks/useAuditLog";
+import { useAuditLog, type AuditEntityRef } from "../../hooks/useAuditLog";
 import { AUDIT_ACTIONS, type AuditLogFilters } from "../../services/auditService";
 import { getAllUsers } from "../../services/authService";
-import { decisionDetailsSchema } from "../../schemas/auditSchema";
 
+import { EntityHistoryDialog } from "./EntityHistoryDialog";
+import { actionKind, formatTimestamp, readDecisionDetails } from "./auditFormat";
 import styles from "./Granskningslogg.module.css";
 
 const ALL_USERS = "all";
 const ALL_EVENTS = "all";
 
-function formatTimestamp(timestamp: string, locale: string): string {
-    return new Date(timestamp).toLocaleString(locale, {
-        dateStyle: "short",
-        timeStyle: "short",
-    });
-}
-
-// Returns the step and comment of an approval decision, or nulls for events without them.
-function readDecisionDetails(details: unknown) {
-    const parsed = decisionDetailsSchema.safeParse(details);
-    if (!parsed.success) return { step: null, totalSteps: null, comment: null };
-
-    return {
-        step: parsed.data.stepNumber ?? null,
-        totalSteps: parsed.data.totalSteps ?? null,
-        comment: parsed.data.comment?.trim() || null,
-    };
-}
-
 export function Granskningslogg() {
     const { t, i18n } = useTranslation();
+
+    const [historyEntity, setHistoryEntity] = useState<AuditEntityRef | null>(null);
+
+    function actionLabel(action: string) {
+        return t(`auditLog.actions.${action}`, { defaultValue: action });
+    }
+
+    function entityLabel(entityType: string, entityId: number) {
+        return t(`auditLog.entityTypes.${entityType}`, {
+            id: entityId,
+            defaultValue: `${entityType} #${entityId}`,
+        });
+    }
 
     const [userFilter, setUserFilter] = useState(ALL_USERS);
     const [eventFilter, setEventFilter] = useState(ALL_EVENTS);
@@ -124,7 +119,7 @@ export function Granskningslogg() {
                             <option value={ALL_EVENTS}>{t("auditLog.filters.allEvents")}</option>
 
                             {AUDIT_ACTIONS.map((action) => (
-                                <option key={action} value={action}>{action}</option>
+                                <option key={action} value={action}>{actionLabel(action)}</option>
                             ))}
                         </select>
                     </div>
@@ -198,9 +193,29 @@ export function Granskningslogg() {
                                             <td>{formatTimestamp(entry.timeStamp, locale)}</td>
                                             <td>{entry.userName}</td>
                                             <td>
-                                                <code className={styles.actionCode}>{entry.action}</code>
+                                                <span
+                                                    className={`${styles.actionLabel} ${styles[`action-${actionKind(entry.action)}`]}`}
+                                                >
+                                                    {actionLabel(entry.action)}
+                                                </span>
                                             </td>
-                                            <td>{entry.entityType} #{entry.entityId}</td>
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    className={styles.entityButton}
+                                                    onClick={() =>
+                                                        setHistoryEntity({
+                                                            entityType: entry.entityType,
+                                                            entityId: entry.entityId,
+                                                        })
+                                                    }
+                                                    aria-label={t("auditLog.history.showHistory", {
+                                                        entity: entityLabel(entry.entityType, entry.entityId),
+                                                    })}
+                                                >
+                                                    {entityLabel(entry.entityType, entry.entityId)}
+                                                </button>
+                                            </td>
                                             <td>
                                                 {entry.description}
 
@@ -214,8 +229,11 @@ export function Granskningslogg() {
                                                 )}
 
                                                 {comment && (
-                                                    <span className={styles.detail}>
-                                                        {t("auditLog.details.comment")}: “{comment}”
+                                                    <span className={styles.comment}>
+                                                        <span className={styles.visuallyHidden}>
+                                                            {t("auditLog.details.comment")}:{" "}
+                                                        </span>
+                                                        “{comment}”
                                                     </span>
                                                 )}
                                             </td>
@@ -259,6 +277,11 @@ export function Granskningslogg() {
                     </div>
                 )}
             </Card>
+
+            <EntityHistoryDialog
+                entity={historyEntity}
+                onClose={() => setHistoryEntity(null)}
+            />
         </section>
     );
 }

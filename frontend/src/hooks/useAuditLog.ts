@@ -1,5 +1,14 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { fetchAuditLog, type AuditLogFilters } from "../services/auditService";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+    fetchAuditLog,
+    fetchEntityHistory,
+    type AuditLogFilters,
+} from "../services/auditService";
+
+export type AuditEntityRef = {
+    entityType: string;
+    entityId: number;
+};
 
 export const AUDIT_LOG_PAGE_SIZE = 20;
 
@@ -14,5 +23,13 @@ export function useAuditLog(filters: AuditLogFilters) {
             lastPage.page * lastPage.pageSize < lastPage.totalCount
                 ? lastPage.page + 1
                 : undefined,
+    });
+}
+
+export function useEntityHistory(entity: AuditEntityRef | null) {
+    return useQuery({
+        queryKey: ["auditLog", "entity", entity?.entityType, entity?.entityId],
+        queryFn: () => fetchEntityHistory(entity!.entityType, entity!.entityId),
+        enabled: entity !== null,
     });
 }
