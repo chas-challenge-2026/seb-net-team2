@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { ChevronsDown, RotateCcw, ScrollText } from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import { useAuditLog, type AuditEntityRef } from "../../hooks/useAuditLog";
@@ -86,7 +87,10 @@ export function Granskningslogg() {
     return (
         <section className={styles.page} aria-labelledby="audit-log-title">
             <header className={styles.header}>
-                <h1 id="audit-log-title">{t("auditLog.title")}</h1>
+                <div className={styles.titleRow}>
+                    <ScrollText size={24} strokeWidth={2} aria-hidden="true" />
+                    <h1 id="audit-log-title">{t("auditLog.title")}</h1>
+                </div>
                 <p className={styles.intro}>{t("auditLog.description")}</p>
             </header>
 
@@ -150,6 +154,7 @@ export function Granskningslogg() {
 
                     {hasActiveFilters && (
                         <button type="button" className={styles.resetButton} onClick={resetFilters}>
+                            <RotateCcw size={16} aria-hidden="true" />
                             {t("auditLog.filters.clear")}
                         </button>
                     )}
@@ -272,6 +277,7 @@ export function Granskningslogg() {
                                 {isFetchingNextPage
                                     ? t("common.loading")
                                     : t("auditLog.pagination.showMore")}
+                                {!isFetchingNextPage && <ChevronsDown size={16} aria-hidden="true" />}
                             </button>
                         )}
                     </div>

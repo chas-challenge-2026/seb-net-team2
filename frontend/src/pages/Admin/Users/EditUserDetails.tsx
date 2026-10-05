@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft, CircleCheck, Pencil, Save, TriangleAlert } from "lucide-react";
 
 import { getUserById, updateUserById } from "../../../services/authService";
 import type { ReadUser, UserRole } from "../../../schemas/userSchema";
@@ -59,8 +60,14 @@ function EditUserForm({ user }: EditUserFormProps) {
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
-                <h1>{t("users.edit.title")}</h1>
-                <p>{t("users.edit.description")}</p>
+                <div className={styles.titleRow}>
+                    <Pencil size={27} strokeWidth={2} aria-hidden="true" />
+
+                    <div>
+                        <h1>{t("users.edit.title")}</h1>
+                        <p>{t("users.edit.description")}</p>
+                    </div>
+                </div>
             </header>
 
             <section className={styles.formSection}>
@@ -142,13 +149,15 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                     {updateMutation.isSuccess && (
                         <div className={styles.success} role="status">
-                            {t("users.edit.success")}
+                            <CircleCheck size={18} aria-hidden="true" />
+                            <span>{t("users.edit.success")}</span>
                         </div>
                     )}
 
                     {updateMutation.isError && (
                         <div className={styles.error} role="alert">
-                            {getErrorMessage(updateMutation.error, t("users.errors.update"))}
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{getErrorMessage(updateMutation.error, t("users.errors.update"))}</span>
                         </div>
                     )}
 
@@ -158,6 +167,7 @@ function EditUserForm({ user }: EditUserFormProps) {
                             params={{ userId: user.id.toString() }}
                             className={styles.cancelButton}
                         >
+                            <ArrowLeft size={17} aria-hidden="true" />
                             {t("common.cancel")}
                         </Link>
 
@@ -174,7 +184,10 @@ function EditUserForm({ user }: EditUserFormProps) {
                                     {t("users.edit.saving")}
                                 </span>
                             ) : (
-                                t("users.edit.save")
+                                <span className={styles.buttonContent}>
+                                    <Save size={18} aria-hidden="true" />
+                                    {t("users.edit.save")}
+                                </span>
                             )}
                         </Button>
                     </div>
@@ -210,7 +223,8 @@ export default function EditUserDetails() {
     if (isError || !user) {
         return (
             <div className={styles.error} role="alert">
-                {getErrorMessage(error, t("users.errors.fetch"))}
+                <TriangleAlert size={18} aria-hidden="true" />
+                <span>{getErrorMessage(error, t("users.errors.fetch"))}</span>
             </div>
         );
     }

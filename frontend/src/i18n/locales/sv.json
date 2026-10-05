@@ -30,13 +30,19 @@
     },
     "sidebar": {
         "menu": "Meny",
+        "closeMenu": "Stäng meny",
         "expand": "Expandera sidomeny",
         "collapse": "Minimera sidomeny",
+        "secondaryNavigation": "Sidomeny",
+        "navigationLinks": "Navigeringslänkar",
         "dashboard": "Översikt",
+        "payments": "Betalningar",
         "newPayment": "Ny betalning",
         "batchUpload": "Batchuppladdning",
+        "savings": "Sparande",
+        "approvals": "Attestering",
         "approvalInbox": "Attestkorg",
-        "admin": "ADMIN",
+        "admin": "Administration",
         "auditLog": "Granskningslogg",
         "administration": "Administration",
         "myProfile": "Min profil",
@@ -64,7 +70,8 @@
         },
         "status": {
             "completed": "Slutförd",
-            "pending": "Väntande"
+            "pending": "Väntande",
+            "rejected": "Avvisad"
         }
     },
     "payment": {

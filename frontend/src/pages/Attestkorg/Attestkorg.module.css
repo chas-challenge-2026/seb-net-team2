@@ -1010,3 +1010,50 @@
         min-height: 44px;
     }
 }
+/* Icons */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.feedbackMessage {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.feedbackMessage svg,
+.overdueBanner > svg,
+.actions button svg,
+.modalActions button svg {
+    flex-shrink: 0;
+}
+
+.overdueBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+}
+
+.overdueBanner > svg {
+    margin-top: 2px;
+}
+
+.actions button,
+.modalActions button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.emptyState > svg {
+    margin-bottom: var(--spacing-sm);
+    color: var(--seb-green-dark-2);
+}

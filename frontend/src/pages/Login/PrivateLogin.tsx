@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
+import { LogIn } from "lucide-react";
 
 import Button from "../../components/Button/Button";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
@@ -99,7 +100,14 @@ export default function PrivateLogin() {
                     className={styles.formButton}
                     disabled={isLoggingIn}
                 >
-                    {isLoggingIn ? <LoadingWheel size="small" /> : t("login.login")}
+                    {isLoggingIn ? (
+                        <LoadingWheel size="small" />
+                    ) : (
+                        <span className={styles.buttonContent}>
+                            <LogIn size={17} aria-hidden="true" />
+                            {t("login.login")}
+                        </span>
+                    )}
                 </Button>
 
                 <p className={styles.error} aria-live="polite">

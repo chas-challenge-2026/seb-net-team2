@@ -391,3 +391,28 @@
         padding: 1.5rem 16px 3rem;
     }
 }
+
+/* Icons */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.resetButton,
+.showMoreButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.resetButton svg,
+.showMoreButton svg {
+    flex-shrink: 0;
+}

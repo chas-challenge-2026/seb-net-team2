@@ -58,6 +58,7 @@
     gap: 1.25rem;
     align-items: start;
 }
+
 .sectionHeading {
     display: flex;
     gap: 1rem;
@@ -359,4 +360,47 @@ textarea {
     .modalActions button {
         width: 100%;
     }
+}
+/* Icons */
+.titleRow,
+.reviewTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow > svg,
+.reviewTitle > svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.titleRow h1,
+.reviewTitle h2 {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.buttonContent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.buttonContent svg,
+.success svg,
+.error svg {
+    flex-shrink: 0;
+}
+
+.success,
+.error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.approvalIcon svg {
+    display: block;
 }

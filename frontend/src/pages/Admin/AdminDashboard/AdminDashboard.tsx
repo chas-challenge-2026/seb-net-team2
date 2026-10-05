@@ -1,6 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import {
+    ArrowRight,
+    ClipboardCheck,
+    ListPlus,
+    ShieldCheck,
+    UserPlus,
+    Users,
+} from "lucide-react";
 
 import Card from "../../../components/Card/Card";
 import Skeleton from "../../../components/LoadingState/Skeleton";
@@ -50,7 +58,15 @@ export default function AdminDashboard() {
 
             <section className={styles.stats} aria-label={t("admin.dashboard.statsLabel")}>
                 <Card className={styles.statCard}>
-                    <span>{t("admin.dashboard.users")}</span>
+                    <div className={styles.statHeader}>
+                        <div className={styles.statLabel}>
+                            <span className={styles.statIcon}>
+                                <Users size={20} strokeWidth={2} aria-hidden="true" />
+                            </span>
+
+                            <span>{t("admin.dashboard.users")}</span>
+                        </div>
+                    </div>
 
                     {isPending ? (
                         <Skeleton width="60px" height="36px" />
@@ -59,12 +75,21 @@ export default function AdminDashboard() {
                     )}
 
                     <Link to="/admin/users">
-                        {t("admin.dashboard.viewUsers")} →
+                        {t("admin.dashboard.viewUsers")}
+                        <ArrowRight size={16} aria-hidden="true" />
                     </Link>
                 </Card>
 
                 <Card className={styles.statCard}>
-                    <span>{t("admin.dashboard.administrators")}</span>
+                    <div className={styles.statHeader}>
+                        <div className={styles.statLabel}>
+                            <span className={styles.statIcon}>
+                                <ShieldCheck size={20} strokeWidth={2} aria-hidden="true" />
+                            </span>
+
+                            <span>{t("admin.dashboard.administrators")}</span>
+                        </div>
+                    </div>
 
                     {isPending ? (
                         <Skeleton width="60px" height="36px" />
@@ -73,12 +98,21 @@ export default function AdminDashboard() {
                     )}
 
                     <Link to="/admin/users">
-                        {t("admin.dashboard.viewUsers")} →
+                        {t("admin.dashboard.viewUsers")}
+                        <ArrowRight size={16} aria-hidden="true" />
                     </Link>
                 </Card>
 
                 <Card className={styles.statCard}>
-                    <span>{t("admin.dashboard.approvalLimits")}</span>
+                    <div className={styles.statHeader}>
+                        <div className={styles.statLabel}>
+                            <span className={styles.statIcon}>
+                                <ClipboardCheck size={20} strokeWidth={2} aria-hidden="true" />
+                            </span>
+
+                            <span>{t("admin.dashboard.approvalLimits")}</span>
+                        </div>
+                    </div>
 
                     {isPending ? (
                         <Skeleton width="60px" height="36px" />
@@ -87,7 +121,8 @@ export default function AdminDashboard() {
                     )}
 
                     <Link to="/admin/approval-limits">
-                        {t("admin.dashboard.viewApprovalLimits")} →
+                        {t("admin.dashboard.viewApprovalLimits")}
+                        <ArrowRight size={16} aria-hidden="true" />
                     </Link>
                 </Card>
             </section>
@@ -100,6 +135,7 @@ export default function AdminDashboard() {
 
                 <div className={styles.actions}>
                     <Link to="/admin/users/create" className={styles.actionLink}>
+                        <UserPlus size={18} strokeWidth={2} aria-hidden="true" />
                         {t("admin.dashboard.createUser")}
                     </Link>
 
@@ -107,6 +143,7 @@ export default function AdminDashboard() {
                         to="/admin/approval-limits/create"
                         className={styles.actionLink}
                     >
+                        <ListPlus size={18} strokeWidth={2} aria-hidden="true" />
                         {t("admin.dashboard.createApprovalLimit")}
                     </Link>
                 </div>
