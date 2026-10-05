@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { TriangleAlert } from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import CustomerTypeSelector, {
@@ -56,7 +57,8 @@ export default function Login() {
 
                 {sessionExpired && (
                     <p className={styles.sessionExpired} role="status">
-                        {t("session.sessionExpired")}
+                        <TriangleAlert size={17} aria-hidden="true" />
+                        <span>{t("session.sessionExpired")}</span>
                     </p>
                 )}
             </Card>

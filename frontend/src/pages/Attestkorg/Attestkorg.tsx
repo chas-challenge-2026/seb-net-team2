@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import {
+    CircleCheck,
+    CircleX,
+    ClipboardCheck,
+    Clock3,
+    Info,
+} from "lucide-react";
 
 import { APPROVALS_QUERY_KEY, useApprovals } from "../../hooks/useApprovals";
 import { decideApproval } from "../../services/approvalService";
@@ -269,7 +276,10 @@ export function Attestkorg() {
         <section className={styles.inbox} aria-labelledby="approval-inbox-title">
             <header className={styles.header}>
                 <div>
-                    <h1 id="approval-inbox-title">{t("approvalInbox.title")}</h1>
+                    <div className={styles.titleRow}>
+                        <ClipboardCheck size={24} strokeWidth={2} aria-hidden="true" />
+                        <h1 id="approval-inbox-title">{t("approvalInbox.title")}</h1>
+                    </div>
                     <p className={styles.intro}>{t("approvalInbox.description")}</p>
                 </div>
 
@@ -288,15 +298,24 @@ export function Attestkorg() {
                     ref={feedbackRef}
                     tabIndex={-1}
                     className={`${styles.feedback} ${actionFeedback.type === "approved"
-                            ? styles.feedbackApproved
-                            : actionFeedback.type === "rejected"
-                                ? styles.feedbackRejected
-                                : styles.feedbackInfo
+                        ? styles.feedbackApproved
+                        : actionFeedback.type === "rejected"
+                            ? styles.feedbackRejected
+                            : styles.feedbackInfo
                         }`}
                     role="status"
                     aria-live="polite"
                 >
-                    <span>{actionFeedback.message}</span>
+                    <span className={styles.feedbackMessage}>
+                        {actionFeedback.type === "approved" ? (
+                            <CircleCheck size={18} aria-hidden="true" />
+                        ) : actionFeedback.type === "rejected" ? (
+                            <CircleX size={18} aria-hidden="true" />
+                        ) : (
+                            <Info size={18} aria-hidden="true" />
+                        )}
+                        {actionFeedback.message}
+                    </span>
 
                     <button
                         type="button"
@@ -311,13 +330,16 @@ export function Attestkorg() {
 
             {overdueCount > 0 && (
                 <div className={styles.overdueBanner} role="status">
-                    <strong>
-                        {t("approvalInbox.overdueBanner", {
-                            count: overdueCount,
-                            days: OVERDUE_AFTER_DAYS,
-                        })}
-                    </strong>{" "}
-                    {t("approvalInbox.overdueFirst")}
+                    <Clock3 size={18} aria-hidden="true" />
+                    <span>
+                        <strong>
+                            {t("approvalInbox.overdueBanner", {
+                                count: overdueCount,
+                                days: OVERDUE_AFTER_DAYS,
+                            })}
+                        </strong>{" "}
+                        {t("approvalInbox.overdueFirst")}
+                    </span>
                 </div>
             )}
 
@@ -408,6 +430,7 @@ export function Attestkorg() {
                                         id: approval.paymentId,
                                     })}
                                 >
+                                    <CircleX size={17} aria-hidden="true" />
                                     {t("approvalInbox.actions.reject")}
                                 </button>
 
@@ -420,6 +443,7 @@ export function Attestkorg() {
                                         id: approval.paymentId,
                                     })}
                                 >
+                                    <CircleCheck size={17} aria-hidden="true" />
                                     {t("approvalInbox.actions.approve")}
                                 </button>
                             </div>
@@ -546,11 +570,19 @@ export function Attestkorg() {
                                 disabled={decisionMutation.isPending || isRejectReasonMissing}
                                 onClick={handleConfirm}
                             >
-                                {decisionMutation.isPending
-                                    ? t("approvalInbox.actions.processing")
-                                    : confirmAction.kind === "approve"
-                                        ? t("approvalInbox.actions.approve")
-                                        : t("approvalInbox.actions.reject")}
+                                {decisionMutation.isPending ? (
+                                    t("approvalInbox.actions.processing")
+                                ) : confirmAction.kind === "approve" ? (
+                                    <>
+                                        <CircleCheck size={17} aria-hidden="true" />
+                                        {t("approvalInbox.actions.approve")}
+                                    </>
+                                ) : (
+                                    <>
+                                        <CircleX size={17} aria-hidden="true" />
+                                        {t("approvalInbox.actions.reject")}
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

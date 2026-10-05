@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ChevronsDown, Info, RotateCcw, ScrollText } from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import { useAuditLog } from "../../hooks/useAuditLog";
@@ -92,16 +93,22 @@ export function Granskningslogg() {
     return (
         <section className={styles.page} aria-labelledby="audit-log-title">
             <header className={styles.header}>
-                <h1 id="audit-log-title">{t("auditLog.title")}</h1>
+                <div className={styles.titleRow}>
+                    <ScrollText size={24} strokeWidth={2} aria-hidden="true" />
+                    <h1 id="audit-log-title">{t("auditLog.title")}</h1>
+                </div>
                 <p className={styles.intro}>{t("auditLog.description")}</p>
             </header>
 
             <Card>
                 <div className={styles.infoBanner}>
-                    <strong>{t("auditLog.note.title")}</strong>{" "}
-                    {t("auditLog.note.description")}{" "}
-                    <code>/tmp/audit.log</code>{" "}
-                    {t("auditLog.note.descriptionEnd")}
+                    <Info size={18} aria-hidden="true" />
+                    <span>
+                        <strong>{t("auditLog.note.title")}</strong>{" "}
+                        {t("auditLog.note.description")}{" "}
+                        <code>/tmp/audit.log</code>{" "}
+                        {t("auditLog.note.descriptionEnd")}
+                    </span>
                 </div>
 
                 {entries && entries.length > 0 && (
@@ -162,6 +169,7 @@ export function Granskningslogg() {
 
                         {hasActiveFilters && (
                             <button type="button" className={styles.resetButton} onClick={resetFilters}>
+                                <RotateCcw size={16} aria-hidden="true" />
                                 {t("auditLog.filters.clear")}
                             </button>
                         )}
@@ -238,6 +246,7 @@ export function Granskningslogg() {
                                 onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
                             >
                                 {t("auditLog.pagination.showMore")}
+                                <ChevronsDown size={16} aria-hidden="true" />
                             </button>
                         )}
                     </div>

@@ -1,8 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { CreditCard, Landmark, ReceiptText } from "lucide-react";
+
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
 import { useAuth } from "../../hooks/useAuth";
+
+import Card from "../../components/Card/Card";
 
 import styles from "./Dashboard.module.css";
 
@@ -15,12 +19,14 @@ export function Dashboard() {
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-GB";
+
     const formattedDate = new Intl.DateTimeFormat(locale, {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
     }).format(today);
+
     const dateTime = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
     if (accountsError) return <p>{t("dashboard.errors.generic")}</p>;
@@ -28,45 +34,68 @@ export function Dashboard() {
     return (
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
-                <div className={styles.dashboard__intro}>
+                <div>
                     <h1>{t("dashboard.greeting", { user: firstName })}</h1>
+
                     <p>
-                        {user?.tenantName && <>{user.tenantName} <span aria-hidden="true">·</span> </>}
+                        {user?.tenantName && (
+                            <>
+                                {user.tenantName} <span aria-hidden="true">·</span>{" "}
+                            </>
+                        )}
+
                         <time dateTime={dateTime}>{formattedDate}</time>
                     </p>
                 </div>
+
                 <Link to="/ny-betalning" className={styles.createPaymentLink}>
+                    <CreditCard size={18} strokeWidth={2} aria-hidden="true" />
                     <span>{t("dashboard.createPayment")}</span>
-                    <svg viewBox="0 0 20 20" aria-hidden="true">
-                        <path d="M4 10h12M10 4l6 6-6 6" />
-                    </svg>
                 </Link>
             </header>
 
             <section>
-                <h2>{t("dashboard.accounts")}</h2>
+                <h2 className={styles.sectionTitle}>
+                    <Landmark size={20} strokeWidth={2} aria-hidden="true" />
+                    {t("dashboard.accounts")}
+                </h2>
 
-                {loadingAccounts ? <p>{t("common.loading")}</p> : (
-                    <div className={styles["accounts-grid"]}>
+                {loadingAccounts ? (
+                    <p>{t("common.loading")}</p>
+                ) : (
+                    <div className={styles.accountsGrid}>
                         {accounts?.map((account) => (
-                            <div key={account.id} className={styles["account-card"]}>
-                                <p className={styles["account-card__name"]}>{account.name}</p>
-                                <p className={styles["account-card__balance"]}>
-                                    {account.balance.toLocaleString(locale, { minimumFractionDigits: 2 })} {account.currency}
+                            <Card key={account.id}
+                                variant="secondary"
+                            >
+                                <p className={styles.accountName}>{account.name}</p>
+
+                                <p className={styles.accountBalance}>
+                                    {account.balance.toLocaleString(locale, {
+                                        minimumFractionDigits: 2,
+                                    })}{" "}
+                                    {account.currency}
                                 </p>
-                                <p className={styles["account-card__iban"]}>{account.iban}</p>
-                            </div>
+
+                                <p className={styles.accountIban}>{account.iban}</p>
+                            </Card>
                         ))}
                     </div>
                 )}
             </section>
 
-            <div className={styles["dashboard__bottom"]}>
-                <section>
-                    <h2>{t("dashboard.recentPayments")}</h2>
+            <section className={styles.recentPayments}>
+                <h2 className={styles.sectionTitle}>
+                    <ReceiptText size={20} strokeWidth={2} aria-hidden="true" />
+                    {t("dashboard.recentPayments")}
+                </h2>
 
-                    {loadingPayments ? <p>{t("common.loading")}</p> : (
-                        <table>
+                <Card
+                >
+                    {loadingPayments ? (
+                        <p>{t("common.loading")}</p>
+                    ) : (
+                        <table className={styles.paymentsTable}>
                             <thead>
                                 <tr>
                                     <th>{t("dashboard.table.date")}</th>
@@ -83,16 +112,30 @@ export function Dashboard() {
                                         <td>{payment.date}</td>
                                         <td>{payment.toIban}</td>
                                         <td>{payment.reference}</td>
+
                                         <td>
-                                            {payment.amount.toLocaleString(locale, { minimumFractionDigits: 2 })} {payment.currency}
+                                            {payment.amount.toLocaleString(locale, {
+                                                minimumFractionDigits: 2,
+                                            })}{" "}
+                                            {payment.currency}
                                         </td>
+
                                         <td>
-                                            <span className={`${styles.status} ${styles[payment.status === "Completed" ? "status--done" : "status--pending"]}`}>
+                                            <span
+                                                className={`${styles.status} ${styles[
+                                                    payment.status === "Completed"
+                                                        ? "status--done"
+                                                        : "status--pending"
+                                                ]
+                                                    }`}
+                                            >
                                                 {payment.status === "Completed"
                                                     ? t("dashboard.status.completed")
                                                     : payment.status === "Pending approval"
                                                         ? t("dashboard.status.pending")
-                                                        : payment.status}
+                                                        : payment.status === "Rejected"
+                                                            ? t("dashboard.status.rejected")
+                                                            : payment.status}
                                             </span>
                                         </td>
                                     </tr>
@@ -100,8 +143,8 @@ export function Dashboard() {
                             </tbody>
                         </table>
                     )}
-                </section>
-            </div>
+                </Card>
+            </section>
         </div>
     );
 }

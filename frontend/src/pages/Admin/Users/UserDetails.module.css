@@ -1,9 +1,5 @@
 .layout {
     width: 100%;
-    max-width: 1100px;
-
-    margin: 0 auto;
-    padding: var(--spacing-xl);
 
     box-sizing: border-box;
 }
@@ -43,6 +39,18 @@
     margin-bottom: var(--spacing-xl);
 }
 
+.titleRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.titleRow > svg {
+    flex-shrink: 0;
+    margin-top: 4px;
+    color: var(--seb-green-dark-2);
+}
+
 .pageHeader h1 {
     margin: 0;
 
@@ -74,6 +82,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
 
     padding:
         0 var(--spacing-lg);
@@ -170,10 +179,18 @@
 }
 
 .detailItem dt {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+
     color: var(--color-text-soft);
 
     font-size: var(--font-size-md);
     font-weight: 600;
+}
+
+.detailItem dt svg {
+    flex-shrink: 0;
 }
 
 .detailItem dd {
@@ -213,6 +230,10 @@
 /* Feedback */
 
 .error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
     margin-bottom: var(--spacing-lg);
 
     padding: var(--spacing-md);
@@ -223,6 +244,10 @@
         1px solid var(--color-error);
 
     border-radius: var(--radius-sm);
+}
+
+.error svg {
+    flex-shrink: 0;
 }
 
 .loadingState,
@@ -247,19 +272,48 @@
 
 /* Delete modal */
 
+.buttonContent,
 .deletingContent {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
 
+.buttonContent svg {
+    flex-shrink: 0;
+}
+
+.deleteWarning {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.deleteWarning > svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--color-error);
+}
+
+.deleteWarning p {
+    margin: 0;
+}
+
+.deleteWarning p + p {
+    margin-top: var(--spacing-sm);
+    color: var(--color-text-soft);
+}
+
+.deletingContent {
+    display: inline-flex;
+    align-items: center;
     gap: var(--spacing-sm);
 }
 
 /* Responsive */
 
 @media (max-width: 700px) {
-    .layout {
-        padding: var(--spacing-md);
-    }
 
     .pageHeader {
         flex-direction: column;

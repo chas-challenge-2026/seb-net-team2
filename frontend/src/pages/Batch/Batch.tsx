@@ -2,6 +2,15 @@ import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { z } from "zod";
+import {
+    CircleCheck,
+    CircleX,
+    Download,
+    FileSpreadsheet,
+    RotateCcw,
+    TriangleAlert,
+    Upload,
+} from "lucide-react";
 
 import { useAccounts } from "../../hooks/useAccounts";
 import Card from "../../components/Card/Card";
@@ -218,7 +227,10 @@ export function Batch() {
             <header className={styles.header}>
                 <div>
                     <span className={styles.eyebrow}>{t("batch.eyebrow")}</span>
-                    <h1>{t("batch.title")}</h1>
+                    <div className={styles.titleRow}>
+                        <FileSpreadsheet size={28} strokeWidth={2} aria-hidden="true" />
+                        <h1>{t("batch.title")}</h1>
+                    </div>
                     <p>{t("batch.description")}</p>
                 </div>
 
@@ -250,7 +262,8 @@ export function Batch() {
 
                         {fileError && (
                             <div className={styles.errorBanner} role="alert">
-                                {fileError}
+                                <TriangleAlert size={18} aria-hidden="true" />
+                                <span>{fileError}</span>
                             </div>
                         )}
 
@@ -262,7 +275,10 @@ export function Batch() {
                                 onClick={handleClear}
                                 disabled={!file && !fileError && !results}
                             >
-                                {t("common.clear")}
+                                <span className={styles.buttonContent}>
+                                    <RotateCcw size={17} aria-hidden="true" />
+                                    {t("common.clear")}
+                                </span>
                             </Button>
 
                             <Button
@@ -273,9 +289,14 @@ export function Batch() {
                                 disabled={!file || isProcessing || isLoadingAccounts}
                                 aria-busy={isProcessing}
                             >
-                                {isProcessing
-                                    ? t("batch.actions.processing")
-                                    : t("batch.actions.upload")}
+                                {isProcessing ? (
+                                    t("batch.actions.processing")
+                                ) : (
+                                    <span className={styles.buttonContent}>
+                                        <Upload size={17} aria-hidden="true" />
+                                        {t("batch.actions.upload")}
+                                    </span>
+                                )}
                             </Button>
                         </div>
                     </form>
@@ -287,7 +308,8 @@ export function Batch() {
                     <pre className={styles.formatExample}>{EXAMPLE_CSV}</pre>
 
                     <div className={styles.warning}>
-                        {t("batch.format.warning")}
+                        <TriangleAlert size={17} aria-hidden="true" />
+                        <span>{t("batch.format.warning")}</span>
                     </div>
 
                     <button
@@ -295,6 +317,7 @@ export function Batch() {
                         className={styles.exampleLink}
                         onClick={handleDownloadExample}
                     >
+                        <Download size={16} aria-hidden="true" />
                         {t("batch.format.download")}
                     </button>
                 </Card>
@@ -349,11 +372,13 @@ export function Batch() {
                                         <td>
                                             {row.success ? (
                                                 <span className={styles.statusSuccess}>
-                                                    ✓ {t("batch.table.success")}
+                                                    <CircleCheck size={16} aria-hidden="true" />
+                                                    {t("batch.table.success")}
                                                 </span>
                                             ) : (
                                                 <span className={styles.statusError}>
-                                                    ✕ {row.error}
+                                                    <CircleX size={16} aria-hidden="true" />
+                                                    {row.error}
                                                 </span>
                                             )}
                                         </td>

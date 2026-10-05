@@ -1,5 +1,15 @@
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import {
+    ArrowLeft,
+    ArrowRight,
+    CircleCheck,
+    ClipboardCheck,
+    CreditCard,
+    RotateCcw,
+    ShieldCheck,
+    TriangleAlert,
+} from "lucide-react";
 
 import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
@@ -121,7 +131,10 @@ export function NyBetalning() {
             <header className={styles.header}>
                 <div>
                     <span className={styles.eyebrow}>{t("payment.eyebrow")}</span>
-                    <h1>{t("payment.title")}</h1>
+                    <div className={styles.titleRow}>
+                        <CreditCard size={28} strokeWidth={2} aria-hidden="true" />
+                        <h1>{t("payment.title")}</h1>
+                    </div>
                     <p>{t("payment.description")}</p>
                 </div>
             </header>
@@ -222,17 +235,24 @@ export function NyBetalning() {
 
                         {submitted && (
                             <div className={styles.success}>
-                                {t("payment.success")}
+                                <CircleCheck size={18} aria-hidden="true" />
+                                <span>{t("payment.success")}</span>
                             </div>
                         )}
 
                         {error && (
-                            <div className={styles.error}>{error}</div>
+                            <div className={styles.error}>
+                                <TriangleAlert size={18} aria-hidden="true" />
+                                <span>{error}</span>
+                            </div>
                         )}
 
                         <div className={styles.actions}>
                             <Button type="button" variant="ghost" size="medium" onClick={clearForm}>
-                                {t("payment.actions.clear")}
+                                <span className={styles.buttonContent}>
+                                    <RotateCcw size={17} aria-hidden="true" />
+                                    {t("payment.actions.clear")}
+                                </span>
                             </Button>
 
                             <Button
@@ -241,8 +261,10 @@ export function NyBetalning() {
                                 size="medium"
                                 disabled={isSubmitting || isLoadingAccounts || accountsError}
                             >
-                                {t("payment.actions.review")}
-                                <span aria-hidden="true">→</span>
+                                <span className={styles.buttonContent}>
+                                    {t("payment.actions.review")}
+                                    <ArrowRight size={17} aria-hidden="true" />
+                                </span>
                             </Button>
                         </div>
                     </form>
@@ -293,7 +315,9 @@ export function NyBetalning() {
                     </div>
 
                     <div className={styles.approval}>
-                        <span className={styles.approvalIcon} aria-hidden="true">✓</span>
+                        <span className={styles.approvalIcon} aria-hidden="true">
+                            <ShieldCheck size={15} strokeWidth={2.25} />
+                        </span>
 
                         <div>
                             <strong>{t("payment.approval.title")}</strong>
@@ -320,7 +344,10 @@ export function NyBetalning() {
                         aria-labelledby="review-payment-title"
                     >
                         <p className={styles.eyebrow}>{t("payment.review.eyebrow")}</p>
-                        <h2 id="review-payment-title">{t("payment.review.title")}</h2>
+                        <div className={styles.reviewTitle}>
+                            <ClipboardCheck size={22} strokeWidth={2} aria-hidden="true" />
+                            <h2 id="review-payment-title">{t("payment.review.title")}</h2>
+                        </div>
                         <p className={styles.reviewIntro}>{t("payment.review.description")}</p>
 
                         <div className={styles.reviewDetails}>
@@ -361,7 +388,10 @@ export function NyBetalning() {
                                 size="medium"
                                 onClick={() => setIsReviewOpen(false)}
                             >
-                                {t("payment.actions.goBack")}
+                                <span className={styles.buttonContent}>
+                                    <ArrowLeft size={17} aria-hidden="true" />
+                                    {t("payment.actions.goBack")}
+                                </span>
                             </Button>
 
                             <Button
@@ -371,9 +401,14 @@ export function NyBetalning() {
                                 onClick={confirmPayment}
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting
-                                    ? t("payment.actions.creating")
-                                    : t("payment.actions.confirm")}
+                                {isSubmitting ? (
+                                    t("payment.actions.creating")
+                                ) : (
+                                    <span className={styles.buttonContent}>
+                                        <CircleCheck size={17} aria-hidden="true" />
+                                        {t("payment.actions.confirm")}
+                                    </span>
+                                )}
                             </Button>
                         </div>
                     </section>

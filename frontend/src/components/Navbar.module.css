@@ -1,56 +1,106 @@
 .navbar {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    padding: 0.75rem 2rem;
-    background-color: var(--color-background);
-    border-bottom: 1px solid #e0e0e0;
-}
+    height: 64px;
 
-.navbar__brand {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+
+    padding: 0 2rem;
+
+    box-sizing: border-box;
+
+    background-color: var(--color-background);
+    border-bottom: 1px solid var(--color-border-light);
 }
 
 .navbar__brandLink {
     display: flex;
     align-items: center;
+
+    border-radius: var(--radius-sm);
+}
+
+.navbar__brandLink:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
 }
 
 .navbar__logo {
     display: block;
+
     width: 4.25rem;
     height: 2.4rem;
+
     object-fit: cover;
 }
 
-.navbar__links {
-    display: flex;
-    flex: 1;
-    gap: 1.5rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-
 .navbar__actions {
-    margin-left: auto;
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
 }
 
-.navbar__link {
-    font-weight: 500;
-    padding: 0.25rem 0;
-}
-
-.navbar__link--active {
-    border-bottom: 2px solid currentColor;
-}
-
-.navbar__actions {
+.navbar__user {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--spacing-sm);
+
+    padding: 0.4rem 0.65rem;
+
+    color: var(--color-text);
+    text-decoration: none;
+
+    border-radius: var(--radius-sm);
+
+    transition: background-color 0.2s ease;
+}
+
+.navbar__user:hover {
+    background-color: var(--color-hover-light);
+}
+
+.navbar__user:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+.navbar__user svg {
+    flex-shrink: 0;
+
+    color: var(--color-text-soft);
+}
+
+.navbar__userText {
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar__userName {
+    color: var(--color-text);
+
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.navbar__userRole {
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0 1rem 0 4.5rem;
+    }
+
+    .navbar__userText {
+        display: none;
+    }
+
+    .navbar__actions {
+        gap: var(--spacing-sm);
+    }
 }
