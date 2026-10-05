@@ -33,20 +33,6 @@
     font-size: var(--font-size-lg);
 }
 
-.infoBanner {
-    padding: 14px 18px;
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: #e8f4fb;
-    color: var(--color-text);
-    font-size: var(--font-size-md);
-    line-height: 1.5;
-}
-
-.infoBanner code {
-    font-size: 0.9em;
-}
-
 .pagination {
     display: flex;
     flex-wrap: wrap;
@@ -82,14 +68,21 @@
     outline-offset: 2px;
 }
 
-.footnote {
-    margin: 1rem 0 0;
-    color: var(--placeholder-grey);
-    font-size: var(--font-size-sm);
+.showMoreButton:disabled {
+    cursor: wait;
+    opacity: 0.6;
 }
 
 .actionCode {
     font-size: 0.9em;
+}
+
+.detail {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+    overflow-wrap: anywhere;
 }
 
 .toolbar {

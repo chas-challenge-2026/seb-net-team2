@@ -237,12 +237,7 @@
     },
     "auditLog": {
         "title": "Audit log",
-        "description": "Event log from the database (note: some events are only logged to a file).",
-        "note": {
-            "title": "Note:",
-            "description": "This view only shows events stored in the database. Some events, such as batch payments and partial approval steps, are only logged to",
-            "descriptionEnd": "and do not appear here."
-        },
+        "description": "All events for your company: payments, approvals, users and approval limits.",
         "filters": {
             "user": "User",
             "allUsers": "All users",
@@ -270,9 +265,9 @@
             "showing": "Showing {{visible}} of {{total}} entries",
             "showMore": "Show more"
         },
-        "footnote": {
-            "start": "Showing the latest 200 entries. For the full log, also see",
-            "end": "on the server."
+        "details": {
+            "step": "Step {{step}} of {{total}}",
+            "comment": "Comment"
         }
     },
     "approvalLimits": {
