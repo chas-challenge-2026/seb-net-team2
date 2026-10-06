@@ -14,7 +14,9 @@ import { decideApproval } from "../../services/approvalService";
 import type { PendingApprovalStep } from "../../schemas/pendingApprovalSchema";
 import { AppError } from "../../errors/AppError";
 import { OVERDUE_AFTER_DAYS, daysWaiting, isOverdue } from "../../utils/approvalReminders";
+import { recipientBank } from "../../utils/paymentChecks";
 
+import { PaymentChecks } from "./PaymentChecks";
 import styles from "./Attestkorg.module.css";
 
 const COMMENT_MAX_LENGTH = 300;
@@ -418,7 +420,16 @@ export function Attestkorg() {
                                     <dt>{t("approvalInbox.card.toIban")}</dt>
                                     <dd>{formatIban(approval.toIban)}</dd>
                                 </div>
+
+                                {recipientBank(approval.toIban) && (
+                                    <div>
+                                        <dt>{t("approvalInbox.card.recipientBank")}</dt>
+                                        <dd>{recipientBank(approval.toIban)}</dd>
+                                    </div>
+                                )}
                             </dl>
+
+                            <PaymentChecks approval={approval} allPending={approvals} />
 
                             <div className={styles.actions}>
                                 <button

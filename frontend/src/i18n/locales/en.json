@@ -196,7 +196,8 @@
             "toIban": "To IBAN",
             "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
             "waitingToday": "Submitted today",
-            "dualApproval": "Dual approval – this payment requires two attestants"
+            "dualApproval": "Dual approval – this payment requires two attestants",
+            "recipientBank": "Recipient bank"
         },
         "comment": {
             "label": "Comment",
@@ -223,6 +224,12 @@
             "approveDescription": "Check the details before you approve. The decision cannot be undone.",
             "rejectDescription": "Check the details and explain why the payment is rejected.",
             "amount": "Amount"
+        },
+        "checks": {
+            "title": "Check before deciding",
+            "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
+            "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
+            "highAmount": "High amount – check extra carefully"
         }
     },
     "batch": {

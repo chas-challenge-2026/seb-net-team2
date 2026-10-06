@@ -1057,3 +1057,53 @@
     margin-bottom: var(--spacing-sm);
     color: var(--seb-green-dark-2);
 }
+
+
+/* Decision support checks on each card */
+
+.checks {
+    margin: 0 0 var(--spacing-md);
+    padding: 12px var(--spacing-md);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-hover-light);
+}
+
+.checksTitle {
+    margin: 0 0 var(--spacing-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+}
+
+.checksList {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.checksList li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-md);
+    line-height: 1.4;
+}
+
+.checksList svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+
+.checkError {
+    color: var(--color-error);
+    font-weight: 600;
+}
+
+.checkWarning {
+    color: #8a5a00;
+    font-weight: 600;
+}
+

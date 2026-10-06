@@ -196,7 +196,8 @@
             "toIban": "Till IBAN",
             "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
             "waitingToday": "Skickad i dag",
-            "dualApproval": "Dubbelattest – betalningen kräver två attestanter"
+            "dualApproval": "Dubbelattest – betalningen kräver två attestanter",
+            "recipientBank": "Mottagarbank"
         },
         "comment": {
             "label": "Kommentar",
@@ -223,6 +224,12 @@
             "approveDescription": "Kontrollera uppgifterna innan du godkänner. Beslutet går inte att ångra.",
             "rejectDescription": "Kontrollera uppgifterna och förklara varför betalningen avvisas.",
             "amount": "Belopp"
+        },
+        "checks": {
+            "title": "Kontrollera innan beslut",
+            "ibanInvalid": "IBAN är ogiltigt – kontrollera kontonumret med initiativtagaren",
+            "duplicate": "Möjlig dubblett: samma mottagare och belopp som betalning {{payments}}",
+            "highAmount": "Högt belopp – kontrollera extra noga"
         }
     },
     "batch": {
