@@ -6,6 +6,8 @@ obj/
 native/libauditsigner.so
 native/libcsvparser.so
 native/libiban.so
+native/test
+native/test.c
 
 ## Rider / VS / VSCode
 .idea/
@@ -13,6 +15,7 @@ native/libiban.so
 *.user
 *.suo
 .vscode/
+compile_flags.txt
 
 ## OS
 .DS_Store

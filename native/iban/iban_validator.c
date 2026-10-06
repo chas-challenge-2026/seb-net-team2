@@ -1,6 +1,6 @@
 #include "iban_validator.h"
 
-const char* VALID_COUNTRY_CODES[] = {
+static const char* VALID_COUNTRY_CODES[] = {
 "AL", "AD", "AT", "AZ", "BH", "BY", "BE", "BA", "BR", "BG",
 "BI", "CR", "HR", "CY", "CZ", "DK", "DJ", "DO", "EG", "SV",
 "EE", "FK", "FO", "FI", "FR", "GE", "DE", "GI", "GR", "GL",
