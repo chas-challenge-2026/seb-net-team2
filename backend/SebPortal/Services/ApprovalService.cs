@@ -35,14 +35,14 @@ namespace SebPortal.Api.Services
         }
 
         // This method handles the decision-making process for an approval step.
-        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId, bool isAdmin)
+        public async Task<ApprovalStepValidationResult> DecideAsync(ApprovalDecisionDTO dto, int currentUserId, bool isAdmin, int tenantId)
         {
             // Validate the decision provided in the DTO
             if (!ValidDecisions.Contains(dto.Decision))
                 return ApprovalStepValidationResult.InvalidDecision;
 
             // Retrieve the approval step from the repository using the provided StepId
-            var approvalStep = await _approvalRepository.GetApprovalStepByIdAsync(dto.StepId);
+            var approvalStep = await _approvalRepository.GetApprovalStepByIdAsync(dto.StepId, tenantId);
             if (approvalStep == null)
                 return ApprovalStepValidationResult.StepNotFound;
 
@@ -60,7 +60,7 @@ namespace SebPortal.Api.Services
                 approvalStep.Comment = dto.Comment;
 
                 // Update the approval step in the repository and check if it was saved successfully
-                var saved = await _approvalRepository.UpdateApprovalStepAsync(approvalStep);
+                var saved = await _approvalRepository.UpdateApprovalStepAsync(approvalStep, tenantId);
                 if (!saved)
                 {
                     await transaction.RollbackAsync();
@@ -68,7 +68,7 @@ namespace SebPortal.Api.Services
                 }
 
                 var payment = approvalStep.Payment;
-                var steps = await _approvalRepository.GetApprovalStepsByPaymentIdAsync(approvalStep.PaymentId);
+                var steps = await _approvalRepository.GetApprovalStepsByPaymentIdAsync(approvalStep.PaymentId, tenantId);
 
                 await _auditRepository.AddEntryAsync(new AuditEntries
                 {
@@ -96,7 +96,7 @@ namespace SebPortal.Api.Services
 
                     if (!stillPending)
                     {
-                        await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId);
+                        await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId, payment.TenantId );
 
                         await _auditRepository.AddEntryAsync(new AuditEntries
                         {
@@ -121,9 +121,9 @@ namespace SebPortal.Api.Services
                 }
                 else
                 {
-                    await _paymentRepository.RejectPaymentAsync(approvalStep.PaymentId);
+                    await _paymentRepository.RejectPaymentAsync(approvalStep.PaymentId, payment.TenantId);
 
-                    await _accountRepository.RefundAsync(payment.FromAccountId, payment.Amount);
+                    await _accountRepository.RefundAsync(payment.FromAccountId, payment.Amount, payment.TenantId);
 
                     await _auditRepository.AddEntryAsync(new AuditEntries
                     {
@@ -189,29 +189,29 @@ namespace SebPortal.Api.Services
             return ApprovalStepValidationResult.Valid;
         }
 
-        public Task<ApprovalStep?> GetApprovalStepByIdAsync(int id)
+        public Task<ApprovalStep?> GetApprovalStepByIdAsync(int id, int tenantId)
         {
-            return _approvalRepository.GetApprovalStepByIdAsync(id);
+            return _approvalRepository.GetApprovalStepByIdAsync(id, tenantId);
         }
 
-        public Task<IEnumerable<ApprovalStep>> GetApprovalStepsByPaymentIdAsync(int paymentId)
+        public Task<IEnumerable<ApprovalStep>> GetApprovalStepsByPaymentIdAsync(int paymentId, int tenantId)
         {
-            return _approvalRepository.GetApprovalStepsByPaymentIdAsync(paymentId);
+            return _approvalRepository.GetApprovalStepsByPaymentIdAsync(paymentId, tenantId);
         }
 
-        public Task<bool> UpdateApprovalStepAsync(ApprovalStep approvalStep)
+        public Task<bool> UpdateApprovalStepAsync(ApprovalStep approvalStep, int tenantId)
         {
-            return _approvalRepository.UpdateApprovalStepAsync(approvalStep);
+            return _approvalRepository.UpdateApprovalStepAsync(approvalStep, tenantId);
         }
 
-        public Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId)
+        public Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId, int tenantId)
         {
-            return _approvalRepository.GetPendingStepsForAttestantAsync(paymentId, attestantId);
+            return _approvalRepository.GetPendingStepsForAttestantAsync(paymentId, attestantId, tenantId);
         }
 
-        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(int attestantId)
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(int attestantId, int tenantId)
         {
-            var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId);
+            var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId, tenantId);
 
             return steps.Select(step => new PendingApprovalStepDTO
             {

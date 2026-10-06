@@ -34,12 +34,10 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> Decide([FromBody] ApprovalDecisionDTO dto)
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
-
+            var tenantId = GetUserTenantId();
             var isAdmin = User.IsInRole(UserRoles.Admin);
 
-            var result = await _approvalService.DecideAsync(dto, userId.Value, isAdmin);
+            var result = await _approvalService.DecideAsync(dto, userId, isAdmin, tenantId);
 
             return result switch
             {
@@ -64,12 +62,6 @@ namespace SebPortal.Api.Controllers
             };
         }
 
-        private int? GetCurrentUserId()
-        {
-            var claim = User.FindFirst("UserId")?.Value;
-            return int.TryParse(claim, out var userId) ? userId : null;
-        }
-
         /// <summary>
         /// Retrieves the approval steps associated with a specific payment.
         /// </summary>
@@ -81,10 +73,8 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> GetApprovalStepsForPayment(int paymentId)
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
-
-            var steps = await _approvalService.GetPendingStepsForAttestantAsync(paymentId, userId.Value);
+            var tenantId = GetUserTenantId();
+            var steps = await _approvalService.GetPendingStepsForAttestantAsync(paymentId, userId, tenantId);
             return Ok(steps);
         }
 
@@ -98,19 +88,43 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> GetPendingApprovals()
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
             if (User.IsInRole(UserRoles.Admin))
             {
-                var tenantIdClaim = User.FindFirst("TenantId")?.Value;
-                if (string.IsNullOrEmpty(tenantIdClaim) || !int.TryParse(tenantIdClaim, out var tenantId))
-                    return Unauthorized("Saknar giltigt TenantId-claim i token.");
                 var allPendingSteps = await _approvalService.GetPendingStepsForTenantAsync(tenantId);
                 return Ok(allPendingSteps);
             }
             
-            var attestantSteps = await _approvalService.GetPendingStepsForAttestantAsync(userId.Value);
+            var attestantSteps = await _approvalService.GetPendingStepsForAttestantAsync(userId, tenantId);
             return Ok(attestantSteps);
         }
+
+
+        #region Helper Methods 
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+
+        // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst("UserId")?.Value;
+            if (int.TryParse(claim, out var userId))
+            {
+                return userId;
+            }
+            throw new UnauthorizedAccessException("Saknar giltigt UserId i token.");
+        }
+        #endregion
     }
 }
