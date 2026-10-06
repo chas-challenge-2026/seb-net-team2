@@ -57,9 +57,11 @@
         "user": "user",
         "companyName": "Company name",
         "accounts": "Accounts",
+        "accountsEmpty": "No accounts are set up for this company yet.",
         "recentPayments": "Recent payments",
         "errors": {
-            "generic": "Something went wrong."
+            "generic": "Something went wrong.",
+            "accounts": "Could not load company accounts. Try again later."
         },
         "table": {
             "date": "Date",
@@ -78,6 +80,12 @@
         "eyebrow": "PAYMENTS",
         "title": "Create a new payment",
         "description": "Send a secure payment from your company account.",
+        "steps": {
+            "label": "Payment progress",
+            "details": "Details",
+            "review": "Review",
+            "result": "Result"
+        },
         "details": {
             "title": "Payment details",
             "description": "Enter the recipient and payment amount."
@@ -95,6 +103,11 @@
             "reference": "Invoice or OCR",
             "message": "Write a message to the recipient"
         },
+        "iban": {
+            "valid": "IBAN format is valid.",
+            "invalid": "This IBAN appears invalid. Check the country code, length and digits.",
+            "accountNotChecked": "This checks the IBAN format, not whether the account exists or belongs to the recipient."
+        },
         "optional": "Optional",
         "loadingAccounts": "Loading accounts...",
         "success": "The payment has been created successfully.",
@@ -103,14 +116,32 @@
             "insufficientBalance": "The payment amount exceeds the account balance.",
             "reviewDetails": "Please review the payment details and try again.",
             "createFailed": "Could not create the payment. Please try again.",
-            "loadAccounts": "Could not load accounts."
+            "loadAccounts": "Could not load accounts.",
+            "noAccounts": "No accounts are available for payments."
         },
         "actions": {
             "clear": "Clear form",
             "review": "Review payment",
+            "continueToReview": "Continue to review",
             "goBack": "Go back",
             "creating": "Creating...",
-            "confirm": "Confirm payment"
+            "confirm": "Confirm payment",
+            "newPayment": "Start a new payment"
+        },
+        "result": {
+            "eyebrow": "PAYMENT STATUS",
+            "title": "Payment submitted",
+            "paymentId": "Payment ID",
+            "status": "Status",
+            "completed": "The payment has been processed.",
+            "pendingApproval": "The payment was created and is waiting for approval.",
+            "rejected": "The payment was rejected.",
+            "accepted": "The payment was created. Check the status below.",
+            "statusValues": {
+                "completed": "Completed",
+                "pendingApproval": "Waiting for approval",
+                "rejected": "Rejected"
+            }
         },
         "summary": {
             "title": "Summary",
