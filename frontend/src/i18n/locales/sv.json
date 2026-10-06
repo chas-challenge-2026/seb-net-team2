@@ -57,9 +57,11 @@
         "user": "användare",
         "companyName": "Företagsnamn",
         "accounts": "Konton",
+        "accountsEmpty": "Det finns inga konton upplagda för företaget ännu.",
         "recentPayments": "Senaste betalningar",
         "errors": {
-            "generic": "Något gick fel."
+            "generic": "Något gick fel.",
+            "accounts": "Det gick inte att hämta företagets konton. Försök igen senare."
         },
         "table": {
             "date": "Datum",
@@ -78,6 +80,12 @@
         "eyebrow": "BETALNINGAR",
         "title": "Skapa en ny betalning",
         "description": "Skicka en säker betalning från ditt företagskonto.",
+        "steps": {
+            "label": "Betalningsflöde",
+            "details": "Uppgifter",
+            "review": "Granskning",
+            "result": "Resultat"
+        },
         "details": {
             "title": "Betalningsuppgifter",
             "description": "Ange mottagare och betalningsbelopp."
@@ -95,6 +103,11 @@
             "reference": "Faktura eller OCR",
             "message": "Skriv ett meddelande till mottagaren"
         },
+        "iban": {
+            "valid": "IBAN-formatet är giltigt.",
+            "invalid": "IBAN-numret verkar vara ogiltigt. Kontrollera landskod, längd och siffror.",
+            "accountNotChecked": "Kontrollen verifierar formatet, inte att kontot finns eller tillhör mottagaren."
+        },
         "optional": "Valfritt",
         "loadingAccounts": "Laddar konton...",
         "success": "Betalningen har skapats.",
@@ -103,14 +116,32 @@
             "insufficientBalance": "Betalningsbeloppet överstiger kontots saldo.",
             "reviewDetails": "Kontrollera betalningsuppgifterna och försök igen.",
             "createFailed": "Det gick inte att skapa betalningen. Försök igen.",
-            "loadAccounts": "Det gick inte att ladda konton."
+            "loadAccounts": "Det gick inte att ladda konton.",
+            "noAccounts": "Det finns inga tillgängliga konton för betalningar."
         },
         "actions": {
             "clear": "Rensa formulär",
             "review": "Granska betalning",
+            "continueToReview": "Fortsätt till granskning",
             "goBack": "Gå tillbaka",
             "creating": "Skapar...",
-            "confirm": "Bekräfta betalning"
+            "confirm": "Bekräfta betalning",
+            "newPayment": "Skapa en ny betalning"
+        },
+        "result": {
+            "eyebrow": "BETALNINGSSTATUS",
+            "title": "Betalningen har skickats",
+            "paymentId": "Betalnings-ID",
+            "status": "Status",
+            "completed": "Betalningen har genomförts.",
+            "pendingApproval": "Betalningen har skapats och väntar på attest.",
+            "rejected": "Betalningen avvisades.",
+            "accepted": "Betalningen har skapats. Se status nedan.",
+            "statusValues": {
+                "completed": "Genomförd",
+                "pendingApproval": "Väntar på attest",
+                "rejected": "Avvisad"
+            }
         },
         "summary": {
             "title": "Sammanfattning",

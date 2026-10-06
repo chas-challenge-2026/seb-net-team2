@@ -1,7 +1,7 @@
 .page {
     max-width: 1080px;
     margin: 0 auto;
-    padding: 3rem 2rem 5rem;
+    padding: 1.5rem 1.5rem 3rem;
 }
 
 .header {
@@ -9,7 +9,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 2rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 .eyebrow {
@@ -20,9 +20,9 @@
 }
 
 .header h1 {
-    margin: 0.45rem 0 0.5rem;
+    margin: 0.25rem 0 0.35rem;
     color: #163226;
-    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-size: 2rem;
     letter-spacing: 0;
 }
 
@@ -30,6 +30,56 @@
 .sectionHeading p {
     margin: 0;
     color: #68756e;
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 0;
+    margin: 0 0 0.85rem;
+    list-style: none;
+}
+
+.step {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.25rem;
+    border-bottom: 2px solid var(--color-border-light);
+    color: var(--color-text-soft);
+    font-size: 0.85rem;
+}
+
+.stepNumber {
+    display: grid;
+    width: 1.75rem;
+    height: 1.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--color-border-light);
+    border-radius: 50%;
+    color: var(--color-text-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.stepCurrent {
+    border-color: var(--seb-green-dark-2);
+    color: var(--color-text);
+    font-weight: 700;
+}
+
+.stepCurrent .stepNumber,
+.stepComplete .stepNumber {
+    border-color: var(--seb-green-dark-2);
+    background: var(--seb-green-dark-2);
+    color: #fff;
+}
+
+.stepComplete {
+    border-color: var(--seb-green-dark-2);
 }
 
 .headerBadge {
@@ -54,17 +104,92 @@
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
-    gap: 1.25rem;
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
 }
 
+.layout > * {
+    width: 100%;
+    max-width: 54rem;
+}
+
+.formCard {
+    padding: 1rem 1.25rem;
+}
+
+.formFields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+        "account account"
+        "recipient amount"
+        "iban iban"
+        "reference message";
+    column-gap: 1rem;
+    align-items: start;
+}
+
+.formFields label {
+    min-width: 0;
+    margin-bottom: 0.65rem;
+}
+
+.accountField { grid-area: account; }
+.recipientField { grid-area: recipient; }
+.amountField { grid-area: amount; }
+.ibanField { grid-area: iban; }
+.referenceField { grid-area: reference; }
+.messageField { grid-area: message; }
+
+.resultCard {
+    max-width: 48rem;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+}
+
+.resultCard h2 {
+    margin: 0.5rem 0;
+    color: #163226;
+    font-size: 1.5rem;
+}
+
+.resultMessage {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-left: 4px solid var(--seb-green-dark-2);
+    background: #eef8ed;
+    color: #245526;
+}
+
+.resultDetails {
+    display: grid;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+}
+
+.resultDetails div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.resultDetails dt {
+    color: var(--color-text-soft);
+}
+
+.resultDetails dd {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    text-align: right;
+}
 .sectionHeading {
     display: flex;
     gap: 1rem;
     align-items: flex-start;
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
     border-bottom: 1px solid #e5ebe6;
 }
 
@@ -82,7 +207,7 @@
 
 label {
     display: block;
-    margin-bottom: 1.2rem;
+    margin-bottom: 0.75rem;
     color: #34483b;
     font-size: 0.82rem;
     font-weight: 750;
@@ -93,8 +218,8 @@ select,
 textarea {
     box-sizing: border-box;
     width: 100%;
-    margin-top: 0.45rem;
-    padding: 0.85rem 0.9rem;
+    margin-top: 0.3rem;
+    padding: 0.65rem 0.75rem;
     border: 1px solid #cbd8ce;
     border-radius: 4px;
     background: #fbfdfb;
@@ -264,6 +389,37 @@ textarea {
     color: #b42318;
 }
 
+.ibanValidation {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.4rem;
+    margin: 0.5rem 0 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.ibanValidation span {
+    flex: 0 0 auto;
+    font-weight: 800;
+}
+
+.ibanValid {
+    color: #256b32;
+}
+
+.ibanInvalid {
+    color: #a32119;
+}
+
+.ibanHint {
+    margin: 0.2rem 0 0;
+    color: #68756e;
+    font-size: 0.75rem;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
 .modalBackdrop {
     position: fixed;
     inset: 0;
@@ -328,7 +484,7 @@ textarea {
 
 @media (max-width: 760px) {
     .page {
-        padding: 1.5rem 1rem 3rem;
+        padding: 1.25rem 1rem 2rem;
     }
 
     .header {
@@ -345,8 +501,30 @@ textarea {
         grid-template-columns: 1fr;
     }
 
-    .summary {
-        order: -1;
+    .formCard {
+        padding: 1rem;
+    }
+
+    .formFields {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "account"
+            "recipient"
+            "iban"
+            "amount"
+            "reference"
+            "message";
+    }
+
+    .steps {
+        gap: 0.5rem;
+    }
+
+    .step {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.4rem;
+        font-size: 0.75rem;
     }
 
     .reviewModal {

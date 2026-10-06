@@ -29,8 +29,6 @@ export function Dashboard() {
 
     const dateTime = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-    if (accountsError) return <p>{t("dashboard.errors.generic")}</p>;
-
     return (
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
@@ -62,6 +60,10 @@ export function Dashboard() {
 
                 {loadingAccounts ? (
                     <p>{t("common.loading")}</p>
+                ) : accountsError ? (
+                    <p role="alert">{t("dashboard.errors.accounts")}</p>
+                ) : accounts?.length === 0 ? (
+                    <p>{t("dashboard.accountsEmpty")}</p>
                 ) : (
                     <div className={styles.accountsGrid}>
                         {accounts?.map((account) => (
