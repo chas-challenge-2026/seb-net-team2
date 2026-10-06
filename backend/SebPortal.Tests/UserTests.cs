@@ -525,7 +525,7 @@ namespace SebPortal.Tests
             {
                 Id = id, Name = "Test", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
             });
-            _auditRepositoryMock.Setup(a => a.HasEntriesForUserAsync(id)).ReturnsAsync(true);
+            _auditRepositoryMock.Setup(a => a.HasEntriesForUserAsync(id, TestTenantId)).ReturnsAsync(true);
 
             await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId));
 
