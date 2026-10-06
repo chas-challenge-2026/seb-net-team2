@@ -42,7 +42,7 @@ namespace SebPortal.Api.Services
 
         public async Task<AccountResponseDTO?> GetAccountByIdAsync(int accountId, int tenantId)
         {
-            var account = await _accountRepository.GetAccountByIdAsync(accountId);
+            var account = await _accountRepository.GetAccountByIdAsync(accountId, tenantId);
             if (account == null || account.TenantId != tenantId)
             {
                 return null;
@@ -59,7 +59,7 @@ namespace SebPortal.Api.Services
 
         public async Task<AccountResponseDTO?> UpdateAccountAsync(int id, int tenantId, UpdateAccountDTO dto)
         {
-            var account = await _accountRepository.GetAccountByIdAsync(id);
+            var account = await _accountRepository.GetAccountByIdAsync(id, tenantId);
             if (account == null || account.TenantId != tenantId)
             {
                 return null;

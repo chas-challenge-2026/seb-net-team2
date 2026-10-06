@@ -32,9 +32,7 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<AccountResponseDTO>> CreateAccount([FromBody] CreateAccountDTO dto)
         {
-            var tenantClaim = User.FindFirst("TenantId")?.Value;
-            if (!int.TryParse(tenantClaim, out var tenantId))
-                return Unauthorized("TenantId saknas i token.");
+            var tenantId = GetUserTenantId();
 
             var newAccount = await _accountService.CreateAccountAsync(dto, tenantId);
             return CreatedAtAction(nameof(GetAccountById), new { id = newAccount.Id }, newAccount);
@@ -55,9 +53,7 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<AccountResponseDTO>> UpdateAccount(int id, [FromBody] UpdateAccountDTO dto)
         {
-            var tenantClaim = User.FindFirst("TenantId")?.Value;
-            if (!int.TryParse(tenantClaim, out var tenantId))
-                return Unauthorized("TenantId saknas i token.");
+            var tenantId = GetUserTenantId();
 
             var updatedAccount = await _accountService.UpdateAccountAsync(id, tenantId, dto);
             if(updatedAccount == null)
@@ -78,9 +74,7 @@ namespace SebPortal.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAccountById(int id)
         {
-            var tenantClaim = User.FindFirst("TenantId")?.Value;
-            if (!int.TryParse(tenantClaim, out var tenantId))
-                return Unauthorized("TenantId saknas i token.");
+            var tenantId = GetUserTenantId();
 
             var account = await _accountService.GetAccountByIdAsync(id, tenantId);
             if (account == null)
@@ -99,12 +93,26 @@ namespace SebPortal.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AccountResponseDTO>>> GetAccountsByTenantId()
         {
-            var tenantClaim = User.FindFirst("TenantId")?.Value;
-            if (!int.TryParse(tenantClaim, out var tenantId))
-                return Unauthorized("TenantId saknas i token.");
+            var tenantId = GetUserTenantId();
 
             var accounts = await _accountService.GetAccountsByTenantIdAsync(tenantId);
             return Ok(accounts);
         }
+
+        #region Helper Methods 
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+        #endregion
     }
 }
