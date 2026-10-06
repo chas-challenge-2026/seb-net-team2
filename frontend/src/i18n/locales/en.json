@@ -275,12 +275,7 @@
     },
     "auditLog": {
         "title": "Audit log",
-        "description": "Event log from the database (note: some events are only logged to a file).",
-        "note": {
-            "title": "Note:",
-            "description": "This view only shows events stored in the database. Some events, such as batch payments and partial approval steps, are only logged to",
-            "descriptionEnd": "and do not appear here."
-        },
+        "description": "All events for your company: payments, approvals, users and approval limits.",
         "filters": {
             "user": "User",
             "allUsers": "All users",
@@ -308,9 +303,36 @@
             "showing": "Showing {{visible}} of {{total}} entries",
             "showMore": "Show more"
         },
-        "footnote": {
-            "start": "Showing the latest 200 entries. For the full log, also see",
-            "end": "on the server."
+        "details": {
+            "step": "Step {{step}} of {{total}}",
+            "comment": "Comment"
+        },
+        "actions": {
+            "CREATE_PAYMENT": "Payment created",
+            "APPROVE_STEP": "Approval step approved",
+            "REJECT_STEP": "Approval step rejected",
+            "EXECUTE_PAYMENT": "Payment executed",
+            "REJECT_PAYMENT": "Payment rejected",
+            "CREATE_USER": "User created",
+            "UPDATE_USER": "User updated",
+            "DELETE_USER": "User deleted",
+            "CREATE_APPROVAL_LIMIT": "Approval limit created",
+            "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
+            "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
+        },
+        "entityTypes": {
+            "payment": "Payment #{{id}}",
+            "user": "User #{{id}}",
+            "approvalLimit": "Approval limit #{{id}}"
+        },
+        "history": {
+            "title": "History: {{entity}}",
+            "description": "Everything that has happened, oldest first.",
+            "showHistory": "Show history for {{entity}}",
+            "loading": "Loading history...",
+            "error": "Could not load the history.",
+            "empty": "No events found.",
+            "by": "by {{user}}"
         }
     },
     "approvalLimits": {

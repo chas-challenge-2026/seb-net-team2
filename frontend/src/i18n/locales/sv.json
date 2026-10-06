@@ -275,12 +275,7 @@
     },
     "auditLog": {
         "title": "Granskningslogg",
-        "description": "Händelselogg från databasen (obs: vissa händelser loggas endast till en fil).",
-        "note": {
-            "title": "Obs:",
-            "description": "Den här vyn visar endast händelser som lagras i databasen. Vissa händelser, såsom batchbetalningar och delvisa atteststeg, loggas endast till",
-            "descriptionEnd": "och visas därför inte här."
-        },
+        "description": "Alla händelser för ert företag: betalningar, attester, användare och attestgränser.",
         "filters": {
             "user": "Användare",
             "allUsers": "Alla användare",
@@ -308,9 +303,36 @@
             "showing": "Visar {{visible}} av {{total}} poster",
             "showMore": "Visa fler"
         },
-        "footnote": {
-            "start": "Visar de senaste 200 posterna. För hela loggen, se även",
-            "end": "på servern."
+        "details": {
+            "step": "Steg {{step}} av {{total}}",
+            "comment": "Kommentar"
+        },
+        "actions": {
+            "CREATE_PAYMENT": "Betalning skapad",
+            "APPROVE_STEP": "Atteststeg godkänt",
+            "REJECT_STEP": "Atteststeg avvisat",
+            "EXECUTE_PAYMENT": "Betalning genomförd",
+            "REJECT_PAYMENT": "Betalning avvisad",
+            "CREATE_USER": "Användare skapad",
+            "UPDATE_USER": "Användare uppdaterad",
+            "DELETE_USER": "Användare borttagen",
+            "CREATE_APPROVAL_LIMIT": "Attestgräns skapad",
+            "UPDATE_APPROVAL_LIMIT": "Attestgräns uppdaterad",
+            "DELETE_APPROVAL_LIMIT": "Attestgräns borttagen"
+        },
+        "entityTypes": {
+            "payment": "Betalning #{{id}}",
+            "user": "Användare #{{id}}",
+            "approvalLimit": "Attestgräns #{{id}}"
+        },
+        "history": {
+            "title": "Historik: {{entity}}",
+            "description": "Allt som har hänt, äldst först.",
+            "showHistory": "Visa historik för {{entity}}",
+            "loading": "Laddar historik...",
+            "error": "Det gick inte att ladda historiken.",
+            "empty": "Inga händelser hittades.",
+            "by": "av {{user}}"
         }
     },
     "approvalLimits": {
