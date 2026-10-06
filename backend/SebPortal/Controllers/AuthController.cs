@@ -39,11 +39,12 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> GetCurrentUser()
         {
             var userIdClaim = User.FindFirst("UserId")?.Value;
+            var tenantId = GetUserTenantId();
 
             if (!int.TryParse(userIdClaim, out var userId))
                 return Unauthorized();
 
-            var currentUser = await _currentUserService.GetCurrentUserAsync(userId);
+            var currentUser = await _currentUserService.GetCurrentUserAsync(userId, tenantId);
 
             if (currentUser == null)
                 return NotFound();
@@ -109,5 +110,20 @@ namespace SebPortal.Api.Controllers
 
             return Ok(response);
         }
+
+        #region Helper Methods
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+        #endregion
     }
 }

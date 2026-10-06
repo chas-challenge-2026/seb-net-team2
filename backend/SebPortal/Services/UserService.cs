@@ -80,7 +80,7 @@ namespace SebPortal.Api.Services
             }
 
             // The audit log must never lose its actor, so users with history can't be hard-deleted
-            if (await _auditRepository.HasEntriesForUserAsync(user.Id))
+            if (await _auditRepository.HasEntriesForUserAsync(user.Id, tenantId))
             {
                 throw new BusinessRuleException("Användaren har historik i granskningsloggen och kan inte tas bort.");
             }
