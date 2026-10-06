@@ -50,11 +50,9 @@ public class ApprovalLimitsController: ControllerBase
     {
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();
-        if (userId == null)
-            return Unauthorized("Saknar giltigt UserId-claim i token.");
 
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System"; // Get from token
-        var createdLimit = await _approvalLimitService.CreateApprovalLimitAsync(tenantId, userId.Value, userEmail, dto);
+        var createdLimit = await _approvalLimitService.CreateApprovalLimitAsync(tenantId, userId, userEmail, dto);
         return CreatedAtAction(nameof(GetApprovalLimits), new { id = createdLimit.Id }, createdLimit);
     }
 
@@ -73,11 +71,9 @@ public class ApprovalLimitsController: ControllerBase
     {
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();
-        if (userId == null)
-            return Unauthorized("Saknar giltigt UserId-claim i token.");
 
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System"; // Get from token
-        var updatedLimit = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userId.Value, userEmail, dto);
+        var updatedLimit = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userId, userEmail, dto);
         return Ok(updatedLimit);
     }
 
@@ -94,14 +90,12 @@ public class ApprovalLimitsController: ControllerBase
     {
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();
-        if (userId == null)
-            return Unauthorized("Saknar giltigt UserId-claim i token.");
 
-        var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id, userId.Value);
+        var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id, userId);
         return NoContent();
     }
 
-
+    #region Helper Methods
     // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
     private int GetUserTenantId()
     {
@@ -112,15 +106,18 @@ public class ApprovalLimitsController: ControllerBase
         {
             return tenantId;
         }
-
-        // Fallback/standard if missing in development (e.g., Tenant 1)
-        return 1;
+        throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
     }
 
     // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
-    private int? GetCurrentUserId()
+    private int GetCurrentUserId()
     {
         var claim = User.FindFirst("UserId")?.Value;
-        return int.TryParse(claim, out var userId) ? userId : null;
+        if (int.TryParse(claim, out var userId))
+        {
+            return userId;
+        }
+        throw new UnauthorizedAccessException("Saknar giltigt UserId i token.");
     }
+    #endregion
 }

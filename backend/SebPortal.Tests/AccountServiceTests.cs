@@ -61,7 +61,7 @@ namespace SebPortal.Tests
             // Kontot tillhör tenant 2, men inloggad användare är tenant 1
             var accountFromDb = new Account { Id = accountId, TenantId = 2, AccountName = "Annan Tenants Kontot", Iban = "SE500123456789" };
 
-            _accountRepositoryMock.Setup(r => r.GetAccountByIdAsync(accountId))
+            _accountRepositoryMock.Setup(r => r.GetAccountByIdAsync(accountId, It.IsAny<int>()))
                                   .ReturnsAsync(accountFromDb);
 
             // Act
@@ -81,7 +81,7 @@ namespace SebPortal.Tests
             var existingAccount = new Account { Id = accountId, TenantId = tenantId, AccountName = "Gamla Namnet", Iban = "SE500123456789", Currency = "SEK" };
             var updateDto = new UpdateAccountDTO { AccountName = "Nya Namnet" };
 
-            _accountRepositoryMock.Setup(r => r.GetAccountByIdAsync(accountId))
+            _accountRepositoryMock.Setup(r => r.GetAccountByIdAsync(accountId, tenantId))
                                   .ReturnsAsync(existingAccount);
 
             // Act

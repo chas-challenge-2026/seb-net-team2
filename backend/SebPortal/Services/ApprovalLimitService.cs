@@ -172,7 +172,7 @@ namespace SebPortal.Api.Services
             {
                 throw new Exception($"Attestbeloppgräns med id: {id} hittades inte");
             }
-            await _repository.DeleteApprovalLimitAsync(limit);
+            await _repository.DeleteApprovalLimitAsync(id, tenantId);
 
             await _auditRepository.AddEntryAsync(new AuditEntries
             {

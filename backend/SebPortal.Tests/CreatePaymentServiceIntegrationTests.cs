@@ -24,6 +24,7 @@ public class CreatePaymentServiceIntegrationTests
 
         int userId;
         int accountId;
+        int tenantId;
 
         await using (var context = new SebDbContext(options))
         {
@@ -61,6 +62,7 @@ public class CreatePaymentServiceIntegrationTests
 
             userId = user.Id;
             accountId = account.Id;
+            tenantId = tenant.Id;
 
             var userRepository = new UserRepository(context);
             var paymentRepository = new PaymentRepository(context);
@@ -91,7 +93,7 @@ public class CreatePaymentServiceIntegrationTests
             };
 
             // Act
-            await Assert.ThrowsAsync<DbUpdateException>(() => service.CreatePaymentAsync(dto, user.Id));
+            await Assert.ThrowsAsync<DbUpdateException>(() => service.CreatePaymentAsync(dto, user.Id, tenantId));
         }
 
         // Assert
@@ -175,7 +177,7 @@ public class CreatePaymentServiceIntegrationTests
                 Amount = 500m,
                 Currency = "SEK",
                 Reference = "Faktura 123"
-            }, user.Id);
+            }, user.Id, tenantId);
 
             paymentId = payment.Id;
         }

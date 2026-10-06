@@ -13,11 +13,11 @@ namespace SebPortal.Api.Services
             _context = context;
         }
 
-        public async Task<CurrentUserDTO?> GetCurrentUserAsync(int userId)
+        public async Task<CurrentUserDTO?> GetCurrentUserAsync(int userId, int tenantId)
         {
             var user = await _context.Users
                 .AsNoTracking()
-                .Where(u => u.Id == userId)
+                .Where(u => u.Id == userId && u.TenantId == tenantId)
                 .Select(u => new CurrentUserDTO
                 {
                     Id = u.Id,
@@ -27,7 +27,7 @@ namespace SebPortal.Api.Services
                     TenantId = u.TenantId,
                     TenantName = u.Tenant.Name,
 
-                    PendingApprovalsCount = _context.ApprovalSteps.Count(s => s.AttestantId == u.Id && s.Status == "pending" && s.Payment.Status == "pending_approval")
+                    PendingApprovalsCount = _context.ApprovalSteps.Count(s => s.AttestantId == u.Id && s.Status == "pending" && s.Payment.Status == "pending_approval" && s.Payment.TenantId == tenantId)
                 })
                 .FirstOrDefaultAsync();
 

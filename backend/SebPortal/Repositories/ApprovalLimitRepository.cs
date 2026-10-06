@@ -42,9 +42,12 @@ namespace SebPortal.Api.Repositories
             return approvalLimit;
         }
 
-        public async Task<bool> DeleteApprovalLimitAsync(ApprovalLimit approvalLimit)
+        public async Task<bool> DeleteApprovalLimitAsync(int id, int tenantId)
         {
-            _context.ApprovalLimits.Remove(approvalLimit);
+            var limit = await _context.ApprovalLimits.FirstOrDefaultAsync(u => u.Id == id && u.TenantId == tenantId);
+            if (limit == null) return false;
+
+            _context.ApprovalLimits.Remove(limit);
             await _context.SaveChangesAsync();
             return true;
         }
