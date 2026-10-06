@@ -1,3 +1,5 @@
+import { focusField } from "../../components/FormValidation/useFormValidation";
+import validationStyles from "../../components/FormValidation/FormValidation.module.css";
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
@@ -111,6 +113,7 @@ export function Batch() {
     const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts();
 
     const [file, setFile] = useState<File | null>(null);
+    const [generalError, setGeneralError] = useState<string | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
     const [results, setResults] = useState<BatchRow[] | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -126,6 +129,11 @@ export function Batch() {
         size: z.number().max(MAX_FILE_SIZE_BYTES, t("batch.errors.fileTooLarge")),
     });
 
+    function reportFileError(message: string) {
+        setFileError(message);
+        requestAnimationFrame(() => focusField("batch-file"));
+    }
+
     function resetFileInput() {
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -134,6 +142,7 @@ export function Batch() {
     function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
         const selected = event.target.files?.[0] ?? null;
         setResults(null);
+        setGeneralError(null);
 
         if (!selected) {
             setFile(null);
@@ -144,20 +153,19 @@ export function Batch() {
         const result = csvFileSchema.safeParse(selected);
 
         if (!result.success) {
-            resetFileInput();
-            setFileError(result.error.issues[0].message);
+            setFile(selected);
+            reportFileError(result.error.issues[0].message);
             return;
         }
 
         setFile(selected);
         setFileError(null);
-
-        document.getElementById("batch-submit")?.focus();
     }
 
     function handleClear() {
         resetFileInput();
         setFileError(null);
+        setGeneralError(null);
         setResults(null);
     }
 
@@ -165,46 +173,59 @@ export function Batch() {
         event.preventDefault();
 
         if (!file) {
-            setFileError(t("batch.errors.chooseFile"));
+            reportFileError(t("batch.errors.chooseFile"));
             return;
         }
 
         if (isLoadingAccounts) {
-            setFileError(t("batch.errors.accountsLoading"));
+            setGeneralError(t("batch.errors.accountsLoading"));
             return;
         }
 
+        const fileValidation = csvFileSchema.safeParse(file);
+        if (!fileValidation.success) {
+            reportFileError(fileValidation.error.issues[0].message);
+            return;
+        }
+        setFileError(null);
+        setGeneralError(null);
         setIsProcessing(true);
 
-        const content = await file.text();
-        const lines = splitCsvLines(content);
+        try {
+            const content = await file.text();
+            const lines = splitCsvLines(content);
 
-        if (lines.length === 0 || !isValidHeader(lines[0])) {
-            setFileError(
-                t("batch.errors.header", {
-                    header: EXPECTED_HEADER.join(","),
-                })
-            );
+            if (lines.length === 0 || !isValidHeader(lines[0])) {
+                reportFileError(
+                    t("batch.errors.header", {
+                        header: EXPECTED_HEADER.join(","),
+                    })
+                );
 
+                return;
+            }
+
+            const dataLines = lines.slice(1);
+
+            if (dataLines.length === 0) {
+                reportFileError(t("batch.errors.empty"));
+                return;
+            }
+
+            const validAccountIds = accounts.map((account) => account.id);
+
+            const rows = parseBatchRows(dataLines, validAccountIds, t);
+            setResults(rows);
+            if (rows.some(row => !row.success)) {
+                reportFileError(t("validation.batchRows"));
+            } else {
+                resetFileInput();
+            }
+        } catch {
+            setGeneralError(t("validation.fileRead"));
+        } finally {
             setIsProcessing(false);
-            resetFileInput();
-            return;
         }
-
-        const dataLines = lines.slice(1);
-
-        if (dataLines.length === 0) {
-            setFileError(t("batch.errors.empty"));
-            setIsProcessing(false);
-            resetFileInput();
-            return;
-        }
-
-        const validAccountIds = accounts.map((account) => account.id);
-
-        setResults(parseBatchRows(dataLines, validAccountIds, t));
-        setIsProcessing(false);
-        resetFileInput();
     }
 
     function handleDownloadExample() {
@@ -251,6 +272,11 @@ export function Batch() {
                         <label>
                             {t("batch.file.label")}
                             <input
+                                id="batch-file"
+                                className={validationStyles.control}
+                                aria-invalid={Boolean(fileError)}
+                                aria-describedby={fileError ? "batch-file-hint batch-file-error" : "batch-file-hint"}
+                                disabled={isProcessing}
                                 ref={fileInputRef}
                                 type="file"
                                 accept=".csv"
@@ -258,14 +284,16 @@ export function Batch() {
                             />
                         </label>
 
-                        <p className={styles.hint}>{t("batch.file.hint")}</p>
+                        <p id="batch-file-hint" className={styles.hint}>{t("batch.file.hint")}</p>
 
                         {fileError && (
-                            <div className={styles.errorBanner} role="alert">
+                            <div id="batch-file-error" className={styles.errorBanner} role="alert">
                                 <TriangleAlert size={18} aria-hidden="true" />
                                 <span>{fileError}</span>
                             </div>
                         )}
+
+                        {generalError && <div className={styles.errorBanner} role="alert">{generalError}</div>}
 
                         <div className={styles.actions}>
                             <Button
@@ -286,7 +314,7 @@ export function Batch() {
                                 type="submit"
                                 variant="primary"
                                 size="medium"
-                                disabled={!file || isProcessing || isLoadingAccounts}
+                                disabled={isProcessing || isLoadingAccounts}
                                 aria-busy={isProcessing}
                             >
                                 {isProcessing ? (

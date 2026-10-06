@@ -1,3 +1,5 @@
+import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,12 +27,12 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 export default function CreateApprovalLimit() {
     const { t } = useTranslation();
+    const validation = useFormValidation();
     const queryClient = useQueryClient();
 
     const [minAmount, setMinAmount] = useState("");
     const [requiredApprovals, setRequiredApprovals] = useState("");
     const [description, setDescription] = useState("");
-    const [validationError, setValidationError] = useState("");
 
     const createMutation = useMutation({
         mutationFn: createApprovalLimit,
@@ -49,7 +51,6 @@ export default function CreateApprovalLimit() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        setValidationError("");
         createMutation.reset();
 
         const result = createApprovalLimitSchema.safeParse({
@@ -58,10 +59,14 @@ export default function CreateApprovalLimit() {
             description: description.trim(),
         });
 
+        const fieldErrors: Record<string, string> = {};
         if (!result.success) {
-            setValidationError(t("approvalLimits.errors.validation"));
-            return;
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0]);
+                fieldErrors[field] = t(`validation.approval.${field}`);
+            }
         }
+        if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
 
         createMutation.mutate(result.data);
     }
@@ -85,7 +90,8 @@ export default function CreateApprovalLimit() {
                     <p>{t("approvalLimits.create.formDescription")}</p>
                 </div>
 
-                <form className={styles.form} onSubmit={handleSubmit}>
+                <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} className={styles.form} onSubmit={handleSubmit}>
+                    <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                     <div className={styles.formGroup}>
                         <label htmlFor="minAmount" className={styles.label}>
                             {t("approvalLimits.form.minAmount")}
@@ -93,6 +99,7 @@ export default function CreateApprovalLimit() {
 
                         <input
                             id="minAmount"
+                            {...validation.fieldProps("minAmount", "minAmount-hint")}
                             name="minAmount"
                             type="number"
                             min="0"
@@ -104,8 +111,9 @@ export default function CreateApprovalLimit() {
                             placeholder="50000"
                             required
                         />
+                        <FieldError id="minAmount" errors={validation.errors} />
 
-                        <span className={styles.helperText}>
+                        <span id="minAmount-hint" className={styles.helperText}>
                             {t("approvalLimits.form.minAmountHelp")}
                         </span>
                     </div>
@@ -117,6 +125,7 @@ export default function CreateApprovalLimit() {
 
                         <input
                             id="requiredApprovals"
+                            {...validation.fieldProps("requiredApprovals", "requiredApprovals-hint")}
                             name="requiredApprovals"
                             type="number"
                             min="1"
@@ -128,8 +137,9 @@ export default function CreateApprovalLimit() {
                             placeholder="2"
                             required
                         />
+                        <FieldError id="requiredApprovals" errors={validation.errors} />
 
-                        <span className={styles.helperText}>
+                        <span id="requiredApprovals-hint" className={styles.helperText}>
                             {t("approvalLimits.form.requiredApprovalsHelp")}
                         </span>
                     </div>
@@ -141,6 +151,7 @@ export default function CreateApprovalLimit() {
 
                         <textarea
                             id="description"
+                            {...validation.fieldProps("description")}
                             name="description"
                             className={styles.textarea}
                             value={description}
@@ -150,6 +161,7 @@ export default function CreateApprovalLimit() {
                             rows={4}
                             required
                         />
+                        <FieldError id="description" errors={validation.errors} />
                     </div>
 
                     {createMutation.isSuccess && (
@@ -164,12 +176,6 @@ export default function CreateApprovalLimit() {
                         </div>
                     )}
 
-                    {validationError && (
-                        <div className={styles.error} role="alert">
-                            <TriangleAlert size={18} aria-hidden="true" />
-                            <span>{validationError}</span>
-                        </div>
-                    )}
 
                     {createMutation.isError && (
                         <div className={styles.error} role="alert">

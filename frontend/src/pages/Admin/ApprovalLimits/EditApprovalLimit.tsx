@@ -1,3 +1,5 @@
+import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import {
     Link,
@@ -50,6 +52,7 @@ type EditApprovalLimitFormProps = {
 
 function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
     const { t } = useTranslation();
+    const validation = useFormValidation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
@@ -58,7 +61,6 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
         limit.requiredApprovals.toString()
     );
     const [description, setDescription] = useState(limit.description);
-    const [validationError, setValidationError] = useState("");
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const updateMutation = useMutation({
@@ -105,7 +107,6 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
     function handleUpdate(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        setValidationError("");
         updateMutation.reset();
 
         const result = updateApprovalLimitSchema.safeParse({
@@ -114,10 +115,14 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
             description: description.trim(),
         });
 
+        const fieldErrors: Record<string, string> = {};
         if (!result.success) {
-            setValidationError(t("approvalLimits.errors.validation"));
-            return;
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0]);
+                fieldErrors[field] = t(`validation.approval.${field}`);
+            }
         }
+        if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
 
         updateMutation.mutate(result.data);
     }
@@ -165,10 +170,11 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                     <p>{t("approvalLimits.edit.formDescription")}</p>
                 </div>
 
-                <form
+                <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)}
                     className={styles.form}
                     onSubmit={handleUpdate}
                 >
+                    <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                     <div className={styles.formGroup}>
                         <label
                             htmlFor="minAmount"
@@ -179,6 +185,7 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
 
                         <input
                             id="minAmount"
+                            {...validation.fieldProps("minAmount", "minAmount-hint")}
                             name="minAmount"
                             type="number"
                             min="0"
@@ -191,8 +198,9 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                             }
                             required
                         />
+                        <FieldError id="minAmount" errors={validation.errors} />
 
-                        <span className={styles.helperText}>
+                        <span id="minAmount-hint" className={styles.helperText}>
                             {t("approvalLimits.form.minAmountEditHelp")}
                         </span>
                     </div>
@@ -207,6 +215,7 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
 
                         <input
                             id="requiredApprovals"
+                            {...validation.fieldProps("requiredApprovals", "requiredApprovals-hint")}
                             name="requiredApprovals"
                             type="number"
                             min="1"
@@ -219,8 +228,9 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                             }
                             required
                         />
+                        <FieldError id="requiredApprovals" errors={validation.errors} />
 
-                        <span className={styles.helperText}>
+                        <span id="requiredApprovals-hint" className={styles.helperText}>
                             {t("approvalLimits.form.requiredApprovalsHelp")}
                         </span>
                     </div>
@@ -235,6 +245,7 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
 
                         <textarea
                             id="description"
+                            {...validation.fieldProps("description")}
                             name="description"
                             rows={4}
                             className={styles.textarea}
@@ -245,6 +256,7 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                             }
                             required
                         />
+                        <FieldError id="description" errors={validation.errors} />
                     </div>
 
                     {updateMutation.isSuccess && (
@@ -263,19 +275,6 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                         </div>
                     )}
 
-                    {validationError && (
-                        <div
-                            className={styles.error}
-                            role="alert"
-                        >
-                            <TriangleAlert
-                                size={18}
-                                aria-hidden="true"
-                            />
-
-                            <span>{validationError}</span>
-                        </div>
-                    )}
 
                     {updateMutation.isError && (
                         <div

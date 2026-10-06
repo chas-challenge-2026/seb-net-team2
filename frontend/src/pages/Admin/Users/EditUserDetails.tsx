@@ -1,3 +1,6 @@
+import { updateUserSchema } from "../../../schemas/userSchema";
+import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,6 +28,7 @@ type EditUserFormProps = {
 
 function EditUserForm({ user }: EditUserFormProps) {
     const { t } = useTranslation();
+    const validation = useFormValidation();
     const queryClient = useQueryClient();
 
     const [name, setName] = useState(user.name);
@@ -54,6 +58,18 @@ function EditUserForm({ user }: EditUserFormProps) {
 
     function handleUpdateUser(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        const result = updateUserSchema.safeParse({ name: name.trim(), email: email.trim(), ...(password && { password }), role });
+        const fieldErrors: Record<string, string> = {};
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0]);
+                const label = t(`users.form.${field}`);
+                fieldErrors[field] = issue.code === "too_big"
+                    ? t("validation.maxLength", { field: label, max: issue.maximum })
+                    : field === "email" ? t("validation.email") : t("validation.required", { field: label });
+            }
+        }
+        if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
         updateMutation.mutate();
     }
 
@@ -76,7 +92,8 @@ function EditUserForm({ user }: EditUserFormProps) {
                     <p>{t("users.edit.formDescription")}</p>
                 </div>
 
-                <form className={styles.form} onSubmit={handleUpdateUser}>
+                <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} className={styles.form} onSubmit={handleUpdateUser}>
+                    <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                     <div className={styles.formGroup}>
                         <label htmlFor="name" className={styles.label}>
                             {t("users.form.name")}
@@ -84,6 +101,8 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                         <input
                             id="name"
+                            placeholder={t("validation.nameExample")}
+                            {...validation.fieldProps("name")}
                             name="name"
                             type="text"
                             className={styles.input}
@@ -92,6 +111,7 @@ function EditUserForm({ user }: EditUserFormProps) {
                             onChange={(event) => setName(event.target.value)}
                             required
                         />
+                        <FieldError id="name" errors={validation.errors} />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -101,6 +121,8 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                         <input
                             id="email"
+                            placeholder={t("validation.emailExample")}
+                            {...validation.fieldProps("email")}
                             name="email"
                             type="email"
                             className={styles.input}
@@ -109,6 +131,7 @@ function EditUserForm({ user }: EditUserFormProps) {
                             onChange={(event) => setEmail(event.target.value)}
                             required
                         />
+                        <FieldError id="email" errors={validation.errors} />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -118,6 +141,7 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                         <PasswordInput
                             id="password"
+                            {...validation.fieldProps("password")}
                             name="password"
                             value={password}
                             disabled={updateMutation.isPending}
@@ -125,6 +149,7 @@ function EditUserForm({ user }: EditUserFormProps) {
                             autoComplete="new-password"
                             placeholder={t("users.edit.passwordPlaceholder")}
                         />
+                        <FieldError id="password" errors={validation.errors} />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -134,6 +159,7 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                         <select
                             id="role"
+                            {...validation.fieldProps("role")}
                             name="role"
                             className={styles.select}
                             value={role}
@@ -145,6 +171,7 @@ function EditUserForm({ user }: EditUserFormProps) {
                             <option value="Attestant">{t("users.roles.Attestant")}</option>
                             <option value="Admin">{t("users.roles.Admin")}</option>
                         </select>
+                        <FieldError id="role" errors={validation.errors} />
                     </div>
 
                     {updateMutation.isSuccess && (
