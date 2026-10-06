@@ -27,14 +27,14 @@ namespace SebPortal.Api.Services
             _context = context;
         }
 
-        public async Task<Payment> CreatePaymentAsync(CreatePaymentDTO createPaymentDTO, int userId)
+        public async Task<Payment> CreatePaymentAsync(CreatePaymentDTO createPaymentDTO, int userId, int tenantId)
         {
             //Starts transaction
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
-                var user = await _userRepository.GetUserByIdAsync(userId);
+                var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
 
                 if (user == null)
                 {
@@ -168,15 +168,15 @@ namespace SebPortal.Api.Services
             }
         }
 
-        public async Task<Payment?> GetPaymentById(int paymentId)
+        public async Task<Payment?> GetPaymentById(int paymentId, int tenantId)
         {
-            var payment = await _paymentRepository.GetPaymentByIdAsync(paymentId);
+            var payment = await _paymentRepository.GetPaymentByIdAsync(paymentId, tenantId);
             return payment;
         }
 
-        public Task<IEnumerable<Payment>> GetPaymentsByUserId(int userId)
+        public Task<IEnumerable<Payment>> GetPaymentsByUserId(int userId, int tenantId)
         {
-            return _paymentRepository.GetPaymentsByUserIdAsync(userId);
+            return _paymentRepository.GetPaymentsByUserIdAsync(userId, tenantId);
         }
     }
 }
