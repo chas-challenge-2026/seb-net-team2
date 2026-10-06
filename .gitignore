@@ -1,28 +1,63 @@
 ## .NET build artifacts
 bin/
 obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
 
-## Native build artifacts
+## Test & Coverage artifacts
+TestResults/
+*.coverage
+*.coveragexml
+
+## Native build artifacts & C++ outputs
 native/libauditsigner.so
 native/libcsvparser.so
 native/libiban.so
 native/test
 native/test.c
+native/csv-test
+*.o
+*.so
+*.dll
+*.dylib
 
-## Rider / VS / VSCode
+## IDE & Editors
 .idea/
 .vs/
 *.user
 *.suo
 .vscode/
 compile_flags.txt
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 
-## OS
+## OS generated files
 .DS_Store
+.DS_Store?
+ehthumbs.db
 Thumbs.db
 
 ## Logs
 *.log
+*.tmp
 
 ## Docker volumes (local)
 pgdata/
+
+## Audit test files
+native/audit/*.o
+native/audit/test_audit
+native/audit/*.log
+.docker/
+
+appsettings.Development.json
+## Security & secrets
+**/.env
+**/.env.*
+!**/.env.example
+
+!frontend/.env.example

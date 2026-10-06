@@ -44,10 +44,10 @@ public class IndexModel : PageModel
         {
             conn.Open();
 
-            // SPAGHETTI: String interpolation in SQL — SQL injection vulnerability
-            // Should use parameterized queries
-            var sql = $"SELECT id, name, role, tenant_id FROM users WHERE email = '{email}' AND password_md5 = '{passwordHash}'";
+            var sql = "SELECT id, name, role, tenant_id FROM users WHERE email = @email AND password_md5 = @hash";
             using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("email", email);
+            cmd.Parameters.AddWithValue("hash", passwordHash);
             using var reader = cmd.ExecuteReader();
 
             if (reader.Read())

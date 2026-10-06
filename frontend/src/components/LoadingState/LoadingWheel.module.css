@@ -1,0 +1,42 @@
+.loadingCircle {
+    display: inline-block;
+
+    border-style: solid;
+    border-color: var(--color-border-light);
+    border-top-color: var(--seb-green-dark-1);
+
+    border-radius: 50%;
+
+    animation: spin 0.8s linear infinite;
+}
+
+.small {
+    width: 18px;
+    height: 18px;
+
+    border-width: 2px;
+}
+
+.medium {
+    width: 32px;
+    height: 32px;
+
+    border-width: 3px;
+}
+
+.large {
+    width: 48px;
+    height: 48px;
+
+    border-width: 4px;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

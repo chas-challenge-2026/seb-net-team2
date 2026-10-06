@@ -1,0 +1,636 @@
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Moq;
+using SebPortal.Api.Dtos;
+using SebPortal.Api.Repositories;
+using SebPortal.Api.Services;
+using SebPortal.Data;
+using SebPortal.Models;
+
+
+namespace SebPortal.Tests
+{
+    public class UserTests
+    {
+        private readonly Mock<IUserRepository> _userRepositoryMock;
+        private readonly Mock<ITokenService> _tokenServiceMock;
+        private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock;
+        private readonly Mock<IAuditRepository> _auditRepositoryMock;
+        private const int ActingAdminId = 99;
+        private const int TestTenantId = 1;
+        private readonly UserService _userService;
+
+        public UserTests()
+        {
+            _userRepositoryMock = new Mock<IUserRepository>();
+            _tokenServiceMock = new Mock<ITokenService>();
+
+            _tokenServiceMock.Setup(x => x.GenerateAccessToken(It.IsAny<User>())).Returns("my_super_secret_key_which_is_long_enough_12345");
+
+            _refreshTokenServiceMock = new Mock<IRefreshTokenService>();
+
+            _refreshTokenServiceMock.Setup(x => x.CreateRefreshTokenAsync(It.IsAny<int>())).ReturnsAsync("fake_refresh_token");
+            
+            _auditRepositoryMock = new Mock<IAuditRepository>();
+
+            _userService = new UserService(_userRepositoryMock.Object, _tokenServiceMock.Object, _refreshTokenServiceMock.Object, _auditRepositoryMock.Object);
+
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldReturnReadUserDTO_WhenEmailIsUnique()
+        {
+            //Arrange
+            var dto = new CreateUserDTO
+            {
+                TenantId = TestTenantId,
+                Name = "Test",
+                Email = "test@example.com",
+                Password = "Password567",
+                Role = "User"
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email, TestTenantId))
+                .ReturnsAsync((User?)null);
+
+            _userRepositoryMock.Setup(r => r.CreateUserAsync(It.IsAny<User>()))
+                .Callback<User>(u=>u.Id =10)
+                .ReturnsAsync((User u) =>u);
+
+            //Act
+            var result = await _userService.CreateUserAsync(dto, ActingAdminId, TestTenantId);
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.Equal(10, result.Id);
+            Assert.Equal("Test", result.Name);
+            Assert.Equal("test@example.com", result.Email);
+        }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldThrowException_WhenEmailAlreadyExists()
+        {
+            // Arrange
+            var dto = new CreateUserDTO
+            {
+                Email = "existing@example.com",
+                Password = "Password567",
+                TenantId = TestTenantId
+            };
+
+            var existingUser = new User 
+            {   Id = 1, 
+                Email = dto.Email,
+                Name = "Test",
+                PasswordHash = "dummy_hash",
+                Role = "User"
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email, TestTenantId))
+                .ReturnsAsync(existingUser);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _userService.CreateUserAsync(dto, ActingAdminId, TestTenantId);
+            });
+
+            Assert.Equal("Användare med denna e-postadress finns redan", exception.Message);
+        }
+
+        [Fact]
+        public async Task LoginAsync_ShouldReturnLoginResponseDTO_WhenCredentialsAreValid()
+        {
+            //arrange
+            var loginDto = new LoginRequestDTO
+            {
+                Email = "test@example.com",
+                Password = "CorrectPassword123"
+            };
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(loginDto.Password);
+
+            var existingUser = new User
+            {
+                Id = 1,
+                Email = loginDto.Email,
+                Name = "Test",
+                PasswordHash = hashedPassword,
+                Role = "Admin"
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByEmailLoginAsync(loginDto.Email))
+                .ReturnsAsync(existingUser);
+
+            //act 
+            var result = await _userService.LoginAsync(loginDto);
+
+            //assert
+            Assert.NotNull(result);
+            Assert.Equal(existingUser.Id, result.UserId);
+            Assert.Equal(existingUser.Email, result.Email);
+            Assert.Equal(existingUser.Role, result.Role);
+            Assert.NotNull(result.Token);
+            Assert.Equal("my_super_secret_key_which_is_long_enough_12345", result.Token);
+            Assert.Equal("fake_refresh_token", result.RefreshToken);
+        }
+        [Fact]
+        public async Task RefreshAsync_ValidToken_RotatesToken()
+        {
+            await using var connection = new SqliteConnection("Data Source=:memory:");
+
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
+
+            await using var context = new SebDbContext(options);
+
+            await context.Database.EnsureCreatedAsync();
+            var tenant = new Tenant
+            {
+                Id = 1,
+                Name = "Test Tenant"
+            };
+
+            context.Tenants.Add(tenant);
+
+            var user = new User
+            {
+                Id = 1,
+                Name = "Test User",
+                Email = "test@test.se",
+                PasswordHash = "hash",
+                Role = "User", //Change to new User roles
+                TenantId = 1
+            };
+
+            context.Users.Add(user);
+
+            var tokenServiceMock = new Mock<ITokenService>();
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("old_refresh_token"))
+                .Returns("OLD_HASH");
+
+            tokenServiceMock
+                .Setup(x => x.GenerateRefreshToken())
+                .Returns("new_refresh_token");
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("new_refresh_token"))
+                .Returns("NEW_HASH");
+
+            tokenServiceMock
+                .Setup(x => x.GenerateAccessToken(It.IsAny<User>()))
+                .Returns("new_access_token");
+
+            context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = 1,
+                TokenHash = "OLD_HASH",
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+
+            await context.SaveChangesAsync();
+
+            var service = new RefreshTokenService(
+                context,
+                tokenServiceMock.Object);
+
+            var result =
+                await service.RefreshAsync("old_refresh_token");
+
+            Assert.NotNull(result);
+
+            Assert.Equal("new_access_token",result.Token);
+
+            Assert.Equal("new_refresh_token",result.RefreshToken);
+            // Old token should now be revoked and replaced
+            var oldToken = await context.RefreshTokens
+                .AsNoTracking()
+                .FirstAsync(x => x.TokenHash == "OLD_HASH");
+
+            Assert.NotNull(oldToken.RevokedAt);
+            Assert.NotNull(oldToken.ReplacedByTokenId);
+
+            // A new refresh token should exist
+            var newToken = await context.RefreshTokens
+                .AsNoTracking()
+                .FirstAsync(x => x.TokenHash == "NEW_HASH");
+
+            Assert.Null(newToken.RevokedAt);
+
+            // Old refresh token cannot be reused
+            var reusedResult =
+                await service.RefreshAsync("old_refresh_token");
+
+            Assert.Null(reusedResult);
+        }
+        [Fact]
+        public async Task RefreshAsync_RevokedToken_ReturnsNull()
+        {
+            await using var connection =
+                new SqliteConnection("Data Source=:memory:");
+
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<SebDbContext>()
+                .UseSqlite(connection)
+                .Options;
+
+            await using var context = new SebDbContext(options);
+
+            await context.Database.EnsureCreatedAsync();
+
+            context.Tenants.Add(new Tenant
+            {
+                Id = 1,
+                Name = "Test Tenant"
+            });
+
+            context.Users.Add(new User
+            {
+                Id = 1,
+                Name = "Test User",
+                Email = "test@test.se",
+                PasswordHash = "hash",
+                Role = "User", //Change to new User roles
+                TenantId = 1
+            });
+
+            context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = 1,
+                TokenHash = "REVOKED_HASH",
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                RevokedAt = DateTime.UtcNow.AddMinutes(-1)
+            });
+
+            await context.SaveChangesAsync();
+
+            var tokenServiceMock = new Mock<ITokenService>();
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("revoked_refresh_token"))
+                .Returns("REVOKED_HASH");
+
+            var service = new RefreshTokenService(
+                context,
+                tokenServiceMock.Object);
+
+            var result =
+                await service.RefreshAsync("revoked_refresh_token");
+
+            Assert.Null(result);
+        }
+        [Fact]
+        public async Task RefreshAsync_ExpiredToken_ReturnsNull()
+        {
+            await using var connection =
+                new SqliteConnection("Data Source=:memory:");
+
+            await connection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<SebDbContext>()
+                .UseSqlite(connection)
+                .Options;
+
+            await using var context = new SebDbContext(options);
+
+            await context.Database.EnsureCreatedAsync();
+
+            var tenant = new Tenant
+            {
+                Id = 1,
+                Name = "Test Tenant"
+            };
+
+            var user = new User
+            {
+                Id = 1,
+                Name = "Test User",
+                Email = "test@test.se",
+                PasswordHash = "hash",
+                Role = "User",
+                TenantId = 1
+            };
+
+            context.Tenants.Add(tenant);
+            context.Users.Add(user);
+
+            context.RefreshTokens.Add(new RefreshToken
+            {
+                UserId = 1,
+                TokenHash = "EXPIRED_HASH",
+                CreatedAt = DateTime.UtcNow.AddDays(-8),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(-1)
+            });
+
+            await context.SaveChangesAsync();
+
+            var tokenServiceMock = new Mock<ITokenService>();
+
+            tokenServiceMock
+                .Setup(x => x.HashRefreshToken("expired_refresh_token"))
+                .Returns("EXPIRED_HASH");
+
+            var service = new RefreshTokenService(
+                context,
+                tokenServiceMock.Object);
+
+            var result = await service.RefreshAsync("expired_refresh_token");
+
+            Assert.Null(result);
+        }
+        [Fact]
+        public async Task LoginAsync_ShouldThrowException_WhenCredentialsNotValid()
+        {
+            //arrange
+            var loginDto = new LoginRequestDTO
+            {
+                Email = "test@example.com",
+                Password = "WrongPassword123"
+            };
+
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword("CorrectPassword123");
+
+            var existingUser = new User
+            {
+                Id = 1,
+                Email = loginDto.Email,
+                Name = "Test",
+                PasswordHash = hashedPassword,
+                Role = "Admin",
+                TenantId = 1
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByEmailLoginAsync(loginDto.Email))
+                .ReturnsAsync(existingUser);
+
+
+            //act & assert
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _userService.LoginAsync(loginDto);
+            });
+
+            Assert.Equal("Ogiltig e-postadress eller lösenord.", exception.Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldReturnReadUserDTO_WhenUserExists()
+        {
+            //Arrange
+            int userId = 1;
+            
+            var existingUser = new User
+            {
+                Id = userId,
+                TenantId = TestTenantId,
+                Name = "Old Name",
+                Email = "test@example.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password567"),
+                Role = "User"
+            };
+
+            var updateDto = new UpdateUserDTO
+            {
+                Name = "New Name"
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(userId, TestTenantId))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock.Setup(r => r.UpdateUserAsync(It.IsAny<User>()))
+                .ReturnsAsync((User u) => u);
+
+            //Act
+            var result = await _userService.UpdateUserAsync(userId, updateDto, ActingAdminId, TestTenantId);
+
+            //Assert
+            Assert.NotNull(result);
+            Assert.Equal("New Name", result.Name);
+            Assert.Equal("test@example.com", result.Email);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrowException_WhenUserNotFound()
+        {
+            //Arrange
+            int id = 100;
+
+            var updateDto = new UpdateUserDTO
+            {
+                Name = "New Name"
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
+                .ReturnsAsync((User?)null);
+
+            //act & assert
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId, TestTenantId);
+            });
+
+            Assert.Equal($"Användaren med id: {id} hittades inte", exception.Message);
+        }
+
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldThrowException_WhenEmailIsAlreadyTaken()
+        {
+            //Arrange
+            int id = 1;
+
+            var existingUser = new User
+            {
+                Id = id,
+                Name = "Test",
+                Email = "old@example.com",
+                PasswordHash = "dummy_hash",
+                Role = "User",
+                TenantId = TestTenantId
+            };
+
+            var updateDto = new UpdateUserDTO
+            {
+                Email = "taken@example.com"
+            };
+
+
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
+                .ReturnsAsync(existingUser);
+
+            var anotherUser = new User
+            {
+                Id = 2,
+                Name = "Test2",
+                Email = "taken@example.com",
+                PasswordHash = "dummy_hash",
+                Role = "User",
+                TenantId = TestTenantId
+            };
+
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(updateDto.Email, TestTenantId))
+                .ReturnsAsync(anotherUser);
+
+            //act & assert
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId, TestTenantId);
+            });
+
+            Assert.Equal($"En användare med denna e-postadress finns redan", exception.Message);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldReturnTrue_WhenUserExists()
+        {
+            int id = 1;
+            var existingUser = new User
+            {
+                Id = id,
+                Name = "Test",
+                Email = "test@example.com",
+                PasswordHash = "dummy_hash",
+                Role = "User",
+                TenantId = TestTenantId
+            };
+
+            _userRepositoryMock.Setup(r=> r.GetUserByIdAsync(id, TestTenantId))
+                .ReturnsAsync(existingUser);
+
+            _userRepositoryMock.Setup(r => r.DeleteUserAsync(id, TestTenantId))
+                .ReturnsAsync(true);
+
+            var result = await _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId);
+            Assert.True(result);
+            _userRepositoryMock.Verify(r=> r.DeleteUserAsync(id, TestTenantId) , Times.Once);
+            _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
+                e.Action == AuditActions.DeleteUser &&
+                e.EntityId == id &&
+                e.UserId == ActingAdminId &&
+                e.TenantId == TestTenantId)), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldThrowBusinessRule_WhenUserHasAuditHistory()
+        {
+            int id = 5;
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId)).ReturnsAsync(new User
+            {
+                Id = id, Name = "Test", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
+            });
+            _auditRepositoryMock.Setup(a => a.HasEntriesForUserAsync(id, TestTenantId)).ReturnsAsync(true);
+
+            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId));
+
+            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldThrowBusinessRule_WhenDeletingSelf()
+        {
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(ActingAdminId, TestTenantId)).ReturnsAsync(new User
+            {
+                Id = ActingAdminId, Name = "Admin", Email = "admin@example.com", PasswordHash = "x", Role = "Admin", TenantId = TestTenantId
+            });
+
+            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(ActingAdminId, ActingAdminId, TestTenantId));
+
+            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task UpdateUserAsync_ShouldLogChangedFields_WithoutPassword()
+        {
+            int id = 5;
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId)).ReturnsAsync(new User
+            {
+                Id = id, Name = "Old", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
+            });
+
+            await _userService.UpdateUserAsync(id, new UpdateUserDTO { Name = "New", Password = "Hemligt123!" }, ActingAdminId, TestTenantId);
+
+            _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
+                e.Action == AuditActions.UpdateUser &&
+                e.Details != null &&
+                e.Details.Contains("\"changedFields\":[\"name\",\"password\"]") &&
+                !e.Details.Contains("Hemligt123!"))), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteUserAsync_ShouldThrowException_WhenUserNotExists()
+        {
+            //arrange
+            int id = 10;
+
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
+                .ReturnsAsync((User?)null);
+
+            //act & assert
+            var exception = await Assert.ThrowsAsync<Exception>(async () =>
+            {
+                await _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId);
+            });
+
+            Assert.Equal($"Användaren med id: {id} hittades inte", exception.Message);
+
+            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task GetAllUsersAsync_ShouldReturnMappedReadUserDTOs_WhenUsersExist()
+        {
+            // Arrange
+            var users = new List<User>
+    {
+                new User
+                {
+                    Id = 1,
+                    TenantId = TestTenantId,
+                    Name = "Test",
+                    Email = "test@example.com",
+                    PasswordHash = "hash1",
+                    Role = "Admin"
+                },
+                new User
+                {
+                    Id = 2,
+                    TenantId = TestTenantId,
+                    Name = "Test2",
+                    Email = "test2@example.com",
+                    PasswordHash = "hash2",
+                    Role = "User"
+                }
+            };
+
+            _userRepositoryMock.Setup(r => r.GetAllUsersAsync(TestTenantId))
+                .ReturnsAsync(users);
+
+            // Act
+            var result = await _userService.GetAllUsersAsync(TestTenantId);
+
+            // Assert
+            Assert.NotNull(result);
+            var userList = result.ToList();
+            Assert.Equal(2, userList.Count); 
+            Assert.Equal(1, userList[0].Id);
+
+                //user 1
+            Assert.Equal("Test", userList[0].Name);
+            Assert.Equal("test@example.com", userList[0].Email);
+            Assert.Equal("Admin", userList[0].Role);
+
+                //user 2
+            Assert.Equal(2, userList[1].Id);
+            Assert.Equal("Test2", userList[1].Name);
+            Assert.Equal("test2@example.com", userList[1].Email);
+        }
+    }
+}
+

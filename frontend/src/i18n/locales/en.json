@@ -1,0 +1,610 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "cancel": "Cancel",
+        "clear": "Clear",
+        "close": "Close",
+        "done": "Done"
+    },
+    "navigation": {
+        "dashboard": "Dashboard",
+        "newPayment": "New payment",
+        "saveInvest": "Save & invest",
+        "batchPayments": "Batch payments",
+        "auditLog": "Audit log",
+        "profile": "Profile",
+        "logout": "Log out",
+        "goToDashboard": "Go to dashboard"
+    },
+    "login": {
+        "private": "Private",
+        "company": "Company",
+        "email": "Email",
+        "password": "Password",
+        "login": "Log in",
+        "missingCredentials": "Enter both email and password.",
+        "generic": "Something went wrong."
+    },
+    "session": {
+        "sessionExpired": "Your session has expired. Please log in again."
+    },
+    "sidebar": {
+        "menu": "Menu",
+        "closeMenu": "Close menu",
+        "expand": "Expand sidebar",
+        "collapse": "Collapse sidebar",
+        "secondaryNavigation": "Sidebar navigation",
+        "navigationLinks": "Navigation links",
+        "dashboard": "Dashboard",
+        "payments": "Payments",
+        "newPayment": "New payment",
+        "batchUpload": "Batch upload",
+        "savings": "Savings",
+        "approvals": "Approvals",
+        "approvalInbox": "Approval inbox",
+        "admin": "Administration",
+        "auditLog": "Audit log",
+        "administration": "Administration",
+        "myProfile": "My profile",
+        "logout": "Log out",
+        "approvalsPending": "{{pending}} pending",
+        "approvalsWithOverdue": "{{pending}} pending, {{overdue}} overdue"
+    },
+    "dashboard": {
+        "welcome": "Welcome, {{user}}",
+        "greeting": "Good morning, {{user}}",
+        "createPayment": "Create payment",
+        "user": "user",
+        "companyName": "Company name",
+        "accounts": "Accounts",
+        "accountsEmpty": "No accounts are set up for this company yet.",
+        "recentPayments": "Recent payments",
+        "errors": {
+            "generic": "Something went wrong.",
+            "accounts": "Could not load company accounts. Try again later."
+        },
+        "table": {
+            "date": "Date",
+            "recipientIban": "Recipient IBAN",
+            "reference": "Reference",
+            "amount": "Amount",
+            "status": "Status"
+        },
+        "status": {
+            "completed": "Completed",
+            "pending": "Pending",
+            "rejected": "Rejected"
+        }
+    },
+    "payment": {
+        "eyebrow": "PAYMENTS",
+        "title": "Create a new payment",
+        "description": "Send a secure payment from your company account.",
+        "steps": {
+            "label": "Payment progress",
+            "details": "Details",
+            "review": "Review",
+            "result": "Result"
+        },
+        "details": {
+            "title": "Payment details",
+            "description": "Enter the recipient and payment amount."
+        },
+        "fields": {
+            "fromAccount": "From account",
+            "recipient": "Recipient",
+            "iban": "IBAN",
+            "amount": "Amount",
+            "reference": "Reference",
+            "message": "Message"
+        },
+        "placeholders": {
+            "recipient": "Company or person",
+            "reference": "Invoice or OCR",
+            "message": "Write a message to the recipient"
+        },
+        "iban": {
+            "valid": "IBAN format is valid.",
+            "invalid": "This IBAN appears invalid. Check the country code, length and digits.",
+            "accountNotChecked": "This checks the IBAN format, not whether the account exists or belongs to the recipient."
+        },
+        "optional": "Optional",
+        "loadingAccounts": "Loading accounts...",
+        "success": "The payment has been created successfully.",
+        "errors": {
+            "selectAccount": "Select an account.",
+            "insufficientBalance": "The payment amount exceeds the account balance.",
+            "reviewDetails": "Please review the payment details and try again.",
+            "createFailed": "Could not create the payment. Please try again.",
+            "loadAccounts": "Could not load accounts.",
+            "noAccounts": "No accounts are available for payments."
+        },
+        "actions": {
+            "clear": "Clear form",
+            "review": "Review payment",
+            "continueToReview": "Continue to review",
+            "goBack": "Go back",
+            "creating": "Creating...",
+            "confirm": "Confirm payment",
+            "newPayment": "Start a new payment"
+        },
+        "result": {
+            "eyebrow": "PAYMENT STATUS",
+            "title": "Payment submitted",
+            "paymentId": "Payment ID",
+            "status": "Status",
+            "completed": "The payment has been processed.",
+            "pendingApproval": "The payment was created and is waiting for approval.",
+            "rejected": "The payment was rejected.",
+            "accepted": "The payment was created. Check the status below.",
+            "statusValues": {
+                "completed": "Completed",
+                "pendingApproval": "Waiting for approval",
+                "rejected": "Rejected"
+            }
+        },
+        "summary": {
+            "title": "Summary",
+            "amountToPay": "Amount to pay",
+            "recipientIban": "Recipient IBAN",
+            "notSpecified": "Not specified",
+            "selectAccount": "Select an account",
+            "balanceAfterPayment": "Balance after payment"
+        },
+        "approval": {
+            "title": "Approval requirements are determined automatically",
+            "description": "The payment will follow the approval rules configured for its amount."
+        },
+        "review": {
+            "eyebrow": "FINAL CHECK",
+            "title": "Review payment",
+            "description": "Check the details before creating this payment."
+        }
+    },
+    "approvalInbox": {
+        "title": "Approval inbox",
+        "description": "Payments awaiting your decision.",
+        "loading": "Loading approvals...",
+        "pendingCount_one": "{{count}} pending",
+        "pendingCount_other": "{{count}} pending",
+        "dismissMessage": "Dismiss message",
+        "overdueBanner_one": "1 payment has been waiting more than {{days}} days.",
+        "overdueBanner_other": "{{count}} payments have been waiting more than {{days}} days.",
+        "overdueFirst": "They are shown first in the list below.",
+        "errors": {
+            "load": "Unable to load approvals.",
+            "decision": "Unable to process the approval decision."
+        },
+        "feedback": {
+            "approved": "{{reference}} ({{amount}}) was approved.",
+            "rejected": "{{reference}} ({{amount}}) was rejected.",
+            "alreadyHandled": "This payment has already been handled. The list has been updated."
+        },
+        "sort": {
+            "label": "Sort by",
+            "newest": "Newest first",
+            "oldest": "Oldest first",
+            "amountHigh": "Amount: high to low",
+            "amountLow": "Amount: low to high"
+        },
+        "card": {
+            "waitingDays_one": "Waiting {{count}} day",
+            "waitingDays_other": "Waiting {{count}} days",
+            "reference": "Reference",
+            "submittedBy": "Submitted by",
+            "submitted": "Submitted",
+            "toIban": "To IBAN",
+            "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
+            "waitingToday": "Submitted today",
+            "dualApproval": "Dual approval – this payment requires two attestants"
+        },
+        "comment": {
+            "label": "Comment",
+            "optional": "(optional)",
+            "placeholder": "Add a comment",
+            "rejectReasonLabel": "Reason for rejection",
+            "required": "(required)",
+            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters."
+        },
+        "actions": {
+            "reject": "Reject",
+            "approve": "Approve",
+            "processing": "Processing...",
+            "rejectPayment": "Reject payment {{id}}",
+            "approvePayment": "Approve payment {{id}}"
+        },
+        "empty": {
+            "title": "No pending approvals",
+            "description": "There are no payments waiting for your approval."
+        },
+        "modal": {
+            "approveTitle": "Approve payment?",
+            "rejectTitle": "Reject payment?",
+            "approveDescription": "Check the details before you approve. The decision cannot be undone.",
+            "rejectDescription": "Check the details and explain why the payment is rejected.",
+            "amount": "Amount"
+        }
+    },
+    "batch": {
+        "eyebrow": "PAYMENTS",
+        "title": "Batch upload",
+        "description": "Upload multiple payments at once via a CSV file.",
+        "mockMode": "Mock mode",
+        "file": {
+            "title": "CSV file",
+            "description": "Choose a file, then upload and process it.",
+            "label": "CSV file",
+            "hint": "Max file size: 1 MB. Encoding: UTF-8."
+        },
+        "actions": {
+            "processing": "Processing...",
+            "upload": "Upload and process"
+        },
+        "format": {
+            "title": "CSV format",
+            "description": "The file must have the following columns:",
+            "warning": "Note: commas inside a field are not supported. Avoid references that contain commas.",
+            "download": "Download example-batch.csv"
+        },
+        "result": {
+            "title": "Result",
+            "processed": "{{succeeded}} of {{total}} payments processed.",
+            "failed_one": "{{count}} row failed — see below.",
+            "failed_other": "{{count}} rows failed — see below."
+        },
+        "table": {
+            "row": "Row",
+            "toIban": "To IBAN",
+            "amount": "Amount",
+            "reference": "Reference",
+            "status": "Status",
+            "success": "Success"
+        },
+        "errors": {
+            "csvOnly": "Only .csv files are supported.",
+            "fileTooLarge": "The file is larger than 1 MB.",
+            "chooseFile": "Choose a CSV file first.",
+            "accountsLoading": "Account data is still loading — try again in a moment.",
+            "header": "The CSV header must be exactly: {{header}}",
+            "empty": "The CSV file is empty or has no data rows.",
+            "columns": "Expected 4 columns, got {{count}}. Commas inside a field are not supported.",
+            "unknownAccount": "Unknown from_account_id '{{id}}'",
+            "invalidIban": "Invalid IBAN '{{iban}}'",
+            "invalidAmount": "Invalid amount '{{amount}}'"
+        }
+    },
+    "auditLog": {
+        "title": "Audit log",
+        "description": "All events for your company: payments, approvals, users and approval limits.",
+        "filters": {
+            "user": "User",
+            "allUsers": "All users",
+            "eventType": "Event type",
+            "allEvents": "All events",
+            "fromDate": "From date",
+            "toDate": "To date",
+            "clear": "Clear filters"
+        },
+        "table": {
+            "caption": "Audit log events",
+            "timestamp": "Timestamp",
+            "user": "User",
+            "event": "Event",
+            "entity": "Entity",
+            "description": "Description"
+        },
+        "states": {
+            "loading": "Loading audit log...",
+            "error": "Could not load the audit log.",
+            "noMatches": "No audit log entries match this filter.",
+            "empty": "No audit log entries found."
+        },
+        "pagination": {
+            "showing": "Showing {{visible}} of {{total}} entries",
+            "showMore": "Show more"
+        },
+        "details": {
+            "step": "Step {{step}} of {{total}}",
+            "comment": "Comment"
+        },
+        "actions": {
+            "CREATE_PAYMENT": "Payment created",
+            "APPROVE_STEP": "Approval step approved",
+            "REJECT_STEP": "Approval step rejected",
+            "EXECUTE_PAYMENT": "Payment executed",
+            "REJECT_PAYMENT": "Payment rejected",
+            "CREATE_USER": "User created",
+            "UPDATE_USER": "User updated",
+            "DELETE_USER": "User deleted",
+            "CREATE_APPROVAL_LIMIT": "Approval limit created",
+            "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
+            "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
+        },
+        "entityTypes": {
+            "payment": "Payment #{{id}}",
+            "user": "User #{{id}}",
+            "approvalLimit": "Approval limit #{{id}}"
+        },
+        "history": {
+            "title": "History: {{entity}}",
+            "description": "Everything that has happened, oldest first.",
+            "showHistory": "Show history for {{entity}}",
+            "loading": "Loading history...",
+            "error": "Could not load the history.",
+            "empty": "No events found.",
+            "by": "by {{user}}"
+        }
+    },
+    "approvalLimits": {
+        "list": {
+            "title": "Approval limits",
+            "description": "Manage rules for required payment approvals.",
+            "create": "Create approval limit",
+            "rules": "Approval rules",
+            "ruleCount_one": "{{count}} rule",
+            "ruleCount_other": "{{count}} rules",
+            "loading": "Loading approval limits",
+            "lastModified": "Last modified",
+            "approvalCount_one": "approval",
+            "approvalCount_other": "approvals",
+            "empty": {
+                "title": "No approval limits",
+                "description": "Create an approval limit to get started."
+            },
+            "errors": {
+                "load": "Unable to load approval limits."
+            }
+        },
+        "form": {
+            "title": "Approval rule",
+            "minAmount": "Minimum amount",
+            "minAmountHelp": "Payments from this amount will use this approval rule.",
+            "minAmountEditHelp": "Payments from this amount use this rule.",
+            "requiredApprovals": "Required approvals",
+            "requiredApprovalsHelp": "Number of approvals required for the rule.",
+            "description": "Description",
+            "descriptionPlaceholder": "Example: Payments above 50,000 require two approvals."
+        },
+        "create": {
+            "title": "Create approval limit",
+            "description": "Define when a payment requires additional approvals.",
+            "formDescription": "Enter the minimum amount and number of required approvals.",
+            "submit": "Create approval limit",
+            "creating": "Creating...",
+            "success": "Approval limit \"{{description}}\" was created successfully."
+        },
+        "edit": {
+            "title": "Edit approval limit",
+            "description": "Update the approval rule for payments.",
+            "formDescription": "Change the minimum amount, number of approvals or description.",
+            "delete": "Delete limit",
+            "save": "Save changes",
+            "saving": "Saving...",
+            "success": "Approval limit updated successfully.",
+            "loading": "Loading approval limit..."
+        },
+        "deleteModal": {
+            "title": "Delete approval limit",
+            "confirm": "Are you sure you want to delete this approval limit?",
+            "warning": "This action cannot be undone.",
+            "deleting": "Deleting..."
+        },
+        "errors": {
+            "validation": "Please enter valid approval limit values.",
+            "create": "Unable to create approval limit.",
+            "update": "Unable to update approval limit.",
+            "delete": "Unable to delete approval limit.",
+            "loadOne": "Unable to load approval limit.",
+            "notFound": "Approval limit could not be found."
+        }
+    },
+    "users": {
+        "roles": {
+            "User": "User",
+            "Initiator": "Initiator",
+            "Attestant": "Attestant",
+            "Admin": "Admin"
+        },
+        "form": {
+            "title": "User information",
+            "name": "Name",
+            "email": "Email",
+            "password": "Password",
+            "role": "Role"
+        },
+        "list": {
+            "title": "Users",
+            "description": "Manage users and their roles.",
+            "create": "Create user",
+            "searchLabel": "Search users",
+            "searchPlaceholder": "Search by name, email or role...",
+            "userCount_one": "{{count}} user",
+            "userCount_other": "{{count}} users",
+            "loading": "Loading users",
+            "empty": {
+                "title": "No users found",
+                "description": "Try another search term."
+            }
+        },
+        "create": {
+            "title": "Create user",
+            "description": "Add a new user and assign their access role.",
+            "formDescription": "Enter the user's details and select their role.",
+            "submit": "Create user",
+            "creating": "Creating...",
+            "success": "{{name}} was created successfully."
+        },
+        "edit": {
+            "title": "Edit user",
+            "description": "Update user information, password or access role.",
+            "formDescription": "Changes will be applied to this user account.",
+            "newPassword": "New password",
+            "passwordPlaceholder": "Leave blank to keep current password",
+            "save": "Save changes",
+            "saving": "Saving...",
+            "success": "User updated successfully.",
+            "loading": "Loading user..."
+        },
+        "details": {
+            "description": "View and manage user details.",
+            "sectionDescription": "Account and access details for this user.",
+            "edit": "Edit user",
+            "delete": "Delete user",
+            "tenantId": "Tenant ID",
+            "loading": "Loading user"
+        },
+        "deleteModal": {
+            "title": "Delete user",
+            "confirm": "Are you sure you want to delete",
+            "warning": "This action cannot be undone.",
+            "deleting": "Deleting..."
+        },
+        "errors": {
+            "load": "Unable to load users.",
+            "create": "Unable to create user.",
+            "update": "Unable to update user.",
+            "delete": "Unable to delete user.",
+            "fetch": "Unable to fetch user.",
+            "notFound": "User could not be found.",
+            "currentUser": "Unable to determine the current user."
+        }
+    },
+    "admin": {
+        "navigation": {
+            "title": "Administration",
+            "overview": "Overview",
+            "users": "Users",
+            "allUsers": "All users",
+            "createUser": "Create user",
+            "approvalLimits": "Approval limits",
+            "allApprovalLimits": "All approval limits",
+            "createApprovalLimit": "Create approval limit"
+        },
+        "dashboard": {
+            "title": "Administration",
+            "description": "Manage users, roles and payment approval settings.",
+            "statsLabel": "Administration overview",
+            "users": "Users",
+            "administrators": "Administrators",
+            "approvalLimits": "Approval limits",
+            "viewUsers": "View users",
+            "viewApprovalLimits": "View approval limits",
+            "quickActions": "Quick actions",
+            "quickActionsDescription": "Common administration tasks.",
+            "createUser": "Create user",
+            "createApprovalLimit": "Create approval limit",
+            "error": "Some administration data could not be loaded."
+        }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "buttonLabel_one": "Notifications, {{count}} unread",
+        "buttonLabel_other": "Notifications, {{count}} unread",
+        "unreadCount_one": "{{count}} unread",
+        "unreadCount_other": "{{count}} unread",
+        "markAllAsRead": "Mark all as read",
+        "empty": "You have no notifications."
+    },
+    "overdueReminder": {
+        "title": "Reminder: approvals waiting",
+        "message_one": "1 payment has been waiting more than {{days}} days for your approval.",
+        "message_other": "{{count}} payments have been waiting more than {{days}} days for your approval.",
+        "goToInbox": "Go to approval inbox",
+        "dismiss": "Dismiss reminder"
+    },
+    "reminderSettings": {
+        "title": "Approval reminders",
+        "description": "Get an email when payments are waiting for your approval, so they don't get stuck.",
+        "emailEnabled": "Send me an email when a payment has waited too long for my approval",
+        "recipient": "Reminders are sent to",
+        "remindAfter": "Email me after",
+        "dayCount_one": "{{count}} day",
+        "dayCount_other": "{{count}} days",
+        "success": "Reminder settings saved.",
+        "saving": "Saving...",
+        "save": "Save settings",
+        "loading": "Loading settings...",
+        "errors": {
+            "save": "Unable to save reminder settings.",
+            "load": "Unable to load reminder settings."
+        },
+        "inAppNote": "Reminders in the app are always shown after {{days}} days."
+    },
+    "saveInvest": {
+        "eyebrow": "SAVINGS & INVESTMENTS",
+        "title": "Save and invest",
+        "description": "Build your financial future with simple, flexible options.",
+        "navigation": "Savings navigation",
+        "dismissMessage": "Dismiss message",
+        "tabs": {
+            "savings": "Savings",
+            "investments": "Investments",
+            "goals": "Savings goals"
+        },
+        "actions": {
+            "openAccount": "Open a savings account",
+            "showLess": "Show less",
+            "viewAll": "View all",
+            "manageAccount": "Manage account",
+            "addGoal": "Add savings goal",
+            "createAccount": "Create account",
+            "createGoal": "Create goal"
+        },
+        "savings": {
+            "totalSaved": "Total saved",
+            "acrossAccounts": "Across your savings accounts",
+            "interestEarned": "Interest earned this year",
+            "accountsTitle": "Your savings accounts",
+            "accountsDescription": "Manage your savings and interest rates.",
+            "interestRate": "interest rate"
+        },
+        "investments": {
+            "overview": "Investment overview",
+            "portfolioValue": "Current portfolio value",
+            "thisYear": "this year",
+            "allocation": "Portfolio allocation",
+            "equities": "Equities",
+            "funds": "Funds",
+            "bonds": "Bonds"
+        },
+        "goals": {
+            "title": "Your savings goals",
+            "description": "Track progress towards the things that matter.",
+            "of": "of",
+            "complete": "{{progress}}% complete"
+        },
+        "modals": {
+            "account": {
+                "eyebrow": "NEW ACCOUNT",
+                "title": "Open a savings account",
+                "description": "Create a mock savings account to see it in your overview.",
+                "name": "Account name",
+                "placeholder": "e.g. Travel fund"
+            },
+            "goal": {
+                "eyebrow": "NEW GOAL",
+                "title": "Add a savings goal",
+                "name": "Goal name",
+                "placeholder": "e.g. New car",
+                "target": "Target amount"
+            },
+            "manage": {
+                "eyebrow": "ACCOUNT",
+                "interestRate": "Interest rate: {{rate}}"
+            }
+        },
+        "messages": {
+            "accountCreated": "Savings account created.",
+            "goalCreated": "Savings goal created.",
+            "accountOpened": "Account details opened."
+        }
+    },
+    "profilePage": {
+        "title": "My profile",
+        "description": "Your account details and settings.",
+        "details": {
+            "title": "Account details",
+            "company": "Company"
+        }
+    }
+}

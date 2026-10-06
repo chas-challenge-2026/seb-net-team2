@@ -1,0 +1,169 @@
+.dashboard {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+}
+
+.dashboard__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.dashboard__header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.75rem;
+    line-height: 1.2;
+}
+
+.dashboard__header p {
+    margin: 0;
+    color: var(--color-text-soft);
+    font-size: 0.9rem;
+}
+
+.createPaymentLink {
+    display: inline-flex;
+    min-height: 2.75rem;
+
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+
+    flex: 0 0 auto;
+
+    padding: 0 1rem;
+
+    border-radius: var(--radius-sm);
+
+    background: var(--seb-green-dark-2);
+    color: white;
+
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: background-color 0.15s ease;
+}
+
+.createPaymentLink:hover {
+    background: var(--seb-green-dark-1);
+    color: white;
+}
+
+.createPaymentLink:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 3px;
+}
+
+.createPaymentLink svg {
+    width: 1rem;
+    height: 1rem;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.accountsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.accountName {
+    margin: 0;
+    font-weight: 600;
+}
+
+.accountBalance {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.accountIban {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-soft);
+}
+
+.recentPayments {
+    margin-top: 2.5rem;
+}
+
+.paymentsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.paymentsTable th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+
+    border-bottom: 2px solid var(--color-border-light);
+
+    font-size: 0.85rem;
+    color: var(--color-text-soft);
+}
+
+.paymentsTable td {
+    padding: 0.6rem 0.75rem;
+
+    border-bottom: 1px solid var(--color-border-light);
+
+    font-size: 0.9rem;
+}
+
+.status {
+    display: inline-block;
+
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status--done {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status--pending {
+    background: #e8e8e8;
+    color: #444;
+}
+
+@media (max-width: 760px) {
+    .dashboard {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    .dashboard__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .accountsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Icons */
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.sectionTitle svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}

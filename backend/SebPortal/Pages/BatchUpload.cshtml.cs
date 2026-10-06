@@ -45,8 +45,11 @@ public class BatchUploadModel : PageModel
             return Page();
         }
 
-        // SPAGHETTI: No actual file size limit enforcement (form says 1MB, but code doesn't check)
-        // A 100MB file would be accepted and parsed
+        if (csvFile.Length > 1_048_576)
+        {
+            ErrorMessage("Filen är för stor. Max 1 MB tillåts.");
+            return Page();
+        }
 
         string csvContent;
         using (var reader = new StreamReader(csvFile.OpenReadStream()))
