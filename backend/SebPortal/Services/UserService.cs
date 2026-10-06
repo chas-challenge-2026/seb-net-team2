@@ -25,9 +25,9 @@ namespace SebPortal.Api.Services
             _auditRepository = auditRepository;
         }
 
-        public async Task<ReadUserDTO> CreateUserAsync(CreateUserDTO dto, int actingUserId)
+        public async Task<ReadUserDTO> CreateUserAsync(CreateUserDTO dto, int actingUserId, int tenantId)
         {
-            var existingEmailUser = await _userRepository.GetUserByEmailAsync(dto.Email);
+            var existingEmailUser = await _userRepository.GetUserByEmailAsync(dto.Email, tenantId);
             if (existingEmailUser != null)
             {
                 throw new Exception("Användare med denna e-postadress finns redan");
@@ -35,7 +35,7 @@ namespace SebPortal.Api.Services
 
             var user = new User
             {
-                TenantId = dto.TenantId,
+                TenantId = tenantId,
                 Name = dto.Name,
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
@@ -65,9 +65,9 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<bool> DeleteUserAsync(int userId, int actingUserId)
+        public async Task<bool> DeleteUserAsync(int userId, int actingUserId, int tenantId)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
+            var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
             if (user == null)
             {
                 throw new Exception($"Användaren med id: {userId} hittades inte");
@@ -85,7 +85,7 @@ namespace SebPortal.Api.Services
                 throw new BusinessRuleException("Användaren har historik i granskningsloggen och kan inte tas bort.");
             }
 
-            await _userRepository.DeleteUserAsync(user.Id);
+            await _userRepository.DeleteUserAsync(user.Id, tenantId);
 
             await _auditRepository.AddEntryAsync(new AuditEntries
             {
@@ -101,9 +101,9 @@ namespace SebPortal.Api.Services
             return true;
         }
 
-        public async Task<ReadUserDTO?> GetUserByEmailAsync(string email)
+        public async Task<ReadUserDTO?> GetUserByEmailAsync(string email, int tenantId)
         {
-            var user = await _userRepository.GetUserByEmailAsync(email);
+            var user = await _userRepository.GetUserByEmailAsync(email, tenantId);
             if (user == null)
             {
                 throw new Exception($"Användaren med e-post: {email} hittades inte");
@@ -119,9 +119,27 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<ReadUserDTO?> GetUserByIdAsync(int userId)
+        public async Task<ReadUserDTO?> GetUserByEmailLoginAsync(string email)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
+            var user = await _userRepository.GetUserByEmailLoginAsync(email);
+            if (user == null)
+            {
+                throw new Exception($"Användaren med e-post: {email} hittades inte");
+            }
+
+            return new ReadUserDTO
+            {
+                Id = user.Id,
+                TenantId = user.TenantId,
+                Name = user.Name,
+                Email = user.Email,
+                Role = user.Role
+            };
+        }
+
+        public async Task<ReadUserDTO?> GetUserByIdAsync(int userId, int tenantId)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
             if (user == null)
             {
                 throw new Exception($"Användaren med id: {userId} hittades inte");
@@ -137,9 +155,9 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<ReadUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto, int actingUserId)
+        public async Task<ReadUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto, int actingUserId, int tenantId)
         {
-            var existingUser = await _userRepository.GetUserByIdAsync(id);
+            var existingUser = await _userRepository.GetUserByIdAsync(id, tenantId);
             if (existingUser == null)
             {
                 throw new Exception($"Användaren med id: {id} hittades inte");
@@ -157,7 +175,7 @@ namespace SebPortal.Api.Services
             //if email is changed, validate unique email
             if (dto.Email != null && existingUser.Email != dto.Email)
             {
-                var existingEmailUser = await _userRepository.GetUserByEmailAsync(dto.Email);
+                var existingEmailUser = await _userRepository.GetUserByEmailAsync(dto.Email, tenantId);
                 if (existingEmailUser != null)
                 {
                     throw new Exception("En användare med denna e-postadress finns redan");
@@ -213,7 +231,8 @@ namespace SebPortal.Api.Services
 
         public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO dto)
         {
-            var user = await _userRepository.GetUserByEmailAsync(dto.Email);
+
+            var user = await _userRepository.GetUserByEmailLoginAsync(dto.Email);
             if (user == null)
             {
                 throw new Exception("Ogiltig e-postadress eller lösenord.");
@@ -238,9 +257,9 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<IEnumerable<ReadUserDTO>> GetAllUsersAsync()
+        public async Task<IEnumerable<ReadUserDTO>> GetAllUsersAsync(int tenantId)
         {
-            var users = await _userRepository.GetAllUsersAsync();
+            var users = await _userRepository.GetAllUsersAsync(tenantId);
             return users.Select(user => new ReadUserDTO
             {
                 Id = user.Id,
