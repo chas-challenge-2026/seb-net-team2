@@ -18,6 +18,7 @@ namespace SebPortal.Tests
         private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock;
         private readonly Mock<IAuditRepository> _auditRepositoryMock;
         private const int ActingAdminId = 99;
+        private const int TestTenantId = 1;
         private readonly UserService _userService;
 
         public UserTests()
@@ -43,14 +44,14 @@ namespace SebPortal.Tests
             //Arrange
             var dto = new CreateUserDTO
             {
-                TenantId = 1,
+                TenantId = TestTenantId,
                 Name = "Test",
                 Email = "test@example.com",
                 Password = "Password567",
                 Role = "User"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email))
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email, TestTenantId))
                 .ReturnsAsync((User?)null);
 
             _userRepositoryMock.Setup(r => r.CreateUserAsync(It.IsAny<User>()))
@@ -58,7 +59,7 @@ namespace SebPortal.Tests
                 .ReturnsAsync((User u) =>u);
 
             //Act
-            var result = await _userService.CreateUserAsync(dto, ActingAdminId);
+            var result = await _userService.CreateUserAsync(dto, ActingAdminId, TestTenantId);
 
             //Assert
             Assert.NotNull(result);
@@ -74,7 +75,8 @@ namespace SebPortal.Tests
             var dto = new CreateUserDTO
             {
                 Email = "existing@example.com",
-                Password = "Password567"
+                Password = "Password567",
+                TenantId = TestTenantId
             };
 
             var existingUser = new User 
@@ -85,13 +87,13 @@ namespace SebPortal.Tests
                 Role = "User"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email))
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email, TestTenantId))
                 .ReturnsAsync(existingUser);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.CreateUserAsync(dto, ActingAdminId);
+                await _userService.CreateUserAsync(dto, ActingAdminId, TestTenantId);
             });
 
             Assert.Equal("Användare med denna e-postadress finns redan", exception.Message);
@@ -118,7 +120,7 @@ namespace SebPortal.Tests
                 Role = "Admin"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(loginDto.Email))
+            _userRepositoryMock.Setup(r => r.GetUserByEmailLoginAsync(loginDto.Email))
                 .ReturnsAsync(existingUser);
 
             //act 
@@ -365,7 +367,7 @@ namespace SebPortal.Tests
                 TenantId = 1
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(loginDto.Email))
+            _userRepositoryMock.Setup(r => r.GetUserByEmailLoginAsync(loginDto.Email))
                 .ReturnsAsync(existingUser);
 
 
@@ -387,7 +389,7 @@ namespace SebPortal.Tests
             var existingUser = new User
             {
                 Id = userId,
-                TenantId = 1,
+                TenantId = TestTenantId,
                 Name = "Old Name",
                 Email = "test@example.com",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Password567"),
@@ -399,14 +401,14 @@ namespace SebPortal.Tests
                 Name = "New Name"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(userId))
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(userId, TestTenantId))
                 .ReturnsAsync(existingUser);
 
             _userRepositoryMock.Setup(r => r.UpdateUserAsync(It.IsAny<User>()))
                 .ReturnsAsync((User u) => u);
 
             //Act
-            var result = await _userService.UpdateUserAsync(userId, updateDto, ActingAdminId);
+            var result = await _userService.UpdateUserAsync(userId, updateDto, ActingAdminId, TestTenantId);
 
             //Assert
             Assert.NotNull(result);
@@ -425,13 +427,13 @@ namespace SebPortal.Tests
                 Name = "New Name"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id))
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
                 .ReturnsAsync((User?)null);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId);
+                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId, TestTenantId);
             });
 
             Assert.Equal($"Användaren med id: {id} hittades inte", exception.Message);
@@ -451,7 +453,7 @@ namespace SebPortal.Tests
                 Email = "old@example.com",
                 PasswordHash = "dummy_hash",
                 Role = "User",
-                TenantId = 1
+                TenantId = TestTenantId
             };
 
             var updateDto = new UpdateUserDTO
@@ -460,7 +462,7 @@ namespace SebPortal.Tests
             };
 
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id))
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
                 .ReturnsAsync(existingUser);
 
             var anotherUser = new User
@@ -470,16 +472,16 @@ namespace SebPortal.Tests
                 Email = "taken@example.com",
                 PasswordHash = "dummy_hash",
                 Role = "User",
-                TenantId = 1
+                TenantId = TestTenantId
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(updateDto.Email))
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(updateDto.Email, TestTenantId))
                 .ReturnsAsync(anotherUser);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId);
+                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId, TestTenantId);
             });
 
             Assert.Equal($"En användare med denna e-postadress finns redan", exception.Message);
@@ -496,63 +498,63 @@ namespace SebPortal.Tests
                 Email = "test@example.com",
                 PasswordHash = "dummy_hash",
                 Role = "User",
-                TenantId = 1
+                TenantId = TestTenantId
             };
 
-            _userRepositoryMock.Setup(r=> r.GetUserByIdAsync(id))
+            _userRepositoryMock.Setup(r=> r.GetUserByIdAsync(id, TestTenantId))
                 .ReturnsAsync(existingUser);
 
-            _userRepositoryMock.Setup(r => r.DeleteUserAsync(id))
+            _userRepositoryMock.Setup(r => r.DeleteUserAsync(id, TestTenantId))
                 .ReturnsAsync(true);
 
-            var result = await _userService.DeleteUserAsync(id, ActingAdminId);
+            var result = await _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId);
             Assert.True(result);
-            _userRepositoryMock.Verify(r=> r.DeleteUserAsync(id) , Times.Once);
+            _userRepositoryMock.Verify(r=> r.DeleteUserAsync(id, TestTenantId) , Times.Once);
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.Action == AuditActions.DeleteUser &&
                 e.EntityId == id &&
                 e.UserId == ActingAdminId &&
-                e.TenantId == 1)), Times.Once);
+                e.TenantId == TestTenantId)), Times.Once);
         }
 
         [Fact]
         public async Task DeleteUserAsync_ShouldThrowBusinessRule_WhenUserHasAuditHistory()
         {
             int id = 5;
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id)).ReturnsAsync(new User
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId)).ReturnsAsync(new User
             {
-                Id = id, Name = "Test", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = 1
+                Id = id, Name = "Test", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
             });
             _auditRepositoryMock.Setup(a => a.HasEntriesForUserAsync(id)).ReturnsAsync(true);
 
-            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(id, ActingAdminId));
+            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId));
 
-            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>()), Times.Never);
+            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
         public async Task DeleteUserAsync_ShouldThrowBusinessRule_WhenDeletingSelf()
         {
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(ActingAdminId)).ReturnsAsync(new User
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(ActingAdminId, TestTenantId)).ReturnsAsync(new User
             {
-                Id = ActingAdminId, Name = "Admin", Email = "admin@example.com", PasswordHash = "x", Role = "Admin", TenantId = 1
+                Id = ActingAdminId, Name = "Admin", Email = "admin@example.com", PasswordHash = "x", Role = "Admin", TenantId = TestTenantId
             });
 
-            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(ActingAdminId, ActingAdminId));
+            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(ActingAdminId, ActingAdminId, TestTenantId));
 
-            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>()), Times.Never);
+            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
         public async Task UpdateUserAsync_ShouldLogChangedFields_WithoutPassword()
         {
             int id = 5;
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id)).ReturnsAsync(new User
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId)).ReturnsAsync(new User
             {
-                Id = id, Name = "Old", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = 1
+                Id = id, Name = "Old", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
             });
 
-            await _userService.UpdateUserAsync(id, new UpdateUserDTO { Name = "New", Password = "Hemligt123!" }, ActingAdminId);
+            await _userService.UpdateUserAsync(id, new UpdateUserDTO { Name = "New", Password = "Hemligt123!" }, ActingAdminId, TestTenantId);
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.Action == AuditActions.UpdateUser &&
@@ -567,18 +569,18 @@ namespace SebPortal.Tests
             //arrange
             int id = 10;
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id))
+            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
                 .ReturnsAsync((User?)null);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.DeleteUserAsync(id, ActingAdminId);
+                await _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId);
             });
 
             Assert.Equal($"Användaren med id: {id} hittades inte", exception.Message);
 
-            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>()), Times.Never);
+            _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
@@ -590,7 +592,7 @@ namespace SebPortal.Tests
                 new User
                 {
                     Id = 1,
-                    TenantId = 1,
+                    TenantId = TestTenantId,
                     Name = "Test",
                     Email = "test@example.com",
                     PasswordHash = "hash1",
@@ -599,7 +601,7 @@ namespace SebPortal.Tests
                 new User
                 {
                     Id = 2,
-                    TenantId = 1,
+                    TenantId = TestTenantId,
                     Name = "Test2",
                     Email = "test2@example.com",
                     PasswordHash = "hash2",
@@ -607,11 +609,11 @@ namespace SebPortal.Tests
                 }
             };
 
-            _userRepositoryMock.Setup(r => r.GetAllUsersAsync())
+            _userRepositoryMock.Setup(r => r.GetAllUsersAsync(TestTenantId))
                 .ReturnsAsync(users);
 
             // Act
-            var result = await _userService.GetAllUsersAsync();
+            var result = await _userService.GetAllUsersAsync(TestTenantId);
 
             // Assert
             Assert.NotNull(result);
