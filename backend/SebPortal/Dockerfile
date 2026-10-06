@@ -6,11 +6,11 @@ COPY backend/SebPortal/SebPortal.Api.csproj backend/SebPortal/
 RUN dotnet restore backend/SebPortal/SebPortal.Api.csproj
 
 COPY backend/SebPortal/ backend/SebPortal/
-COPY native/csv/csv.c native/csv/csv.h native/csv/
+COPY native/ native/
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc libc6-dev \
-    && gcc -O2 -Wall -fPIC -shared -o native/libcsvparser.so native/csv/csv.c \
+    && apt-get install -y --no-install-recommends gcc libc6-dev make libssl-dev \
     && rm -rf /var/lib/apt/lists/*
+RUN make -C native
 RUN dotnet publish backend/SebPortal/SebPortal.Api.csproj -c Release -o /app/publish
 
 # Runtime stage
