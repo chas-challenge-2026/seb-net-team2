@@ -56,4 +56,4 @@ jobs:
 
         - name: Build Docker Image
           run: |
-            docker build -t sebportal:${{ github.sha }} -f backend/SebPortal/Dockerfile backend/SebPortal    
+            docker build -t sebportal:${{ github.sha }} -f backend/SebPortal/Dockerfile .  
