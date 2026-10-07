@@ -22,6 +22,11 @@ import { useAuth } from "../../hooks/useAuth";
 import { PaymentChecks } from "./PaymentChecks";
 import { PaymentSourceAccount } from "./PaymentSourceAccount";
 import { DueBadge, RecipientAndDueRows } from "./PaymentDueInfo";
+import { ApprovalTabs } from "./ApprovalTabs";
+import { TAB_IDS, type ApprovalTab } from "./approvalTabIds";
+import { HandledApprovals } from "./HandledApprovals";
+import { APPROVAL_HISTORY_QUERY_KEY } from "../../hooks/useApprovalHistory";
+import { addSessionDecision } from "../../hooks/useSessionDecisions";
 import styles from "./Attestkorg.module.css";
 
 const COMMENT_MAX_LENGTH = 300;
@@ -76,6 +81,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 export function Attestkorg() {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState<ApprovalTab>("pending");
     const { data: approvals = [], isPending, isError, error } = useApprovals();
     const queryClient = useQueryClient();
 
@@ -173,6 +179,22 @@ export function Attestkorg() {
                         amount: formatAmount(approval, locale),
                     };
 
+                    // Shown in the "Handled" tab until the backend provides the real history.
+                    addSessionDecision(queryClient, user?.id, {
+                        stepId: approval.stepId,
+                        stepNumber: approval.stepNumber,
+                        paymentId: approval.paymentId,
+                        reference: approval.reference,
+                        amount: approval.amount,
+                        currency: approval.currency,
+                        toIban: approval.toIban,
+                        recipientName: approval.recipientName,
+                        createdByUserName: approval.createdByUserName,
+                        decision: approved ? "approved" : "rejected",
+                        comment: confirmComment || null,
+                        decidedAt: new Date().toISOString(),
+                    });
+
                     setActionFeedback({
                         type: approved ? "approved" : "rejected",
                         message: approved
@@ -188,7 +210,11 @@ export function Attestkorg() {
 
                     setConfirmAction(null);
 
-                    await queryClient.invalidateQueries({ queryKey: APPROVALS_QUERY_KEY });
+                    await Promise.all([
+                        queryClient.invalidateQueries({ queryKey: APPROVALS_QUERY_KEY }),
+                        // The decision now belongs in the "Handled" tab.
+                        queryClient.invalidateQueries({ queryKey: APPROVAL_HISTORY_QUERY_KEY }),
+                    ]);
                 },
 
                 onError: async (error) => {
@@ -339,6 +365,23 @@ export function Attestkorg() {
                 </div>
             )}
 
+            <ApprovalTabs
+                activeTab={activeTab}
+                onChange={setActiveTab}
+                pendingCount={approvals.length}
+            />
+
+            {activeTab === "handled" ? (
+                <HandledApprovals
+                    id={TAB_IDS.handled.panel}
+                    labelledBy={TAB_IDS.handled.tab}
+                />
+            ) : (
+            <div
+                id={TAB_IDS.pending.panel}
+                role="tabpanel"
+                aria-labelledby={TAB_IDS.pending.tab}
+            >
             {overdueCount > 0 && (
                 <div className={styles.overdueBanner} role="status">
                     <Clock3 size={18} aria-hidden="true" />
@@ -482,6 +525,8 @@ export function Attestkorg() {
                     </div>
                 )}
             </div>
+            </div>
+            )}
 
             {confirmAction && (
                 <div className={styles.modalOverlay} onClick={closeConfirm}>

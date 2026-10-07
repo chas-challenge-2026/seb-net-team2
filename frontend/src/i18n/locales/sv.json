@@ -244,6 +244,39 @@
             "duplicate": "Möjlig dubblett: samma mottagare och belopp som betalning {{payments}}",
             "highAmount": "Högt belopp – kontrollera extra noga",
             "foreignRecipient": "Utländsk mottagare ({{country}}) – kontrollera att det stämmer med fakturan"
+        },
+        "tabs": {
+            "label": "Vyer i attestkorgen",
+            "pending_one": "Att hantera ({{count}})",
+            "pending_other": "Att hantera ({{count}})",
+            "handled": "Hanterade"
+        },
+        "history": {
+            "loading": "Laddar hanterade betalningar...",
+            "error": "Det gick inte att ladda hanterade betalningar.",
+            "unavailableTitle": "Historiken är inte tillgänglig än",
+            "emptyTitle": "Inga hanterade betalningar än",
+            "emptyDescription": "Betalningar som du godkänner eller avvisar visas här.",
+            "noMatchesTitle": "Inga betalningar matchar filtren",
+            "noMatchesDescription": "Prova en annan sökning eller rensa filtren.",
+            "search": "Sök",
+            "searchPlaceholder": "Referens, mottagare eller IBAN",
+            "status": "Beslut",
+            "statusAll": "Alla",
+            "statusApproved": "Godkända",
+            "statusRejected": "Avvisade",
+            "fromDate": "Från datum",
+            "toDate": "Till datum",
+            "minAmount": "Lägsta belopp",
+            "maxAmount": "Högsta belopp",
+            "clear": "Rensa filter",
+            "count": "Visar {{visible}} av {{total}}",
+            "approvedOn": "Godkänd {{date}}",
+            "rejectedOn": "Avvisad {{date}}",
+            "step": "Atteststeg",
+            "reason": "Anledning",
+            "sessionNote": "Visar beslut du har fattat sedan du öppnade sidan. Äldre beslut visas när backend har stöd för det.",
+            "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här."
         }
     },
     "batch": {

@@ -244,6 +244,39 @@
             "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
             "highAmount": "High amount – check extra carefully",
             "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
+        },
+        "tabs": {
+            "label": "Approval inbox views",
+            "pending_one": "To handle ({{count}})",
+            "pending_other": "To handle ({{count}})",
+            "handled": "Handled"
+        },
+        "history": {
+            "loading": "Loading handled payments...",
+            "error": "Could not load handled payments.",
+            "unavailableTitle": "History is not available yet",
+            "emptyTitle": "No handled payments yet",
+            "emptyDescription": "Payments you approve or reject will be shown here.",
+            "noMatchesTitle": "No payments match the filters",
+            "noMatchesDescription": "Try another search or clear the filters.",
+            "search": "Search",
+            "searchPlaceholder": "Reference, recipient or IBAN",
+            "status": "Decision",
+            "statusAll": "All",
+            "statusApproved": "Approved",
+            "statusRejected": "Rejected",
+            "fromDate": "From date",
+            "toDate": "To date",
+            "minAmount": "Min amount",
+            "maxAmount": "Max amount",
+            "clear": "Clear filters",
+            "count": "Showing {{visible}} of {{total}}",
+            "approvedOn": "Approved {{date}}",
+            "rejectedOn": "Rejected {{date}}",
+            "step": "Approval step",
+            "reason": "Reason",
+            "sessionNote": "Showing decisions you have made since you opened the page. Earlier decisions will be shown once the backend supports it.",
+            "sessionEmpty": "Payments you approve or reject now will be shown here."
         }
     },
     "batch": {
