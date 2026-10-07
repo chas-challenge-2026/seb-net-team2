@@ -229,7 +229,8 @@
             "title": "Check before deciding",
             "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
             "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
-            "highAmount": "High amount – check extra carefully"
+            "highAmount": "High amount – check extra carefully",
+            "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
         }
     },
     "batch": {

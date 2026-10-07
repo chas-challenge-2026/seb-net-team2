@@ -229,7 +229,8 @@
             "title": "Kontrollera innan beslut",
             "ibanInvalid": "IBAN är ogiltigt – kontrollera kontonumret med initiativtagaren",
             "duplicate": "Möjlig dubblett: samma mottagare och belopp som betalning {{payments}}",
-            "highAmount": "Högt belopp – kontrollera extra noga"
+            "highAmount": "Högt belopp – kontrollera extra noga",
+            "foreignRecipient": "Utländsk mottagare ({{country}}) – kontrollera att det stämmer med fakturan"
         }
     },
     "batch": {

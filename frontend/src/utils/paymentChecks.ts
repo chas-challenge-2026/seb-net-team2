@@ -5,6 +5,10 @@ import type { PendingApprovalStep } from "../schemas/pendingApprovalSchema";
 // An assumption, not a business rule from the bank: adjust when the team agrees on a limit.
 export const HIGH_AMOUNT_THRESHOLD_SEK = 100_000;
 
+// The customers are Swedish companies, so a recipient abroad is unusual and worth a second look:
+// a forged invoice with a changed (often foreign) IBAN is a common fraud against companies.
+export const HOME_COUNTRY = "SE";
+
 // Swedish IBANs carry the bank's code in positions 5–7 (after "SE" and the two check digits).
 const SWEDISH_BANK_CODES: Record<string, string> = {
     "120": "Danske Bank",
@@ -26,8 +30,16 @@ export function recipientBank(iban: string): string | null {
     return SWEDISH_BANK_CODES[normalized.slice(4, 7)] ?? null;
 }
 
+// The first two letters of an IBAN are the recipient's country code, e.g. "DE".
+export function ibanCountry(iban: string): string | null {
+    const code = normalizeIban(iban).slice(0, 2);
+    return /^[A-Z]{2}$/.test(code) ? code : null;
+}
+
 export type PaymentChecks = {
     ibanValid: boolean;
+    // Country code when the recipient is outside HOME_COUNTRY, otherwise null.
+    foreignCountry: string | null;
     // Other pending payments with the same recipient and amount: a possible double payment.
     duplicateOf: number[];
     highAmount: boolean;
@@ -38,6 +50,7 @@ export function checkPayment(
     allPending: PendingApprovalStep[]
 ): PaymentChecks {
     const iban = normalizeIban(approval.toIban);
+    const country = ibanCountry(iban);
 
     const duplicateOf = allPending
         .filter((other) =>
@@ -50,6 +63,7 @@ export function checkPayment(
 
     return {
         ibanValid: isValidIban(approval.toIban),
+        foreignCountry: country && country !== HOME_COUNTRY ? country : null,
         duplicateOf: [...new Set(duplicateOf)],
         highAmount: approval.currency === "SEK" && approval.amount >= HIGH_AMOUNT_THRESHOLD_SEK,
     };
