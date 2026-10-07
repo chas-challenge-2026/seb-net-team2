@@ -17,3 +17,24 @@ export function isOverdue(approval: PendingApprovalStep): boolean {
 export function countOverdue(approvals: PendingApprovalStep[] | undefined): number {
     return (approvals ?? []).filter(isOverdue).length
 }
+
+export type DueStatus = 'pastDue' | 'today' | 'tomorrow' | 'later'
+
+// How close the payment is to its due date, compared by calendar day in the user's time zone.
+// Returns null when the payment has no due date.
+export function dueStatus(approval: PendingApprovalStep): DueStatus | null {
+    if (!approval.dueDate) return null
+
+    const [year, month, day] = approval.dueDate.slice(0, 10).split('-').map(Number)
+    if (!year || !month || !day) return null
+
+    const due = new Date(year, month - 1, day).getTime()
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const daysLeft = Math.round((due - today) / MS_PER_DAY)
+
+    if (daysLeft < 0) return 'pastDue'
+    if (daysLeft === 0) return 'today'
+    if (daysLeft === 1) return 'tomorrow'
+    return 'later'
+}

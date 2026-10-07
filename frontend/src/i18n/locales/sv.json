@@ -200,7 +200,16 @@
             "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
             "waitingToday": "Skickad i dag",
             "dualApproval": "Dubbelattest – betalningen kräver två attestanter",
-            "recipientBank": "Mottagarbank"
+            "recipientBank": "Mottagarbank",
+            "fromAccount": "Från konto",
+            "accountNumber": "Konto #{{id}}",
+            "recipient": "Mottagare",
+            "dueDate": "Förfallodatum",
+            "due": {
+                "pastDue": "Förfallen",
+                "today": "Förfaller i dag",
+                "tomorrow": "Förfaller i morgon"
+            }
         },
         "comment": {
             "label": "Kommentar",
@@ -226,7 +235,8 @@
             "rejectTitle": "Avvisa betalning?",
             "approveDescription": "Kontrollera uppgifterna innan du godkänner. Beslutet går inte att ångra.",
             "rejectDescription": "Kontrollera uppgifterna och förklara varför betalningen avvisas.",
-            "amount": "Belopp"
+            "amount": "Belopp",
+            "attestingAs": "Du attesterar som {{name}} · Atteststeg {{step}}"
         },
         "checks": {
             "title": "Kontrollera innan beslut",

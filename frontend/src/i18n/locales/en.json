@@ -200,7 +200,16 @@
             "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
             "waitingToday": "Submitted today",
             "dualApproval": "Dual approval – this payment requires two attestants",
-            "recipientBank": "Recipient bank"
+            "recipientBank": "Recipient bank",
+            "fromAccount": "From account",
+            "accountNumber": "Account #{{id}}",
+            "recipient": "Recipient",
+            "dueDate": "Due date",
+            "due": {
+                "pastDue": "Past due",
+                "today": "Due today",
+                "tomorrow": "Due tomorrow"
+            }
         },
         "comment": {
             "label": "Comment",
@@ -226,7 +235,8 @@
             "rejectTitle": "Reject payment?",
             "approveDescription": "Check the details before you approve. The decision cannot be undone.",
             "rejectDescription": "Check the details and explain why the payment is rejected.",
-            "amount": "Amount"
+            "amount": "Amount",
+            "attestingAs": "You are approving as {{name}} · Approval step {{step}}"
         },
         "checks": {
             "title": "Check before deciding",
