@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useFormValidation } from "../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
+import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
     CircleCheck,
@@ -42,6 +44,7 @@ const goals: SavingsGoal[] = [
 
 export function SaveInvest() {
     const { t, i18n } = useTranslation();
+    const validation = useFormValidation();
 
     const [activeTab, setActiveTab] = useState<Tab>("savings");
     const [actionMessage, setActionMessage] = useState<string | null>(null);
@@ -61,6 +64,49 @@ export function SaveInvest() {
         setActionMessage(message);
     }
 
+    function handleCreateAccount(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!validation.validate(event.currentTarget, { "savings-account-name": !accountName.trim() ? t("validation.required", { field: t("saveInvest.modals.account.name") }) : "" })) return;
+
+        if (!accountName.trim()) return;
+
+        setAccountList((current) => [
+            ...current,
+            {
+                name: accountName.trim(),
+                balance: 0,
+                rate: "2.40%",
+            },
+        ]);
+
+        setAccountName("");
+        setModal(null);
+        showActionMessage(t("saveInvest.messages.accountCreated"));
+    }
+
+    function handleCreateGoal(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!validation.validate(event.currentTarget, { "savings-goal-name": !goalName.trim() ? t("validation.required", { field: t("saveInvest.modals.goal.name") }) : "" })) return;
+
+        const target = Number(goalTarget);
+
+        if (!goalName.trim() || !target) return;
+
+        setGoalList((current) => [
+            ...current,
+            {
+                name: goalName.trim(),
+                saved: 0,
+                target,
+            },
+        ]);
+
+        setGoalName("");
+        setGoalTarget("");
+        setModal(null);
+        showActionMessage(t("saveInvest.messages.goalCreated"));
+    }
+
     return (
         <div className={styles.page}>
             <header className={styles.header}>
@@ -73,7 +119,7 @@ export function SaveInvest() {
                     <p>{t("saveInvest.description")}</p>
                 </div>
 
-                <Button size="medium" onClick={() => setModal("account")}>
+                <Button size="medium" onClick={() => { validation.clear(); setModal("account"); }}>
                     <span className={styles.buttonContent}>
                         <Plus size={17} aria-hidden="true" />
                         {t("saveInvest.actions.openAccount")}
@@ -223,7 +269,7 @@ export function SaveInvest() {
                             <p>{t("saveInvest.goals.description")}</p>
                         </div>
 
-                        <Button size="small" onClick={() => setModal("goal")}>
+                        <Button size="small" onClick={() => { validation.clear(); setModal("goal"); }}>
                             <span className={styles.buttonContent}>
                                 <Plus size={16} aria-hidden="true" />
                                 {t("saveInvest.actions.addGoal")}
@@ -277,7 +323,8 @@ export function SaveInvest() {
                         </button>
 
                         {modal === "account" && (
-                            <>
+                            <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} onSubmit={handleCreateAccount}>
+                                <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                                 <p className={styles.eyebrow}>{t("saveInvest.modals.account.eyebrow")}</p>
                                 <h2 id="save-invest-modal-title">{t("saveInvest.modals.account.title")}</h2>
 
@@ -288,93 +335,64 @@ export function SaveInvest() {
                                 <label className={styles.modalLabel}>
                                     {t("saveInvest.modals.account.name")}
 
-                                    <input
+                                    <input id="savings-account-name" required {...validation.fieldProps("savings-account-name")}
                                         value={accountName}
                                         onChange={(event) => setAccountName(event.target.value)}
                                         placeholder={t("saveInvest.modals.account.placeholder")}
                                     />
+                                    <FieldError id="savings-account-name" errors={validation.errors} />
                                 </label>
 
                                 <Button
-                                    onClick={() => {
-                                        if (!accountName.trim()) return;
-
-                                        setAccountList((current) => [
-                                            ...current,
-                                            {
-                                                name: accountName.trim(),
-                                                balance: 0,
-                                                rate: "2.40%",
-                                            },
-                                        ]);
-
-                                        setAccountName("");
-                                        setModal(null);
-                                        showActionMessage(t("saveInvest.messages.accountCreated"));
-                                    }}
+                                    type="submit"
                                 >
                                     <span className={styles.buttonContent}>
                                         <Plus size={17} aria-hidden="true" />
                                         {t("saveInvest.actions.createAccount")}
                                     </span>
                                 </Button>
-                            </>
+                            </form>
                         )}
 
                         {modal === "goal" && (
-                            <>
+                            <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} onSubmit={handleCreateGoal}>
+                                <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                                 <p className={styles.eyebrow}>{t("saveInvest.modals.goal.eyebrow")}</p>
                                 <h2 id="save-invest-modal-title">{t("saveInvest.modals.goal.title")}</h2>
 
                                 <label className={styles.modalLabel}>
                                     {t("saveInvest.modals.goal.name")}
 
-                                    <input
+                                    <input id="savings-goal-name" required {...validation.fieldProps("savings-goal-name")}
                                         value={goalName}
                                         onChange={(event) => setGoalName(event.target.value)}
                                         placeholder={t("saveInvest.modals.goal.placeholder")}
                                     />
+                                    <FieldError id="savings-goal-name" errors={validation.errors} />
                                 </label>
 
                                 <label className={styles.modalLabel}>
                                     {t("saveInvest.modals.goal.target")}
 
-                                    <input
+                                    <input id="savings-goal-target" required {...validation.fieldProps("savings-goal-target")}
                                         type="number"
                                         min="1"
                                         value={goalTarget}
                                         onChange={(event) => setGoalTarget(event.target.value)}
                                         placeholder="50000"
                                     />
+                                    <FieldError id="savings-goal-target" errors={validation.errors} />
                                 </label>
 
                                 <Button
-                                    onClick={() => {
-                                        const target = Number(goalTarget);
-
-                                        if (!goalName.trim() || !target) return;
-
-                                        setGoalList((current) => [
-                                            ...current,
-                                            {
-                                                name: goalName.trim(),
-                                                saved: 0,
-                                                target,
-                                            },
-                                        ]);
-
-                                        setGoalName("");
-                                        setGoalTarget("");
-                                        setModal(null);
-                                        showActionMessage(t("saveInvest.messages.goalCreated"));
-                                    }}
+                                    type="submit"
                                 >
                                     <span className={styles.buttonContent}>
                                         <Plus size={17} aria-hidden="true" />
                                         {t("saveInvest.actions.createGoal")}
                                     </span>
                                 </Button>
-                            </>
+                            </form>
                         )}
 
                         {modal === "manage" && selectedAccount && (

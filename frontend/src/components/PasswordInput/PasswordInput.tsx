@@ -50,9 +50,11 @@ export default function PasswordInput({
                 onClick={handleVisibilityToggle}
                 aria-label={
                     isPasswordVisible
-                        ? "Hide password"
-                        : "Show password"
+                        ? t("validation.hidePassword")
+                        : t("validation.showPassword")
                 }
+                disabled={rest.disabled}
+                aria-controls={id}
                 aria-pressed={isPasswordVisible}
             >
                 {!isPasswordVisible ? (

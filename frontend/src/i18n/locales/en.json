@@ -17,6 +17,9 @@
         "goToDashboard": "Go to dashboard"
     },
     "login": {
+        "invalidCredentials": "Incorrect email or password. Check both and try again.",
+        "unavailable": "We could not log you in. Check your email and password and try again. If the problem continues, try again later.",
+        "connectionFailed": "Could not connect to the server. Check your connection and try again.",
         "private": "Private",
         "company": "Company",
         "email": "Email",
@@ -614,5 +617,40 @@
             "title": "Account details",
             "company": "Company"
         }
+    },
+    "validation": {
+        "batchRows": "Correct the row errors shown below in your CSV file, then select the corrected file.",
+        "fileRead": "The file could not be read. Try selecting it again.",
+        "rejectReason": "Enter a rejection reason with at least {{min}} characters.",
+        "required": "Enter {{field}}. This field is required.",
+        "email": "Enter a valid email address, for example alex@example.com.",
+        "number": "Enter a valid number.",
+        "minimum": "Enter a number of at least {{min}}.",
+        "maximum": "Enter a number no greater than {{max}}.",
+        "step": "Enter a number in increments of {{step}}.",
+        "format": "Check the format of {{field}} and correct it.",
+        "summary": "Please correct the following errors ({{count}}):",
+        "nameExample": "Alex Andersson",
+        "emailExample": "alex@example.com",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "approval": {
+            "minAmount": "Enter an amount of 0 or more.",
+            "requiredApprovals": "Enter a whole number of approvals, at least 1."
+        },
+        "payment": {
+            "fromAccountId": "Select the account to pay from.",
+            "recipient": "Enter the recipient's name.",
+            "amount": "Enter an amount greater than 0.",
+            "reference": "Shorten the reference to 100 characters or fewer.",
+            "message": "Shorten the message to 500 characters or fewer."
+        },
+        "maxLength": "Shorten {{field}} to {{max}} characters or fewer.",
+        "companyExample": "Example AB"
+    },
+    "registration": {
+        "submit": "Register",
+        "login": "Already have an account? Log in.",
+        "companyName": "Company name"
     }
 }

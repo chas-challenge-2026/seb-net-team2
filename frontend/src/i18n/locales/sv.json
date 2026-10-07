@@ -17,6 +17,9 @@
         "goToDashboard": "Gå till översikten"
     },
     "login": {
+        "invalidCredentials": "Fel e-postadress eller lösenord. Kontrollera båda och försök igen.",
+        "unavailable": "Det gick inte att logga in. Kontrollera din e-postadress och ditt lösenord och försök igen. Om problemet kvarstår, försök senare.",
+        "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.",
         "private": "Privat",
         "company": "Bolag",
         "email": "E-post",
@@ -614,5 +617,40 @@
             "title": "Kontouppgifter",
             "company": "Företag"
         }
+    },
+    "validation": {
+        "batchRows": "Rätta radfelen som visas nedan i CSV-filen och välj sedan den korrigerade filen.",
+        "fileRead": "Filen kunde inte läsas. Försök välja den igen.",
+        "rejectReason": "Ange ett skäl för avslag med minst {{min}} tecken.",
+        "required": "Ange {{field}}. Fältet är obligatoriskt.",
+        "email": "Ange en giltig e-postadress, till exempel alex@example.com.",
+        "number": "Ange ett giltigt tal.",
+        "minimum": "Ange ett tal som är minst {{min}}.",
+        "maximum": "Ange ett tal som är högst {{max}}.",
+        "step": "Ange ett tal i steg om {{step}}.",
+        "format": "Kontrollera formatet för {{field}} och korrigera det.",
+        "summary": "Rätta följande fel ({{count}}):",
+        "nameExample": "Alex Andersson",
+        "emailExample": "alex@example.com",
+        "showPassword": "Visa lösenord",
+        "hidePassword": "Dölj lösenord",
+        "approval": {
+            "minAmount": "Ange ett belopp som är 0 eller större.",
+            "requiredApprovals": "Ange ett helt antal godkännanden, minst 1."
+        },
+        "payment": {
+            "fromAccountId": "Välj kontot som betalningen ska göras från.",
+            "recipient": "Ange mottagarens namn.",
+            "amount": "Ange ett belopp större än 0.",
+            "reference": "Korta referensen till högst 100 tecken.",
+            "message": "Korta meddelandet till högst 500 tecken."
+        },
+        "maxLength": "Korta {{field}} till högst {{max}} tecken.",
+        "companyExample": "Exempel AB"
+    },
+    "registration": {
+        "submit": "Registrera",
+        "login": "Har du redan ett konto? Logga in.",
+        "companyName": "Företagsnamn"
     }
 }

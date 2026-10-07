@@ -1,3 +1,5 @@
+import { focusField } from "../../components/FormValidation/useFormValidation";
+import { FieldError } from "../../components/FormValidation/FormErrors";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -85,6 +87,7 @@ export function Attestkorg() {
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
     const cancelButtonRef = useRef<HTMLButtonElement>(null);
+    const [reasonError, setReasonError] = useState(false);
     const reasonRef = useRef<HTMLTextAreaElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
     const feedbackRef = useRef<HTMLDivElement>(null);
@@ -132,6 +135,7 @@ export function Attestkorg() {
     }
 
     function updateComment(stepId: number, comment: string) {
+        setReasonError(false);
         setComments((current) => ({ ...current, [stepId]: comment }));
     }
 
@@ -142,11 +146,17 @@ export function Attestkorg() {
     ) {
         triggerRef.current = event.currentTarget;
         decisionMutation.reset();
+        setReasonError(false);
         setConfirmAction({ approval, kind });
     }
 
     function handleConfirm() {
-        if (!confirmAction || isRejectReasonMissing) return;
+        if (!confirmAction) return;
+        if (isRejectReasonMissing) {
+            setReasonError(true);
+            requestAnimationFrame(() => focusField("confirm-comment"));
+            return;
+        }
 
         const { approval, kind } = confirmAction;
         const approved = kind === "approve";
@@ -533,11 +543,15 @@ export function Attestkorg() {
                                 maxLength={COMMENT_MAX_LENGTH}
                                 placeholder={t("approvalInbox.comment.placeholder")}
                                 required={confirmAction.kind === "reject"}
-                                aria-describedby={
-                                    confirmAction.kind === "reject" ? "confirm-comment-hint" : undefined
-                                }
+                                aria-invalid={reasonError}
+                                aria-describedby={[confirmAction.kind === "reject" ? "confirm-comment-hint" : "", reasonError ? "confirm-comment-error" : ""].filter(Boolean).join(" ") || undefined}
                             />
 
+                            <div aria-live="assertive">
+                                <FieldError id="confirm-comment" errors={reasonError ? {
+                                    "confirm-comment": t("validation.rejectReason", { min: REJECT_REASON_MIN_LENGTH }),
+                                } : {}} />
+                            </div>
                             {confirmAction.kind === "reject" && (
                                 <span id="confirm-comment-hint" className={styles.commentHint}>
                                     {t("approvalInbox.comment.rejectReasonHint", {
@@ -578,7 +592,7 @@ export function Attestkorg() {
                                         ? styles.approve
                                         : styles.reject
                                 }
-                                disabled={decisionMutation.isPending || isRejectReasonMissing}
+                                disabled={decisionMutation.isPending}
                                 onClick={handleConfirm}
                             >
                                 {decisionMutation.isPending ? (

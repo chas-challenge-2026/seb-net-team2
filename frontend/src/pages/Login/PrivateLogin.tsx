@@ -1,3 +1,5 @@
+import { useFormValidation } from "../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,7 +10,7 @@ import Button from "../../components/Button/Button";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import LoadingWheel from "../../components/LoadingState/LoadingWheel";
 import { useAuth } from "../../hooks/useAuth";
-import { AppError } from "../../errors/AppError";
+import { getLoginErrorMessage } from "./loginErrorMessage";
 
 import styles from "./Login.module.css";
 
@@ -18,6 +20,7 @@ export default function PrivateLogin() {
     const [error, setError] = useState("");
 
     const { t } = useTranslation();
+    const validation = useFormValidation();
     const { login, isLoggingIn } = useAuth();
     const navigate = useNavigate();
 
@@ -31,6 +34,7 @@ export default function PrivateLogin() {
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (!validation.validate(event.currentTarget)) return;
 
         if (!email.trim() || !password) {
             setError(t("login.missingCredentials"));
@@ -43,17 +47,13 @@ export default function PrivateLogin() {
             await login(email.trim(), password);
             await navigate({ to: "/dashboard" });
         } catch (error) {
-            if (error instanceof AppError) {
-                setError(error.detail ?? error.message);
-                return;
-            }
-
-            setError(t("login.generic"));
+            setError(getLoginErrorMessage(error, t));
         }
     }
 
     return (
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} onSubmit={handleSubmit} className={styles.form}>
+            <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
             <div className={styles.inputGrid}>
                 <div className={styles.formGroup}>
                     <label htmlFor="private-email" className={styles.label}>
@@ -62,17 +62,19 @@ export default function PrivateLogin() {
 
                     <input
                         id="private-email"
+                        {...validation.fieldProps("private-email")}
                         name="email"
                         type="email"
                         autoComplete="username"
                         inputMode="email"
                         required
-                        placeholder={t("login.email")}
+                        placeholder={t("validation.emailExample")}
                         value={email}
                         onChange={handleEmail}
                         className={styles.input}
                         disabled={isLoggingIn}
                     />
+                    <FieldError id="private-email" errors={validation.errors} />
                 </div>
 
                 <div className={styles.formGroup}>
@@ -82,6 +84,7 @@ export default function PrivateLogin() {
 
                     <PasswordInput
                         id="private-password"
+                        {...validation.fieldProps("private-password")}
                         name="password"
                         value={password}
                         onChange={handlePassword}
@@ -89,6 +92,7 @@ export default function PrivateLogin() {
                         required
                         disabled={isLoggingIn}
                     />
+                    <FieldError id="private-password" errors={validation.errors} />
                 </div>
             </div>
 
