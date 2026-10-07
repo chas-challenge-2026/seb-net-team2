@@ -141,6 +141,12 @@ int audit_verify(
 - HMAC-SHA256 och SHA256-hashkedja används för integritet.
 - Testa med `make audit-test`.
 
+### Begränsningar och avgränsningar
+
+- Native Audit ansvarar för att skriva och verifiera den kryptografiskt skyddade loggen.
+- Presentation av Audit-händelser i applikationen hanteras av systemets övriga lager.
+- `audit_verify()` verifierar loggens integritet men ansvarar inte för hur verifieringsresultatet presenteras i applikationen.
+
 ---
 
 ## Bygga alla moduler

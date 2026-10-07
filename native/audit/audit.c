@@ -52,7 +52,7 @@ static void get_timestamp(char *buffer, size_t size)
     strftime(buffer, size, "%Y-%m-%d %H:%M:%S", time_info);
 }
 
-/* Läser sista raden i loggfilen. Returnerar 0 om filen inte kunde öppnas. */
+/* Läser sista raden i loggfilen. Returnerar 1 vid lyckad läsning, annars 0. */
 static int get_last_log_line(const char *log_path, char *last_line, size_t size)
 {
     FILE *file = fopen(log_path, "r");
@@ -133,9 +133,11 @@ int audit_append(const char *log_path, const char *secret_key, int user_id,
 
 /*
  * Verifierar audit-loggens integritet:
- * - HMAC-signaturen för varje post.
- * - PREV_HASH för den första posten.
- * (Full kedjeverifiering av PREV_HASH för resterande poster är under implementering.)
+ * HMAC-signaturen för varje post.
+ * PREV_HASH för varje post i hashkedjan.
+ * Första posten måste ha en PREV_HASH bestående av 64 nollor.
+ * Returnerar -1 om loggen är giltig,
+ * annars radnumret för den första felaktiga posten.
  */
 int audit_verify(const char *log_path, const char *secret_key)
 {
