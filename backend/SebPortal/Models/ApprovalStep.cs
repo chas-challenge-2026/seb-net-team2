@@ -4,7 +4,7 @@ namespace SebPortal.Models
     {
     public class ApprovalStep
     {
-        public int Id { get; set; }
+        public Guid PublicId { get; set; } = Guid.NewGuid();
         public int PaymentId { get; set; }
         public Payment Payment { get; set; } = null!; // Navigation property to Payments
         public int AttestantId { get; set; }

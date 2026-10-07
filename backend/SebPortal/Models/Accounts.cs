@@ -6,7 +6,7 @@ namespace SebPortal.Models
 {
     public class Account
     {
-        public int Id { get; set; }
+        public Guid PublicId { get; set; } = Guid.NewGuid();
         public int TenantId { get; set; }
         public Tenant Tenant { get; set; } = null!; // Navigation property to Tenants
         [Required]

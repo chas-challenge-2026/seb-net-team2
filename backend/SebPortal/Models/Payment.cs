@@ -6,7 +6,7 @@ namespace SebPortal.Models
 {
     public class Payment
     {
-        public int Id { get; set; }
+        public Guid PublicId { get; set; } = Guid.NewGuid();
         public int TenantId { get; set; }
         public Tenant Tenant { get; set; } = null!; // Navigation property to Tenants
         public int FromAccountId { get; set; }
