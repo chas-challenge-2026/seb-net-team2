@@ -5,6 +5,7 @@ import { CreditCard, Landmark, ReceiptText } from "lucide-react";
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
 import { useAuth } from "../../hooks/useAuth";
+import { formatIban } from "../../utils/paymentChecks";
 
 import Card from "../../components/Card/Card";
 
@@ -15,6 +16,9 @@ export function Dashboard() {
     const { data: accounts, isLoading: loadingAccounts, isError: accountsError } = useAccounts();
     const { data: payments, isLoading: loadingPayments } = usePayments();
     const { user } = useAuth();
+
+    // Only initiators may create payments (the backend rejects other roles).
+    const canCreatePayments = user?.role === "Initiator";
 
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
@@ -46,10 +50,12 @@ export function Dashboard() {
                     </p>
                 </div>
 
-                <Link to="/ny-betalning" className={styles.createPaymentLink}>
-                    <CreditCard size={18} strokeWidth={2} aria-hidden="true" />
-                    <span>{t("dashboard.createPayment")}</span>
-                </Link>
+                {canCreatePayments && (
+                    <Link to="/ny-betalning" className={styles.createPaymentLink}>
+                        <CreditCard size={18} strokeWidth={2} aria-hidden="true" />
+                        <span>{t("dashboard.createPayment")}</span>
+                    </Link>
+                )}
             </header>
 
             <section>
@@ -79,13 +85,16 @@ export function Dashboard() {
                                     {account.currency}
                                 </p>
 
-                                <p className={styles.accountIban}>{account.iban}</p>
+                                <p className={styles.accountIban}>{formatIban(account.iban)}</p>
                             </Card>
                         ))}
                     </div>
                 )}
             </section>
 
+            {/* "Recent payments" lists the user's own payments, so it is always empty for roles
+                that cannot create payments. */}
+            {canCreatePayments && (
             <section className={styles.recentPayments}>
                 <h2 className={styles.sectionTitle}>
                     <ReceiptText size={20} strokeWidth={2} aria-hidden="true" />
@@ -112,7 +121,7 @@ export function Dashboard() {
                                 {payments?.map((payment) => (
                                     <tr key={payment.id}>
                                         <td>{payment.date}</td>
-                                        <td>{payment.toIban}</td>
+                                        <td>{formatIban(payment.toIban)}</td>
                                         <td>{payment.reference}</td>
 
                                         <td>
@@ -147,6 +156,7 @@ export function Dashboard() {
                     )}
                 </Card>
             </section>
+            )}
         </div>
     );
 }
