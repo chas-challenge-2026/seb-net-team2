@@ -208,3 +208,7 @@
     align-items: center;
     justify-content: center;
 }
+
+/* Validation can make the dialog taller than a small viewport. */
+.modal { max-height: calc(100dvh - 2rem); overflow-y: auto; box-sizing: border-box; }
+.modal form { display: grid; gap: 1rem; }

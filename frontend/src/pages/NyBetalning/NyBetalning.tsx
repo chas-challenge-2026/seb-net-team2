@@ -1,3 +1,5 @@
+import { useFormValidation } from "../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -30,6 +32,7 @@ const initialForm: PaymentForm = {
 
 export function NyBetalning() {
     const { t, i18n } = useTranslation();
+    const validation = useFormValidation();
     const { user } = useAuth();
     const { data: accounts = [], isLoading: isLoadingAccounts, isError: accountsError } = useAccounts();
 
@@ -77,6 +80,7 @@ export function NyBetalning() {
     function clearForm() {
         setForm(initialForm);
         setError(null);
+        validation.clear();
         setIdempotencyKey(null);
     }
 
@@ -88,37 +92,39 @@ export function NyBetalning() {
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!selectedAccount) {
-            setError(t("payment.errors.selectAccount"));
-            return;
+        const result = paymentSchema.safeParse({ ...form, fromAccountId: selectedAccount?.id ?? "" });
+        const fieldErrors: Record<string, string> = {};
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0]);
+                if (field === "iban") continue;
+                fieldErrors[`payment-${field}`] = t(`validation.payment.${field}`);
+            }
         }
-
-        const validation = paymentSchema.safeParse(form);
-
-        if (!validation.success) {
-            setError(validation.error.issues[0].message);
-            return;
+        if (!selectedAccount) fieldErrors["payment-fromAccountId"] = t("payment.errors.selectAccount");
+        if (selectedAccount && amount > selectedAccount.balance) {
+            fieldErrors["payment-amount"] = t("payment.errors.insufficientBalance");
         }
-
-        if (amount > selectedAccount.balance) {
-            setError(t("payment.errors.insufficientBalance"));
-            return;
-        }
-
         setError(null);
+        if (!validation.validate(event.currentTarget, fieldErrors)) return;
+        if (!result.success) {
+            setError(result.error.issues[0].message);
+            return;
+        }
+
         setIsReviewOpen(true);
     }
 
     async function confirmPayment() {
-        const validation = paymentSchema.safeParse(form);
+        const result = paymentSchema.safeParse({ ...form, fromAccountId: selectedAccount?.id ?? "" });
 
-        if (!validation.success || !selectedAccount) {
+        if (!result.success || !selectedAccount) {
             setIsReviewOpen(false);
             setError(t("payment.errors.reviewDetails"));
             return;
         }
 
-        const validatedForm = validation.data;
+        const validatedForm = result.data;
         const paymentIdempotencyKey = idempotencyKey ?? crypto.randomUUID();
 
         if (!idempotencyKey) {
@@ -210,7 +216,8 @@ export function NyBetalning() {
             ) : (
             <div className={styles.layout}>
                 <Card className={styles.formCard}>
-                    <form onSubmit={handleSubmit}>
+                    <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} onSubmit={handleSubmit}>
+                        <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                         <div className={styles.sectionHeading}>
                             <div className={styles.number}>01</div>
 
@@ -224,6 +231,9 @@ export function NyBetalning() {
                         <label className={styles.accountField}>
                             {t("payment.fields.fromAccount")}
                             <select
+                                id="payment-fromAccountId"
+                                {...validation.fieldProps("payment-fromAccountId")}
+                                name="fromAccountId"
                                 value={selectedAccount?.id ?? ""}
                                 disabled={isLoadingAccounts || accountsError || isSubmitting}
                                 onChange={(event) => updateField("fromAccountId", event.target.value)}
@@ -242,20 +252,25 @@ export function NyBetalning() {
                                     </option>
                                 ))}
                             </select>
+                            <FieldError id="payment-fromAccountId" errors={validation.errors} />
 
                             {accountsError && (
-                                <p className={styles.fieldError}>{t("payment.errors.loadAccounts")}</p>
+                                <p className={styles.fieldError} role="alert">{t("payment.errors.loadAccounts")}</p>
                             )}
                         </label>
 
                         <label className={styles.recipientField}>
                             {t("payment.fields.recipient")}
                             <input
+                                id="payment-recipient"
+                                {...validation.fieldProps("payment-recipient")}
+                                name="recipient"
                                 required
                                 value={form.recipient}
                                 placeholder={t("payment.placeholders.recipient")}
                                 onChange={(event) => updateField("recipient", event.target.value)}
                             />
+                            <FieldError id="payment-recipient" errors={validation.errors} />
                         </label>
 
                         <label className={styles.ibanField}>
@@ -284,6 +299,9 @@ export function NyBetalning() {
                             {t("payment.fields.amount")}
                             <div className={styles.amountInput}>
                                 <input
+                                    id="payment-amount"
+                                    {...validation.fieldProps("payment-amount")}
+                                    name="amount"
                                     required
                                     min="1"
                                     step="0.01"
@@ -294,15 +312,20 @@ export function NyBetalning() {
                                 />
                                 <span>SEK</span>
                             </div>
+                            <FieldError id="payment-amount" errors={validation.errors} />
                         </label>
 
                         <label className={styles.referenceField}>
                             {t("payment.fields.reference")}
                             <input
+                                id="payment-reference"
+                                {...validation.fieldProps("payment-reference")}
+                                name="reference"
                                 value={form.reference}
                                 placeholder={t("payment.placeholders.reference")}
                                 onChange={(event) => updateField("reference", event.target.value)}
                             />
+                            <FieldError id="payment-reference" errors={validation.errors} />
                         </label>
 
                         <label className={styles.messageField}>
@@ -310,11 +333,15 @@ export function NyBetalning() {
                             <span className={styles.optional}>{t("payment.optional")}</span>
 
                             <textarea
+                                id="payment-message"
+                                {...validation.fieldProps("payment-message")}
+                                name="message"
                                 rows={2}
                                 value={form.message}
                                 placeholder={t("payment.placeholders.message")}
                                 onChange={(event) => updateField("message", event.target.value)}
                             />
+                            <FieldError id="payment-message" errors={validation.errors} />
                         </label>
                         </div>
 
