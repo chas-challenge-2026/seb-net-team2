@@ -1,6 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { CircleCheck, CircleX, History, Info, RotateCcw } from "lucide-react";
+import {
+    ChevronDown,
+    CircleCheck,
+    CircleX,
+    History,
+    RotateCcw,
+    SlidersHorizontal,
+} from "lucide-react";
 
 import { isHistoryUnavailable, useApprovalHistory } from "../../hooks/useApprovalHistory";
 import { useAuth } from "../../hooks/useAuth";
@@ -11,6 +18,9 @@ import { formatIban, recipientBank } from "../../utils/paymentChecks";
 import styles from "./Attestkorg.module.css";
 
 type StatusFilter = "all" | "approved" | "rejected";
+
+// Search and filters appear only when there are more decisions than this.
+const FILTERS_FROM_COUNT = 5;
 
 function formatAmount(entry: DecidedApproval, locale: string): string {
     return `${entry.amount.toLocaleString(locale, {
@@ -43,6 +53,10 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     const [dateTo, setDateTo] = useState("");
     const [minAmount, setMinAmount] = useState("");
     const [maxAmount, setMaxAmount] = useState("");
+
+    const [filtersOpen, setFiltersOpen] = useState(false);
+
+    const showFilters = history.length > FILTERS_FROM_COUNT;
 
     const hasActiveFilters =
         search !== "" || status !== "all" || dateFrom !== "" || dateTo !== "" ||
@@ -127,14 +141,8 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     return (
         <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
-            {usingSession && (
-                <p className={styles.sessionNote}>
-                    <Info size={16} aria-hidden="true" />
-                    {t("approvalInbox.history.sessionNote")}
-                </p>
-            )}
-
-            {history.length > 0 && (
+            {/* With only a few decisions the list is easy to scan, so filters would just be in the way. */}
+            {showFilters && (
                 <div className={styles.toolbar}>
                     <div className={styles.filterField}>
                         <label htmlFor="history-search">{t("approvalInbox.history.search")}</label>
@@ -147,6 +155,33 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         />
                     </div>
 
+                    <button
+                        type="button"
+                        className={styles.filterToggle}
+                        aria-expanded={filtersOpen}
+                        aria-controls="history-more-filters"
+                        onClick={() => setFiltersOpen((open) => !open)}
+                    >
+                        <SlidersHorizontal size={16} aria-hidden="true" />
+                        {t("approvalInbox.history.moreFilters")}
+                        <ChevronDown
+                            size={16}
+                            aria-hidden="true"
+                            className={filtersOpen ? styles.chevronOpen : undefined}
+                        />
+                    </button>
+
+                    {hasActiveFilters && (
+                        <button type="button" className={styles.resetFilters} onClick={resetFilters}>
+                            <RotateCcw size={16} aria-hidden="true" />
+                            {t("approvalInbox.history.clear")}
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {showFilters && filtersOpen && (
+                <div id="history-more-filters" className={styles.toolbar}>
                     <div className={styles.filterField}>
                         <label htmlFor="history-status">{t("approvalInbox.history.status")}</label>
                         <select
@@ -182,40 +217,36 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         />
                     </div>
 
-                    <div className={styles.filterField}>
-                        <label htmlFor="history-min">{t("approvalInbox.history.minAmount")}</label>
-                        <input
-                            id="history-min"
-                            type="number"
-                            min={0}
-                            inputMode="decimal"
-                            value={minAmount}
-                            onChange={(event) => setMinAmount(event.target.value)}
-                        />
-                    </div>
-
-                    <div className={styles.filterField}>
-                        <label htmlFor="history-max">{t("approvalInbox.history.maxAmount")}</label>
-                        <input
-                            id="history-max"
-                            type="number"
-                            min={0}
-                            inputMode="decimal"
-                            value={maxAmount}
-                            onChange={(event) => setMaxAmount(event.target.value)}
-                        />
-                    </div>
-
-                    {hasActiveFilters && (
-                        <button type="button" className={styles.resetFilters} onClick={resetFilters}>
-                            <RotateCcw size={16} aria-hidden="true" />
-                            {t("approvalInbox.history.clear")}
-                        </button>
-                    )}
+                    {/* One "Amount: from – to" group instead of two separate fields that wrap onto a new row. */}
+                    <fieldset className={styles.amountRange}>
+                        <legend>{t("approvalInbox.history.amount")}</legend>
+                        <div className={styles.amountInputs}>
+                            <input
+                                type="number"
+                                min={0}
+                                inputMode="decimal"
+                                value={minAmount}
+                                onChange={(event) => setMinAmount(event.target.value)}
+                                placeholder={t("approvalInbox.history.amountFrom")}
+                                aria-label={t("approvalInbox.history.minAmount")}
+                            />
+                            <span aria-hidden="true">–</span>
+                            <input
+                                type="number"
+                                min={0}
+                                inputMode="decimal"
+                                value={maxAmount}
+                                onChange={(event) => setMaxAmount(event.target.value)}
+                                placeholder={t("approvalInbox.history.amountTo")}
+                                aria-label={t("approvalInbox.history.maxAmount")}
+                            />
+                        </div>
+                    </fieldset>
                 </div>
             )}
 
-            {history.length > 0 && (
+            {/* Only meaningful when the filters actually hide something. */}
+            {hasActiveFilters && (
                 <p className={styles.historyCount} aria-live="polite">
                     {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
                 </p>

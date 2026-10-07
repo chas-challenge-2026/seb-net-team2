@@ -181,7 +181,8 @@
         "feedback": {
             "approved": "{{reference}} ({{amount}}) godkändes.",
             "rejected": "{{reference}} ({{amount}}) avvisades.",
-            "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats."
+            "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats.",
+            "showHandled": "Visa i Hanterade →"
         },
         "sort": {
             "label": "Sortera efter",
@@ -228,7 +229,8 @@
         },
         "empty": {
             "title": "Inga väntande attesteringar",
-            "description": "Det finns inga betalningar som väntar på ditt godkännande."
+            "description": "Det finns inga betalningar som väntar på ditt godkännande.",
+            "showHandled": "Visa hanterade betalningar →"
         },
         "modal": {
             "approveTitle": "Godkänn betalning?",
@@ -249,7 +251,9 @@
             "label": "Vyer i attestkorgen",
             "pending_one": "Att hantera ({{count}})",
             "pending_other": "Att hantera ({{count}})",
-            "handled": "Hanterade"
+            "handled": "Hanterade",
+            "handledCount_one": "Hanterade ({{count}})",
+            "handledCount_other": "Hanterade ({{count}})"
         },
         "history": {
             "loading": "Laddar hanterade betalningar...",
@@ -260,7 +264,7 @@
             "noMatchesTitle": "Inga betalningar matchar filtren",
             "noMatchesDescription": "Prova en annan sökning eller rensa filtren.",
             "search": "Sök",
-            "searchPlaceholder": "Referens, mottagare eller IBAN",
+            "searchPlaceholder": "Sök referens eller IBAN",
             "status": "Beslut",
             "statusAll": "Alla",
             "statusApproved": "Godkända",
@@ -275,8 +279,11 @@
             "rejectedOn": "Avvisad {{date}}",
             "step": "Atteststeg",
             "reason": "Anledning",
-            "sessionNote": "Visar beslut du har fattat sedan du öppnade sidan. Äldre beslut visas när backend har stöd för det.",
-            "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här."
+            "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här.",
+            "moreFilters": "Filtrera",
+            "amount": "Belopp",
+            "amountFrom": "Från",
+            "amountTo": "Till"
         }
     },
     "batch": {

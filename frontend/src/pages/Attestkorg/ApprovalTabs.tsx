@@ -10,11 +10,12 @@ type ApprovalTabsProps = {
     activeTab: ApprovalTab;
     onChange: (tab: ApprovalTab) => void;
     pendingCount: number;
+    handledCount: number;
 };
 
 // "Att hantera (3)" / "Hanterade". Follows the ARIA tabs pattern:
 // only the active tab is in the Tab order, and the arrow keys move between tabs.
-export function ApprovalTabs({ activeTab, onChange, pendingCount }: ApprovalTabsProps) {
+export function ApprovalTabs({ activeTab, onChange, pendingCount, handledCount }: ApprovalTabsProps) {
     const { t } = useTranslation();
     const tabRefs = useRef<Record<ApprovalTab, HTMLButtonElement | null>>({
         pending: null,
@@ -50,7 +51,9 @@ export function ApprovalTabs({ activeTab, onChange, pendingCount }: ApprovalTabs
                 >
                     {tab === "pending"
                         ? t("approvalInbox.tabs.pending", { count: pendingCount })
-                        : t("approvalInbox.tabs.handled")}
+                        : handledCount > 0
+                            ? t("approvalInbox.tabs.handledCount", { count: handledCount })
+                            : t("approvalInbox.tabs.handled")}
                 </button>
             ))}
         </div>

@@ -1302,22 +1302,105 @@
     }
 }
 
-/* Explains that the "Handled" tab only shows this session's decisions for now */
-.sessionNote {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-    margin: 0 0 var(--spacing-md);
-    padding: 10px 14px;
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-sm);
-    background-color: #eef6fb;
-    color: var(--color-text);
-    font-size: var(--font-size-md);
+
+/* Links to the "Handled" tab: in the feedback after a decision and in the empty "To handle" state */
+
+.feedbackLink,
+.emptyStateAction {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
 }
 
-.sessionNote svg {
-    flex-shrink: 0;
-    margin-top: 2px;
-    color: var(--color-primary);
+.feedbackLink {
+    margin-left: auto;
+}
+
+.emptyStateAction {
+    margin-top: var(--spacing-md);
+    color: var(--seb-green-dark-2);
+}
+
+.feedbackLink:focus-visible,
+.emptyStateAction:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+/* History filters: "Filtrera" toggle and the "Belopp: från – till" group */
+
+.filterToggle {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-end;
+    gap: var(--spacing-xs);
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.filterToggle:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+.filterToggle svg {
+    transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+    transform: rotate(180deg);
+}
+
+.amountRange {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.amountRange legend {
+    margin-bottom: 4px;
+    padding: 0;
+    color: var(--placeholder-grey);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.amountInputs {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.amountInputs input {
+    width: 110px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font: inherit;
+    font-size: var(--font-size-md);
+    background: var(--color-surface);
+}
+
+.amountInputs input:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+    border-color: var(--color-text);
 }

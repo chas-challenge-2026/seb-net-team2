@@ -25,8 +25,12 @@ import { DueBadge, RecipientAndDueRows } from "./PaymentDueInfo";
 import { ApprovalTabs } from "./ApprovalTabs";
 import { TAB_IDS, type ApprovalTab } from "./approvalTabIds";
 import { HandledApprovals } from "./HandledApprovals";
-import { APPROVAL_HISTORY_QUERY_KEY } from "../../hooks/useApprovalHistory";
-import { addSessionDecision } from "../../hooks/useSessionDecisions";
+import {
+    APPROVAL_HISTORY_QUERY_KEY,
+    isHistoryUnavailable,
+    useApprovalHistory,
+} from "../../hooks/useApprovalHistory";
+import { addSessionDecision, useSessionDecisions } from "../../hooks/useSessionDecisions";
 import styles from "./Attestkorg.module.css";
 
 const COMMENT_MAX_LENGTH = 300;
@@ -82,6 +86,14 @@ export function Attestkorg() {
     const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<ApprovalTab>("pending");
+
+    // Number shown on the "Handled" tab: the real history when the backend has it,
+    // otherwise this session's decisions.
+    const historyQuery = useApprovalHistory(true);
+    const sessionDecisions = useSessionDecisions(user?.id);
+    const handledCount = historyQuery.isError && isHistoryUnavailable(historyQuery.error)
+        ? sessionDecisions.length
+        : historyQuery.data?.length ?? 0;
     const { data: approvals = [], isPending, isError, error } = useApprovals();
     const queryClient = useQueryClient();
 
@@ -354,6 +366,16 @@ export function Attestkorg() {
                         {actionFeedback.message}
                     </span>
 
+                    {actionFeedback.type !== "info" && activeTab !== "handled" && (
+                        <button
+                            type="button"
+                            className={styles.feedbackLink}
+                            onClick={() => setActiveTab("handled")}
+                        >
+                            {t("approvalInbox.feedback.showHandled")}
+                        </button>
+                    )}
+
                     <button
                         type="button"
                         className={styles.feedbackClose}
@@ -369,6 +391,7 @@ export function Attestkorg() {
                 activeTab={activeTab}
                 onChange={setActiveTab}
                 pendingCount={approvals.length}
+                handledCount={handledCount}
             />
 
             {activeTab === "handled" ? (
@@ -522,6 +545,15 @@ export function Attestkorg() {
                     <div className={styles.emptyState}>
                         <h2>{t("approvalInbox.empty.title")}</h2>
                         <p>{t("approvalInbox.empty.description")}</p>
+
+                        {/* Keeps the inbox useful when everything is handled: go to the decisions. */}
+                        <button
+                            type="button"
+                            className={styles.emptyStateAction}
+                            onClick={() => setActiveTab("handled")}
+                        >
+                            {t("approvalInbox.empty.showHandled")}
+                        </button>
                     </div>
                 )}
             </div>

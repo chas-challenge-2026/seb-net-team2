@@ -181,7 +181,8 @@
         "feedback": {
             "approved": "{{reference}} ({{amount}}) was approved.",
             "rejected": "{{reference}} ({{amount}}) was rejected.",
-            "alreadyHandled": "This payment has already been handled. The list has been updated."
+            "alreadyHandled": "This payment has already been handled. The list has been updated.",
+            "showHandled": "Show in Handled →"
         },
         "sort": {
             "label": "Sort by",
@@ -228,7 +229,8 @@
         },
         "empty": {
             "title": "No pending approvals",
-            "description": "There are no payments waiting for your approval."
+            "description": "There are no payments waiting for your approval.",
+            "showHandled": "Show handled payments →"
         },
         "modal": {
             "approveTitle": "Approve payment?",
@@ -249,7 +251,9 @@
             "label": "Approval inbox views",
             "pending_one": "To handle ({{count}})",
             "pending_other": "To handle ({{count}})",
-            "handled": "Handled"
+            "handled": "Handled",
+            "handledCount_one": "Handled ({{count}})",
+            "handledCount_other": "Handled ({{count}})"
         },
         "history": {
             "loading": "Loading handled payments...",
@@ -260,7 +264,7 @@
             "noMatchesTitle": "No payments match the filters",
             "noMatchesDescription": "Try another search or clear the filters.",
             "search": "Search",
-            "searchPlaceholder": "Reference, recipient or IBAN",
+            "searchPlaceholder": "Search reference or IBAN",
             "status": "Decision",
             "statusAll": "All",
             "statusApproved": "Approved",
@@ -275,8 +279,11 @@
             "rejectedOn": "Rejected {{date}}",
             "step": "Approval step",
             "reason": "Reason",
-            "sessionNote": "Showing decisions you have made since you opened the page. Earlier decisions will be shown once the backend supports it.",
-            "sessionEmpty": "Payments you approve or reject now will be shown here."
+            "sessionEmpty": "Payments you approve or reject now will be shown here.",
+            "moreFilters": "Filter",
+            "amount": "Amount",
+            "amountFrom": "From",
+            "amountTo": "To"
         }
     },
     "batch": {
