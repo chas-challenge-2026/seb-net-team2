@@ -9,7 +9,7 @@ all: libcsvparser.so libiban.so libauditsigner.so
 libcsvparser.so: csv/csv.c
 	$(CC) $(CFLAGS) -fopenmp $(LDFLAGS) -o $@ $<
 
-libiban.so: iban/iban.c
+libiban.so: iban/iban_validator.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
 
 libauditsigner.so: audit/audit.c
