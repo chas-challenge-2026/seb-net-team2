@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { Building2, Mail, Pencil, ShieldCheck, Trash2, TriangleAlert, UserRound } from "lucide-react";
 
 import Button from "../../../components/Button/Button";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
@@ -116,6 +117,7 @@ export default function UserDetails() {
     if (isError || !user) {
         return (
             <div className={styles.errorState}>
+                <TriangleAlert size={28} aria-hidden="true" />
                 <p role="alert">
                     {getErrorMessage(loadError, t("users.errors.notFound"))}
                 </p>
@@ -126,9 +128,13 @@ export default function UserDetails() {
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
-                <div>
-                    <h1>{user.name}</h1>
-                    <p>{t("users.details.description")}</p>
+                <div className={styles.titleRow}>
+                    <UserRound size={28} strokeWidth={2} aria-hidden="true" />
+
+                    <div>
+                        <h1>{user.name}</h1>
+                        <p>{t("users.details.description")}</p>
+                    </div>
                 </div>
 
                 <div className={styles.headerActions}>
@@ -137,6 +143,7 @@ export default function UserDetails() {
                         params={{ userId: user.id.toString() }}
                         className={styles.editButton}
                     >
+                        <Pencil size={17} aria-hidden="true" />
                         {t("users.details.edit")}
                     </Link>
 
@@ -146,14 +153,18 @@ export default function UserDetails() {
                         disabled={deleteMutation.isPending}
                         onClick={() => setIsDeleteModalOpen(true)}
                     >
-                        {t("users.details.delete")}
+                        <span className={styles.buttonContent}>
+                            <Trash2 size={17} aria-hidden="true" />
+                            {t("users.details.delete")}
+                        </span>
                     </Button>
                 </div>
             </header>
 
             {deleteMutation.isError && (
                 <div className={styles.error} role="alert">
-                    {getErrorMessage(deleteMutation.error, t("users.errors.delete"))}
+                    <TriangleAlert size={18} aria-hidden="true" />
+                    <span>{getErrorMessage(deleteMutation.error, t("users.errors.delete"))}</span>
                 </div>
             )}
 
@@ -165,17 +176,26 @@ export default function UserDetails() {
 
                 <dl className={styles.detailsGrid}>
                     <div className={styles.detailItem}>
-                        <dt>{t("users.form.name")}</dt>
+                        <dt>
+                            <UserRound size={16} aria-hidden="true" />
+                            {t("users.form.name")}
+                        </dt>
                         <dd>{user.name}</dd>
                     </div>
 
                     <div className={styles.detailItem}>
-                        <dt>{t("users.form.email")}</dt>
+                        <dt>
+                            <Mail size={16} aria-hidden="true" />
+                            {t("users.form.email")}
+                        </dt>
                         <dd>{user.email}</dd>
                     </div>
 
                     <div className={styles.detailItem}>
-                        <dt>{t("users.form.role")}</dt>
+                        <dt>
+                            <ShieldCheck size={16} aria-hidden="true" />
+                            {t("users.form.role")}
+                        </dt>
                         <dd>
                             <span className={styles.roleBadge}>
                                 {t(`users.roles.${user.role}`)}
@@ -184,7 +204,10 @@ export default function UserDetails() {
                     </div>
 
                     <div className={styles.detailItem}>
-                        <dt>{t("users.details.tenantId")}</dt>
+                        <dt>
+                            <Building2 size={16} aria-hidden="true" />
+                            {t("users.details.tenantId")}
+                        </dt>
                         <dd>{user.tenantId}</dd>
                     </div>
                 </dl>
@@ -219,17 +242,26 @@ export default function UserDetails() {
                                     {t("users.deleteModal.deleting")}
                                 </span>
                             ) : (
-                                t("users.details.delete")
+                                <span className={styles.buttonContent}>
+                                    <Trash2 size={17} aria-hidden="true" />
+                                    {t("users.details.delete")}
+                                </span>
                             )}
                         </Button>
                     </>
                 }
             >
-                <p>
-                    {t("users.deleteModal.confirm")} <strong>{user.name}</strong>?
-                </p>
+                <div className={styles.deleteWarning}>
+                    <TriangleAlert size={22} strokeWidth={2} aria-hidden="true" />
 
-                <p>{t("users.deleteModal.warning")}</p>
+                    <div>
+                        <p>
+                            {t("users.deleteModal.confirm")} <strong>{user.name}</strong>?
+                        </p>
+
+                        <p>{t("users.deleteModal.warning")}</p>
+                    </div>
+                </div>
             </Modal>
         </div>
     );

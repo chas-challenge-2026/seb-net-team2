@@ -21,9 +21,9 @@ namespace SebPortal.Api.Repositories
         }
 
         // True if the user has performed any audited action, which means they can't be deleted.
-        public Task<bool> HasEntriesForUserAsync(int userId)
+        public Task<bool> HasEntriesForUserAsync(int userId, int tenantId)
         {
-            return _context.AuditEntries.AnyAsync(e => e.UserId == userId);
+            return _context.AuditEntries.AnyAsync(e => e.UserId == userId && e.TenantId == tenantId);
         }
 
         // Paging values are expected to be validated by the service layer.

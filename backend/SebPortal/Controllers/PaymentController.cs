@@ -20,13 +20,6 @@ namespace SebPortal.Api.Controllers
             _createPaymentService = createPaymentService;
         }
 
-        // gets current user id from the JWT token claims
-        private int? GetCurrentUserId()
-        {
-            var claim = User.FindFirst("UserId")?.Value;
-            return int.TryParse(claim, out var userId) ? userId : null;
-        }
-
         /// <summary>
         /// Creates a new payment for the authenticated initiator.
         /// </summary>
@@ -42,10 +35,9 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, [FromHeader(Name = "X-Idempotency-Key")] string idempotencyKey)
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
 
-            var payment = await _createPaymentService.CreatePaymentAsync(dto, userId.Value);
+            var payment = await _createPaymentService.CreatePaymentAsync(dto, userId, tenantId);
             var responseDTO = MapToResponseDto(payment);
             return CreatedAtAction(nameof(GetPaymentById), new { id = responseDTO.Id }, responseDTO);
 
@@ -61,7 +53,8 @@ namespace SebPortal.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentById(int id)
         {
-            var payment = await _createPaymentService.GetPaymentById(id);
+            var tenantId = GetUserTenantId();
+            var payment = await _createPaymentService.GetPaymentById(id, tenantId);
             if (payment == null)
             {
                 return NotFound();
@@ -79,10 +72,9 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> GetMyPayments()
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
 
-            var payments = await _createPaymentService.GetPaymentsByUserId(userId.Value);
+            var payments = await _createPaymentService.GetPaymentsByUserId(userId, tenantId);
             return Ok(payments.Select(MapToResponseDto));
         }
 
@@ -100,5 +92,32 @@ namespace SebPortal.Api.Controllers
                 CreatedAt = payment.CreatedAt
             };
         }
+
+        #region Helper Methods 
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+
+        // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst("UserId")?.Value;
+            if (int.TryParse(claim, out var userId))
+            {
+                return userId;
+            }
+            throw new UnauthorizedAccessException("Saknar giltigt UserId i token.");
+        }
+        #endregion
     }
 }

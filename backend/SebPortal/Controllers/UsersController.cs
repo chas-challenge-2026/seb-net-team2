@@ -29,7 +29,8 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<IEnumerable<ReadUserDTO>>> GetAllUsers()
         {
-            var users = await _userService.GetAllUsersAsync();
+            var tenantId = GetUserTenantId();
+            var users = await _userService.GetAllUsersAsync(tenantId);
             return Ok(users);
         }
 
@@ -44,7 +45,8 @@ namespace SebPortal.Api.Controllers
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ReadUserDTO>> GetUserById(int id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var tenantId = GetUserTenantId();
+            var user = await _userService.GetUserByIdAsync(id, tenantId);
             return Ok(user);
         }
 
@@ -59,7 +61,8 @@ namespace SebPortal.Api.Controllers
         [HttpGet("by-email")]
         public async Task<ActionResult<ReadUserDTO>> GetUserByEmail([FromQuery] string email)
         {
-            var user = await _userService.GetUserByEmailAsync(email);
+            var tenantId = GetUserTenantId();
+            var user = await _userService.GetUserByEmailAsync(email, tenantId);
             return Ok(user);
         }
 
@@ -77,10 +80,9 @@ namespace SebPortal.Api.Controllers
         public async Task<ActionResult<ReadUserDTO>> CreateUser([FromBody] CreateUserDTO dto)
         {
             var actingUserId = GetCurrentUserId();
-            if (actingUserId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
 
-            var createdUser = await _userService.CreateUserAsync(dto, actingUserId.Value);
+            var createdUser = await _userService.CreateUserAsync(dto, actingUserId, tenantId);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
@@ -100,10 +102,9 @@ namespace SebPortal.Api.Controllers
         public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
         {
             var actingUserId = GetCurrentUserId();
-            if (actingUserId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
 
-            var updatedUser = await _userService.UpdateUserAsync(id, dto, actingUserId.Value);
+            var updatedUser = await _userService.UpdateUserAsync(id, dto, actingUserId, tenantId);
             return Ok(updatedUser);
         }
 
@@ -121,18 +122,37 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> DeleteUser(int id)
         {
             var actingUserId = GetCurrentUserId();
-            if (actingUserId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
 
-            var result = await _userService.DeleteUserAsync(id, actingUserId.Value);
+            var result = await _userService.DeleteUserAsync(id, actingUserId, tenantId);
             return NoContent();
         }
 
+        #region Helper Methods 
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+
         // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
-        private int? GetCurrentUserId()
+        private int GetCurrentUserId()
         {
             var claim = User.FindFirst("UserId")?.Value;
-            return int.TryParse(claim, out var userId) ? userId : null;
+            if (int.TryParse(claim, out var userId))
+            {
+                return userId;
+            }
+            throw new UnauthorizedAccessException("Saknar giltigt UserId i token.");
         }
+        #endregion
     }
 }

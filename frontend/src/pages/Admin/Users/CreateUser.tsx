@@ -1,7 +1,11 @@
+import { createUserSchema } from "../../../schemas/userSchema";
+import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { ArrowLeft, CircleCheck, TriangleAlert, UserPlus } from "lucide-react";
 
 import Button from "../../../components/Button/Button";
 import PasswordInput from "../../../components/PasswordInput/PasswordInput";
@@ -20,6 +24,7 @@ function getErrorMessage(error: unknown, fallback: string) {
 
 export default function CreateUser() {
     const { t } = useTranslation();
+    const validation = useFormValidation();
     const { user } = useAuth();
     const queryClient = useQueryClient();
 
@@ -43,8 +48,19 @@ export default function CreateUser() {
 
     function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
         if (!user) return;
+        const result = createUserSchema.safeParse({ tenantId: user.tenantId, name: name.trim(), email: email.trim(), password, role });
+        const fieldErrors: Record<string, string> = {};
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0]);
+                const label = t(`users.form.${field}`);
+                fieldErrors[field] = issue.code === "too_big"
+                    ? t("validation.maxLength", { field: label, max: issue.maximum })
+                    : field === "email" ? t("validation.email") : t("validation.required", { field: label });
+            }
+        }
+        if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
 
         createMutation.mutate({
             tenantId: user.tenantId,
@@ -58,8 +74,14 @@ export default function CreateUser() {
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
-                <h1>{t("users.create.title")}</h1>
-                <p>{t("users.create.description")}</p>
+                <div className={styles.titleRow}>
+                    <UserPlus size={28} strokeWidth={2} aria-hidden="true" />
+
+                    <div>
+                        <h1>{t("users.create.title")}</h1>
+                        <p>{t("users.create.description")}</p>
+                    </div>
+                </div>
             </header>
 
             <section className={styles.formSection}>
@@ -68,7 +90,8 @@ export default function CreateUser() {
                     <p>{t("users.create.formDescription")}</p>
                 </div>
 
-                <form className={styles.form} onSubmit={handleSubmit}>
+                <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} className={styles.form} onSubmit={handleSubmit}>
+                    <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                     <div className={styles.formGroup}>
                         <label htmlFor="name" className={styles.label}>
                             {t("users.form.name")}
@@ -76,6 +99,8 @@ export default function CreateUser() {
 
                         <input
                             id="name"
+                            placeholder={t("validation.nameExample")}
+                            {...validation.fieldProps("name")}
                             name="name"
                             type="text"
                             className={styles.input}
@@ -85,6 +110,7 @@ export default function CreateUser() {
                             disabled={createMutation.isPending}
                             required
                         />
+                        <FieldError id="name" errors={validation.errors} />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -94,6 +120,8 @@ export default function CreateUser() {
 
                         <input
                             id="email"
+                            placeholder={t("validation.emailExample")}
+                            {...validation.fieldProps("email")}
                             name="email"
                             type="email"
                             className={styles.input}
@@ -104,6 +132,7 @@ export default function CreateUser() {
                             disabled={createMutation.isPending}
                             required
                         />
+                        <FieldError id="email" errors={validation.errors} />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -113,6 +142,7 @@ export default function CreateUser() {
 
                         <PasswordInput
                             id="password"
+                            {...validation.fieldProps("password")}
                             name="password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
@@ -121,6 +151,7 @@ export default function CreateUser() {
                             disabled={createMutation.isPending}
                             required
                         />
+                        <FieldError id="password" errors={validation.errors} />
                     </div>
 
                     <div className={styles.formGroup}>
@@ -130,6 +161,7 @@ export default function CreateUser() {
 
                         <select
                             id="role"
+                            {...validation.fieldProps("role")}
                             name="role"
                             className={styles.select}
                             value={role}
@@ -141,28 +173,33 @@ export default function CreateUser() {
                             <option value="Attestant">{t("users.roles.Attestant")}</option>
                             <option value="Admin">{t("users.roles.Admin")}</option>
                         </select>
+                        <FieldError id="role" errors={validation.errors} />
                     </div>
 
                     {createMutation.isSuccess && (
                         <div className={styles.success} role="status">
-                            {t("users.create.success", { name: createMutation.data.name })}
+                            <CircleCheck size={18} aria-hidden="true" />
+                            <span>{t("users.create.success", { name: createMutation.data.name })}</span>
                         </div>
                     )}
 
                     {createMutation.isError && (
                         <div className={styles.error} role="alert">
-                            {getErrorMessage(createMutation.error, t("users.errors.create"))}
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{getErrorMessage(createMutation.error, t("users.errors.create"))}</span>
                         </div>
                     )}
 
                     {!user && (
                         <div className={styles.error} role="alert">
-                            {t("users.errors.currentUser")}
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{t("users.errors.currentUser")}</span>
                         </div>
                     )}
 
                     <div className={styles.actions}>
                         <Link to="/admin/users" className={styles.cancelButton}>
+                            <ArrowLeft size={17} aria-hidden="true" />
                             {t("common.cancel")}
                         </Link>
 
@@ -179,7 +216,10 @@ export default function CreateUser() {
                                     {t("users.create.creating")}
                                 </span>
                             ) : (
-                                t("users.create.submit")
+                                <span className={styles.buttonContent}>
+                                    <UserPlus size={18} aria-hidden="true" />
+                                    {t("users.create.submit")}
+                                </span>
                             )}
                         </Button>
                     </div>

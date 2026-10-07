@@ -162,3 +162,53 @@
     .heroMetric { margin-top: 2rem; text-align: left; }
     .accountGrid, .goalGrid, .contentGrid { grid-template-columns: 1fr; }
 }
+
+/* Icons */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow > svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.titleRow h1 {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.buttonContent,
+.actionMessageText {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.buttonContent svg,
+.actionMessageText svg {
+    flex-shrink: 0;
+}
+
+.tabs button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.tabs button svg {
+    flex-shrink: 0;
+}
+
+.closeButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Validation can make the dialog taller than a small viewport. */
+.modal { max-height: calc(100dvh - 2rem); overflow-y: auto; box-sizing: border-box; }
+.modal form { display: grid; gap: 1rem; }

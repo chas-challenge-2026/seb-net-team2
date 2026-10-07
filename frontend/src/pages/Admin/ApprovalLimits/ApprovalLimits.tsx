@@ -1,6 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import {
+    Banknote,
+    ChevronRight,
+    Clock3,
+    Plus,
+    ShieldCheck,
+    UsersRound,
+} from "lucide-react";
 
 import { getApprovalLimits } from "../../../services/approvalLimitsService";
 import Skeleton from "../../../components/LoadingState/Skeleton";
@@ -33,7 +41,12 @@ function ApprovalLimitSkeleton() {
 
 export default function ApprovalLimits() {
     const { t, i18n } = useTranslation();
-    const { data: limits = [], isPending, isError } = useQuery({
+
+    const {
+        data: limits = [],
+        isPending,
+        isError,
+    } = useQuery({
         queryKey: ["approvalLimits"],
         queryFn: getApprovalLimits,
     });
@@ -55,11 +68,19 @@ export default function ApprovalLimits() {
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
                 <div>
-                    <h1>{t("approvalLimits.list.title")}</h1>
+                    <div className={styles.titleRow}>
+                        <ShieldCheck size={26} strokeWidth={2} aria-hidden="true" />
+                        <h1>{t("approvalLimits.list.title")}</h1>
+                    </div>
+
                     <p>{t("approvalLimits.list.description")}</p>
                 </div>
 
-                <Link to="/admin/approval-limits/create" className={styles.createButton}>
+                <Link
+                    to="/admin/approval-limits/create"
+                    className={styles.createButton}
+                >
+                    <Plus size={18} strokeWidth={2} aria-hidden="true" />
                     {t("approvalLimits.list.create")}
                 </Link>
             </header>
@@ -70,7 +91,11 @@ export default function ApprovalLimits() {
                         <h2>{t("approvalLimits.list.rules")}</h2>
 
                         {!isPending && !isError && (
-                            <p>{t("approvalLimits.list.ruleCount", { count: limits.length })}</p>
+                            <p>
+                                {t("approvalLimits.list.ruleCount", {
+                                    count: limits.length,
+                                })}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -95,6 +120,7 @@ export default function ApprovalLimits() {
 
                 {!isPending && !isError && limits.length === 0 && (
                     <div className={styles.emptyState}>
+                        <ShieldCheck size={32} strokeWidth={1.75} aria-hidden="true" />
                         <h2>{t("approvalLimits.list.empty.title")}</h2>
                         <p>{t("approvalLimits.list.empty.description")}</p>
                     </div>
@@ -111,9 +137,17 @@ export default function ApprovalLimits() {
                             >
                                 <article className={styles.limitRow}>
                                     <div className={styles.limitInfo}>
-                                        <strong className={styles.amount}>
-                                            {formatAmount(limit.minAmount)}
-                                        </strong>
+                                        <div className={styles.valueRow}>
+                                            <Banknote
+                                                size={18}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
+
+                                            <strong className={styles.amount}>
+                                                {formatAmount(limit.minAmount)}
+                                            </strong>
+                                        </div>
 
                                         <span className={styles.description}>
                                             {limit.description}
@@ -121,7 +155,18 @@ export default function ApprovalLimits() {
                                     </div>
 
                                     <div className={styles.approvals}>
-                                        <strong>{limit.requiredApprovals}</strong>
+                                        <div className={styles.valueRow}>
+                                            <UsersRound
+                                                size={18}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
+
+                                            <strong>
+                                                {limit.requiredApprovals}
+                                            </strong>
+                                        </div>
+
                                         <span>
                                             {t("approvalLimits.list.approvalCount", {
                                                 count: limit.requiredApprovals,
@@ -130,12 +175,25 @@ export default function ApprovalLimits() {
                                     </div>
 
                                     <div className={styles.modified}>
-                                        <span>{t("approvalLimits.list.lastModified")}</span>
+                                        <span className={styles.modifiedLabel}>
+                                            <Clock3
+                                                size={15}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                            />
+                                            {t("approvalLimits.list.lastModified")}
+                                        </span>
+
                                         <strong>{limit.lastModifiedBy}</strong>
                                         <small>{formatDate(limit.lastModifiedAt)}</small>
                                     </div>
 
-                                    <span className={styles.chevron} aria-hidden="true">›</span>
+                                    <ChevronRight
+                                        className={styles.chevron}
+                                        size={22}
+                                        strokeWidth={2}
+                                        aria-hidden="true"
+                                    />
                                 </article>
                             </Link>
                         ))}

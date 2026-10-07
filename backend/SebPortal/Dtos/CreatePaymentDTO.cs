@@ -5,8 +5,6 @@ namespace SebPortal.Api.Dtos
 {
     public class CreatePaymentDTO
     {
-        [Range(1, int.MaxValue)] // TenantId should be a positive int
-        public int TenantId { get; set; }
         [Range(1, int.MaxValue)] // FromAccountId should be a positive int
         public int FromAccountId { get; set; }
         [Required]

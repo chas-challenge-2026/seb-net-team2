@@ -36,10 +36,8 @@ namespace SebPortal.Api.Controllers
         public async Task<ActionResult<PagedResult<AuditEntryDTO>>> GetEntries([FromQuery] AuditQueryDTO query)
         {
             var tenantId = GetUserTenantId();
-            if (tenantId is null)
-                return Unauthorized();
 
-            var result = await _auditService.GetEntriesAsync(tenantId.Value, query);
+            var result = await _auditService.GetEntriesAsync(tenantId, query);
             return Ok(result);
         }
 
@@ -59,8 +57,6 @@ namespace SebPortal.Api.Controllers
             string entityType, int entityId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
         {
             var tenantId = GetUserTenantId();
-            if (tenantId is null)
-                return Unauthorized();
 
             var query = new AuditQueryDTO
             {
@@ -70,14 +66,23 @@ namespace SebPortal.Api.Controllers
                 PageSize = pageSize
             };
 
-            var result = await _auditService.GetEntriesAsync(tenantId.Value, query);
+            var result = await _auditService.GetEntriesAsync(tenantId, query);
             return Ok(result);
         }
 
-        private int? GetUserTenantId()
+        #region Helper Methods
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
         {
-            var claim = User.FindFirst("TenantId")?.Value;
-            return int.TryParse(claim, out var tenantId) ? tenantId : null;
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
         }
+        #endregion
     }
 }

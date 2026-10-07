@@ -17,6 +17,9 @@
         "goToDashboard": "Gå till översikten"
     },
     "login": {
+        "invalidCredentials": "Fel e-postadress eller lösenord. Kontrollera båda och försök igen.",
+        "unavailable": "Det gick inte att logga in. Kontrollera din e-postadress och ditt lösenord och försök igen. Om problemet kvarstår, försök senare.",
+        "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.",
         "private": "Privat",
         "company": "Bolag",
         "email": "E-post",
@@ -30,13 +33,19 @@
     },
     "sidebar": {
         "menu": "Meny",
+        "closeMenu": "Stäng meny",
         "expand": "Expandera sidomeny",
         "collapse": "Minimera sidomeny",
+        "secondaryNavigation": "Sidomeny",
+        "navigationLinks": "Navigeringslänkar",
         "dashboard": "Översikt",
+        "payments": "Betalningar",
         "newPayment": "Ny betalning",
         "batchUpload": "Batchuppladdning",
+        "savings": "Sparande",
+        "approvals": "Attestering",
         "approvalInbox": "Attestkorg",
-        "admin": "ADMIN",
+        "admin": "Administration",
         "auditLog": "Granskningslogg",
         "administration": "Administration",
         "myProfile": "Min profil",
@@ -51,9 +60,11 @@
         "user": "användare",
         "companyName": "Företagsnamn",
         "accounts": "Konton",
+        "accountsEmpty": "Det finns inga konton upplagda för företaget ännu.",
         "recentPayments": "Senaste betalningar",
         "errors": {
-            "generic": "Något gick fel."
+            "generic": "Något gick fel.",
+            "accounts": "Det gick inte att hämta företagets konton. Försök igen senare."
         },
         "table": {
             "date": "Datum",
@@ -64,13 +75,20 @@
         },
         "status": {
             "completed": "Slutförd",
-            "pending": "Väntande"
+            "pending": "Väntande",
+            "rejected": "Avvisad"
         }
     },
     "payment": {
         "eyebrow": "BETALNINGAR",
         "title": "Skapa en ny betalning",
         "description": "Skicka en säker betalning från ditt företagskonto.",
+        "steps": {
+            "label": "Betalningsflöde",
+            "details": "Uppgifter",
+            "review": "Granskning",
+            "result": "Resultat"
+        },
         "details": {
             "title": "Betalningsuppgifter",
             "description": "Ange mottagare och betalningsbelopp."
@@ -88,6 +106,11 @@
             "reference": "Faktura eller OCR",
             "message": "Skriv ett meddelande till mottagaren"
         },
+        "iban": {
+            "valid": "IBAN-formatet är giltigt.",
+            "invalid": "IBAN-numret verkar vara ogiltigt. Kontrollera landskod, längd och siffror.",
+            "accountNotChecked": "Kontrollen verifierar formatet, inte att kontot finns eller tillhör mottagaren."
+        },
         "optional": "Valfritt",
         "loadingAccounts": "Laddar konton...",
         "success": "Betalningen har skapats.",
@@ -96,14 +119,32 @@
             "insufficientBalance": "Betalningsbeloppet överstiger kontots saldo.",
             "reviewDetails": "Kontrollera betalningsuppgifterna och försök igen.",
             "createFailed": "Det gick inte att skapa betalningen. Försök igen.",
-            "loadAccounts": "Det gick inte att ladda konton."
+            "loadAccounts": "Det gick inte att ladda konton.",
+            "noAccounts": "Det finns inga tillgängliga konton för betalningar."
         },
         "actions": {
             "clear": "Rensa formulär",
             "review": "Granska betalning",
+            "continueToReview": "Fortsätt till granskning",
             "goBack": "Gå tillbaka",
             "creating": "Skapar...",
-            "confirm": "Bekräfta betalning"
+            "confirm": "Bekräfta betalning",
+            "newPayment": "Skapa en ny betalning"
+        },
+        "result": {
+            "eyebrow": "BETALNINGSSTATUS",
+            "title": "Betalningen har skickats",
+            "paymentId": "Betalnings-ID",
+            "status": "Status",
+            "completed": "Betalningen har genomförts.",
+            "pendingApproval": "Betalningen har skapats och väntar på attest.",
+            "rejected": "Betalningen avvisades.",
+            "accepted": "Betalningen har skapats. Se status nedan.",
+            "statusValues": {
+                "completed": "Genomförd",
+                "pendingApproval": "Väntar på attest",
+                "rejected": "Avvisad"
+            }
         },
         "summary": {
             "title": "Sammanfattning",
@@ -237,12 +278,7 @@
     },
     "auditLog": {
         "title": "Granskningslogg",
-        "description": "Händelselogg från databasen (obs: vissa händelser loggas endast till en fil).",
-        "note": {
-            "title": "Obs:",
-            "description": "Den här vyn visar endast händelser som lagras i databasen. Vissa händelser, såsom batchbetalningar och delvisa atteststeg, loggas endast till",
-            "descriptionEnd": "och visas därför inte här."
-        },
+        "description": "Alla händelser för ert företag: betalningar, attester, användare och attestgränser.",
         "filters": {
             "user": "Användare",
             "allUsers": "Alla användare",
@@ -270,9 +306,36 @@
             "showing": "Visar {{visible}} av {{total}} poster",
             "showMore": "Visa fler"
         },
-        "footnote": {
-            "start": "Visar de senaste 200 posterna. För hela loggen, se även",
-            "end": "på servern."
+        "details": {
+            "step": "Steg {{step}} av {{total}}",
+            "comment": "Kommentar"
+        },
+        "actions": {
+            "CREATE_PAYMENT": "Betalning skapad",
+            "APPROVE_STEP": "Atteststeg godkänt",
+            "REJECT_STEP": "Atteststeg avvisat",
+            "EXECUTE_PAYMENT": "Betalning genomförd",
+            "REJECT_PAYMENT": "Betalning avvisad",
+            "CREATE_USER": "Användare skapad",
+            "UPDATE_USER": "Användare uppdaterad",
+            "DELETE_USER": "Användare borttagen",
+            "CREATE_APPROVAL_LIMIT": "Attestgräns skapad",
+            "UPDATE_APPROVAL_LIMIT": "Attestgräns uppdaterad",
+            "DELETE_APPROVAL_LIMIT": "Attestgräns borttagen"
+        },
+        "entityTypes": {
+            "payment": "Betalning #{{id}}",
+            "user": "Användare #{{id}}",
+            "approvalLimit": "Attestgräns #{{id}}"
+        },
+        "history": {
+            "title": "Historik: {{entity}}",
+            "description": "Allt som har hänt, äldst först.",
+            "showHistory": "Visa historik för {{entity}}",
+            "loading": "Laddar historik...",
+            "error": "Det gick inte att ladda historiken.",
+            "empty": "Inga händelser hittades.",
+            "by": "av {{user}}"
         }
     },
     "approvalLimits": {
@@ -546,5 +609,40 @@
             "title": "Kontouppgifter",
             "company": "Företag"
         }
+    },
+    "validation": {
+        "batchRows": "Rätta radfelen som visas nedan i CSV-filen och välj sedan den korrigerade filen.",
+        "fileRead": "Filen kunde inte läsas. Försök välja den igen.",
+        "rejectReason": "Ange ett skäl för avslag med minst {{min}} tecken.",
+        "required": "Ange {{field}}. Fältet är obligatoriskt.",
+        "email": "Ange en giltig e-postadress, till exempel alex@example.com.",
+        "number": "Ange ett giltigt tal.",
+        "minimum": "Ange ett tal som är minst {{min}}.",
+        "maximum": "Ange ett tal som är högst {{max}}.",
+        "step": "Ange ett tal i steg om {{step}}.",
+        "format": "Kontrollera formatet för {{field}} och korrigera det.",
+        "summary": "Rätta följande fel ({{count}}):",
+        "nameExample": "Alex Andersson",
+        "emailExample": "alex@example.com",
+        "showPassword": "Visa lösenord",
+        "hidePassword": "Dölj lösenord",
+        "approval": {
+            "minAmount": "Ange ett belopp som är 0 eller större.",
+            "requiredApprovals": "Ange ett helt antal godkännanden, minst 1."
+        },
+        "payment": {
+            "fromAccountId": "Välj kontot som betalningen ska göras från.",
+            "recipient": "Ange mottagarens namn.",
+            "amount": "Ange ett belopp större än 0.",
+            "reference": "Korta referensen till högst 100 tecken.",
+            "message": "Korta meddelandet till högst 500 tecken."
+        },
+        "maxLength": "Korta {{field}} till högst {{max}} tecken.",
+        "companyExample": "Exempel AB"
+    },
+    "registration": {
+        "submit": "Registrera",
+        "login": "Har du redan ett konto? Logga in.",
+        "companyName": "Företagsnamn"
     }
 }

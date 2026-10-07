@@ -37,7 +37,6 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
@@ -70,7 +69,6 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
@@ -153,7 +151,6 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
@@ -178,7 +175,6 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 500,
@@ -288,7 +284,6 @@ public class IdempotencyFilterTests
             "expired-key",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
@@ -354,7 +349,6 @@ public class IdempotencyFilterTests
             "concurrent-key",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
@@ -366,7 +360,6 @@ public class IdempotencyFilterTests
             "concurrent-key",
             new CreatePaymentDTO
             {
-                TenantId = 1,
                 FromAccountId = 1,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,

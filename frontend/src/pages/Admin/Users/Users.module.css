@@ -1,9 +1,5 @@
 .layout {
     width: 100%;
-    max-width: 1100px;
-
-    margin: 0 auto;
-    padding: var(--spacing-xl);
 
     box-sizing: border-box;
 }
@@ -18,6 +14,18 @@
     gap: var(--spacing-lg);
 
     margin-bottom: var(--spacing-xl);
+}
+
+.titleRow {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+}
+
+.titleRow > svg {
+    flex-shrink: 0;
+    margin-top: 4px;
+    color: var(--seb-green-dark-2);
 }
 
 .pageHeader h1 {
@@ -41,6 +49,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
 
     min-height: 40px;
 
@@ -112,11 +121,25 @@
     color: var(--color-text);
 }
 
+.searchInputWrapper {
+    position: relative;
+}
+
+.searchInputWrapper > svg {
+    position: absolute;
+    top: 50%;
+    left: var(--spacing-md);
+    transform: translateY(-50%);
+    z-index: 1;
+    pointer-events: none;
+    color: var(--color-text-soft);
+}
+
 .searchInput {
     width: 100%;
     height: 42px;
 
-    padding: 0 var(--spacing-md);
+    padding: 0 var(--spacing-md) 0 2.75rem;
 
     box-sizing: border-box;
 
@@ -300,9 +323,8 @@
 }
 
 .chevron {
+    flex-shrink: 0;
     color: var(--color-text-soft);
-
-    font-size: 1.5rem;
 }
 
 /* States */
@@ -330,6 +352,10 @@
     color: var(--color-text-soft);
 }
 
+.emptyState > svg {
+    color: var(--color-text-soft);
+}
+
 .emptyState h2,
 .emptyState p {
     margin: 0;
@@ -346,9 +372,6 @@
 /* Responsive */
 
 @media (max-width: 700px) {
-    .layout {
-        padding: var(--spacing-md);
-    }
 
     .pageHeader {
         flex-direction: column;
