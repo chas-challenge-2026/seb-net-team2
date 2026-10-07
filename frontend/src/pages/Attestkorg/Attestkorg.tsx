@@ -16,7 +16,12 @@ import { decideApproval } from "../../services/approvalService";
 import type { PendingApprovalStep } from "../../schemas/pendingApprovalSchema";
 import { AppError } from "../../errors/AppError";
 import { OVERDUE_AFTER_DAYS, daysWaiting, isOverdue } from "../../utils/approvalReminders";
+import { formatIban, recipientBank } from "../../utils/paymentChecks";
+import { useAuth } from "../../hooks/useAuth";
 
+import { PaymentChecks } from "./PaymentChecks";
+import { PaymentSourceAccount } from "./PaymentSourceAccount";
+import { DueBadge, RecipientAndDueRows } from "./PaymentDueInfo";
 import styles from "./Attestkorg.module.css";
 
 const COMMENT_MAX_LENGTH = 300;
@@ -39,11 +44,6 @@ function formatAmount(approval: PendingApprovalStep, locale: string): string {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     })} ${approval.currency}`;
-}
-
-// Groups the IBAN in blocks of four (e.g. "SE60 3000 0000 ...") so the attestant can check it by eye.
-function formatIban(iban: string): string {
-    return iban.replace(/\s/g, "").replace(/(.{4})(?=.)/g, "$1 ");
 }
 
 function formatDate(date: string, locale: string): string {
@@ -75,6 +75,7 @@ function getErrorMessage(error: unknown, fallback: string): string {
 
 export function Attestkorg() {
     const { t, i18n } = useTranslation();
+    const { user } = useAuth();
     const { data: approvals = [], isPending, isError, error } = useApprovals();
     const queryClient = useQueryClient();
 
@@ -403,6 +404,8 @@ export function Attestkorg() {
                                             })}
                                     </p>
 
+                                    <DueBadge approval={approval} />
+
                                     {approval.stepNumber > 1 && (
                                         <p className={styles.dualApproval}>
                                             {t("approvalInbox.card.dualApproval")}
@@ -414,6 +417,8 @@ export function Attestkorg() {
                             </div>
 
                             <dl className={styles.details}>
+                                <RecipientAndDueRows approval={approval} />
+
                                 <div>
                                     <dt>{t("approvalInbox.card.submittedBy")}</dt>
                                     <dd>{approval.createdByUserName}</dd>
@@ -428,7 +433,18 @@ export function Attestkorg() {
                                     <dt>{t("approvalInbox.card.toIban")}</dt>
                                     <dd>{formatIban(approval.toIban)}</dd>
                                 </div>
+
+                                {recipientBank(approval.toIban) && (
+                                    <div>
+                                        <dt>{t("approvalInbox.card.recipientBank")}</dt>
+                                        <dd>{recipientBank(approval.toIban)}</dd>
+                                    </div>
+                                )}
+
+                                <PaymentSourceAccount paymentId={approval.paymentId} />
                             </dl>
+
+                            <PaymentChecks approval={approval} allPending={approvals} />
 
                             <div className={styles.actions}>
                                 <button
@@ -489,7 +505,27 @@ export function Attestkorg() {
                                 : t("approvalInbox.modal.rejectDescription")}
                         </p>
 
+                        {/* Who is approving and at which step of the approval chain. */}
+                        <div className={styles.modalContext}>
+                            {user?.name && (
+                                <span>
+                                    {t("approvalInbox.modal.attestingAs", {
+                                        name: user.name,
+                                        step: confirmAction.approval.stepNumber,
+                                    })}
+                                </span>
+                            )}
+
+                            {confirmAction.approval.stepNumber > 1 && (
+                                <span className={styles.dualApproval}>
+                                    {t("approvalInbox.card.dualApproval")}
+                                </span>
+                            )}
+                        </div>
+
                         <dl className={styles.modalDetails}>
+                            <RecipientAndDueRows approval={confirmAction.approval} />
+
                             <div>
                                 <dt>{t("approvalInbox.card.reference")}</dt>
                                 <dd>{confirmAction.approval.reference}</dd>
@@ -507,11 +543,22 @@ export function Attestkorg() {
                                 <dd>{formatIban(confirmAction.approval.toIban)}</dd>
                             </div>
 
+                            {recipientBank(confirmAction.approval.toIban) && (
+                                <div>
+                                    <dt>{t("approvalInbox.card.recipientBank")}</dt>
+                                    <dd>{recipientBank(confirmAction.approval.toIban)}</dd>
+                                </div>
+                            )}
+
+                            <PaymentSourceAccount paymentId={confirmAction.approval.paymentId} />
+
                             <div>
                                 <dt>{t("approvalInbox.card.submittedBy")}</dt>
                                 <dd>{confirmAction.approval.createdByUserName}</dd>
                             </div>
                         </dl>
+
+                        <PaymentChecks approval={confirmAction.approval} allPending={approvals} />
 
                         <div className={styles.commentField}>
                             <label htmlFor="confirm-comment">

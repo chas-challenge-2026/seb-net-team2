@@ -1057,3 +1057,78 @@
     margin-bottom: var(--spacing-sm);
     color: var(--seb-green-dark-2);
 }
+
+
+/* Decision support checks on each card */
+
+.checks {
+    margin: 0 0 var(--spacing-md);
+    padding: 12px var(--spacing-md);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-hover-light);
+}
+
+.checksTitle {
+    margin: 0 0 var(--spacing-sm);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+}
+
+.checksList {
+    display: grid;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.checksList li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-md);
+    line-height: 1.4;
+}
+
+.checksList svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+
+.checkError {
+    color: var(--color-error);
+    font-weight: 600;
+}
+
+.checkWarning {
+    color: #8a5a00;
+    font-weight: 600;
+}
+
+
+/* "Du attesterar som … · Atteststeg 2" in the confirmation dialog */
+.modalContext {
+    display: grid;
+    gap: 2px;
+    margin: 0 0 var(--spacing-md);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+}
+
+.modalContext .dualApproval {
+    margin: 0;
+}
+
+/* "Förfaller i morgon": due soon, but not yet as urgent as today or past due */
+.dueSoon {
+    display: inline-block;
+    margin: 8px 0 0;
+    padding: 2px 10px;
+    border: 1px solid #b54708;
+    border-radius: var(--radius-pill);
+    color: #b54708;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}

@@ -11,6 +11,10 @@ export const pendingApprovalStepSchema = z.object({
     createdByUserId: z.number(),
     createdByUserName: z.string(),
     paymentCreatedAt: z.string(),
+    // Not sent by the backend yet. Optional so the inbox keeps working without them,
+    // and shows them automatically once the backend adds them to /api/Approval/pending.
+    recipientName: z.string().nullish(),
+    dueDate: z.string().nullish(), // yyyy-MM-dd
 });
 
 export const pendingApprovalStepsSchema = z.array(pendingApprovalStepSchema);

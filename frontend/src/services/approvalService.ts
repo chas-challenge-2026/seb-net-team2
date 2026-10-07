@@ -2,6 +2,7 @@ import { apiRequest } from "./apiRequest";
 import z from "zod";
 
 import { pendingApprovalStepsSchema } from "../schemas/pendingApprovalSchema";
+import { createdPaymentSchema } from "../schemas/paymentSchema";
 import type { ApprovalDecision } from "../schemas/approvalDecisionSchema";
 
 const API_URL =
@@ -11,6 +12,15 @@ export async function fetchPendingApprovals() {
     return apiRequest(
         `${API_URL}/api/Approval/pending`,
         pendingApprovalStepsSchema,
+    );
+}
+
+// The pending list doesn't include which account the money is taken from, but the
+// payment itself does. The backend only returns payments from the user's own company.
+export async function fetchPaymentById(paymentId: number) {
+    return apiRequest(
+        `${API_URL}/api/Payment/${paymentId}`,
+        createdPaymentSchema,
     );
 }
 
