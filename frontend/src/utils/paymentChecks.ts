@@ -23,6 +23,11 @@ function normalizeIban(iban: string): string {
     return iban.replace(/\s/g, "").toUpperCase();
 }
 
+// Groups the IBAN in blocks of four (e.g. "SE60 3000 0000 ...") so it can be checked by eye.
+export function formatIban(iban: string): string {
+    return iban.replace(/\s/g, "").replace(/(.{4})(?=.)/g, "$1 ");
+}
+
 // Returns the recipient's bank for Swedish IBANs we recognise, otherwise null.
 export function recipientBank(iban: string): string | null {
     const normalized = normalizeIban(iban);
