@@ -16,5 +16,8 @@ namespace SebPortal.Models
         public DateTime? DecidedAt { get; set; } // null until the attestant has decided
         [MaxLength(255)]
         public string? Comment { get; set; }
+        public int ReminderCount { get; set; } = 0;
+
+        public DateTime? LastReminderSentAt { get; set; }
     }
 }

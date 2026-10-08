@@ -1,15 +1,16 @@
-using Microsoft.AspNetCore.DataProtection;
-using System.IO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
-using SebPortal.Api.Middleware;
 using SebPortal.Api.Auth;
 using SebPortal.Api.Filters;
+using SebPortal.Api.Middleware;
+using SebPortal.Api.Models;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Data;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -122,10 +123,15 @@ builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
+builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddHostedService<ReminderBackgroundService>();
+
 // Global error handling middleware
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.Configure<ReminderOptions>(builder.Configuration.GetSection("Reminder"));
 
 
 builder.Services.AddDbContext<SebDbContext>(options =>
