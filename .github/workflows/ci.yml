@@ -20,6 +20,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
   
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+          make \
+          libc6-dev \
+          gcc \
+          libssl-dev
+      
+      - name: Build native code
+        run: make -C native
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -44,4 +56,4 @@ jobs:
 
         - name: Build Docker Image
           run: |
-            docker build -t sebportal:${{ github.sha }} -f backend/SebPortal/Dockerfile backend/SebPortal    
+            docker build -t sebportal:${{ github.sha }} -f backend/SebPortal/Dockerfile .  
