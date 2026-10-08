@@ -96,7 +96,7 @@ namespace SebPortal.Api.Services
 
                     if (!stillPending)
                     {
-                        await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId, payment.TenantId );
+                        await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId, payment.TenantId);
 
                         await _auditRepository.AddEntryAsync(new AuditEntries
                         {
@@ -232,6 +232,44 @@ namespace SebPortal.Api.Services
         {
             var allTenantsteps = await _approvalRepository.GetPendingStepsForTenantAsync(tenantId);
             return allTenantsteps.Select(step => new PendingApprovalStepDTO
+            {
+                StepId = step.Id,
+                StepNumber = step.StepNumber,
+                PaymentId = step.PaymentId,
+                Amount = step.Payment.Amount,
+                Currency = step.Payment.Currency,
+                ToIban = step.Payment.ToIban,
+                Reference = step.Payment.Reference,
+                CreatedByUserId = step.Payment.CreatedByUserId,
+                CreatedByUserName = step.Payment.CreatedByUser.Name,
+                PaymentCreatedAt = step.Payment.CreatedAt
+            });
+        }
+
+        //gets the 50 most recent approval steps for a tenant, with status completed (approved or rejected), ordered by decidedAt descending
+        public async Task<IEnumerable<RecentApprovalStepDTO>> GetRecentApprovalsForTenantAsync(int tenantId)
+        {
+            var recentApprovals = await _approvalRepository.GetRecentApprovalsForTenantAsync(tenantId);
+            return recentApprovals.Select(step => new RecentApprovalStepDTO
+            {
+                StepId = step.Id,
+                StepNumber = step.StepNumber,
+                PaymentId = step.PaymentId,
+                Amount = step.Payment.Amount,
+                Currency = step.Payment.Currency,
+                ToIban = step.Payment.ToIban,
+                Reference = step.Payment.Reference,
+                CreatedByUserId = step.Payment.CreatedByUserId,
+                CreatedByUserName = step.Payment.CreatedByUser.Name,
+                PaymentCreatedAt = step.Payment.CreatedAt
+            });
+        }
+
+        //gets the 50 most recent approval steps for a attestant, with status completed (approved or rejected), ordered by decidedAt descending
+        public async Task<IEnumerable<RecentApprovalStepDTO>> GetApprovalHistoryForAttestantAsync(int attestantId, int tenantId)
+        {
+            var history = await _approvalRepository.GetApprovalHistoryForAttestantAsync(attestantId, tenantId);
+            return history.Select(step => new RecentApprovalStepDTO
             {
                 StepId = step.Id,
                 StepNumber = step.StepNumber,
