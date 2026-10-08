@@ -16,7 +16,18 @@ namespace SebPortal.Api.Services
 
         public async Task SendNotificationMessageAsync(NotificationMessageDTO dto)
         {
-            _logger.LogInformation($"Lägger till notifiering för {dto.RecipientEmail} i kön.");
+            if (dto.Channel == NotificationChannel.Email)
+            {
+                _logger.LogInformation(
+                    "Lägger till email-notifiering för {RecipientEmail} i kön.",
+                    dto.RecipientEmail);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Lägger till in-app-notifiering för UserId {UserId} i kön.",
+                    dto.UserId);
+            }
             await _queue.EnqueueNotificationAsync(dto);
             
         }
