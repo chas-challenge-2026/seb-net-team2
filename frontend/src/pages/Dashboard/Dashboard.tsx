@@ -1,6 +1,5 @@
-import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { CreditCard, Landmark, ReceiptText } from "lucide-react";
+import { Landmark, ReceiptText } from "lucide-react";
 
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
@@ -46,10 +45,6 @@ export function Dashboard() {
                     </p>
                 </div>
 
-                <Link to="/ny-betalning" className={styles.createPaymentLink}>
-                    <CreditCard size={18} strokeWidth={2} aria-hidden="true" />
-                    <span>{t("dashboard.createPayment")}</span>
-                </Link>
             </header>
 
             <section>
@@ -101,6 +96,7 @@ export function Dashboard() {
                             <thead>
                                 <tr>
                                     <th>{t("dashboard.table.date")}</th>
+                                    <th>{t("dashboard.table.fromAccount")}</th>
                                     <th>{t("dashboard.table.recipientIban")}</th>
                                     <th>{t("dashboard.table.reference")}</th>
                                     <th>{t("dashboard.table.amount")}</th>
@@ -112,6 +108,7 @@ export function Dashboard() {
                                 {payments?.map((payment) => (
                                     <tr key={payment.id}>
                                         <td>{payment.date}</td>
+                                        <td>{accounts?.find((account) => account.id === payment.fromAccountId)?.name ?? "—"}</td>
                                         <td>{payment.toIban}</td>
                                         <td>{payment.reference}</td>
 

@@ -38,16 +38,16 @@ export function isValidIban(value: string): boolean {
 }
 
 export const paymentSchema = z.object({
-    fromAccountId: z.string().min(1, 'Select an account.'),
-    recipient: z.string().trim().min(1, 'Enter a recipient.'),
+    fromAccountId: z.string().min(1, 'payment.errors.selectAccount'),
+    recipient: z.string().trim().min(1, 'payment.errors.recipientRequired'),
     iban: z.string().transform(value => value.replaceAll(' ', '').toUpperCase())
     .pipe(
-        z.string().refine(isValidIban, 'Enter a valid IBAN.')
+        z.string().refine(isValidIban, 'payment.errors.invalidIban')
     ),
-    amount: z.string().min(1, 'Enter an amount.')
-    .refine(value => Number(value) > 0, 'Amount must be greater than 0.'),
-    reference: z.string().trim().max(100, 'Reference can contain at most 100 characters.'),
-    message: z.string().trim().max(500, 'Message can contain at most 500 characters'),
+    amount: z.string().min(1, 'payment.errors.amountRequired')
+    .refine(value => Number(value) > 0, 'payment.errors.amountPositive'),
+    reference: z.string().trim().max(100, 'payment.errors.referenceTooLong'),
+    message: z.string().trim().max(500, 'payment.errors.messageTooLong'),
 })
 
 export type PaymentForm = z.input<typeof paymentSchema>
