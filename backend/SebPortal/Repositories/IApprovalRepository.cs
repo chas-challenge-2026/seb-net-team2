@@ -10,5 +10,9 @@ namespace SebPortal.Api.Repositories
         Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId, int tenantId);
         Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int attestantId, int tenantId);
         Task<IEnumerable<ApprovalStep>> GetPendingStepsForTenantAsync(int tenantId);
+        Task<IEnumerable<ApprovalStep>> GetRecentApprovalsForTenantAsync(int tenantId);
+        Task<IEnumerable<ApprovalStep>> GetApprovalHistoryForAttestantAsync(int attestantId, int tenantId);
+
+
     }
 }

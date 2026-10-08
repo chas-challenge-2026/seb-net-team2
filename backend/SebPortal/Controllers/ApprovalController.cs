@@ -99,6 +99,24 @@ namespace SebPortal.Api.Controllers
             return Ok(attestantSteps);
         }
 
+        [HttpGet("recent")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> GetRecentApprovalsForTenant()
+        {
+            var tenantId = GetUserTenantId();
+            var recentApprovals = await _approvalService.GetRecentApprovalsForTenantAsync(tenantId);
+            return Ok(recentApprovals);
+        }
+
+        [HttpGet("history")]
+        public async Task<IActionResult> GetApprovalHistory()
+        {
+            var userId = GetCurrentUserId();
+            var tenantId = GetUserTenantId();
+            var history = await _approvalService.GetApprovalHistoryForAttestantAsync(userId, tenantId);
+            return Ok(history);
+        }
+
 
         #region Helper Methods 
         // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
