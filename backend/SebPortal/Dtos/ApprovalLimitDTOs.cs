@@ -19,7 +19,7 @@ public class UpdateApprovalLimitDTO
 
 public class ApprovalLimitResponseDTO
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public int TenantId { get; set; }
     public decimal MinAmount { get; set; }
     public int RequiredApprovals { get; set; }

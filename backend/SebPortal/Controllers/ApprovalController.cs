@@ -69,8 +69,8 @@ namespace SebPortal.Api.Controllers
         /// <returns>A list of approval steps for the payment.</returns>
         /// <response code="200">Returns the approval steps.</response>
         /// <response code="401">Unauthorized if the user ID claim is missing.</response>
-        [HttpGet("payment/{paymentId}/steps")]
-        public async Task<IActionResult> GetApprovalStepsForPayment(int paymentId)
+        [HttpGet("payment/{paymentId:guid}/steps")]
+        public async Task<IActionResult> GetApprovalStepsForPayment(Guid paymentId)
         {
             var userId = GetCurrentUserId();
             var tenantId = GetUserTenantId();

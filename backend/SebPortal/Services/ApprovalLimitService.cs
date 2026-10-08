@@ -25,7 +25,7 @@ namespace SebPortal.Api.Services
 
             return limits.Select(limit => new ApprovalLimitResponseDTO
             {
-                Id = limit.Id,
+                Id = limit.PublicId,
                 TenantId = limit.TenantId,
                 MinAmount = limit.MinAmount,
                 RequiredApprovals = limit.RequiredApprovals,
@@ -35,9 +35,9 @@ namespace SebPortal.Api.Services
             });
         }
 
-        public async Task<ApprovalLimitResponseDTO?> GetByIdAsync(int id, int tenantId)
+        public async Task<ApprovalLimitResponseDTO?> GetByIdAsync(Guid id, int tenantId)
         {
-            var limit = await _repository.GetByIdAsync(id, tenantId);
+            var limit = await _repository.GetByPublicIdAsync(id, tenantId);
             if (limit == null)
             {
                 throw new Exception($"Attestbeloppgräns med id: {id} hittades inte");
@@ -45,7 +45,7 @@ namespace SebPortal.Api.Services
 
             return new ApprovalLimitResponseDTO
             {
-                Id = limit.Id,
+                Id = limit.PublicId,
                 TenantId = limit.TenantId,
                 MinAmount = limit.MinAmount,
                 RequiredApprovals = limit.RequiredApprovals,
@@ -86,7 +86,7 @@ namespace SebPortal.Api.Services
 
             return new ApprovalLimitResponseDTO
             {
-                Id = limit.Id,
+                Id = limit.PublicId,
                 TenantId = tenantId,
                 MinAmount = limit.MinAmount,
                 RequiredApprovals = limit.RequiredApprovals,
@@ -96,9 +96,9 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<ApprovalLimitResponseDTO> UpdateApprovalLimitAsync(int tenantId, int id, int userId, string modifiedBy, UpdateApprovalLimitDTO dto)
+        public async Task<ApprovalLimitResponseDTO> UpdateApprovalLimitAsync(int tenantId, Guid id, int userId, string modifiedBy, UpdateApprovalLimitDTO dto)
         {
-            var existingLimit = await _repository.GetByIdAsync(id, tenantId);
+            var existingLimit = await _repository.GetByPublicIdAsync(id, tenantId);
 
             if (existingLimit == null)
             {
@@ -115,7 +115,7 @@ namespace SebPortal.Api.Services
             int targetRequiredApprovals = dto.RequiredApprovals ?? existingLimit.RequiredApprovals;
 
             // Validate with id
-            ValidateLimitsOrder(existingLimits, targetMinAmount, targetRequiredApprovals, id);
+            ValidateLimitsOrder(existingLimits, targetMinAmount, targetRequiredApprovals, existingLimit.Id);
 
             if (dto.MinAmount != null)
             {
@@ -155,7 +155,7 @@ namespace SebPortal.Api.Services
 
             return new ApprovalLimitResponseDTO
             {
-                Id = existingLimit.Id,
+                Id = existingLimit.PublicId,
                 TenantId = existingLimit.TenantId,
                 MinAmount = existingLimit.MinAmount,
                 RequiredApprovals = existingLimit.RequiredApprovals,
@@ -165,14 +165,14 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<bool> DeleteApprovalLimitAsync(int tenantId, int id, int userId)
+        public async Task<bool> DeleteApprovalLimitAsync(int tenantId, Guid id, int userId)
         {
-            var limit = await _repository.GetByIdAsync(id, tenantId);
+            var limit = await _repository.GetByPublicIdAsync(id, tenantId);
             if (limit == null)
             {
                 throw new Exception($"Attestbeloppgräns med id: {id} hittades inte");
             }
-            await _repository.DeleteApprovalLimitAsync(id, tenantId);
+            await _repository.DeleteApprovalLimitAsync(limit.Id, tenantId);
 
             await _auditRepository.AddEntryAsync(new AuditEntries
             {

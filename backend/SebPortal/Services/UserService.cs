@@ -57,7 +57,7 @@ namespace SebPortal.Api.Services
 
             return new ReadUserDTO
             {
-                Id = user.Id,
+                Id = user.PublicId,
                 TenantId = user.TenantId,
                 Name = user.Name,
                 Email = user.Email,
@@ -65,12 +65,12 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<bool> DeleteUserAsync(int userId, int actingUserId, int tenantId)
+        public async Task<bool> DeleteUserAsync(Guid id, int actingUserId, int tenantId)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
+            var user = await _userRepository.GetByPublicIdAsync(id, tenantId);
             if (user == null)
             {
-                throw new Exception($"Användaren med id: {userId} hittades inte");
+                throw new Exception($"Användaren med id: {id} hittades inte");
             }
 
             // The DELETE_USER entry below needs an existing actor
@@ -111,7 +111,7 @@ namespace SebPortal.Api.Services
 
             return new ReadUserDTO
             {
-                Id = user.Id,
+                Id = user.PublicId,
                 TenantId = user.TenantId,
                 Name = user.Name,
                 Email = user.Email,
@@ -129,7 +129,7 @@ namespace SebPortal.Api.Services
 
             return new ReadUserDTO
             {
-                Id = user.Id,
+                Id = user.PublicId,
                 TenantId = user.TenantId,
                 Name = user.Name,
                 Email = user.Email,
@@ -137,9 +137,9 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<ReadUserDTO?> GetUserByIdAsync(int userId, int tenantId)
+        public async Task<ReadUserDTO?> GetUserByIdAsync(Guid userId, int tenantId)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
+            var user = await _userRepository.GetByPublicIdAsync(userId, tenantId);
             if (user == null)
             {
                 throw new Exception($"Användaren med id: {userId} hittades inte");
@@ -147,7 +147,7 @@ namespace SebPortal.Api.Services
 
             return new ReadUserDTO
             {
-                Id = user.Id,
+                Id = user.PublicId,
                 TenantId = user.TenantId,
                 Name = user.Name,
                 Email = user.Email,
@@ -155,9 +155,9 @@ namespace SebPortal.Api.Services
             };
         }
 
-        public async Task<ReadUserDTO> UpdateUserAsync(int id, UpdateUserDTO dto, int actingUserId, int tenantId)
+        public async Task<ReadUserDTO> UpdateUserAsync(Guid id, UpdateUserDTO dto, int actingUserId, int tenantId)
         {
-            var existingUser = await _userRepository.GetUserByIdAsync(id, tenantId);
+            var existingUser = await _userRepository.GetByPublicIdAsync(id, tenantId);
             if (existingUser == null)
             {
                 throw new Exception($"Användaren med id: {id} hittades inte");
@@ -221,7 +221,7 @@ namespace SebPortal.Api.Services
 
             return new ReadUserDTO
             {
-                Id = existingUser.Id,
+                Id = existingUser.PublicId,
                 TenantId = existingUser.TenantId,
                 Name = existingUser.Name,
                 Email = existingUser.Email,
@@ -250,7 +250,7 @@ namespace SebPortal.Api.Services
             {
                 Token = accessToken,
                 RefreshToken = refreshToken,
-                UserId = user.Id,
+                UserId = user.PublicId,
                 Email = user.Email,
                 Role = user.Role,
                 TenantId = user.TenantId
@@ -262,7 +262,7 @@ namespace SebPortal.Api.Services
             var users = await _userRepository.GetAllUsersAsync(tenantId);
             return users.Select(user => new ReadUserDTO
             {
-                Id = user.Id,
+                Id = user.PublicId,
                 TenantId = user.TenantId,
                 Name = user.Name,
                 Email = user.Email,

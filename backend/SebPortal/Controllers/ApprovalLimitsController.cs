@@ -66,8 +66,8 @@ public class ApprovalLimitsController: ControllerBase
     /// <response code="400">Invalid input data or hierarchy rules violated.</response>
     /// <response code="401">Unauthorized if the user ID claim is missing.</response>
     /// <response code="404">The approval limit was not found.</response>
-    [HttpPatch("{id:int}")]
-    public async Task<ActionResult<ApprovalLimitResponseDTO>> UpdateApprovalLimit(int id, [FromBody] UpdateApprovalLimitDTO dto)
+    [HttpPatch("{id:guid}")]
+    public async Task<ActionResult<ApprovalLimitResponseDTO>> UpdateApprovalLimit(Guid id, [FromBody] UpdateApprovalLimitDTO dto)
     {
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();
@@ -85,8 +85,8 @@ public class ApprovalLimitsController: ControllerBase
     /// <response code="204">The approval limit was successfully deleted.</response>
     /// <response code="401">Unauthorized if the user ID claim is missing.</response>
     /// <response code="404">The approval limit was not found.</response>
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteApprovalLimit(int id)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteApprovalLimit(Guid id)
     {
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();

@@ -20,7 +20,7 @@ namespace SebPortal.Api.Services
                 .Where(u => u.Id == userId && u.TenantId == tenantId)
                 .Select(u => new CurrentUserDTO
                 {
-                    Id = u.Id,
+                    Id = u.PublicId,
                     Name = u.Name,
                     Email = u.Email,
                     Role = u.Role,

@@ -49,9 +49,9 @@ namespace SebPortal.Api.Controllers
         /// <response code="401">If the tenant ID claim is missing or invalid.</response>
         /// <response code="403">If the user is not an administrator.</response>
         /// <response code="404">If the account was not found.</response>
-        [HttpPut("{id}")]
+        [HttpPut("{id:guid}")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<ActionResult<AccountResponseDTO>> UpdateAccount(int id, [FromBody] UpdateAccountDTO dto)
+        public async Task<ActionResult<AccountResponseDTO>> UpdateAccount(Guid id, [FromBody] UpdateAccountDTO dto)
         {
             var tenantId = GetUserTenantId();
 
@@ -71,8 +71,8 @@ namespace SebPortal.Api.Controllers
         /// <response code="200">Returns the account.</response>
         /// <response code="401">If the tenant ID claim is missing or invalid.</response>
         /// <response code="404">If the account was not found.</response>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAccountById(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetAccountById(Guid id)
         {
             var tenantId = GetUserTenantId();
 
