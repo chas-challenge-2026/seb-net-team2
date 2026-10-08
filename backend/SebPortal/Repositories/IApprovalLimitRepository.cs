@@ -12,7 +12,8 @@ namespace SebPortal.Api.Repositories
 		/// 
 		Task<IEnumerable<ApprovalLimit>> GetOrderedLimitsAsync(int tenantId);
         Task<ApprovalLimit?> GetByIdAsync(int id, int tenantId); 
-		Task<ApprovalLimit> CreateApprovalLimitAsync(ApprovalLimit approvalLimit);
+		Task<ApprovalLimit?> GetByPublicIdAsync(Guid publicId, int tenantId);
+        Task<ApprovalLimit> CreateApprovalLimitAsync(ApprovalLimit approvalLimit);
         Task<ApprovalLimit> UpdateApprovalLimitAsync(ApprovalLimit approvalLimit);
 		Task<bool> DeleteApprovalLimitAsync(int id, int tenantId);
 	}

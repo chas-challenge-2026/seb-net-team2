@@ -51,5 +51,10 @@ namespace SebPortal.Api.Repositories
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(a => a.Balance, a => a.Balance + amount));
         }
+
+        public Task<Account?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _context.Accounts.FirstOrDefaultAsync(a => a.PublicId == publicId && a.TenantId == tenantId);
+        }
     }
 }

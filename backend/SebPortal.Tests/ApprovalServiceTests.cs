@@ -95,16 +95,16 @@ namespace SebPortal.Tests
             // Assert
             Assert.Equal(2, result.Count);
 
-            var first = result.Single(r => r.PaymentId == paymentA.Id);
-            Assert.Equal(1, first.StepId);
+            var first = result.Single(r => r.PaymentId == paymentA.PublicId);
+            Assert.Equal(steps[0].PublicId, first.StepId);
             Assert.Equal(15000m, first.Amount);
             Assert.Equal("SE1111111111111111111111", first.ToIban);
             Assert.Equal("Faktura 1", first.Reference);
-            Assert.Equal(3, first.CreatedByUserId);
+            Assert.Equal(paymentA.CreatedByUser.PublicId, first.CreatedByUserId);
             Assert.Equal("Lisa Svensson", first.CreatedByUserName);
 
-            var second = result.Single(r => r.PaymentId == paymentB.Id);
-            Assert.Equal(2, second.StepId);
+            var second = result.Single(r => r.PaymentId == paymentB.PublicId);
+            Assert.Equal(steps[1].PublicId, second.StepId);
             Assert.Equal(250000m, second.Amount);
         }
 

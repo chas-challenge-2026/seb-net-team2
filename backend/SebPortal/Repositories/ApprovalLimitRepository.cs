@@ -51,6 +51,11 @@ namespace SebPortal.Api.Repositories
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public Task<ApprovalLimit?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _context.ApprovalLimits.FirstOrDefaultAsync(limit => limit.PublicId == publicId && limit.TenantId == tenantId);
+        }
     }
     
 }

@@ -63,7 +63,7 @@ namespace SebPortal.Tests
 
             //Assert
             Assert.NotNull(result);
-            Assert.Equal(10, result.Id);
+            Assert.NotEqual(Guid.Empty, result.Id);
             Assert.Equal("Test", result.Name);
             Assert.Equal("test@example.com", result.Email);
         }
@@ -128,7 +128,7 @@ namespace SebPortal.Tests
 
             //assert
             Assert.NotNull(result);
-            Assert.Equal(existingUser.Id, result.UserId);
+            Assert.Equal(existingUser.PublicId, result.UserId);
             Assert.Equal(existingUser.Email, result.Email);
             Assert.Equal(existingUser.Role, result.Role);
             Assert.NotNull(result.Token);
@@ -385,10 +385,12 @@ namespace SebPortal.Tests
         {
             //Arrange
             int userId = 1;
+            var publicId = Guid.NewGuid();
             
             var existingUser = new User
             {
                 Id = userId,
+                PublicId = publicId,
                 TenantId = TestTenantId,
                 Name = "Old Name",
                 Email = "test@example.com",
@@ -401,14 +403,14 @@ namespace SebPortal.Tests
                 Name = "New Name"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(userId, TestTenantId))
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId))
                 .ReturnsAsync(existingUser);
 
             _userRepositoryMock.Setup(r => r.UpdateUserAsync(It.IsAny<User>()))
                 .ReturnsAsync((User u) => u);
 
             //Act
-            var result = await _userService.UpdateUserAsync(userId, updateDto, ActingAdminId, TestTenantId);
+            var result = await _userService.UpdateUserAsync(publicId, updateDto, ActingAdminId, TestTenantId);
 
             //Assert
             Assert.NotNull(result);
@@ -420,23 +422,23 @@ namespace SebPortal.Tests
         public async Task UpdateUserAsync_ShouldThrowException_WhenUserNotFound()
         {
             //Arrange
-            int id = 100;
+            var publicId = Guid.NewGuid();
 
             var updateDto = new UpdateUserDTO
             {
                 Name = "New Name"
             };
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId))
                 .ReturnsAsync((User?)null);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId, TestTenantId);
+                await _userService.UpdateUserAsync(publicId, updateDto, ActingAdminId, TestTenantId);
             });
 
-            Assert.Equal($"Användaren med id: {id} hittades inte", exception.Message);
+            Assert.Equal($"Användaren med id: {publicId} hittades inte", exception.Message);
         }
 
 
@@ -445,10 +447,12 @@ namespace SebPortal.Tests
         {
             //Arrange
             int id = 1;
+            var publicId = Guid.NewGuid();
 
             var existingUser = new User
             {
                 Id = id,
+                PublicId = publicId,
                 Name = "Test",
                 Email = "old@example.com",
                 PasswordHash = "dummy_hash",
@@ -462,7 +466,7 @@ namespace SebPortal.Tests
             };
 
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId))
                 .ReturnsAsync(existingUser);
 
             var anotherUser = new User
@@ -481,7 +485,7 @@ namespace SebPortal.Tests
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.UpdateUserAsync(id, updateDto, ActingAdminId, TestTenantId);
+                await _userService.UpdateUserAsync(publicId, updateDto, ActingAdminId, TestTenantId);
             });
 
             Assert.Equal($"En användare med denna e-postadress finns redan", exception.Message);
@@ -491,9 +495,11 @@ namespace SebPortal.Tests
         public async Task DeleteUserAsync_ShouldReturnTrue_WhenUserExists()
         {
             int id = 1;
+            var publicId = Guid.NewGuid();
             var existingUser = new User
             {
                 Id = id,
+                PublicId = publicId,
                 Name = "Test",
                 Email = "test@example.com",
                 PasswordHash = "dummy_hash",
@@ -501,13 +507,13 @@ namespace SebPortal.Tests
                 TenantId = TestTenantId
             };
 
-            _userRepositoryMock.Setup(r=> r.GetUserByIdAsync(id, TestTenantId))
+            _userRepositoryMock.Setup(r=> r.GetByPublicIdAsync(publicId, TestTenantId))
                 .ReturnsAsync(existingUser);
 
             _userRepositoryMock.Setup(r => r.DeleteUserAsync(id, TestTenantId))
                 .ReturnsAsync(true);
 
-            var result = await _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId);
+            var result = await _userService.DeleteUserAsync(publicId, ActingAdminId, TestTenantId);
             Assert.True(result);
             _userRepositoryMock.Verify(r=> r.DeleteUserAsync(id, TestTenantId) , Times.Once);
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
@@ -521,13 +527,14 @@ namespace SebPortal.Tests
         public async Task DeleteUserAsync_ShouldThrowBusinessRule_WhenUserHasAuditHistory()
         {
             int id = 5;
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId)).ReturnsAsync(new User
+            var publicId = Guid.NewGuid();
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId)).ReturnsAsync(new User
             {
-                Id = id, Name = "Test", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
+                Id = id, PublicId = publicId, Name = "Test", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
             });
             _auditRepositoryMock.Setup(a => a.HasEntriesForUserAsync(id, TestTenantId)).ReturnsAsync(true);
 
-            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId));
+            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(publicId, ActingAdminId, TestTenantId));
 
             _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
@@ -535,12 +542,13 @@ namespace SebPortal.Tests
         [Fact]
         public async Task DeleteUserAsync_ShouldThrowBusinessRule_WhenDeletingSelf()
         {
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(ActingAdminId, TestTenantId)).ReturnsAsync(new User
+            var publicId = Guid.NewGuid();
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId)).ReturnsAsync(new User
             {
-                Id = ActingAdminId, Name = "Admin", Email = "admin@example.com", PasswordHash = "x", Role = "Admin", TenantId = TestTenantId
+                Id = ActingAdminId, PublicId = publicId, Name = "Admin", Email = "admin@example.com", PasswordHash = "x", Role = "Admin", TenantId = TestTenantId
             });
 
-            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(ActingAdminId, ActingAdminId, TestTenantId));
+            await Assert.ThrowsAsync<SebPortal.Api.Middleware.BusinessRuleException>(() => _userService.DeleteUserAsync(publicId, ActingAdminId, TestTenantId));
 
             _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
@@ -549,12 +557,13 @@ namespace SebPortal.Tests
         public async Task UpdateUserAsync_ShouldLogChangedFields_WithoutPassword()
         {
             int id = 5;
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId)).ReturnsAsync(new User
+            var publicId = Guid.NewGuid();
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId)).ReturnsAsync(new User
             {
-                Id = id, Name = "Old", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
+                Id = id, PublicId = publicId, Name = "Old", Email = "test@example.com", PasswordHash = "x", Role = "Initiator", TenantId = TestTenantId
             });
 
-            await _userService.UpdateUserAsync(id, new UpdateUserDTO { Name = "New", Password = "Hemligt123!" }, ActingAdminId, TestTenantId);
+            await _userService.UpdateUserAsync(publicId, new UpdateUserDTO { Name = "New", Password = "Hemligt123!" }, ActingAdminId, TestTenantId);
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.Action == AuditActions.UpdateUser &&
@@ -567,18 +576,18 @@ namespace SebPortal.Tests
         public async Task DeleteUserAsync_ShouldThrowException_WhenUserNotExists()
         {
             //arrange
-            int id = 10;
+            var publicId = Guid.NewGuid();
 
-            _userRepositoryMock.Setup(r => r.GetUserByIdAsync(id, TestTenantId))
+            _userRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, TestTenantId))
                 .ReturnsAsync((User?)null);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _userService.DeleteUserAsync(id, ActingAdminId, TestTenantId);
+                await _userService.DeleteUserAsync(publicId, ActingAdminId, TestTenantId);
             });
 
-            Assert.Equal($"Användaren med id: {id} hittades inte", exception.Message);
+            Assert.Equal($"Användaren med id: {publicId} hittades inte", exception.Message);
 
             _userRepositoryMock.Verify(r => r.DeleteUserAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
@@ -619,7 +628,7 @@ namespace SebPortal.Tests
             Assert.NotNull(result);
             var userList = result.ToList();
             Assert.Equal(2, userList.Count); 
-            Assert.Equal(1, userList[0].Id);
+            Assert.Equal(users[0].PublicId, userList[0].Id);
 
                 //user 1
             Assert.Equal("Test", userList[0].Name);
@@ -627,7 +636,7 @@ namespace SebPortal.Tests
             Assert.Equal("Admin", userList[0].Role);
 
                 //user 2
-            Assert.Equal(2, userList[1].Id);
+            Assert.Equal(users[1].PublicId, userList[1].Id);
             Assert.Equal("Test2", userList[1].Name);
             Assert.Equal("test2@example.com", userList[1].Email);
         }

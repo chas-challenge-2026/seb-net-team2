@@ -5,8 +5,7 @@ namespace SebPortal.Api.Dtos
 {
     public class CreatePaymentDTO
     {
-        [Range(1, int.MaxValue)] // FromAccountId should be a positive int
-        public int FromAccountId { get; set; }
+        public Guid FromAccountId { get; set; }
         [Required]
         [StringLength(34, MinimumLength = 15)]
         public string ToIban { get; set; } = ""; // IBAN can be between 15 and 34 characters

@@ -7,6 +7,7 @@ namespace SebPortal.Api.Repositories
         Task<Account> CreateAccountAsync(Account account);
         Task<Account?> GetAccountByIdAsync(int accountId, int tenantId);
         Task<IEnumerable<Account>> GetAccountsByTenantIdAsync(int tenantId);
+        Task<Account?> GetByPublicIdAsync(Guid publicId, int tenantId);
         Task UpdateAccountAsync(Account account);
         Task<bool> IbanExistsAsync(string iban); // New method to check if IBAN exists
         Task RefundAsync(int accountId, decimal amount, int tenantId);
