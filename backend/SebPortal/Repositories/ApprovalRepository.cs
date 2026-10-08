@@ -29,6 +29,14 @@ namespace SebPortal.Api.Repositories
                 .ToListAsync();
         }
 
+        public Task<ApprovalStep?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .FirstOrDefaultAsync(s => s.PublicId == publicId && s.Payment.TenantId == tenantId);
+        }
+
         public async Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId, int tenantId)
         {
             return await _dbContext.ApprovalSteps

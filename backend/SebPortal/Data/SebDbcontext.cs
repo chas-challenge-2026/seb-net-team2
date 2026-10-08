@@ -34,7 +34,10 @@ namespace SebPortal.Data
             modelBuilder.Entity<User>(e =>
             {
                 e.ToTable("users");
-                e.Property(x => x.PublicId).HasColumnName("id");
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => x.PublicId).IsUnique();
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.PublicId).HasColumnName("public_id");
                 e.Property(x => x.TenantId).HasColumnName("tenant_id");
                 e.Property(x => x.Name).HasColumnName("name");
                 e.Property(x => x.Email).HasColumnName("email");
@@ -51,7 +54,10 @@ namespace SebPortal.Data
             modelBuilder.Entity<Account>(e =>
             {
                 e.ToTable("accounts");
-                e.Property(x => x.PublicId).HasColumnName("id");
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => x.PublicId).IsUnique();
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.PublicId).HasColumnName("public_id");
                 e.Property(x => x.TenantId).HasColumnName("tenant_id");
                 e.Property(x => x.AccountName).HasColumnName("account_name");
                 e.Property(x => x.Iban).HasColumnName("iban");
@@ -66,7 +72,12 @@ namespace SebPortal.Data
             modelBuilder.Entity<Payment>(e =>
             {
                 e.ToTable("payments");
-                e.Property(x => x.PublicId).HasColumnName("id");
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => x.PublicId).IsUnique();
+                e.Property(x => x.Id)
+                    .HasColumnName("id");
+                e.Property(x => x.PublicId)
+                    .HasColumnName("public_id");
                 e.Property(x => x.TenantId).HasColumnName("tenant_id");
                 e.Property(x => x.FromAccountId).HasColumnName("from_account_id");
                 e.Property(x => x.ToIban).HasColumnName("to_iban");
@@ -88,16 +99,32 @@ namespace SebPortal.Data
             modelBuilder.Entity<ApprovalStep>(e =>
             {
                 e.ToTable("approval_steps");
-                e.Property(x => x.PublicId).HasColumnName("id");
-                e.Property(x => x.PaymentId).HasColumnName("payment_id");
-                e.Property(x => x.AttestantId).HasColumnName("attestant_id");
-                e.Property(x => x.StepNumber).HasColumnName("step_number");
-                e.Property(x => x.Status).HasColumnName("status");
-                e.Property(x => x.DecidedAt).HasColumnName("decided_at");
-                e.Property(x => x.Comment).HasColumnName("comment");
-
-                e.HasOne(x => x.Payment).WithMany().HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Restrict);
-                e.HasOne(x => x.Attestant).WithMany().HasForeignKey(x => x.AttestantId).OnDelete(DeleteBehavior.Restrict);
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => x.PublicId).IsUnique();
+                e.Property(x => x.Id)
+                    .HasColumnName("id");
+                e.Property(x => x.PublicId)
+                    .HasColumnName("public_id");
+                e.Property(x => x.PaymentId)
+                    .HasColumnName("payment_id");
+                e.Property(x => x.AttestantId)
+                    .HasColumnName("attestant_id");
+                e.Property(x => x.StepNumber)
+                    .HasColumnName("step_number");
+                e.Property(x => x.Status)
+                    .HasColumnName("status");
+                e.Property(x => x.DecidedAt)
+                    .HasColumnName("decided_at");
+                e.Property(x => x.Comment)
+                    .HasColumnName("comment");
+                e.HasOne(x => x.Payment)
+                    .WithMany()
+                    .HasForeignKey(x => x.PaymentId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(x => x.Attestant)
+                    .WithMany()
+                    .HasForeignKey(x => x.AttestantId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<AuditEntries>(e =>
@@ -125,7 +152,10 @@ namespace SebPortal.Data
             modelBuilder.Entity<ApprovalLimit>(e =>
             {
                 e.ToTable("approvalLimit");
-                e.Property(x => x.PublicId).HasColumnName("id");
+                e.HasKey(x => x.Id);
+                e.HasIndex(x => x.PublicId).IsUnique();
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.PublicId).HasColumnName("public_id");
                 e.Property(x => x.TenantId).HasColumnName("tenant_id");
                 e.Property(x => x.MinAmount).HasColumnName("minAmount");
                 e.Property(x => x.RequiredApprovals).HasColumnName("requiredApprovals");

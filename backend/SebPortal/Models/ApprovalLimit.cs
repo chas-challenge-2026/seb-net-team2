@@ -6,6 +6,7 @@ namespace SebPortal.Models;
 public class ApprovalLimit
 {
     [Key]
+    public int Id { get; set; } // Primary key
     public Guid PublicId { get; set; } = Guid.NewGuid();
     public int TenantId { get; set; }
     public Tenant Tenant { get; set; } = null!; // Navigation property to Tenants
