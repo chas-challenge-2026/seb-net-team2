@@ -17,6 +17,7 @@ export interface Account {
 export interface Payment {
     id: string
     date: string
+    fromAccountId: string
     toIban: string
     reference: string
     amount: number
@@ -72,6 +73,7 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
         .map((payment) => ({
             id: String(payment.id),
             date: payment.createdAt.slice(0, 10),
+            fromAccountId: String(payment.fromAccountId),
             toIban: payment.toIban,
             reference: payment.reference,
             amount: payment.amount,

@@ -9,6 +9,10 @@ body {
     outline-offset: 3px;
 }
 
+main:focus-visible {
+    outline: none;
+}
+
 .skip-link {
     position: fixed;
     top: 0.75rem;
