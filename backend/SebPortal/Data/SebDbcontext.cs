@@ -18,7 +18,8 @@ namespace SebPortal.Data
         public DbSet<ApprovalLimit> ApprovalLimits => Set<ApprovalLimit>();
         public DbSet<IdempotencyKey> IdempotencyKeys => Set<IdempotencyKey>();
         public DbSet<NotificationLog> NotificationLogs => Set<NotificationLog>();
-        
+        public DbSet<InAppNotification> InAppNotifications => Set<InAppNotification>();
+
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -125,6 +126,19 @@ namespace SebPortal.Data
                     .WithMany()
                     .HasForeignKey(x => x.AttestantId)
                     .OnDelete(DeleteBehavior.Restrict);
+                e.Property(x => x.Id).HasColumnName("id");
+                e.Property(x => x.PaymentId).HasColumnName("payment_id");
+                e.Property(x => x.AttestantId).HasColumnName("attestant_id");
+                e.Property(x => x.StepNumber).HasColumnName("step_number");
+                e.Property(x => x.Status).HasColumnName("status");
+                e.Property(x => x.DecidedAt).HasColumnName("decided_at");
+                e.Property(x => x.Comment).HasColumnName("comment");
+
+                e.Property(x => x.ReminderCount).HasColumnName("reminder_count");
+                e.Property(x => x.LastReminderSentAt).HasColumnName("last_reminder_sent_at");
+
+                e.HasOne(x => x.Payment).WithMany().HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.Restrict);
+                e.HasOne(x => x.Attestant).WithMany().HasForeignKey(x => x.AttestantId).OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<AuditEntries>(e =>
@@ -245,6 +259,38 @@ namespace SebPortal.Data
                 e.HasOne(x => x.Tenant)
                  .WithMany()
                  .HasForeignKey(x => x.TenantId);
+            });
+            modelBuilder.Entity<InAppNotification>(e =>
+            {
+                e.ToTable("in_app_notifications");
+
+                e.Property(x => x.Id)
+                    .HasColumnName("id");
+
+                e.Property(x => x.UserId)
+                    .HasColumnName("user_id");
+
+                e.Property(x => x.ApprovalStepId)
+                    .HasColumnName("approval_step_id");
+
+                e.Property(x => x.Message)
+                    .HasColumnName("message");
+
+                e.Property(x => x.IsRead)
+                    .HasColumnName("is_read");
+
+                e.Property(x => x.CreatedAt)
+                    .HasColumnName("created_at");
+
+                e.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.ApprovalStep)
+                    .WithMany()
+                    .HasForeignKey(x => x.ApprovalStepId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

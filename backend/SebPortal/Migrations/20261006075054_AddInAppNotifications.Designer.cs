@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SebPortal.Data;
@@ -11,9 +12,11 @@ using SebPortal.Data;
 namespace SebPortal.Api.Migrations
 {
     [DbContext(typeof(SebDbContext))]
-    partial class SebDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261006075054_AddInAppNotifications")]
+    partial class AddInAppNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,18 +56,11 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(34)")
                         .HasColumnName("iban");
 
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id");
-
                     b.Property<int>("TenantId")
                         .HasColumnType("integer")
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
 
                     b.HasIndex("TenantId");
 
@@ -102,10 +98,6 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("minAmount");
 
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id");
-
                     b.Property<int>("RequiredApprovals")
                         .HasColumnType("integer")
                         .HasColumnName("requiredApprovals");
@@ -115,9 +107,6 @@ namespace SebPortal.Api.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
 
                     b.HasIndex("TenantId");
 
@@ -154,9 +143,6 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("payment_id");
 
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id");
                     b.Property<int>("ReminderCount")
                         .HasColumnType("integer")
                         .HasColumnName("reminder_count");
@@ -176,9 +162,6 @@ namespace SebPortal.Api.Migrations
                     b.HasIndex("AttestantId");
 
                     b.HasIndex("PaymentId");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
 
                     b.ToTable("approval_steps", (string)null);
                 });
@@ -406,10 +389,6 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("from_account_id");
 
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id");
-
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -437,9 +416,6 @@ namespace SebPortal.Api.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("FromAccountId");
-
-                    b.HasIndex("PublicId")
-                        .IsUnique();
 
                     b.HasIndex("TenantId");
 
@@ -538,10 +514,6 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(60)")
                         .HasColumnName("password_hash");
 
-                    b.Property<Guid>("PublicId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("public_id");
-
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -555,9 +527,6 @@ namespace SebPortal.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("PublicId")
                         .IsUnique();
 
                     b.HasIndex("TenantId");
