@@ -68,6 +68,7 @@
         },
         "table": {
             "date": "Datum",
+            "fromAccount": "Från konto",
             "recipientIban": "Mottagarens IBAN",
             "reference": "Referens",
             "amount": "Belopp",
@@ -116,6 +117,12 @@
         "success": "Betalningen har skapats.",
         "errors": {
             "selectAccount": "Välj ett konto.",
+            "recipientRequired": "Ange en mottagare.",
+            "invalidIban": "Ange ett giltigt IBAN. Kontrollera landskod, längd och siffror.",
+            "amountRequired": "Ange ett belopp.",
+            "amountPositive": "Beloppet måste vara större än noll.",
+            "referenceTooLong": "Referensen får vara högst 100 tecken.",
+            "messageTooLong": "Meddelandet får vara högst 500 tecken.",
             "insufficientBalance": "Betalningsbeloppet överstiger kontots saldo.",
             "reviewDetails": "Kontrollera betalningsuppgifterna och försök igen.",
             "createFailed": "Det gick inte att skapa betalningen. Försök igen.",
@@ -134,7 +141,11 @@
         "result": {
             "eyebrow": "BETALNINGSSTATUS",
             "title": "Betalningen har skickats",
-            "paymentId": "Betalnings-ID",
+            "completedTitle": "Betalningen är genomförd",
+            "pendingTitle": "Betalningen väntar på attest",
+            "rejectedTitle": "Betalningen har avvisats",
+            "sourceAccount": "Från konto",
+            "submittedAt": "Skickad",
             "status": "Status",
             "completed": "Betalningen har genomförts.",
             "pendingApproval": "Betalningen har skapats och väntar på attest.",
@@ -199,7 +210,17 @@
             "toIban": "Till IBAN",
             "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
             "waitingToday": "Skickad i dag",
-            "dualApproval": "Dubbelattest – betalningen kräver två attestanter"
+            "dualApproval": "Dubbelattest – betalningen kräver två attestanter",
+            "recipientBank": "Mottagarbank",
+            "fromAccount": "Från konto",
+            "accountNumber": "Konto #{{id}}",
+            "recipient": "Mottagare",
+            "dueDate": "Förfallodatum",
+            "due": {
+                "pastDue": "Förfallen",
+                "today": "Förfaller i dag",
+                "tomorrow": "Förfaller i morgon"
+            }
         },
         "comment": {
             "label": "Kommentar",
@@ -225,7 +246,15 @@
             "rejectTitle": "Avvisa betalning?",
             "approveDescription": "Kontrollera uppgifterna innan du godkänner. Beslutet går inte att ångra.",
             "rejectDescription": "Kontrollera uppgifterna och förklara varför betalningen avvisas.",
-            "amount": "Belopp"
+            "amount": "Belopp",
+            "attestingAs": "Du attesterar som {{name}} · Atteststeg {{step}}"
+        },
+        "checks": {
+            "title": "Kontrollera innan beslut",
+            "ibanInvalid": "IBAN är ogiltigt – kontrollera kontonumret med initiativtagaren",
+            "duplicate": "Möjlig dubblett: samma mottagare och belopp som betalning {{payments}}",
+            "highAmount": "Högt belopp – kontrollera extra noga",
+            "foreignRecipient": "Utländsk mottagare ({{country}}) – kontrollera att det stämmer med fakturan"
         }
     },
     "batch": {

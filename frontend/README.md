@@ -44,3 +44,18 @@ npm run lint     # Run ESLint
 ```
 
 The production build is written to `dist/`.
+
+## Enkla frontendtester
+
+Kör `npm test` från `frontend/`.
+
+- `tests/login.test.tsx`: US-67, lyckad/misslyckad inloggning och skyddad sida.
+- `tests/services.test.ts`: US-70, hämta konton (GET) och skicka betalningsdata (POST).
+
+Testerna följer tre steg: förbered ett falskt svar, kör funktionen eller klicka,
+kontrollera resultatet med `expect`. Inloggning och navigation är mockade i
+komponenttesterna. Service-testernas `fetch` är mockad: **testerna verifierar
+inte en liveanslutning till backend**. Ingen backend eller databas behövs.
+
+Övriga filer i `tests/` och `jest.config.cjs` är bara konfiguration för Jest,
+TypeScript och webbläsarmiljön. Applikationskoden ändras inte.

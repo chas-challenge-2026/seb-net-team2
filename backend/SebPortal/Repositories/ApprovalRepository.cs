@@ -65,6 +65,28 @@ namespace SebPortal.Api.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<ApprovalStep>> GetRecentApprovalsForTenantAsync(int tenantId)
+        {
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .Where(s => s.Payment.TenantId == tenantId && s.Status == "completed" && s.Payment.Status == "completed")
+                .OrderByDescending(s => s.DecidedAt)
+                .Take(50)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ApprovalStep>> GetApprovalHistoryForAttestantAsync(int attestantId, int tenantId)
+        {
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .Where(s => s.AttestantId == attestantId && s.Payment.TenantId == tenantId && s.Status != "pending")
+                .OrderByDescending(s => s.DecidedAt)
+                .Take(50)
+                .ToListAsync();
+        }
+
         public async Task<bool> UpdateApprovalStepAsync(ApprovalStep approvalStep, int tenantId)
         {
             // Use ExecuteUpdateAsync to update the approval step directly in the database

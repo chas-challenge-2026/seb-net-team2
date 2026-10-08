@@ -68,6 +68,7 @@
         },
         "table": {
             "date": "Date",
+            "fromAccount": "From account",
             "recipientIban": "Recipient IBAN",
             "reference": "Reference",
             "amount": "Amount",
@@ -116,6 +117,12 @@
         "success": "The payment has been created successfully.",
         "errors": {
             "selectAccount": "Select an account.",
+            "recipientRequired": "Enter a recipient.",
+            "invalidIban": "Enter a valid IBAN. Check the country code, length and digits.",
+            "amountRequired": "Enter an amount.",
+            "amountPositive": "Amount must be greater than zero.",
+            "referenceTooLong": "Reference must be 100 characters or fewer.",
+            "messageTooLong": "Message must be 500 characters or fewer.",
             "insufficientBalance": "The payment amount exceeds the account balance.",
             "reviewDetails": "Please review the payment details and try again.",
             "createFailed": "Could not create the payment. Please try again.",
@@ -134,7 +141,11 @@
         "result": {
             "eyebrow": "PAYMENT STATUS",
             "title": "Payment submitted",
-            "paymentId": "Payment ID",
+            "completedTitle": "Payment completed",
+            "pendingTitle": "Approval required",
+            "rejectedTitle": "Payment rejected",
+            "sourceAccount": "From account",
+            "submittedAt": "Submitted",
             "status": "Status",
             "completed": "The payment has been processed.",
             "pendingApproval": "The payment was created and is waiting for approval.",
@@ -199,7 +210,17 @@
             "toIban": "To IBAN",
             "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
             "waitingToday": "Submitted today",
-            "dualApproval": "Dual approval – this payment requires two attestants"
+            "dualApproval": "Dual approval – this payment requires two attestants",
+            "recipientBank": "Recipient bank",
+            "fromAccount": "From account",
+            "accountNumber": "Account #{{id}}",
+            "recipient": "Recipient",
+            "dueDate": "Due date",
+            "due": {
+                "pastDue": "Past due",
+                "today": "Due today",
+                "tomorrow": "Due tomorrow"
+            }
         },
         "comment": {
             "label": "Comment",
@@ -225,7 +246,15 @@
             "rejectTitle": "Reject payment?",
             "approveDescription": "Check the details before you approve. The decision cannot be undone.",
             "rejectDescription": "Check the details and explain why the payment is rejected.",
-            "amount": "Amount"
+            "amount": "Amount",
+            "attestingAs": "You are approving as {{name}} · Approval step {{step}}"
+        },
+        "checks": {
+            "title": "Check before deciding",
+            "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
+            "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
+            "highAmount": "High amount – check extra carefully",
+            "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
         }
     },
     "batch": {

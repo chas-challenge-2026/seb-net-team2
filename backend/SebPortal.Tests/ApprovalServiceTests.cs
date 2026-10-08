@@ -122,5 +122,116 @@ namespace SebPortal.Tests
 
             Assert.Empty(result);
         }
+
+        [Fact]
+        public async Task GetRecentApprovalsForTenantAsync_ReturnsMappedDtos()
+        {
+            // Arrange
+            int tenantId = 1;
+            var payment = new Payment
+            {
+                Id = 201,
+                TenantId = tenantId,
+                Amount = 50000m,
+                Currency = "SEK",
+                ToIban = "SE9999999999999999999999",
+                Reference = "Leverantörsfaktura",
+                CreatedByUserId = 3,
+                CreatedByUser = new User { Id = 3, TenantId = tenantId, Name = "Lisa Svensson", Email = "lisa@malmobygg.se", PasswordHash = "hash", Role = "initiator" },
+                CreatedAt = new DateTime(2026, 9, 10)
+            };
+
+            var steps = new List<ApprovalStep>
+            {
+                new()
+                {
+                    Id = 10,
+                    PaymentId = payment.Id,
+                    Payment = payment,
+                    StepNumber = 1,
+                    Status = "completed",
+                    DecidedAt = new DateTime(2026, 9, 11)
+                }
+            };
+
+            _approvalRepositoryMock
+                .Setup(r => r.GetRecentApprovalsForTenantAsync(tenantId))
+                .ReturnsAsync(steps);
+
+            // Act
+            var result = (await _service.GetRecentApprovalsForTenantAsync(tenantId)).ToList();
+
+            // Assert
+            var item = Assert.Single(result);
+            Assert.Equal(10, item.StepId);
+            Assert.Equal(201, item.PaymentId);
+            Assert.Equal(50000m, item.Amount);
+            Assert.Equal("SE9999999999999999999999", item.ToIban);
+            Assert.Equal("Lisa Svensson", item.CreatedByUserName);
+        }
+
+        [Fact]
+        public async Task GetApprovalHistoryForAttestantAsync_ReturnsMappedDtos()
+        {
+            // Arrange
+            int attestantId = 7;
+            int tenantId = 1;
+            var payment = new Payment
+            {
+                Id = 301,
+                TenantId = tenantId,
+                Amount = 12000m,
+                Currency = "SEK",
+                ToIban = "SE8888888888888888888888",
+                Reference = "Kontorsmaterial",
+                CreatedByUserId = 4,
+                CreatedByUser = new User { Id = 4, TenantId = tenantId, Name = "Erik Nilsson", Email = "erik@malmobygg.se", PasswordHash = "hash", Role = "initiator" },
+                CreatedAt = new DateTime(2026, 9, 12)
+            };
+
+            var steps = new List<ApprovalStep>
+            {
+                new()
+                {
+                    Id = 20,
+                    PaymentId = payment.Id,
+                    Payment = payment,
+                    AttestantId = attestantId,
+                    StepNumber = 1,
+                    Status = "approved",
+                    DecidedAt = new DateTime(2026, 9, 13)
+                }
+            };
+
+            _approvalRepositoryMock
+                .Setup(r => r.GetApprovalHistoryForAttestantAsync(attestantId, tenantId))
+                .ReturnsAsync(steps);
+
+            // Act
+            var result = (await _service.GetApprovalHistoryForAttestantAsync(attestantId, tenantId)).ToList();
+
+            // Assert
+            var item = Assert.Single(result);
+            Assert.Equal(20, item.StepId);
+            Assert.Equal(12000m, item.Amount);
+            Assert.Equal("Erik Nilsson", item.CreatedByUserName);
+        }
+
+        [Fact]
+        public async Task GetRecentApprovalsForTenantAsync_ReturnsEmpty_WhenNoRecentApprovals()
+        {
+            // Arrange
+            int tenantId = 1;
+
+            _approvalRepositoryMock
+                .Setup(r => r.GetRecentApprovalsForTenantAsync(tenantId))
+                .ReturnsAsync(new List<ApprovalStep>());
+
+            // Act
+            var result = await _service.GetRecentApprovalsForTenantAsync(tenantId);
+
+            // Assert
+            Assert.Empty(result);
+        }
     }
 }

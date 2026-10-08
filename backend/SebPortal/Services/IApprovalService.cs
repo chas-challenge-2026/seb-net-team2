@@ -14,5 +14,7 @@ namespace SebPortal.Api.Services
         Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(Guid paymentId, int attestantId, int tenantId);
         Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(int attestantId, int tenantId);
         Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForTenantAsync(int tenantId);
+        Task<IEnumerable<RecentApprovalStepDTO>> GetRecentApprovalsForTenantAsync(int tenantId);
+        Task<IEnumerable<RecentApprovalStepDTO>> GetApprovalHistoryForAttestantAsync(int attestantId, int tenantId);
     }
 }
