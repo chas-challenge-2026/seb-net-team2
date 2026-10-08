@@ -99,6 +99,13 @@ namespace SebPortal.Api.Controllers
             return Ok(attestantSteps);
         }
 
+        /// <summary>
+        /// Retrieves the 50 most recent completed approvals for the current tenant (Admin view).
+        /// </summary>
+        /// <returns>A list of recent completed approval steps.</returns>
+        /// <response code="200">Returns the recent approvals.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+        /// <response code="403">Forbidden if the user is not an administrator.</response>
         [HttpGet("recent")]
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> GetRecentApprovalsForTenant()
@@ -108,6 +115,12 @@ namespace SebPortal.Api.Controllers
             return Ok(recentApprovals);
         }
 
+        /// <summary>
+        /// Retrieves the approval history for the current attestant (handled steps).
+        /// </summary>
+        /// <returns>A list of the attestant's approval history.</returns>
+        /// <response code="200">Returns the approval history.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
         [HttpGet("history")]
         public async Task<IActionResult> GetApprovalHistory()
         {
