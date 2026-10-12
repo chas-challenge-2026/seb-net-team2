@@ -69,13 +69,19 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
-    policy.AllowAnyOrigin()
+    policy.WithOrigins("http://localhost:3000")
           .AllowAnyHeader()
           .AllowAnyMethod();
     });
+    options.AddPolicy("StagePolicy", policy =>
+    {
+        policy.WithOrigins("https://seb-net-team2-dev.team.chas-challenge.comerit.se")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
     options.AddPolicy("ProductionPolicy", policy =>
     {
-        policy.WithOrigins("https://our-production-domain.com")
+        policy.WithOrigins("https://seb-net-team2.team.chas-challenge.comerit.se")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
