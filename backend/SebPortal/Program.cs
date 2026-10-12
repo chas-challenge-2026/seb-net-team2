@@ -180,11 +180,15 @@ if (!app.Environment.IsDevelopment())
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
 app.UseExceptionHandler();
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+// Unknown API routes should return 404 rather than the React page.
+app.MapFallback("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();

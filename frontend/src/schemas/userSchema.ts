@@ -8,7 +8,7 @@ export const userRoleSchema = z.enum([
     "Initiator",
 ]);
 
-const userIdSchema = z.union([z.number(), z.string().uuid()]);
+const userIdSchema = z.string().uuid();
 
 export const currentUserSchema = z.object({
     id: userIdSchema,
@@ -21,7 +21,7 @@ export const currentUserSchema = z.object({
 });
 
 export const readUserSchema = z.object({
-    id: z.number(),
+    id: z.string().uuid(),
     tenantId: z.number(),
     name: z.string(),
     email: z.string().email(),

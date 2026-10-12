@@ -84,6 +84,10 @@ export function NyBetalning() {
     const resultSourceAccount = createdPayment
         ? accounts.find((account) => account.id === String(createdPayment.fromAccountId))
         : undefined;
+    const createdAtLabel = createdPayment
+        ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" })
+            .format(new Date(createdPayment.createdAt))
+        : undefined;
     const resultStatusLabel = resultStatus === "completed"
         ? t("payment.result.statusValues.completed")
         : resultStatus === "pending_approval"
@@ -323,7 +327,7 @@ export function NyBetalning() {
                         )}
                         <div>
                             <dt>{t("payment.result.submittedAt")}</dt>
-                            <dd>{new Date(createdPayment.createdAt).toLocaleString(locale)}</dd>
+                            <dd>{createdAtLabel}</dd>
                         </div>
                     </dl>
 

@@ -31,7 +31,7 @@ const useMockAuth =
     import.meta.env.VITE_MOCK_AUTH === "true";
 
 const mockUser: AuthUser = {
-    id: 1,
+    id: "00000000-0000-4000-8000-000000000001",
     name: "Mock Admin",
     email: "admin@example.com",
     role: "Admin",
