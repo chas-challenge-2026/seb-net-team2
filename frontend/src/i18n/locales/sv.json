@@ -242,7 +242,8 @@
             "placeholder": "Lägg till en kommentar",
             "rejectReasonLabel": "Anledning till avvisning",
             "required": "(obligatoriskt)",
-            "rejectReasonHint": "Initiativtagaren ser din motivering. Minst {{min}} tecken."
+            "rejectReasonHint": "Initiativtagaren ser din motivering. Minst {{min}} tecken.",
+            "characterCount": "{{count}} av {{max}} tecken"
         },
         "actions": {
             "reject": "Avvisa",

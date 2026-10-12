@@ -676,7 +676,7 @@ export function Attestkorg() {
                                 placeholder={t("approvalInbox.comment.placeholder")}
                                 required={confirmAction.kind === "reject"}
                                 aria-invalid={reasonError}
-                                aria-describedby={[confirmAction.kind === "reject" ? "confirm-comment-hint" : "", reasonError ? "confirm-comment-error" : ""].filter(Boolean).join(" ") || undefined}
+                                aria-describedby={[confirmAction.kind === "reject" ? "confirm-comment-hint" : "", reasonError ? "confirm-comment-error" : "", "confirm-comment-count"].filter(Boolean).join(" ")}
                             />
 
                             <div aria-live="assertive">
@@ -692,8 +692,17 @@ export function Attestkorg() {
                                 </span>
                             )}
 
-                            <span className={styles.commentCount}>
-                                {(comments[confirmAction.approval.stepId] ?? "").length}/{COMMENT_MAX_LENGTH}
+                            {/* "12/300" visually, "12 of 300 characters" for screen readers. */}
+                            <span id="confirm-comment-count" className={styles.commentCount}>
+                                <span aria-hidden="true">
+                                    {(comments[confirmAction.approval.stepId] ?? "").length}/{COMMENT_MAX_LENGTH}
+                                </span>
+                                <span className={styles.visuallyHidden}>
+                                    {t("approvalInbox.comment.characterCount", {
+                                        count: (comments[confirmAction.approval.stepId] ?? "").length,
+                                        max: COMMENT_MAX_LENGTH,
+                                    })}
+                                </span>
                             </span>
                         </div>
 

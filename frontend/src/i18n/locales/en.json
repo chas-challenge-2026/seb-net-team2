@@ -242,7 +242,8 @@
             "placeholder": "Add a comment",
             "rejectReasonLabel": "Reason for rejection",
             "required": "(required)",
-            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters."
+            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters.",
+            "characterCount": "{{count}} of {{max}} characters"
         },
         "actions": {
             "reject": "Reject",
