@@ -65,7 +65,7 @@
 }
 
 .collapse-toggle:hover {
-  background-color: var(--color-hover-light);
+  background-color: var(--color-400);
 }
 
 .collapse-toggle:focus-visible {
@@ -145,7 +145,7 @@
 }
 
 .nav-item:hover {
-  background-color: var(--color-hover-light);
+  background-color: var(--color-400);
   color: var(--color-text);
 
   text-decoration: none;
@@ -266,7 +266,7 @@
 
 .logout-btn:hover,
 .logout-link:hover {
-  background-color: var(--color-hover-light);
+  background-color: var(--color-400);
 }
 
 .logout-btn:hover svg,
@@ -359,7 +359,7 @@
 }
 
 .hamburger-btn:hover {
-  background-color: var(--color-hover-light);
+  background-color: var(--color-400);
 }
 
 .hamburger-btn:focus-visible {

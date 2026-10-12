@@ -6,6 +6,7 @@ import './i18n/i18n';
 import "flag-icons/css/flag-icons.min.css";
 import { MainLayout } from './layouts/MainLayout'
 import { AuthProvider } from './context/AuthProvider'
+import { CurrencyProvider } from './context/CurrencyProvider'
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { NyBetalning } from './pages/NyBetalning/NyBetalning'
 import { SaveInvest } from './pages/SaveInvest/SaveInvest'
@@ -100,7 +101,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <CurrencyProvider>
+          <RouterProvider router={router} />
+        </CurrencyProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

@@ -54,6 +54,18 @@
         "approvalsWithOverdue": "{{pending}} pending, {{overdue}} overdue"
     },
     "dashboard": {
+        "currency": {
+            "originalBalance": "Account balance",
+            "converted": "Approximate value in {{currency}}",
+            "copy": "Copy",
+            "copyIban": "Copy IBAN for {{account}}",
+            "copied": "IBAN copied.",
+            "copyFailed": "Could not copy. Select and copy the IBAN manually.",
+            "select": "Display currency",
+            "loading": "Loading exchange rates...",
+            "unavailable": "Converted balance unavailable.",
+            "rateDate": "Rate date:"
+        },
         "welcome": "Welcome, {{user}}",
         "greeting": "Good morning, {{user}}",
         "createPayment": "Create payment",
