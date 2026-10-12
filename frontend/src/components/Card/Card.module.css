@@ -1,4 +1,5 @@
 .card {
+    max-width: 100%;
     background-color: var(--color-surface);
     color: var(--color-text);
 
@@ -12,30 +13,58 @@
     gap: var(--spacing-md);
 
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-
 }
-
 
 .card__title {
     margin: 0;
-
     font-size: var(--font-size-xl);
     font-weight: 600;
 }
 
+/* Sizes */
 
+.card--sm {
+    width: 16rem;
+}
+
+.card--md {
+    width: 24rem;
+}
+
+.card--lg {
+    width: 32rem;
+}
+
+.card--xl {
+    width: 40rem;
+}
+
+/* Variants */
 
 .card--default {
     background-color: var(--color-surface);
+    border: 1px solid var(--color-muted-light);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
-
-
 
 .card--primary {
     border-left: 4px solid var(--seb-green-dark-2);
 }
 
+.card--secondary {
+    background: var(--color-yellow);
+    box-shadow: 0 4px 12px var(--color-border-lighter);
+}
 
+.card--danger {
+    border: 1px solid var(--color-danger);
+}
+
+.card--ghost {
+    background: transparent;
+    border: 1px solid var(--color-muted-light);
+    box-shadow: none;
+}
 
 .card--image {
     padding: 0;
@@ -48,12 +77,11 @@
 
 .card--image img {
     width: 100%;
-
     display: block;
     object-fit: cover;
 }
 
-.card--defaultonhover {
+.card--defaultOnHover {
     background-color: var(--color-surface);
 
     transition:
@@ -66,5 +94,83 @@
 }
 
 .card--square {
-    border-radius: 0%;
+    border-radius: 0;
+}
+
+/* Full vertical lines */
+
+.card--vertical-lines {
+    background: transparent;
+    border: none;
+    border-left: 1px solid var(--color-border-light);
+    border-right: 1px solid var(--color-border-light);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Full horizontal lines */
+
+.card--horizontal-lines {
+    background: transparent;
+    border: none;
+    border-top: 1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Short vertical lines */
+
+.card--vertical-lines-sm {
+    position: relative;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.card--vertical-lines-sm::before,
+.card--vertical-lines-sm::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    bottom: 20%;
+    width: 1px;
+    background-color: var(--color-border-light);
+}
+
+.card--vertical-lines-sm::before {
+    left: 0;
+}
+
+.card--vertical-lines-sm::after {
+    right: 0;
+}
+
+/* Short horizontal lines */
+
+.card--horizontal-lines-sm {
+    position: relative;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.card--horizontal-lines-sm::before,
+.card--horizontal-lines-sm::after {
+    content: "";
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    height: 1px;
+    background-color: var(--color-border-light);
+}
+
+.card--horizontal-lines-sm::before {
+    top: 0;
+}
+
+.card--horizontal-lines-sm::after {
+    bottom: 0;
 }

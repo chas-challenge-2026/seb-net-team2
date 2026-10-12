@@ -20,9 +20,9 @@ namespace SebPortal.Api.Repositories
             return result.Entity;
         }
 
-        public async Task<Account?> GetAccountByIdAsync(int accountId)
+        public async Task<Account?> GetAccountByIdAsync(int accountId, int tenantId)
         {
-            return await _context.Accounts.FindAsync(accountId);
+            return await _context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId && a.TenantId == tenantId);
         }
 
         public async Task<IEnumerable<Account>> GetAccountsByTenantIdAsync(int tenantId)
@@ -44,12 +44,17 @@ namespace SebPortal.Api.Repositories
             return await _context.Accounts.AnyAsync(a => a.Iban == iban);
         }
 
-        public async Task RefundAsync(int accountId, decimal amount)
+        public async Task RefundAsync(int accountId, decimal amount, int tenantId)
         {
             await _context.Accounts
-                .Where(a => a.Id == accountId)
+                .Where(a => a.Id == accountId && a.TenantId == tenantId)
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(a => a.Balance, a => a.Balance + amount));
+        }
+
+        public Task<Account?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _context.Accounts.FirstOrDefaultAsync(a => a.PublicId == publicId && a.TenantId == tenantId);
         }
     }
 }

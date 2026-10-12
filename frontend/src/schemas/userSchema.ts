@@ -9,7 +9,7 @@ export const userRoleSchema = z.enum([
 ]);
 
 export const currentUserSchema = z.object({
-    id: z.number(),
+    id: z.string().uuid(),
     name: z.string(),
     email: z.string().email(),
     role: userRoleSchema,
@@ -19,7 +19,7 @@ export const currentUserSchema = z.object({
 });
 
 export const readUserSchema = z.object({
-    id: z.number(),
+    id: z.string().uuid(),
     tenantId: z.number(),
     name: z.string(),
     email: z.string().email(),
@@ -47,7 +47,8 @@ export const updateUserSchema = z.object({
 
 export const loginResponseSchema = z.object({
     token: z.string(),
-    userId: z.number(),
+    refreshToken: z.string(),
+    userId: z.string().uuid(),
     email: z.string().email(),
     role: userRoleSchema,
     tenantId: z.number(),

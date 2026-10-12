@@ -1,6 +1,20 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import {
+  ChevronLeft,
+  ClipboardCheck,
+  CreditCard,
+  FileUp,
+  House,
+  Landmark,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  ScrollText,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
 import { useApprovals } from "../hooks/useApprovals";
@@ -27,9 +41,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarId = useId();
 
-  const canViewApprovals =
-    user?.role === "Attestant" ||
-    user?.role === "Admin";
+  const isAdmin = user?.role === "Admin";
+  const isInitiator = user?.role === "Initiator";
+  const isAttestant = user?.role === "Attestant";
+
+  const canViewApprovals = isAttestant || isAdmin;
+  const canViewSavings = user?.role === "User" || isInitiator;
 
   const { data: approvals } = useApprovals(canViewApprovals);
 
@@ -96,75 +113,78 @@ export const Sidebar: React.FC<SidebarProps> = ({
         aria-controls={sidebarId}
         aria-expanded={isOpen}
       >
-        ☰
+        <Menu size={22} strokeWidth={2} aria-hidden="true" />
       </button>
 
       {isOpen && (
         <button
           type="button"
           className={styles["sidebar-backdrop"]}
-          aria-label="Close menu"
+          aria-label={t("sidebar.closeMenu")}
           onClick={toggleMobileSidebar}
         />
       )}
 
       <aside
         id={sidebarId}
-        aria-label="Secondary navigation"
-        className={`
-          ${styles.sidebar}
-          ${isOpen ? styles.open : ""}
-          ${collapsed ? styles.collapsed : ""}
-        `}
+        aria-label={t("sidebar.secondaryNavigation")}
+        className={`${styles.sidebar} ${isOpen ? styles.open : ""} ${collapsed ? styles.collapsed : ""}`}
       >
         <button
           type="button"
           className={styles["collapse-toggle"]}
           onClick={onToggleCollapsed}
-          aria-label={
-            collapsed
-              ? t("sidebar.expand")
-              : t("sidebar.collapse")
-          }
+          aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
           aria-expanded={!collapsed}
-          aria-controls={sidebarId}
         >
-          <svg
-            className={styles["collapse-toggle-icon"]}
-            viewBox="0 0 16 16"
-            width="14"
-            height="14"
-            aria-hidden="true"
-          >
-            <path
-              d="M10 2 L5 8 L10 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ChevronLeft size={18} strokeWidth={2} aria-hidden="true" />
         </button>
 
-        <nav
-          aria-label="Secondary navigation links"
-          className={styles["sidebar-nav"]}
-        >
-          <Link
-            to="/dashboard"
-            activeOptions={{ exact: true }}
-            className={styles["nav-item"]}
-            activeProps={{
-              className: `${styles["nav-item"]} ${styles.active}`,
-            }}
-            onClick={handleMobileNavClick}
-          >
-            <span>{t("sidebar.dashboard")}</span>
-          </Link>
+        <nav aria-label={t("sidebar.navigationLinks")} className={styles["sidebar-nav"]}>
+          {!isAdmin && (
+            <Link
+              to="/dashboard"
+              activeOptions={{ exact: true }}
+              className={styles["nav-item"]}
+              activeProps={{
+                className: `${styles["nav-item"]} ${styles.active}`,
+              }}
+              onClick={handleMobileNavClick}
+              title={collapsed ? t("sidebar.dashboard") : undefined}
+            >
+              <House size={20} strokeWidth={2} aria-hidden="true" />
 
-          {user?.role === "Initiator" && (
-            <>
+              <span className={styles["nav-item-label"]}>
+                {t("sidebar.dashboard")}
+              </span>
+            </Link>
+          )}
+
+          {isAdmin && (
+            <Link
+              to="/admin"
+              activeOptions={{ exact: true }}
+              className={styles["nav-item"]}
+              activeProps={{
+                className: `${styles["nav-item"]} ${styles.active}`,
+              }}
+              onClick={handleMobileNavClick}
+              title={collapsed ? t("admin.navigation.overview") : undefined}
+            >
+              <LayoutDashboard size={20} strokeWidth={2} aria-hidden="true" />
+
+              <span className={styles["nav-item-label"]}>
+                {t("admin.navigation.overview")}
+              </span>
+            </Link>
+          )}
+
+          {isInitiator && (
+            <div className={styles["nav-section"]}>
+              <span className={styles["section-label"]}>
+                {t("sidebar.payments")}
+              </span>
+
               <Link
                 to="/ny-betalning"
                 activeOptions={{ exact: true }}
@@ -173,8 +193,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className: `${styles["nav-item"]} ${styles.active}`,
                 }}
                 onClick={handleMobileNavClick}
+                title={collapsed ? t("sidebar.newPayment") : undefined}
               >
-                <span>{t("sidebar.newPayment")}</span>
+                <CreditCard size={20} strokeWidth={2} aria-hidden="true" />
+
+                <span className={styles["nav-item-label"]}>
+                  {t("sidebar.newPayment")}
+                </span>
               </Link>
 
               <Link
@@ -185,43 +210,116 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className: `${styles["nav-item"]} ${styles.active}`,
                 }}
                 onClick={handleMobileNavClick}
+                title={collapsed ? t("sidebar.batchUpload") : undefined}
               >
-                <span>{t("sidebar.batchUpload")}</span>
+                <FileUp size={20} strokeWidth={2} aria-hidden="true" />
+
+                <span className={styles["nav-item-label"]}>
+                  {t("sidebar.batchUpload")}
+                </span>
               </Link>
-            </>
+            </div>
+          )}
+
+          {canViewSavings && (
+            <div className={styles["nav-section"]}>
+              <span className={styles["section-label"]}>
+                {t("sidebar.savings")}
+              </span>
+
+              <Link
+                to="/spara-investera"
+                activeOptions={{ exact: true }}
+                className={styles["nav-item"]}
+                activeProps={{
+                  className: `${styles["nav-item"]} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
+                title={collapsed ? t("navigation.saveInvest") : undefined}
+              >
+                <Landmark size={20} strokeWidth={2} aria-hidden="true" />
+
+                <span className={styles["nav-item-label"]}>
+                  {t("navigation.saveInvest")}
+                </span>
+              </Link>
+            </div>
           )}
 
           {canViewApprovals && (
-            <Link
-              to="/attestkorg"
-              activeOptions={{ exact: true }}
-              className={styles["nav-item"]}
-              activeProps={{
-                className: `${styles["nav-item"]} ${styles.active}`,
-              }}
-              onClick={handleMobileNavClick}
-            >
-              <span>{t("sidebar.approvalInbox")}</span>
+            <div className={styles["nav-section"]}>
+              <span className={styles["section-label"]}>
+                {t("sidebar.approvals")}
+              </span>
 
-              {pendingApprovalCount > 0 && (
-                <span
-                  className={`${styles.badge} ${badgePulsing ? styles.pulse : ""
-                    } ${overdueApprovalCount > 0 ? styles.overdue : ""
-                    }`}
-                  title={badgeLabel}
-                  aria-label={badgeLabel}
-                >
-                  {pendingApprovalCount}
+              <Link
+                to="/attestkorg"
+                activeOptions={{ exact: true }}
+                className={styles["nav-item"]}
+                activeProps={{
+                  className: `${styles["nav-item"]} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
+                title={collapsed ? badgeLabel : undefined}
+              >
+                <ClipboardCheck size={20} strokeWidth={2} aria-hidden="true" />
+
+                <span className={styles["nav-item-label"]}>
+                  {t("sidebar.approvalInbox")}
                 </span>
-              )}
-            </Link>
+
+                {pendingApprovalCount > 0 && (
+                  <span
+                    className={`${styles.badge} ${badgePulsing ? styles.pulse : ""} ${overdueApprovalCount > 0 ? styles.overdue : ""}`}
+                    title={badgeLabel}
+                    aria-label={badgeLabel}
+                  >
+                    {pendingApprovalCount}
+                  </span>
+                )}
+              </Link>
+            </div>
           )}
 
-          {user?.role === "Admin" && (
-            <div className={styles["admin-section"]}>
+          {isAdmin && (
+            <div className={styles["nav-section"]}>
               <span className={styles["section-label"]}>
                 {t("sidebar.admin")}
               </span>
+
+              <Link
+                to="/admin/users"
+                activeOptions={{ exact: false }}
+                className={styles["nav-item"]}
+                activeProps={{
+                  className: `${styles["nav-item"]} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
+                title={collapsed ? t("admin.navigation.users") : undefined}
+              >
+                <Users size={20} strokeWidth={2} aria-hidden="true" />
+
+                <span className={styles["nav-item-label"]}>
+                  {t("admin.navigation.users")}
+                </span>
+              </Link>
+
+              <Link
+                to="/admin/approval-limits"
+                activeOptions={{ exact: false }}
+                className={styles["nav-item"]}
+                activeProps={{
+                  className: `${styles["nav-item"]} ${styles.active}`,
+                }}
+                onClick={handleMobileNavClick}
+                title={collapsed ? t("admin.navigation.approvalLimits") : undefined}
+              >
+                <ShieldCheck size={20} strokeWidth={2} aria-hidden="true" />
+
+                <span className={styles["nav-item-label"]}>
+                  {t("admin.navigation.approvalLimits")}
+                </span>
+              </Link>
 
               <Link
                 to="/granskningslogg"
@@ -231,71 +329,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   className: `${styles["nav-item"]} ${styles.active}`,
                 }}
                 onClick={handleMobileNavClick}
+                title={collapsed ? t("sidebar.auditLog") : undefined}
               >
-                <span>{t("sidebar.auditLog")}</span>
-              </Link>
+                <ScrollText size={20} strokeWidth={2} aria-hidden="true" />
 
-              <Link
-                to="/admin"
-                activeOptions={{ exact: true }}
-                className={styles["nav-item"]}
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
-              >
-                <span>{t("sidebar.administration")}</span>
+                <span className={styles["nav-item-label"]}>
+                  {t("sidebar.auditLog")}
+                </span>
               </Link>
             </div>
           )}
-
-          <Link
-            to="/profil"
-            activeOptions={{ exact: true }}
-            className={styles["nav-item"]}
-            activeProps={{
-              className: `${styles["nav-item"]} ${styles.active}`,
-            }}
-            onClick={handleMobileNavClick}
-          >
-            <span>{t("sidebar.myProfile")}</span>
-          </Link>
         </nav>
 
         <div className={styles["sidebar-footer"]}>
-          <div className={styles["user-info"]}>
-            {user?.name && (
-              <span className={styles["user-name"]}>
-                {user.name}
-              </span>
-            )}
-
-            {user?.email && (
-              <span className={styles["user-email"]}>
-                {user.email}
-              </span>
-            )}
-
-            <span className={styles["user-role"]}>
-              {user?.role}
-            </span>
-          </div>
-
           {onLogout ? (
             <button
               type="button"
               className={styles["logout-btn"]}
               onClick={onLogout}
+              title={collapsed ? t("sidebar.logout") : undefined}
+              aria-label={t("sidebar.logout")}
             >
-              {t("sidebar.logout")}
+              <LogOut size={20} strokeWidth={2} aria-hidden="true" />
+
+              <span className={styles["nav-item-label"]}>
+                {t("sidebar.logout")}
+              </span>
             </button>
           ) : (
             <Link
               to="/logout"
               className={styles["logout-link"]}
               onClick={handleMobileNavClick}
+              title={collapsed ? t("sidebar.logout") : undefined}
             >
-              {t("sidebar.logout")}
+              <LogOut size={20} strokeWidth={2} aria-hidden="true" />
+
+              <span className={styles["nav-item-label"]}>
+                {t("sidebar.logout")}
+              </span>
             </Link>
           )}
         </div>

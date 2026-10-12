@@ -13,7 +13,7 @@ import type {
 } from '../schemas/approvalLimitsSchema';
 
 const API_URL =
-    import.meta.env.VITE_API_URL;
+    (import.meta.env.VITE_API_URL || window.location.origin);
 
 export async function getApprovalLimits() {
     return apiRequest(
@@ -40,7 +40,7 @@ export async function createApprovalLimit(
 }
 
 export async function updateApprovalLimit(
-    id: number,
+    id: string,
     limit: UpdateApprovalLimit
 ) {
     return apiRequest(
@@ -58,7 +58,7 @@ export async function updateApprovalLimit(
 }
 
 export async function deleteApprovalLimit(
-    id: number
+    id: string
 ): Promise<void> {
     return apiRequest(
         `${API_URL}/api/ApprovalLimits/${id}`,

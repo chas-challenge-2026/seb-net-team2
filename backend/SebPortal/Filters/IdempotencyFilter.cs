@@ -32,7 +32,18 @@ namespace SebPortal.Api.Filters
                 return;
             }
 
-            var key = idempotencyKey.ToString();
+            // Determine tenant prefix if available in JWT claims. If missing, fall back to unprefixed behavior to preserve compatibility in tests/dev.
+            var tenantClaim = context.HttpContext.User?.FindFirst("tenant_id")?.Value
+                              ?? context.HttpContext.User?.FindFirst("TenantId")?.Value;
+
+            string tenantPrefix = string.Empty;
+            if (!string.IsNullOrWhiteSpace(tenantClaim) && int.TryParse(tenantClaim, out var tenantIdFromClaim))
+            {
+                tenantPrefix = tenantIdFromClaim + ":";
+            }
+
+            var originalKey = idempotencyKey.ToString();
+            var namespacedKey = tenantPrefix + originalKey;
 
             // Create a hash of the payment request only
             if (!context.ActionArguments.TryGetValue("dto", out var dtoObject) ||
@@ -49,8 +60,8 @@ namespace SebPortal.Api.Filters
             var requestHash = Convert.ToHexString(
                 SHA256.HashData(Encoding.UTF8.GetBytes(requestJson)));
 
-            // Check if this key has already been used
-            var existingKey = await _context.IdempotencyKeys.FirstOrDefaultAsync(x => x.Key == key);
+            // Check if this key has already been used (namespaced)
+            var existingKey = await _context.IdempotencyKeys.FirstOrDefaultAsync(x => x.Key == namespacedKey);
 
             if (existingKey != null)
             {
@@ -93,7 +104,7 @@ namespace SebPortal.Api.Filters
 
                     // Same request is currently being processed by another request.
                     // Wait for it to finish and replay its response.
-                    context.Result = await WaitForCompletedResponseAsync(key, requestHash, context.HttpContext);
+                    context.Result = await WaitForCompletedResponseAsync(namespacedKey, requestHash, context.HttpContext);
 
                     return;
                 }
@@ -102,7 +113,7 @@ namespace SebPortal.Api.Filters
             // Reserve the key BEFORE running the controller
             var idempotencyRecord = new IdempotencyKey
             {
-                Key = key,
+                Key = namespacedKey,
                 RequestHash = requestHash,
                 CreatedAt = DateTime.UtcNow
             };
@@ -118,7 +129,7 @@ namespace SebPortal.Api.Filters
                 // Another request inserted the same key before us.
                 _context.Entry(idempotencyRecord).State = EntityState.Detached;
 
-                context.Result = await WaitForCompletedResponseAsync(key, requestHash, context.HttpContext);
+                context.Result = await WaitForCompletedResponseAsync(namespacedKey, requestHash, context.HttpContext);
 
                 return;
             }

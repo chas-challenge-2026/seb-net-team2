@@ -17,6 +17,9 @@
         "goToDashboard": "Go to dashboard"
     },
     "login": {
+        "invalidCredentials": "Incorrect email or password. Check both and try again.",
+        "unavailable": "We could not log you in. Check your email and password and try again. If the problem continues, try again later.",
+        "connectionFailed": "Could not connect to the server. Check your connection and try again.",
         "private": "Private",
         "company": "Company",
         "email": "Email",
@@ -30,13 +33,19 @@
     },
     "sidebar": {
         "menu": "Menu",
+        "closeMenu": "Close menu",
         "expand": "Expand sidebar",
         "collapse": "Collapse sidebar",
+        "secondaryNavigation": "Sidebar navigation",
+        "navigationLinks": "Navigation links",
         "dashboard": "Dashboard",
+        "payments": "Payments",
         "newPayment": "New payment",
         "batchUpload": "Batch upload",
+        "savings": "Savings",
+        "approvals": "Approvals",
         "approvalInbox": "Approval inbox",
-        "admin": "ADMIN",
+        "admin": "Administration",
         "auditLog": "Audit log",
         "administration": "Administration",
         "myProfile": "My profile",
@@ -46,15 +55,20 @@
     },
     "dashboard": {
         "welcome": "Welcome, {{user}}",
+        "greeting": "Good morning, {{user}}",
+        "createPayment": "Create payment",
         "user": "user",
         "companyName": "Company name",
         "accounts": "Accounts",
+        "accountsEmpty": "No accounts are set up for this company yet.",
         "recentPayments": "Recent payments",
         "errors": {
-            "generic": "Something went wrong."
+            "generic": "Something went wrong.",
+            "accounts": "Could not load company accounts. Try again later."
         },
         "table": {
             "date": "Date",
+            "fromAccount": "From account",
             "recipientIban": "Recipient IBAN",
             "reference": "Reference",
             "amount": "Amount",
@@ -62,13 +76,20 @@
         },
         "status": {
             "completed": "Completed",
-            "pending": "Pending"
+            "pending": "Pending",
+            "rejected": "Rejected"
         }
     },
     "payment": {
         "eyebrow": "PAYMENTS",
         "title": "Create a new payment",
         "description": "Send a secure payment from your company account.",
+        "steps": {
+            "label": "Payment progress",
+            "details": "Details",
+            "review": "Review",
+            "result": "Result"
+        },
         "details": {
             "title": "Payment details",
             "description": "Enter the recipient and payment amount."
@@ -86,22 +107,55 @@
             "reference": "Invoice or OCR",
             "message": "Write a message to the recipient"
         },
+        "iban": {
+            "valid": "IBAN format is valid.",
+            "invalid": "This IBAN appears invalid. Check the country code, length and digits.",
+            "accountNotChecked": "This checks the IBAN format, not whether the account exists or belongs to the recipient."
+        },
         "optional": "Optional",
         "loadingAccounts": "Loading accounts...",
         "success": "The payment has been created successfully.",
         "errors": {
             "selectAccount": "Select an account.",
+            "recipientRequired": "Enter a recipient.",
+            "invalidIban": "Enter a valid IBAN. Check the country code, length and digits.",
+            "amountRequired": "Enter an amount.",
+            "amountPositive": "Amount must be greater than zero.",
+            "referenceTooLong": "Reference must be 100 characters or fewer.",
+            "messageTooLong": "Message must be 500 characters or fewer.",
             "insufficientBalance": "The payment amount exceeds the account balance.",
             "reviewDetails": "Please review the payment details and try again.",
             "createFailed": "Could not create the payment. Please try again.",
-            "loadAccounts": "Could not load accounts."
+            "loadAccounts": "Could not load accounts.",
+            "noAccounts": "No accounts are available for payments."
         },
         "actions": {
             "clear": "Clear form",
             "review": "Review payment",
+            "continueToReview": "Continue to review",
             "goBack": "Go back",
             "creating": "Creating...",
-            "confirm": "Confirm payment"
+            "confirm": "Confirm payment",
+            "newPayment": "Start a new payment"
+        },
+        "result": {
+            "eyebrow": "PAYMENT STATUS",
+            "title": "Payment submitted",
+            "completedTitle": "Payment completed",
+            "pendingTitle": "Approval required",
+            "rejectedTitle": "Payment rejected",
+            "sourceAccount": "From account",
+            "submittedAt": "Submitted",
+            "status": "Status",
+            "completed": "The payment has been processed.",
+            "pendingApproval": "The payment was created and is waiting for approval.",
+            "rejected": "The payment was rejected.",
+            "accepted": "The payment was created. Check the status below.",
+            "statusValues": {
+                "completed": "Completed",
+                "pendingApproval": "Waiting for approval",
+                "rejected": "Rejected"
+            }
         },
         "summary": {
             "title": "Summary",
@@ -138,7 +192,8 @@
         "feedback": {
             "approved": "{{reference}} ({{amount}}) was approved.",
             "rejected": "{{reference}} ({{amount}}) was rejected.",
-            "alreadyHandled": "This payment has already been handled. The list has been updated."
+            "alreadyHandled": "This payment has already been handled. The list has been updated.",
+            "showHandled": "Show in Handled →"
         },
         "sort": {
             "label": "Sort by",
@@ -156,7 +211,17 @@
             "toIban": "To IBAN",
             "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
             "waitingToday": "Submitted today",
-            "dualApproval": "Dual approval – this payment requires two attestants"
+            "dualApproval": "Dual approval – this payment requires two attestants",
+            "recipientBank": "Recipient bank",
+            "fromAccount": "From account",
+            "accountNumber": "Account #{{id}}",
+            "recipient": "Recipient",
+            "dueDate": "Due date",
+            "due": {
+                "pastDue": "Past due",
+                "today": "Due today",
+                "tomorrow": "Due tomorrow"
+            }
         },
         "comment": {
             "label": "Comment",
@@ -175,14 +240,61 @@
         },
         "empty": {
             "title": "No pending approvals",
-            "description": "There are no payments waiting for your approval."
+            "description": "There are no payments waiting for your approval.",
+            "showHandled": "Show handled payments →"
         },
         "modal": {
             "approveTitle": "Approve payment?",
             "rejectTitle": "Reject payment?",
             "approveDescription": "Check the details before you approve. The decision cannot be undone.",
             "rejectDescription": "Check the details and explain why the payment is rejected.",
-            "amount": "Amount"
+            "amount": "Amount",
+            "attestingAs": "You are approving as {{name}} · Approval step {{step}}"
+        },
+        "checks": {
+            "title": "Check before deciding",
+            "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
+            "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
+            "highAmount": "High amount – check extra carefully",
+            "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
+        },
+        "tabs": {
+            "label": "Approval inbox views",
+            "pending_one": "To handle ({{count}})",
+            "pending_other": "To handle ({{count}})",
+            "handled": "Handled",
+            "handledCount_one": "Handled ({{count}})",
+            "handledCount_other": "Handled ({{count}})"
+        },
+        "history": {
+            "loading": "Loading handled payments...",
+            "error": "Could not load handled payments.",
+            "unavailableTitle": "History is not available yet",
+            "emptyTitle": "No handled payments yet",
+            "emptyDescription": "Payments you approve or reject will be shown here.",
+            "noMatchesTitle": "No payments match the filters",
+            "noMatchesDescription": "Try another search or clear the filters.",
+            "search": "Search",
+            "searchPlaceholder": "Search reference or IBAN",
+            "status": "Decision",
+            "statusAll": "All",
+            "statusApproved": "Approved",
+            "statusRejected": "Rejected",
+            "fromDate": "From date",
+            "toDate": "To date",
+            "minAmount": "Min amount",
+            "maxAmount": "Max amount",
+            "clear": "Clear filters",
+            "count": "Showing {{visible}} of {{total}}",
+            "approvedOn": "Approved {{date}}",
+            "rejectedOn": "Rejected {{date}}",
+            "step": "Approval step",
+            "reason": "Reason",
+            "sessionEmpty": "Payments you approve or reject now will be shown here.",
+            "moreFilters": "Filter",
+            "amount": "Amount",
+            "amountFrom": "From",
+            "amountTo": "To"
         }
     },
     "batch": {
@@ -235,12 +347,7 @@
     },
     "auditLog": {
         "title": "Audit log",
-        "description": "Event log from the database (note: some events are only logged to a file).",
-        "note": {
-            "title": "Note:",
-            "description": "This view only shows events stored in the database. Some events, such as batch payments and partial approval steps, are only logged to",
-            "descriptionEnd": "and do not appear here."
-        },
+        "description": "All events for your company: payments, approvals, users and approval limits.",
         "filters": {
             "user": "User",
             "allUsers": "All users",
@@ -268,9 +375,36 @@
             "showing": "Showing {{visible}} of {{total}} entries",
             "showMore": "Show more"
         },
-        "footnote": {
-            "start": "Showing the latest 200 entries. For the full log, also see",
-            "end": "on the server."
+        "details": {
+            "step": "Step {{step}} of {{total}}",
+            "comment": "Comment"
+        },
+        "actions": {
+            "CREATE_PAYMENT": "Payment created",
+            "APPROVE_STEP": "Approval step approved",
+            "REJECT_STEP": "Approval step rejected",
+            "EXECUTE_PAYMENT": "Payment executed",
+            "REJECT_PAYMENT": "Payment rejected",
+            "CREATE_USER": "User created",
+            "UPDATE_USER": "User updated",
+            "DELETE_USER": "User deleted",
+            "CREATE_APPROVAL_LIMIT": "Approval limit created",
+            "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
+            "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
+        },
+        "entityTypes": {
+            "payment": "Payment #{{id}}",
+            "user": "User #{{id}}",
+            "approvalLimit": "Approval limit #{{id}}"
+        },
+        "history": {
+            "title": "History: {{entity}}",
+            "description": "Everything that has happened, oldest first.",
+            "showHistory": "Show history for {{entity}}",
+            "loading": "Loading history...",
+            "error": "Could not load the history.",
+            "empty": "No events found.",
+            "by": "by {{user}}"
         }
     },
     "approvalLimits": {
@@ -544,5 +678,40 @@
             "title": "Account details",
             "company": "Company"
         }
+    },
+    "validation": {
+        "batchRows": "Correct the row errors shown below in your CSV file, then select the corrected file.",
+        "fileRead": "The file could not be read. Try selecting it again.",
+        "rejectReason": "Enter a rejection reason with at least {{min}} characters.",
+        "required": "Enter {{field}}. This field is required.",
+        "email": "Enter a valid email address, for example alex@example.com.",
+        "number": "Enter a valid number.",
+        "minimum": "Enter a number of at least {{min}}.",
+        "maximum": "Enter a number no greater than {{max}}.",
+        "step": "Enter a number in increments of {{step}}.",
+        "format": "Check the format of {{field}} and correct it.",
+        "summary": "Please correct the following errors ({{count}}):",
+        "nameExample": "Alex Andersson",
+        "emailExample": "alex@example.com",
+        "showPassword": "Show password",
+        "hidePassword": "Hide password",
+        "approval": {
+            "minAmount": "Enter an amount of 0 or more.",
+            "requiredApprovals": "Enter a whole number of approvals, at least 1."
+        },
+        "payment": {
+            "fromAccountId": "Select the account to pay from.",
+            "recipient": "Enter the recipient's name.",
+            "amount": "Enter an amount greater than 0.",
+            "reference": "Shorten the reference to 100 characters or fewer.",
+            "message": "Shorten the message to 500 characters or fewer."
+        },
+        "maxLength": "Shorten {{field}} to {{max}} characters or fewer.",
+        "companyExample": "Example AB"
+    },
+    "registration": {
+        "submit": "Register",
+        "login": "Already have an account? Log in.",
+        "companyName": "Company name"
     }
 }

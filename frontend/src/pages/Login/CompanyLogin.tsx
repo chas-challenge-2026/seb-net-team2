@@ -1,13 +1,16 @@
+import { useFormValidation } from "../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
+import { LogIn } from "lucide-react";
 
 import Button from "../../components/Button/Button";
 import PasswordInput from "../../components/PasswordInput/PasswordInput";
 import LoadingWheel from "../../components/LoadingState/LoadingWheel";
 import { useAuth } from "../../hooks/useAuth";
-import { AppError } from "../../errors/AppError";
+import { getLoginErrorMessage } from "./loginErrorMessage";
 
 import styles from "./Login.module.css";
 
@@ -17,6 +20,7 @@ export default function CompanyLogin() {
     const [error, setError] = useState("");
 
     const { t } = useTranslation();
+    const validation = useFormValidation();
     const { login, isLoggingIn } = useAuth();
     const navigate = useNavigate();
 
@@ -30,6 +34,7 @@ export default function CompanyLogin() {
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if (!validation.validate(event.currentTarget)) return;
 
         if (!email.trim() || !password) {
             setError(t("login.missingCredentials"));
@@ -42,17 +47,13 @@ export default function CompanyLogin() {
             await login(email.trim(), password);
             await navigate({ to: "/dashboard" });
         } catch (error) {
-            if (error instanceof AppError) {
-                setError(error.detail ?? error.message);
-                return;
-            }
-
-            setError(t("login.generic"));
+            setError(getLoginErrorMessage(error, t));
         }
     }
 
     return (
-        <form onSubmit={handleSubmit} className={styles.form}>
+        <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} onSubmit={handleSubmit} className={styles.form}>
+            <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
             <div className={styles.inputGrid}>
                 <div className={styles.formGroup}>
                     <label htmlFor="company-email" className={styles.label}>
@@ -61,17 +62,19 @@ export default function CompanyLogin() {
 
                     <input
                         id="company-email"
+                        {...validation.fieldProps("company-email")}
                         name="email"
                         type="email"
                         autoComplete="username"
                         inputMode="email"
                         required
-                        placeholder={t("login.email")}
+                        placeholder={t("validation.emailExample")}
                         value={email}
                         onChange={handleEmail}
                         className={styles.input}
                         disabled={isLoggingIn}
                     />
+                    <FieldError id="company-email" errors={validation.errors} />
                 </div>
 
                 <div className={styles.formGroup}>
@@ -81,6 +84,7 @@ export default function CompanyLogin() {
 
                     <PasswordInput
                         id="company-password"
+                        {...validation.fieldProps("company-password")}
                         name="password"
                         value={password}
                         onChange={handlePassword}
@@ -88,6 +92,7 @@ export default function CompanyLogin() {
                         required
                         disabled={isLoggingIn}
                     />
+                    <FieldError id="company-password" errors={validation.errors} />
                 </div>
             </div>
 
@@ -99,7 +104,14 @@ export default function CompanyLogin() {
                     className={styles.formButton}
                     disabled={isLoggingIn}
                 >
-                    {isLoggingIn ? <LoadingWheel size="small" /> : t("login.login")}
+                    {isLoggingIn ? (
+                        <LoadingWheel size="small" />
+                    ) : (
+                        <span className={styles.buttonContent}>
+                            <LogIn size={17} aria-hidden="true" />
+                            {t("login.login")}
+                        </span>
+                    )}
                 </Button>
 
                 <p className={styles.error} aria-live="polite">

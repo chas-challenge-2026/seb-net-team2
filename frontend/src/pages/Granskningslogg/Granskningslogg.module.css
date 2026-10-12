@@ -33,20 +33,6 @@
     font-size: var(--font-size-lg);
 }
 
-.infoBanner {
-    padding: 14px 18px;
-    border: 1px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    background: #e8f4fb;
-    color: var(--color-text);
-    font-size: var(--font-size-md);
-    line-height: 1.5;
-}
-
-.infoBanner code {
-    font-size: 0.9em;
-}
-
 .pagination {
     display: flex;
     flex-wrap: wrap;
@@ -82,14 +68,188 @@
     outline-offset: 2px;
 }
 
-.footnote {
-    margin: 1rem 0 0;
+.showMoreButton:disabled {
+    cursor: wait;
+    opacity: 0.6;
+}
+
+.actionLabel {
+    display: block;
+    font-weight: 600;
+}
+
+.action-success {
+    color: var(--seb-green-dark-2);
+}
+
+.action-danger {
+    color: var(--color-error);
+}
+
+.action-neutral {
+    color: var(--color-text);
+}
+
+.entityButton {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--color-primary);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.entityButton:hover {
+    text-decoration-thickness: 2px;
+}
+
+.entityButton:focus-visible,
+.historyClose:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+/* Entity history dialog */
+
+.historyDialog {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
+    padding: var(--spacing-lg);
+    border: 0;
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 12px 32px rgb(0 30 80 / 20%);
+}
+
+.historyDialog::backdrop {
+    background: rgb(0 30 80 / 45%);
+}
+
+.historyHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.historyHeader h2 {
+    margin: 0;
+    font-size: var(--font-size-xl);
+}
+
+.historyHeader p {
+    margin: var(--spacing-xs) 0 0;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+}
+
+.historyClose {
+    flex-shrink: 0;
+    padding: 0 var(--spacing-xs);
+    border: 0;
+    background: none;
+    color: var(--color-text-soft);
+    cursor: pointer;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.timelineItem {
+    position: relative;
+    display: flex;
+    gap: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+}
+
+/* Vertical line connecting the markers */
+.timelineItem:not(:last-child)::before {
+    position: absolute;
+    top: 28px;
+    bottom: 0;
+    left: 13px;
+    width: 2px;
+    background: var(--color-border-light);
+    content: "";
+}
+
+.timelineMarker {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: var(--color-surface);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.marker-success {
+    background: var(--seb-green-dark-2);
+}
+
+.marker-danger {
+    background: var(--color-error);
+}
+
+.marker-neutral {
+    background: var(--placeholder-grey);
+}
+
+.timelineBody {
+    min-width: 0;
+    padding-top: 3px;
+}
+
+.timelineTitle {
+    margin: 0;
+    font-size: var(--font-size-md);
+}
+
+.timelineTime {
+    display: block;
+    margin-top: 2px;
     color: var(--placeholder-grey);
     font-size: var(--font-size-sm);
 }
 
-.actionCode {
-    font-size: 0.9em;
+.timelineDescription {
+    margin: var(--spacing-xs) 0 0;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+    overflow-wrap: anywhere;
+}
+
+.detail {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+    overflow-wrap: anywhere;
+}
+
+/* The attestant's own words, shown as a quote so it stands out from the technical details. */
+.comment {
+    display: block;
+    margin-top: 6px;
+    padding-left: 10px;
+    border-left: 3px solid var(--color-border);
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    font-style: italic;
+    overflow-wrap: anywhere;
 }
 
 .toolbar {
@@ -230,4 +390,29 @@
     .page {
         padding: 1.5rem 16px 3rem;
     }
+}
+
+/* Icons */
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.resetButton,
+.showMoreButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.resetButton svg,
+.showMoreButton svg {
+    flex-shrink: 0;
 }

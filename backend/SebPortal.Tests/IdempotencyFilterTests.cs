@@ -14,6 +14,8 @@ namespace SebPortal.Tests;
 
 public class IdempotencyFilterTests
 {
+    private static readonly Guid TestAccountId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+
     [Fact]
     public async Task SameKeyAndRequest_ActionIsOnlyExecutedOnce()
     {
@@ -37,8 +39,7 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
                 Currency = "SEK",
@@ -70,8 +71,7 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
                 Currency = "SEK",
@@ -153,8 +153,7 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
                 Currency = "SEK",
@@ -178,8 +177,7 @@ public class IdempotencyFilterTests
             "test-key-123",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 500,
                 Currency = "SEK",
@@ -288,8 +286,7 @@ public class IdempotencyFilterTests
             "expired-key",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
                 Currency = "SEK",
@@ -354,8 +351,7 @@ public class IdempotencyFilterTests
             "concurrent-key",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
                 Currency = "SEK",
@@ -366,8 +362,7 @@ public class IdempotencyFilterTests
             "concurrent-key",
             new CreatePaymentDTO
             {
-                TenantId = 1,
-                FromAccountId = 1,
+                FromAccountId = TestAccountId,
                 ToIban = "SE3550000000054910000003",
                 Amount = 100,
                 Currency = "SEK",

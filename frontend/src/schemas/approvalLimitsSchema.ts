@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const approvalLimitSchema = z.object({
-    id: z.number(),
+    id: z.string().uuid(),
     tenantId: z.number(),
     minAmount: z.number(),
     requiredApprovals: z.number(),

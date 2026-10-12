@@ -34,10 +34,10 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> Decide([FromBody] ApprovalDecisionDTO dto)
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
+            var tenantId = GetUserTenantId();
+            var isAdmin = User.IsInRole(UserRoles.Admin);
 
-            var result = await _approvalService.DecideAsync(dto, userId.Value);
+            var result = await _approvalService.DecideAsync(dto, userId, isAdmin, tenantId);
 
             return result switch
             {
@@ -62,12 +62,6 @@ namespace SebPortal.Api.Controllers
             };
         }
 
-        private int? GetCurrentUserId()
-        {
-            var claim = User.FindFirst("UserId")?.Value;
-            return int.TryParse(claim, out var userId) ? userId : null;
-        }
-
         /// <summary>
         /// Retrieves the approval steps associated with a specific payment.
         /// </summary>
@@ -75,14 +69,12 @@ namespace SebPortal.Api.Controllers
         /// <returns>A list of approval steps for the payment.</returns>
         /// <response code="200">Returns the approval steps.</response>
         /// <response code="401">Unauthorized if the user ID claim is missing.</response>
-        [HttpGet("payment/{paymentId}/steps")]
-        public async Task<IActionResult> GetApprovalStepsForPayment(int paymentId)
+        [HttpGet("payment/{paymentId:guid}/steps")]
+        public async Task<IActionResult> GetApprovalStepsForPayment(Guid paymentId)
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
-
-            var steps = await _approvalService.GetPendingStepsForAttestantAsync(paymentId, userId.Value);
+            var tenantId = GetUserTenantId();
+            var steps = await _approvalService.GetPendingStepsForAttestantAsync(paymentId, userId, tenantId);
             return Ok(steps);
         }
 
@@ -96,11 +88,74 @@ namespace SebPortal.Api.Controllers
         public async Task<IActionResult> GetPendingApprovals()
         {
             var userId = GetCurrentUserId();
-            if (userId == null)
-                return Unauthorized("Saknar giltigt UserId-claim i token.");
-
-            var steps = await _approvalService.GetPendingStepsForAttestantAsync(userId.Value);
-            return Ok(steps);
+            var tenantId = GetUserTenantId();
+            if (User.IsInRole(UserRoles.Admin))
+            {
+                var allPendingSteps = await _approvalService.GetPendingStepsForTenantAsync(tenantId);
+                return Ok(allPendingSteps);
+            }
+            
+            var attestantSteps = await _approvalService.GetPendingStepsForAttestantAsync(userId, tenantId);
+            return Ok(attestantSteps);
         }
+
+        /// <summary>
+        /// Retrieves the 50 most recent completed approvals for the current tenant (Admin view).
+        /// </summary>
+        /// <returns>A list of recent completed approval steps.</returns>
+        /// <response code="200">Returns the recent approvals.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+        /// <response code="403">Forbidden if the user is not an administrator.</response>
+        [HttpGet("recent")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> GetRecentApprovalsForTenant()
+        {
+            var tenantId = GetUserTenantId();
+            var recentApprovals = await _approvalService.GetRecentApprovalsForTenantAsync(tenantId);
+            return Ok(recentApprovals);
+        }
+
+        /// <summary>
+        /// Retrieves the approval history for the current attestant (handled steps).
+        /// </summary>
+        /// <returns>A list of the attestant's approval history.</returns>
+        /// <response code="200">Returns the approval history.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+        [HttpGet("history")]
+        public async Task<IActionResult> GetApprovalHistory()
+        {
+            var userId = GetCurrentUserId();
+            var tenantId = GetUserTenantId();
+            var history = await _approvalService.GetApprovalHistoryForAttestantAsync(userId, tenantId);
+            return Ok(history);
+        }
+
+
+        #region Helper Methods 
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+
+        // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst("UserId")?.Value;
+            if (int.TryParse(claim, out var userId))
+            {
+                return userId;
+            }
+            throw new UnauthorizedAccessException("Saknar giltigt UserId i token.");
+        }
+        #endregion
     }
 }

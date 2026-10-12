@@ -2,6 +2,7 @@
 import { z } from 'zod'
 
 import { apiRequest } from './apiRequest'
+import { accountListSchema } from '../schemas/accountSchema'
 import { createdPaymentSchema, type CreatedPayment } from '../schemas/paymentSchema'
 
 
@@ -16,6 +17,7 @@ export interface Account {
 export interface Payment {
     id: string
     date: string
+    fromAccountId: string
     toIban: string
     reference: string
     amount: number
@@ -23,15 +25,25 @@ export interface Payment {
     status: 'Completed' | 'Pending approval' | 'Rejected'
 }
 
-// Replace mock data with API requests when the backend is ready.
-
 export async function fetchAccounts(): Promise<Account[]> {
-    return [
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
-        { id: '1', name: 'Operating account', balance: 2500000, currency: 'SEK', iban: 'SE4550000000058398257466' },
-        { id: '2', name: 'Payroll account', balance: 890000, currency: 'SEK', iban: 'SE4550000000058398257467' },
-        { id: '3', name: 'Project account', balance: 450000, currency: 'SEK', iban: 'SE4550000000058398257468' },
-    ]
+    if (!apiUrl) {
+        throw new Error('VITE_API_URL is not configured.')
+    }
+
+    const accounts = await apiRequest(
+        `${apiUrl}/api/Accounts`,
+        accountListSchema,
+    )
+
+    return accounts.map((account) => ({
+        id: String(account.id),
+        name: account.accountName,
+        balance: account.balance,
+        currency: account.currency,
+        iban: account.iban,
+    }))
 }
 
 function mapPaymentStatus(status: string): Payment['status'] {
@@ -46,7 +58,7 @@ function mapPaymentStatus(status: string): Payment['status'] {
 }
 
 export async function fetchRecentPayments(): Promise<Payment[]> {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
         throw new Error('VITE_API_URL is not configured.')
@@ -61,6 +73,7 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
         .map((payment) => ({
             id: String(payment.id),
             date: payment.createdAt.slice(0, 10),
+            fromAccountId: String(payment.fromAccountId),
             toIban: payment.toIban,
             reference: payment.reference,
             amount: payment.amount,
@@ -72,7 +85,7 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
 
 export type CreatePaymentRequest = {
     tenantId: number
-    fromAccountId: number
+    fromAccountId: string
     toIban: string
     amount: number
     currency: 'SEK'
@@ -83,7 +96,7 @@ export async function createPayment(
     payment: CreatePaymentRequest,
     idempotencyKey: string,
 ): Promise<CreatedPayment> {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
         throw new Error('VITE_API_URL is not configured.')

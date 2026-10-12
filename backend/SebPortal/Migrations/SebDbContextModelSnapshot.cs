@@ -53,11 +53,18 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(34)")
                         .HasColumnName("iban");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("integer")
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.HasIndex("TenantId");
 
@@ -95,6 +102,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("minAmount");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
                     b.Property<int>("RequiredApprovals")
                         .HasColumnType("integer")
                         .HasColumnName("requiredApprovals");
@@ -104,6 +115,9 @@ namespace SebPortal.Api.Migrations
                         .HasColumnName("tenant_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.HasIndex("TenantId");
 
@@ -132,9 +146,20 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("decided_at");
 
+                    b.Property<DateTime?>("LastReminderSentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_reminder_sent_at");
+
                     b.Property<int>("PaymentId")
                         .HasColumnType("integer")
                         .HasColumnName("payment_id");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+                    b.Property<int>("ReminderCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("reminder_count");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -151,6 +176,9 @@ namespace SebPortal.Api.Migrations
                     b.HasIndex("AttestantId");
 
                     b.HasIndex("PaymentId");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.ToTable("approval_steps", (string)null);
                 });
@@ -179,6 +207,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<string>("Details")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("details");
+
                     b.Property<int>("EntityId")
                         .HasColumnType("integer")
                         .HasColumnName("entity_id");
@@ -189,6 +221,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("entity_type");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer")
+                        .HasColumnName("tenant_id");
+
                     b.Property<int>("UserId")
                         .HasColumnType("integer")
                         .HasColumnName("user_id");
@@ -196,6 +232,10 @@ namespace SebPortal.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.HasIndex("TenantId", "DateTime");
 
                     b.ToTable("audit_entries", (string)null);
                 });
@@ -243,6 +283,45 @@ namespace SebPortal.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("idempotency_keys", (string)null);
+                });
+
+            modelBuilder.Entity("SebPortal.Models.InAppNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApprovalStepId")
+                        .HasColumnType("integer")
+                        .HasColumnName("approval_step_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_read");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovalStepId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("in_app_notifications", (string)null);
                 });
 
             modelBuilder.Entity("SebPortal.Models.NotificationLog", b =>
@@ -327,6 +406,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("from_account_id");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
                     b.Property<string>("Reference")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -354,6 +437,9 @@ namespace SebPortal.Api.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("FromAccountId");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
 
                     b.HasIndex("TenantId");
 
@@ -452,6 +538,10 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(60)")
                         .HasColumnName("password_hash");
 
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("public_id");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -465,6 +555,9 @@ namespace SebPortal.Api.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("PublicId")
                         .IsUnique();
 
                     b.HasIndex("TenantId");
@@ -515,11 +608,38 @@ namespace SebPortal.Api.Migrations
 
             modelBuilder.Entity("SebPortal.Models.AuditEntries", b =>
                 {
+                    b.HasOne("SebPortal.Models.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SebPortal.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SebPortal.Models.InAppNotification", b =>
+                {
+                    b.HasOne("SebPortal.Models.ApprovalStep", "ApprovalStep")
+                        .WithMany()
+                        .HasForeignKey("ApprovalStepId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SebPortal.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApprovalStep");
 
                     b.Navigation("User");
                 });

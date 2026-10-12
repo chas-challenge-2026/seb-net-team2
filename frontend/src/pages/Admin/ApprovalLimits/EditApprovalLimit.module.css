@@ -1,37 +1,10 @@
 .layout {
     width: 100%;
-    max-width: 1100px;
-
-    margin: 0 auto;
-    padding: var(--spacing-xl);
 
     box-sizing: border-box;
 }
 
-/* Breadcrumb */
-
-.breadcrumb {
-    margin-bottom: var(--spacing-md);
-}
-
-.backLink {
-    color: var(--color-text-soft);
-
-    font-size: var(--font-size-md);
-    text-decoration: none;
-}
-
-.backLink:hover {
-    color: var(--color-text);
-    text-decoration: underline;
-}
-
-.backLink:focus-visible {
-    outline: 2px solid var(--seb-green-dark-1);
-    outline-offset: 3px;
-}
-
-/* Header */
+/* Page header */
 
 .pageHeader {
     display: flex;
@@ -41,6 +14,21 @@
     gap: var(--spacing-lg);
 
     margin-bottom: var(--spacing-xl);
+}
+
+.titleRow {
+    display: flex;
+    align-items: flex-start;
+
+    gap: var(--spacing-md);
+}
+
+.titleRow > svg {
+    flex-shrink: 0;
+
+    margin-top: 4px;
+
+    color: var(--seb-green-dark-2);
 }
 
 .pageHeader h1 {
@@ -53,8 +41,7 @@
 }
 
 .pageHeader p {
-    margin:
-        var(--spacing-xs) 0 0;
+    margin: var(--spacing-xs) 0 0;
 
     color: var(--color-text-soft);
 }
@@ -64,9 +51,7 @@
 .formSection {
     background-color: var(--color-surface);
 
-    border:
-        1px solid var(--color-border-light);
-
+    border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
 
     overflow: hidden;
@@ -75,8 +60,9 @@
 .sectionHeader {
     padding: var(--spacing-lg);
 
-    border-bottom:
-        1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
+
+    background-color: var(--color-300);
 }
 
 .sectionHeader h2 {
@@ -89,8 +75,7 @@
 }
 
 .sectionHeader p {
-    margin:
-        var(--spacing-xs) 0 0;
+    margin: var(--spacing-xs) 0 0;
 
     color: var(--color-text-soft);
 }
@@ -99,12 +84,9 @@
 
 .form {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
-
-    gap:
-        var(--spacing-lg) var(--spacing-xl);
+    gap: var(--spacing-lg) var(--spacing-xl);
 
     padding: var(--spacing-xl);
 }
@@ -149,9 +131,7 @@
     color: var(--color-text);
     background-color: var(--color-surface);
 
-    border:
-        1px solid var(--color-border);
-
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
 
     transition:
@@ -174,15 +154,12 @@
 
 .input:hover:not(:disabled),
 .textarea:hover:not(:disabled) {
-    border-color:
-        var(--color-text-soft);
+    border-color: var(--color-text-soft);
 }
 
 .input:focus,
 .textarea:focus {
-    outline:
-        2px solid var(--seb-green-dark-1);
-
+    outline: 2px solid var(--seb-green-dark-1);
     outline-offset: 1px;
 }
 
@@ -192,8 +169,7 @@
 
     cursor: not-allowed;
 
-    background-color:
-        var(--color-hover-light);
+    background-color: var(--color-hover-light);
 }
 
 /* Feedback */
@@ -202,6 +178,11 @@
 .error {
     grid-column: 1 / -1;
 
+    display: flex;
+    align-items: center;
+
+    gap: var(--spacing-sm);
+
     padding: var(--spacing-md);
 
     border-radius: var(--radius-sm);
@@ -209,18 +190,21 @@
     font-size: var(--font-size-md);
 }
 
+.success svg,
+.error svg {
+    flex-shrink: 0;
+}
+
 .success {
     color: var(--seb-green-dark-2);
 
-    border:
-        1px solid var(--seb-green-dark-1);
+    border: 1px solid var(--seb-green-dark-1);
 }
 
 .error {
     color: var(--color-error);
 
-    border:
-        1px solid var(--color-error);
+    border: 1px solid var(--color-error);
 }
 
 /* Actions */
@@ -236,8 +220,7 @@
 
     padding-top: var(--spacing-md);
 
-    border-top:
-        1px solid var(--color-border-light);
+    border-top: 1px solid var(--color-border-light);
 }
 
 .cancelButton {
@@ -247,55 +230,84 @@
     align-items: center;
     justify-content: center;
 
-    padding:
-        0 var(--spacing-lg);
+    gap: var(--spacing-sm);
+
+    padding: 0 var(--spacing-lg);
 
     box-sizing: border-box;
 
     color: var(--color-text);
 
-    border:
-        1px solid var(--color-border);
-
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
 
     text-decoration: none;
 }
 
 .cancelButton:hover {
-    background-color:
-        var(--color-hover-light);
+    background-color: var(--color-hover-light);
 }
 
 .cancelButton:focus-visible {
-    outline:
-        2px solid var(--seb-green-dark-1);
-
+    outline: 2px solid var(--seb-green-dark-1);
     outline-offset: 2px;
 }
 
 .formButton {
-    min-width: 150px;
+    min-width: 190px;
 }
 
+.buttonContent,
 .loadingButton {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
 
     gap: var(--spacing-sm);
 }
 
-/* Loading */
+.buttonContent svg {
+    flex-shrink: 0;
+}
+
+/* Initial loading */
 
 .loadingState {
     min-height: 300px;
 
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 
     gap: var(--spacing-md);
+
+    color: var(--color-text-soft);
+}
+
+/* Delete modal */
+
+.deleteWarning {
+    display: flex;
+    align-items: flex-start;
+
+    gap: var(--spacing-md);
+}
+
+.deleteWarning > svg {
+    flex-shrink: 0;
+
+    margin-top: 2px;
+
+    color: var(--color-error);
+}
+
+.deleteWarning p {
+    margin: 0;
+}
+
+.deleteWarning p + p {
+    margin-top: var(--spacing-sm);
 
     color: var(--color-text-soft);
 }
@@ -303,10 +315,6 @@
 /* Responsive */
 
 @media (max-width: 700px) {
-    .layout {
-        padding: var(--spacing-md);
-    }
-
     .pageHeader {
         flex-direction: column;
     }

@@ -4,7 +4,8 @@ namespace SebPortal.Models
     {
     public class ApprovalStep
     {
-        public int Id { get; set; }
+        public int Id { get; set; } // Primary key
+        public Guid PublicId { get; set; } = Guid.NewGuid();
         public int PaymentId { get; set; }
         public Payment Payment { get; set; } = null!; // Navigation property to Payments
         public int AttestantId { get; set; }
@@ -16,5 +17,8 @@ namespace SebPortal.Models
         public DateTime? DecidedAt { get; set; } // null until the attestant has decided
         [MaxLength(255)]
         public string? Comment { get; set; }
+        public int ReminderCount { get; set; } = 0;
+
+        public DateTime? LastReminderSentAt { get; set; }
     }
 }

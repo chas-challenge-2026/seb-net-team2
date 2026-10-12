@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
+import { ChevronRight, Search, UserPlus, Users as UsersIcon } from "lucide-react";
 
 import { getAllUsers } from "../../../services/authService";
 import Card from "../../../components/Card/Card";
@@ -48,12 +49,17 @@ export default function Users() {
     return (
         <div className={styles.layout}>
             <header className={styles.pageHeader}>
-                <div>
-                    <h1>{t("users.list.title")}</h1>
-                    <p className={styles.description}>{t("users.list.description")}</p>
+                <div className={styles.titleRow}>
+                    <UsersIcon size={28} strokeWidth={2} aria-hidden="true" />
+
+                    <div>
+                        <h1>{t("users.list.title")}</h1>
+                        <p className={styles.description}>{t("users.list.description")}</p>
+                    </div>
                 </div>
 
                 <Link to="/admin/users/create" className={styles.createButton}>
+                    <UserPlus size={18} strokeWidth={2} aria-hidden="true" />
                     {t("users.list.create")}
                 </Link>
             </header>
@@ -65,15 +71,19 @@ export default function Users() {
                             {t("users.list.searchLabel")}
                         </label>
 
-                        <input
-                            id="user-search"
-                            type="search"
-                            placeholder={t("users.list.searchPlaceholder")}
-                            value={search}
-                            disabled={isPending}
-                            onChange={(event) => setSearch(event.target.value)}
-                            className={styles.searchInput}
-                        />
+                        <div className={styles.searchInputWrapper}>
+                            <Search size={18} strokeWidth={2} aria-hidden="true" />
+
+                            <input
+                                id="user-search"
+                                type="search"
+                                placeholder={t("users.list.searchPlaceholder")}
+                                value={search}
+                                disabled={isPending}
+                                onChange={(event) => setSearch(event.target.value)}
+                                className={styles.searchInput}
+                            />
+                        </div>
                     </div>
 
                     {!isPending && !isError && (
@@ -103,6 +113,7 @@ export default function Users() {
 
                 {!isPending && !isError && filteredUsers.length === 0 && (
                     <div className={styles.emptyState}>
+                        <UsersIcon size={32} strokeWidth={1.75} aria-hidden="true" />
                         <h2>{t("users.list.empty.title")}</h2>
                         <p>{t("users.list.empty.description")}</p>
                     </div>
@@ -131,7 +142,7 @@ export default function Users() {
                                         {t(`users.roles.${user.role}`)}
                                     </span>
 
-                                    <span className={styles.chevron} aria-hidden="true">›</span>
+                                    <ChevronRight className={styles.chevron} size={20} strokeWidth={2} aria-hidden="true" />
                                 </Card>
                             </Link>
                         ))}

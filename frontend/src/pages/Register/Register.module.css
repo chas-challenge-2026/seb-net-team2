@@ -187,3 +187,34 @@
         width: 100%;
     }
 }
+/* Icons */
+.headerTitle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.headerTitle svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.buttonContent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+}
+
+.loginLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.buttonContent svg,
+.loginLink svg {
+    flex-shrink: 0;
+}

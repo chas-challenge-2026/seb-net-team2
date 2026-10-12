@@ -25,26 +25,28 @@ namespace SebPortal.Tests
         {
             // Arrange
             int id = 1;
+            var publicId = Guid.NewGuid();
             int tenantId = 10;
 
             var existingLimit = new ApprovalLimit
             {
                 Id = id,
+                PublicId = publicId,
                 TenantId = tenantId,
                 MinAmount = 1000m,
                 RequiredApprovals = 2,
                 Description = "Testgräns"
             };
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync(existingLimit);
 
             // Act
-            var result = await _approvalLimitService.GetByIdAsync(id, tenantId);
+            var result = await _approvalLimitService.GetByIdAsync(publicId, tenantId);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
+            Assert.Equal(publicId, result.Id);
             Assert.Equal(tenantId, result.TenantId);
             Assert.Equal(1000m, result.MinAmount);
             Assert.Equal(2, result.RequiredApprovals);
@@ -55,19 +57,19 @@ namespace SebPortal.Tests
         public async Task GetByIdAsync_ShouldThrowException_WhenLimitNotExists()
         {
             // Arrange
-            int id = 1;
+            var publicId = Guid.NewGuid();
             int tenantId = 10;
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync((ApprovalLimit?)null);
 
             // Act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _approvalLimitService.GetByIdAsync(id, tenantId);
+                await _approvalLimitService.GetByIdAsync(publicId, tenantId);
             });
 
-            Assert.Equal($"Attestbeloppgräns med id: {id} hittades inte", exception.Message);
+            Assert.Equal($"Attestbeloppgräns med id: {publicId} hittades inte", exception.Message);
 
         }
 
@@ -107,12 +109,12 @@ namespace SebPortal.Tests
             var limitList = result.ToList();
             Assert.Equal(2, limitList.Count);
             //limit 1 
-            Assert.Equal(1, limitList[0].Id);
+            Assert.Equal(limits[0].PublicId, limitList[0].Id);
             Assert.Equal(tenantId, limitList[0].TenantId);
             Assert.Equal(50000, limitList[0].MinAmount);
             Assert.Equal(1, limitList[0].RequiredApprovals);
             //limit 2 
-            Assert.Equal(2, limitList[1].Id);
+            Assert.Equal(limits[1].PublicId, limitList[1].Id);
             Assert.Equal(tenantId, limitList[1].TenantId);
             Assert.Equal(200000, limitList[1].MinAmount);
             Assert.Equal(2, limitList[1].RequiredApprovals);
@@ -153,9 +155,9 @@ namespace SebPortal.Tests
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.UserId == userId &&
+                e.TenantId == tenantId && 
                 e.Action == "CREATE_APPROVAL_LIMIT" &&
-                e.EntityType == "approvalLimit" &&
-                e.EntityId == result.Id)), Times.Once);
+                e.EntityType == "approvalLimit")), Times.Once);
         }
 
         [Fact]
@@ -231,21 +233,23 @@ namespace SebPortal.Tests
             // Arrange
             int tenantId = 10;
             int id = 1;
+            var publicId = Guid.NewGuid();
             int userId = 42;
             string modifiedBy = "Admin";
 
             var existingLimit = new ApprovalLimit
             {
                 Id = id,
+                PublicId = publicId,
                 TenantId = tenantId,
                 MinAmount = 1000m,
                 RequiredApprovals = 1,
                 Description = "Gammal beskrivning"
             };
 
-            // GetByIdAsync must be called with (id, tenantId) exactly as the repository expects -
+            // GetByPublicIdAsync must be called with (publicId, tenantId) exactly as the repository expects -
             // this pins down the parameter order bug where id and tenantId were swapped.
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync(existingLimit);
 
             _repositoryMock.Setup(r => r.GetOrderedLimitsAsync(tenantId))
@@ -259,19 +263,20 @@ namespace SebPortal.Tests
             };
 
             // Act
-            var result = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userId, modifiedBy, dto);
+            var result = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, publicId, userId, modifiedBy, dto);
 
             // Assert
-            Assert.Equal(id, result.Id);
+            Assert.Equal(publicId, result.Id);
             Assert.Equal(tenantId, result.TenantId);
             Assert.Equal(2000m, result.MinAmount);
             Assert.Equal(2, result.RequiredApprovals);
             Assert.Equal("Ny beskrivning", result.Description);
             Assert.Equal(modifiedBy, result.LastModifiedBy);
-            _repositoryMock.Verify(r => r.GetByIdAsync(id, tenantId), Times.Once);
+            _repositoryMock.Verify(r => r.GetByPublicIdAsync(publicId, tenantId), Times.Once);
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.UserId == userId &&
+                e.TenantId == tenantId &&
                 e.Action == "UPDATE_APPROVAL_LIMIT" &&
                 e.EntityType == "approvalLimit" &&
                 e.EntityId == id)), Times.Once);
@@ -282,26 +287,28 @@ namespace SebPortal.Tests
         {
             int tenantId = 1;
             int id = 1;
+            var publicId = Guid.NewGuid();
             int userId = 42;
 
             var existingLimit = new ApprovalLimit
             {
                 TenantId = tenantId,
                 Id = id,
+                PublicId = publicId,
                 MinAmount = 1000,
                 RequiredApprovals = 1,
                 Description = "Onödig attest"
             };
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync(existingLimit);
 
-            _repositoryMock.Setup(r => r.DeleteApprovalLimitAsync(existingLimit))
+            _repositoryMock.Setup(r => r.DeleteApprovalLimitAsync(id, tenantId))
                 .ReturnsAsync(true);
 
-            var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id, userId);
+            var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, publicId, userId);
             Assert.True(result);
-            _repositoryMock.Verify(r => r.DeleteApprovalLimitAsync(existingLimit), Times.Once);
+            _repositoryMock.Verify(r => r.DeleteApprovalLimitAsync(id, tenantId), Times.Once);
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.UserId == userId &&
@@ -314,161 +321,25 @@ namespace SebPortal.Tests
         public async Task DeleteApprovalLimitAsync_ShouldThrowException_WhenLimitNotFound()
         {
             int tenantId = 1;
-            int id = 100;
+            var publicId = Guid.NewGuid();
             int userId = 42;
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync((ApprovalLimit?)null);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id, userId);
+                await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, publicId, userId);
             });
 
-            Assert.Equal($"Attestbeloppgräns med id: {id} hittades inte", exception.Message);
+            Assert.Equal($"Attestbeloppgräns med id: {publicId} hittades inte", exception.Message);
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.IsAny<AuditEntries>()), Times.Never);
         }
     }
 
 
-//Borttagning(DeleteApprovalLimitAsync) :
 
-////Att gränsen raderas om den finns.
-
-////Att undantag kastas om gränsen saknas.
-
-
-
-        //    public async Task<ApprovalLimitResponseDTO> CreateApprovalLimitAsync(int tenantId, string modifiedBy, CreateApprovalLimitDTO dto)
-        //    {
-        //        var existingLimits = await _repository.GetOrderedLimitsAsync(tenantId);
-
-        //        //validate buissiness logic
-        //        ValidateLimitsOrder(existingLimits, dto.MinAmount, dto.RequiredApprovals, null);
-
-        //        var limit = new ApprovalLimit
-        //        {
-        //            TenantId = tenantId,
-        //            MinAmount = dto.MinAmount,
-        //            RequiredApprovals = dto.RequiredApprovals,
-        //            Description = dto.Description,
-        //            CreatedAt = DateTime.UtcNow,
-        //            LastModifiedAt = DateTime.UtcNow,
-        //            LastModifiedBy = modifiedBy
-        //        };
-        //        await _repository.CreateApprovalLimitAsync(limit);
-        //        return new ApprovalLimitResponseDTO
-        //        {
-        //            Id = limit.Id,
-        //            TenantId = tenantId,
-        //            MinAmount = limit.MinAmount,
-        //            RequiredApprovals = limit.RequiredApprovals,
-        //            Description = limit.Description,
-        //            LastModifiedAt = limit.LastModifiedAt,
-        //            LastModifiedBy = limit.LastModifiedBy
-        //        };
-        //    }
-
-        //    public async Task<ApprovalLimitResponseDTO> UpdateApprovalLimitAsync(int id, int tenantId, string modifiedBy, UpdateApprovalLimitDTO dto)
-        //    {
-        //        var existingLimit = await _repository.GetByIdAsync(id, tenantId);
-
-        //        if (existingLimit == null)
-        //        {
-        //            throw new Exception($"Attestbeloppgräns med id: {id} hittades inte");
-        //        }
-
-        //        var existingLimits = await _repository.GetOrderedLimitsAsync(tenantId);
-
-        //        //for validation
-        //        decimal targetMinAmount = dto.MinAmount ?? existingLimit.MinAmount;
-        //        int targetRequiredApprovals = dto.RequiredApprovals ?? existingLimit.RequiredApprovals;
-
-        //        // Validate with id 
-        //        ValidateLimitsOrder(existingLimits, targetMinAmount, targetRequiredApprovals, id);
-
-        //        if (dto.MinAmount != null)
-        //        {
-        //            existingLimit.MinAmount = dto.MinAmount.Value;
-        //        }
-
-        //        if (dto.RequiredApprovals != null)
-        //        {
-        //            existingLimit.RequiredApprovals = dto.RequiredApprovals.Value;
-        //        }
-
-        //        if (dto.Description != null)
-        //        {
-        //            existingLimit.Description = dto.Description;
-        //        }
-
-        //        existingLimit.LastModifiedAt = DateTime.UtcNow;
-        //        existingLimit.LastModifiedBy = modifiedBy;
-
-
-        //        await _repository.UpdateApprovalLimitAsync(existingLimit);
-        //        return new ApprovalLimitResponseDTO
-        //        {
-        //            Id = existingLimit.Id,
-        //            TenantId = existingLimit.TenantId,
-        //            MinAmount = existingLimit.MinAmount,
-        //            RequiredApprovals = existingLimit.RequiredApprovals,
-        //            Description = existingLimit.Description,
-        //            LastModifiedAt = existingLimit.LastModifiedAt,
-        //            LastModifiedBy = existingLimit.LastModifiedBy
-        //        };
-        //    }
-
-        //    public async Task<bool> DeleteApprovalLimitAsync(int id, int tenantId)
-        //    {
-        //        var limit = await _repository.GetByIdAsync(id, tenantId);
-        //        if (limit == null)
-        //        {
-        //            throw new Exception($"Attestbeloppgräns med id: {id} hittades inte");
-        //        }
-        //        await _repository.DeleteApprovalLimitAsync(limit);
-        //        return true;
-        //    }
-
-        //    // Helpmethod for validation
-        //    //A limit with higher 
-        //    private void ValidateLimitsOrder(IEnumerable<ApprovalLimit> existingLimits, decimal newMinAmount, int newRequiredApprovals, int? updatingId)
-        //    {
-        //        // 1. create a new list (exclude the unsaved)
-        //        var limitsToCheck = existingLimits.Where(l => updatingId == null || l.Id != updatingId.Value).ToList();
-
-        //        // 2. check if the amount already exists on another approvallimit
-        //        if (limitsToCheck.Any(l => l.MinAmount == newMinAmount))
-        //        {
-        //            throw new InvalidOperationException($"Det finns redan en attestbeloppgräns för beloppet {newMinAmount}.");
-        //        }
-
-        //        // 3. Add the unsaved limit to the list and sort it by MinAmount rising
-        //        limitsToCheck.Add(new ApprovalLimit
-        //        {
-        //            MinAmount = newMinAmount,
-        //            RequiredApprovals = newRequiredApprovals
-        //        });
-
-        //        var sortedLimits = limitsToCheck.OrderBy(l => l.MinAmount).ToList();
-
-        //        // 4. Control hierarcy: Higher amount MUST demand more requiredApprovals
-        //        for (int i = 0; i < sortedLimits.Count - 1; i++)
-        //        {
-        //            var current = sortedLimits[i];
-        //            var next = sortedLimits[i + 1];
-
-        //            if (current.RequiredApprovals > next.RequiredApprovals)
-        //            {
-        //                throw new InvalidOperationException(
-        //                    $"Ogiltig hierarki: Beloppgränsen {current.MinAmount} kräver {current.RequiredApprovals} attestanter, " +
-        //                    $"medan den högre gränsen {next.MinAmount} endast kräver {next.RequiredApprovals}. Högre belopp måste kräva fler attestanter.");
-        //            }
-        //        }
-        //    }
-
-        //}
 
 }
 

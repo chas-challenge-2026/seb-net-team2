@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { UserPlus } from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import CustomerTypeSelector, {
@@ -21,9 +22,12 @@ export default function Register() {
                 className={styles.registerCard}
             >
                 <div className={styles.headerSection}>
-                    <h1 className={styles.header}>
-                        Welcome to SEB
-                    </h1>
+                    <div className={styles.headerTitle}>
+                        <UserPlus size={22} aria-hidden="true" />
+                        <h1 className={styles.header}>
+                            Welcome to SEB
+                        </h1>
+                    </div>
 
                     <div className={styles.line} />
                 </div>

@@ -10,8 +10,11 @@
 
 .pageHeader p {
     margin-top: var(--spacing-sm);
-    color: var(--color-text-secondary);
+    color: var(--color-text-soft);
 }
+
+
+/* Stats */
 
 .stats {
     display: grid;
@@ -25,19 +28,61 @@
     gap: var(--spacing-md);
 }
 
+.statHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+}
+
+.statLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.statIcon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    background-color: var(--color-300);
+    color: var(--seb-green-dark-2);
+
+    border-radius: var(--radius-md);
+}
+
 .statCard span {
-    color: var(--color-text-secondary);
+    color: var(--color-text-soft);
 }
 
 .statCard strong {
     font-size: 2rem;
+    line-height: 1;
 }
 
 .statCard a {
     width: fit-content;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+
     font-weight: 600;
     text-decoration: none;
 }
+
+.statCard a:hover {
+    text-decoration: underline;
+}
+
+
+/* Quick actions */
 
 .quickActions {
     display: flex;
@@ -52,7 +97,7 @@
 
 .quickActions p {
     margin: var(--spacing-sm) 0 0;
-    color: var(--color-text-secondary);
+    color: var(--color-text-soft);
 }
 
 .actions {
@@ -61,17 +106,49 @@
 }
 
 .actionLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
     padding: 10px 16px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
+
+    color: var(--color-text);
     text-decoration: none;
     font-weight: 600;
+
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
 }
+
+.actionLink svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
+.actionLink:hover {
+    background-color: var(--color-hover-light);
+    border-color: var(--color-border);
+}
+
+.actionLink:focus-visible {
+    outline: 3px solid var(--seb-green);
+    outline-offset: 2px;
+}
+
+
+/* Error */
 
 .error {
     padding: var(--spacing-md);
     border-radius: var(--radius-md);
 }
+
+
+/* Responsive */
 
 @media (max-width: 900px) {
     .stats {
@@ -81,5 +158,21 @@
     .quickActions {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .actions {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 600px) {
+    .actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .actionLink {
+        width: 100%;
+        box-sizing: border-box;
     }
 }

@@ -1,8 +1,4 @@
-import {
-    Outlet,
-    useRouterState,
-} from "@tanstack/react-router";
-
+import { Outlet } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { NavigationBar } from "../components/Navbar";
@@ -15,26 +11,11 @@ import styles from "../components/Sidebar.module.css";
 
 export function MainLayout() {
     const { isAuthenticated } = useAuth();
-
-    const pathname = useRouterState({
-        select: (state) =>
-            state.location.pathname,
-    });
-
-    const isAdminRoute =
-        pathname.startsWith("/admin");
-
-    const [collapsed, setCollapsed] =
-        useState(false);
+    const [collapsed, setCollapsed] = useState(false);
 
     function handleToggleCollapsed() {
-        setCollapsed(
-            (current) => !current
-        );
+        setCollapsed((current) => !current);
     }
-
-    const showSidebar =
-        isAuthenticated && !isAdminRoute;
 
     return (
         <>
@@ -44,12 +25,10 @@ export function MainLayout() {
 
             <NavigationBar />
 
-            {showSidebar && (
+            {isAuthenticated && (
                 <Sidebar
                     collapsed={collapsed}
-                    onToggleCollapsed={
-                        handleToggleCollapsed
-                    }
+                    onToggleCollapsed={handleToggleCollapsed}
                 />
             )}
 
@@ -58,11 +37,8 @@ export function MainLayout() {
                 tabIndex={-1}
                 aria-label="Main content"
                 className={
-                    showSidebar
-                        ? `${styles.content} ${collapsed
-                            ? styles.contentCollapsed
-                            : ""
-                        }`
+                    isAuthenticated
+                        ? `${styles.content} ${collapsed ? styles.contentCollapsed : ""}`
                         : ""
                 }
             >

@@ -1,9 +1,5 @@
 .layout {
     width: 100%;
-    max-width: 1100px;
-
-    margin: 0 auto;
-    padding: var(--spacing-xl);
 
     box-sizing: border-box;
 }
@@ -20,6 +16,17 @@
     margin-bottom: var(--spacing-xl);
 }
 
+.titleRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.titleRow svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}
+
 .pageHeader h1 {
     margin: 0;
 
@@ -30,8 +37,7 @@
 }
 
 .pageHeader p {
-    margin:
-        var(--spacing-xs) 0 0;
+    margin: var(--spacing-xs) 0 0;
 
     color: var(--color-text-soft);
 }
@@ -42,24 +48,25 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: var(--spacing-sm);
 
-    padding:
-        0 var(--spacing-lg);
+    padding: 0 var(--spacing-lg);
 
     border-radius: var(--radius-sm);
 
-    background-color:
-        var(--seb-green-dark-1);
-
+    background-color: var(--seb-green-dark-1);
     color: white;
 
     font-weight: 600;
     text-decoration: none;
 }
 
+.createButton svg {
+    flex-shrink: 0;
+}
+
 .createButton:hover {
-    background-color:
-        var(--seb-green-dark-2);
+    background-color: var(--seb-green-dark-2);
 }
 
 .createButton:focus-visible {
@@ -79,9 +86,7 @@
 .limitsSection {
     background-color: var(--color-surface);
 
-    border:
-        1px solid var(--color-border-light);
-
+    border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
 
     overflow: hidden;
@@ -90,8 +95,7 @@
 .toolbar {
     padding: var(--spacing-lg);
 
-    border-bottom:
-        1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
 
     background-color: var(--color-300);
 }
@@ -103,8 +107,7 @@
 }
 
 .toolbar p {
-    margin:
-        var(--spacing-xs) 0 0;
+    margin: var(--spacing-xs) 0 0;
 
     color: var(--color-text-soft);
 }
@@ -123,22 +126,16 @@
 
 .limitRow {
     display: grid;
-
-    grid-template-columns:
-        minmax(0, 1fr) 120px 220px 24px;
-
+    grid-template-columns: minmax(0, 1fr) 120px 220px 24px;
     align-items: center;
 
     gap: var(--spacing-lg);
 
-    padding:
-        var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
 
-    border-bottom:
-        1px solid var(--color-border-light);
+    border-bottom: 1px solid var(--color-border-light);
 
-    transition:
-        background-color 150ms ease;
+    transition: background-color 150ms ease;
 }
 
 .limitLink:last-child .limitRow {
@@ -146,8 +143,7 @@
 }
 
 .limitLink:hover .limitRow {
-    background-color:
-        var(--color-hover-light);
+    background-color: var(--color-hover-light);
 }
 
 .limitLink:focus-visible {
@@ -155,13 +151,11 @@
 }
 
 .limitLink:focus-visible .limitRow {
-    outline:
-        2px solid var(--seb-green-dark-1);
-
+    outline: 2px solid var(--seb-green-dark-1);
     outline-offset: -2px;
 }
 
-/* Limit information */
+/* Information */
 
 .limitInfo {
     min-width: 0;
@@ -170,6 +164,17 @@
     flex-direction: column;
 
     gap: var(--spacing-xs);
+}
+
+.valueRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.valueRow svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
 }
 
 .amount {
@@ -210,6 +215,16 @@
     gap: 2px;
 }
 
+.modifiedLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.modifiedLabel svg {
+    flex-shrink: 0;
+}
+
 .modified span,
 .modified small {
     color: var(--color-text-soft);
@@ -221,8 +236,6 @@
 
 .chevron {
     color: var(--color-text-soft);
-
-    font-size: 1.5rem;
 }
 
 /* States */
@@ -250,6 +263,10 @@
     color: var(--color-text-soft);
 }
 
+.emptyState>svg {
+    color: var(--color-text-soft);
+}
+
 .emptyState h2,
 .emptyState p {
     margin: 0;
@@ -266,9 +283,6 @@
 /* Responsive */
 
 @media (max-width: 800px) {
-    .layout {
-        padding: var(--spacing-md);
-    }
 
     .pageHeader {
         flex-direction: column;
@@ -279,8 +293,7 @@
     }
 
     .limitRow {
-        grid-template-columns:
-            minmax(0, 1fr) auto 20px;
+        grid-template-columns: minmax(0, 1fr) auto 20px;
     }
 
     .modified {

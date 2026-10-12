@@ -29,7 +29,8 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<IEnumerable<ReadUserDTO>>> GetAllUsers()
         {
-            var users = await _userService.GetAllUsersAsync();
+            var tenantId = GetUserTenantId();
+            var users = await _userService.GetAllUsersAsync(tenantId);
             return Ok(users);
         }
 
@@ -41,10 +42,11 @@ namespace SebPortal.Api.Controllers
         /// <response code="200">Returns the user details.</response>
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         /// <response code="404">The user was not found.</response>
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ReadUserDTO>> GetUserById(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReadUserDTO>> GetUserById(Guid id)
         {
-            var user = await _userService.GetUserByIdAsync(id);
+            var tenantId = GetUserTenantId();
+            var user = await _userService.GetUserByIdAsync(id, tenantId);
             return Ok(user);
         }
 
@@ -59,7 +61,8 @@ namespace SebPortal.Api.Controllers
         [HttpGet("by-email")]
         public async Task<ActionResult<ReadUserDTO>> GetUserByEmail([FromQuery] string email)
         {
-            var user = await _userService.GetUserByEmailAsync(email);
+            var tenantId = GetUserTenantId();
+            var user = await _userService.GetUserByEmailAsync(email, tenantId);
             return Ok(user);
         }
 
@@ -76,7 +79,10 @@ namespace SebPortal.Api.Controllers
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<ActionResult<ReadUserDTO>> CreateUser([FromBody] CreateUserDTO dto)
         {
-            var createdUser = await _userService.CreateUserAsync(dto);
+            var actingUserId = GetCurrentUserId();
+            var tenantId = GetUserTenantId();
+
+            var createdUser = await _userService.CreateUserAsync(dto, actingUserId, tenantId);
             return CreatedAtAction(nameof(GetUserById), new { id = createdUser.Id }, createdUser);
         }
 
@@ -91,11 +97,14 @@ namespace SebPortal.Api.Controllers
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         /// <response code="403">Forbidden if the user lacks the Admin role.</response>
         /// <response code="404">The user was not found.</response>
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id:guid}")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
+        public async Task<ActionResult<ReadUserDTO>> UpdateUser(Guid id, [FromBody] UpdateUserDTO dto)
         {
-            var updatedUser = await _userService.UpdateUserAsync(id, dto);
+            var actingUserId = GetCurrentUserId();
+            var tenantId = GetUserTenantId();
+
+            var updatedUser = await _userService.UpdateUserAsync(id, dto, actingUserId, tenantId);
             return Ok(updatedUser);
         }
 
@@ -108,12 +117,42 @@ namespace SebPortal.Api.Controllers
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         /// <response code="403">Forbidden if the user lacks the Admin role.</response>
         /// <response code="404">The user was not found.</response>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var result = await _userService.DeleteUserAsync(id);
+            var actingUserId = GetCurrentUserId();
+            var tenantId = GetUserTenantId();
+
+            var result = await _userService.DeleteUserAsync(id, actingUserId, tenantId);
             return NoContent();
         }
+
+        #region Helper Methods 
+        // Helpmethod to extract tenant ID from the user's claims. This is used to ensure that the approval limits are tenant-specific.
+        private int GetUserTenantId()
+        {
+            var tenantClaim = User.FindFirst("tenant_id")?.Value
+                           ?? User.FindFirst("TenantId")?.Value;
+
+            if (int.TryParse(tenantClaim, out int tenantId))
+            {
+                return tenantId;
+            }
+
+            throw new UnauthorizedAccessException("TenantId saknas eller är ogiltigt i token.");
+        }
+
+        // Helpmethod to extract the current user's id from the JWT "UserId" claim, for audit logging.
+        private int GetCurrentUserId()
+        {
+            var claim = User.FindFirst("UserId")?.Value;
+            if (int.TryParse(claim, out var userId))
+            {
+                return userId;
+            }
+            throw new UnauthorizedAccessException("Saknar giltigt UserId i token.");
+        }
+        #endregion
     }
 }

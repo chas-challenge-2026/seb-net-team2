@@ -7,8 +7,8 @@ namespace SebPortal.Api.Dtos
     public class CreatePaymentResponseDTO
     {
 
-        public int Id { get; set; }
-        public int FromAccountId { get; set; }
+        public Guid Id { get; set; }
+        public Guid FromAccountId { get; set; }
         public string ToIban { get; set; } = ""; // IBAN can be between 15 and 34 characters
         public decimal Amount { get; set; }
         public string Currency { get; set; } = "SEK";

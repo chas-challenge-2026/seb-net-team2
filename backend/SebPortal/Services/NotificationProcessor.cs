@@ -11,19 +11,39 @@ namespace SebPortal.Api.Services
         private readonly IEmailSender _emailSender;
         private readonly INotificationRepository _repository;
         private readonly ILogger<NotificationProcessor> _logger;
+        private readonly IInAppNotificationService _inAppNotificationService;
 
         public NotificationProcessor(
-            IEmailSender emailSender,
-            INotificationRepository repository,
-            ILogger<NotificationProcessor> logger)
+        IEmailSender emailSender,
+        INotificationRepository repository,
+        IInAppNotificationService inAppNotificationService,
+        ILogger<NotificationProcessor> logger)
         {
             _emailSender = emailSender;
             _repository = repository;
+            _inAppNotificationService = inAppNotificationService;
             _logger = logger;
         }
 
-       public async Task ProcessNotificationAsync(NotificationMessageDTO dto, CancellationToken cancellationToken)
-        { 
+        public async Task ProcessNotificationAsync(NotificationMessageDTO dto, CancellationToken cancellationToken)
+        {
+            if (dto.Channel == NotificationChannel.InApp)
+            {
+                if (dto.UserId == null || dto.ApprovalStepId == null)
+                {
+                    _logger.LogWarning("InApp-notifiering saknar UserId eller ApprovalStepId.");
+
+                    return;
+                }
+
+                await _inAppNotificationService.CreateAsync(
+                    dto.UserId.Value,
+                    dto.ApprovalStepId.Value,
+                    dto.Message,
+                    cancellationToken);
+
+                return;
+            }
             var pipeline = new ResiliencePipelineBuilder()
                 .AddRetry(new RetryStrategyOptions
                 {
