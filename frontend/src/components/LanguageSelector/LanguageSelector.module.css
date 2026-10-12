@@ -3,8 +3,9 @@
 }
 
 .trigger {
-    min-width: 135px;
-    height: 40px;
+    box-sizing: border-box;
+    width: 135px;
+    height: 2.75rem;
 
     display: flex;
     align-items: center;
@@ -16,14 +17,15 @@
     color: inherit;
 
     background: transparent;
-    border: 1px solid var(--color-border-light);
+    border: 1px solid transparent;
     border-radius: 4px;
 
     cursor: pointer;
 }
 
 .trigger:hover {
-    background: var(--color-hover-light);
+    background: var(--color-400);
+    border-color: var(--color-border-light);
 }
 
 .trigger:focus-visible {
@@ -87,7 +89,7 @@
 }
 
 .option:hover {
-    background: var(--color-hover-light);
+    background: var(--color-400);
 }
 
 .check {

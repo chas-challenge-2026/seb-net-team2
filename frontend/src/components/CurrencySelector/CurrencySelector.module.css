@@ -1,0 +1,13 @@
+/* Share the language menu's dimensions, hover styles and white menu. */
+.wrapper { composes: wrapper from "../LanguageSelector/LanguageSelector.module.css"; }
+.trigger { composes: trigger from "../LanguageSelector/LanguageSelector.module.css"; background: white; }
+.chevron { composes: chevron from "../LanguageSelector/LanguageSelector.module.css"; flex-shrink: 0; }
+.menu { composes: menu from "../LanguageSelector/LanguageSelector.module.css"; }
+.option { composes: option from "../LanguageSelector/LanguageSelector.module.css"; }
+.check { composes: check from "../LanguageSelector/LanguageSelector.module.css"; }
+.coin { color: #b8860b; flex-shrink: 0; }
+
+.trigger:hover,
+.option:hover {
+    background: var(--color-400);
+}
