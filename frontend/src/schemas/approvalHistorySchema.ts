@@ -3,9 +3,9 @@ import z from "zod";
 // Proposed contract for GET /api/Approval/history (not built in the backend yet):
 // the approval steps the current attestant has decided, newest first.
 export const decidedApprovalSchema = z.object({
-    stepId: z.number(),
+    stepId: z.string().uuid(),
     stepNumber: z.number(),
-    paymentId: z.number(),
+    paymentId: z.string().uuid(),
     reference: z.string(),
     amount: z.number(),
     currency: z.string(),

@@ -72,7 +72,7 @@ export function NyBetalning() {
                 ? t("payment.result.rejected")
                 : t("payment.result.accepted");
     const resultAccountName = createdPayment
-        ? accounts.find((account) => Number(account.id) === createdPayment.fromAccountId)?.name
+        ? accounts.find((account) => account.id === createdPayment.fromAccountId)?.name
         : undefined;
     const createdAtLabel = createdPayment
         ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" })
@@ -170,7 +170,7 @@ export function NyBetalning() {
             const payment = await createPayment(
                 {
                     tenantId: user?.tenantId ?? 0,
-                    fromAccountId: Number(selectedAccount.id),
+                    fromAccountId: selectedAccount.id,
                     toIban: validatedForm.iban,
                     amount: Number(validatedForm.amount),
                     currency: "SEK",

@@ -36,6 +36,9 @@ namespace SebPortal.Api.Repositories
             if (query.UserId.HasValue)
                 q = q.Where(e => e.UserId == query.UserId.Value);
 
+            if (query.UserPublicId.HasValue)
+                q = q.Where(e => e.User.PublicId == query.UserPublicId.Value);
+
             if (!string.IsNullOrWhiteSpace(query.Action))
                 q = q.Where(e => e.Action == query.Action);
 

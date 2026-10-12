@@ -1,14 +1,14 @@
 import z from "zod"
 
 export const pendingApprovalStepSchema = z.object({
-    stepId: z.number(),
+    stepId: z.string().uuid(),
     stepNumber: z.number(),
-    paymentId: z.number(),
+    paymentId: z.string().uuid(),
     amount: z.number(),
     currency: z.string(),
     toIban: z.string(),
     reference: z.string(),
-    createdByUserId: z.number(),
+    createdByUserId: z.string().uuid(),
     createdByUserName: z.string(),
     paymentCreatedAt: z.string(),
     // Not sent by the backend yet. Optional so the inbox keeps working without them,

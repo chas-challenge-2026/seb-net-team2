@@ -53,8 +53,8 @@ export const paymentSchema = z.object({
 export type PaymentForm = z.input<typeof paymentSchema>
 
 export const createdPaymentSchema = z.object({
-    id: z.coerce.number(),
-    fromAccountId: z.coerce.number(),
+    id: z.string().uuid(),
+    fromAccountId: z.string().uuid(),
     toIban: z.string(),
     amount: z.coerce.number(),
     currency: z.string(),

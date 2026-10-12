@@ -1,7 +1,7 @@
 import { apiRequest } from "./apiRequest";
 import { auditPageSchema } from "../schemas/auditSchema";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || window.location.origin);
 
 // Mirrors backend/SebPortal/Models/AuditActions.cs. The API has no endpoint that lists them.
 export const AUDIT_ACTIONS = [
@@ -20,6 +20,7 @@ export const AUDIT_ACTIONS = [
 
 export type AuditLogFilters = {
     userId?: number;
+    userPublicId?: string;
     action?: string;
     // Inclusive dates in yyyy-MM-dd format.
     from?: string;
@@ -37,6 +38,7 @@ export async function fetchAuditLog(
     });
 
     if (filters.userId !== undefined) params.set("userId", String(filters.userId));
+    if (filters.userPublicId !== undefined) params.set("userPublicId", filters.userPublicId);
     if (filters.action) params.set("action", filters.action);
     if (filters.from) params.set("from", filters.from);
     if (filters.to) params.set("to", filters.to);

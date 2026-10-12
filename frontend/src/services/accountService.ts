@@ -26,7 +26,7 @@ export interface Payment {
 }
 
 export async function fetchAccounts(): Promise<Account[]> {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
         throw new Error('VITE_API_URL is not configured.')
@@ -58,7 +58,7 @@ function mapPaymentStatus(status: string): Payment['status'] {
 }
 
 export async function fetchRecentPayments(): Promise<Payment[]> {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
         throw new Error('VITE_API_URL is not configured.')
@@ -85,7 +85,7 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
 
 export type CreatePaymentRequest = {
     tenantId: number
-    fromAccountId: number
+    fromAccountId: string
     toIban: string
     amount: number
     currency: 'SEK'
@@ -96,7 +96,7 @@ export async function createPayment(
     payment: CreatePaymentRequest,
     idempotencyKey: string,
 ): Promise<CreatedPayment> {
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
         throw new Error('VITE_API_URL is not configured.')

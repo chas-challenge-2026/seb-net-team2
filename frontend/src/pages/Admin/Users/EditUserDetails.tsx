@@ -231,7 +231,7 @@ export default function EditUserDetails() {
         from: "/admin/users/$userId/edit",
     });
 
-    const id = Number(userId);
+    const id = userId;
 
     const { data: user, isPending, isError, error } = useQuery({
         queryKey: ["user", id],

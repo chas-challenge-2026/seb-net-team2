@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const approvalDecisionSchema = z.object({
-    stepId: z.number(),
+    stepId: z.string().uuid(),
     decision: z.enum([
         "approved",
         "rejected",

@@ -84,7 +84,7 @@ const mockedCreatePayment = jest.mocked(createPayment);
 
 const accounts = [
     {
-        id: "12",
+        id: "00000000-0000-4000-8000-000000000012",
         name: "Operating account",
         balance: 1250000.5,
         currency: "SEK",
@@ -129,7 +129,7 @@ describe("New payment flow", () => {
     it("renders the account returned by the accounts hook and payment fields", () => {
         render(<NyBetalning />);
 
-        expect(screen.getByRole("combobox")).toHaveValue("12");
+        expect(screen.getByRole("combobox")).toHaveValue("00000000-0000-4000-8000-000000000012");
         expect(screen.getByRole("option", { name: /Operating account/ })).toBeInTheDocument();
         expect(screen.getByPlaceholderText("Company or person")).toBeInTheDocument();
         expect(screen.getByPlaceholderText("SE00 0000 0000 0000 0000 0000")).toBeInTheDocument();
@@ -219,8 +219,8 @@ describe("New payment flow", () => {
 
     it("submits after confirmation and shows the API approval status", async () => {
         mockedCreatePayment.mockResolvedValue({
-            id: 42,
-            fromAccountId: 12,
+            id: "00000000-0000-4000-8000-000000000042",
+            fromAccountId: "00000000-0000-4000-8000-000000000012",
             toIban: "SE3550000000054910000003",
             amount: 2500,
             currency: "SEK",
@@ -237,7 +237,7 @@ describe("New payment flow", () => {
         await waitFor(() => {
             expect(mockedCreatePayment).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    fromAccountId: 12,
+                    fromAccountId: "00000000-0000-4000-8000-000000000012",
                     toIban: "SE3550000000054910000003",
                     amount: 2500,
                     reference: "Invoice 42",
