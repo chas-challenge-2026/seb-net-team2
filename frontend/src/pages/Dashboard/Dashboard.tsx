@@ -35,6 +35,9 @@ export function Dashboard() {
     const balances = calculateAccountBalances(displayedAccounts, rates, primaryCurrency);
     const loadingRates = rateQueries.some((query) => query.isPending);
 
+    // Only initiators may create payments (the backend rejects other roles).
+    const canCreatePayments = user?.role === "Initiator";
+
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-GB";
@@ -133,6 +136,9 @@ export function Dashboard() {
                 )}
             </section>
 
+            {/* "Recent payments" lists the user's own payments, so it is always empty for roles
+                that cannot create payments. */}
+            {canCreatePayments && (
             <section className={styles.recentPayments}>
                 <h2 className={styles.sectionTitle}>
                     <ReceiptText size={20} strokeWidth={2} aria-hidden="true" />
@@ -196,6 +202,7 @@ export function Dashboard() {
                     )}
                 </Card>
             </section>
+            )}
         </div>
     );
 }
