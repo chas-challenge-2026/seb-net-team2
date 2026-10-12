@@ -78,6 +78,7 @@ function setDefaultHookValues() {
         user: {
             name: "Lisa Persson",
             tenantName: "Malmö Bygg AB",
+            role: "Initiator",
         },
     } as unknown as ReturnType<typeof useAuth>);
 }
@@ -168,5 +169,20 @@ describe("Dashboard account information", () => {
         render(<Dashboard />);
 
         expect(screen.queryByRole("link", { name: "Create payment" })).not.toBeInTheDocument();
+    });
+
+    it("hides recent payments for roles that cannot create payments", () => {
+        mockedUseAuth.mockReturnValue({
+            user: {
+                name: "Johan Berg",
+                tenantName: "Malmö Bygg AB",
+                role: "Attestant",
+            },
+        } as unknown as ReturnType<typeof useAuth>);
+
+        render(<Dashboard />);
+
+        expect(screen.queryByText("Recent payments")).not.toBeInTheDocument();
+        expect(screen.getByText("Operating account")).toBeInTheDocument();
     });
 });
