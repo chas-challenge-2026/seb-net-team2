@@ -192,7 +192,8 @@
         "feedback": {
             "approved": "{{reference}} ({{amount}}) godkändes.",
             "rejected": "{{reference}} ({{amount}}) avvisades.",
-            "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats."
+            "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats.",
+            "showHandled": "Visa i Hanterade →"
         },
         "sort": {
             "label": "Sortera efter",
@@ -239,7 +240,8 @@
         },
         "empty": {
             "title": "Inga väntande attesteringar",
-            "description": "Det finns inga betalningar som väntar på ditt godkännande."
+            "description": "Det finns inga betalningar som väntar på ditt godkännande.",
+            "showHandled": "Visa hanterade betalningar →"
         },
         "modal": {
             "approveTitle": "Godkänn betalning?",
@@ -255,6 +257,44 @@
             "duplicate": "Möjlig dubblett: samma mottagare och belopp som betalning {{payments}}",
             "highAmount": "Högt belopp – kontrollera extra noga",
             "foreignRecipient": "Utländsk mottagare ({{country}}) – kontrollera att det stämmer med fakturan"
+        },
+        "tabs": {
+            "label": "Vyer i attestkorgen",
+            "pending_one": "Att hantera ({{count}})",
+            "pending_other": "Att hantera ({{count}})",
+            "handled": "Hanterade",
+            "handledCount_one": "Hanterade ({{count}})",
+            "handledCount_other": "Hanterade ({{count}})"
+        },
+        "history": {
+            "loading": "Laddar hanterade betalningar...",
+            "error": "Det gick inte att ladda hanterade betalningar.",
+            "unavailableTitle": "Historiken är inte tillgänglig än",
+            "emptyTitle": "Inga hanterade betalningar än",
+            "emptyDescription": "Betalningar som du godkänner eller avvisar visas här.",
+            "noMatchesTitle": "Inga betalningar matchar filtren",
+            "noMatchesDescription": "Prova en annan sökning eller rensa filtren.",
+            "search": "Sök",
+            "searchPlaceholder": "Sök referens eller IBAN",
+            "status": "Beslut",
+            "statusAll": "Alla",
+            "statusApproved": "Godkända",
+            "statusRejected": "Avvisade",
+            "fromDate": "Från datum",
+            "toDate": "Till datum",
+            "minAmount": "Lägsta belopp",
+            "maxAmount": "Högsta belopp",
+            "clear": "Rensa filter",
+            "count": "Visar {{visible}} av {{total}}",
+            "approvedOn": "Godkänd {{date}}",
+            "rejectedOn": "Avvisad {{date}}",
+            "step": "Atteststeg",
+            "reason": "Anledning",
+            "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här.",
+            "moreFilters": "Filtrera",
+            "amount": "Belopp",
+            "amountFrom": "Från",
+            "amountTo": "Till"
         }
     },
     "batch": {
