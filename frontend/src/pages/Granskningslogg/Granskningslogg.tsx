@@ -38,7 +38,7 @@ export function Granskningslogg() {
 
     const filters = useMemo<AuditLogFilters>(
         () => ({
-            userId: userFilter === ALL_USERS ? undefined : Number(userFilter),
+            userPublicId: userFilter === ALL_USERS ? undefined : userFilter,
             action: eventFilter === ALL_EVENTS ? undefined : eventFilter,
             from: dateFrom || undefined,
             to: dateTo || undefined,

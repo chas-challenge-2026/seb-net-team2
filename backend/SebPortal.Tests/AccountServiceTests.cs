@@ -45,7 +45,7 @@ namespace SebPortal.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(10, result.Id);
+            Assert.NotEqual(Guid.Empty, result.Id);
             Assert.Equal("Lönekonto", result.AccountName);
             Assert.Equal(tenantId, result.TenantId);
             Assert.Equal("SE500123456789", result.Iban);
@@ -56,16 +56,17 @@ namespace SebPortal.Tests
         {
             // Arrange
             var accountId = 1;
+            var publicId = Guid.NewGuid();
             var currentTenantId = 1;
 
             // Kontot tillhör tenant 2, men inloggad användare är tenant 1
-            var accountFromDb = new Account { Id = accountId, TenantId = 2, AccountName = "Annan Tenants Kontot", Iban = "SE500123456789" };
+            var accountFromDb = new Account { Id = accountId, PublicId = publicId, TenantId = 2, AccountName = "Annan Tenants Kontot", Iban = "SE500123456789" };
 
-            _accountRepositoryMock.Setup(r => r.GetAccountByIdAsync(accountId, It.IsAny<int>()))
+            _accountRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, It.IsAny<int>()))
                                   .ReturnsAsync(accountFromDb);
 
             // Act
-            var result = await _service.GetAccountByIdAsync(accountId, currentTenantId);
+            var result = await _service.GetAccountByIdAsync(publicId, currentTenantId);
 
             // Assert
             // Ska returnera null så att controllern kan svara med 404 (förhindrar information leakage)
@@ -77,15 +78,16 @@ namespace SebPortal.Tests
         {
             // Arrange
             var accountId = 1;
+            var publicId = Guid.NewGuid();
             var tenantId = 1;
-            var existingAccount = new Account { Id = accountId, TenantId = tenantId, AccountName = "Gamla Namnet", Iban = "SE500123456789", Currency = "SEK" };
+            var existingAccount = new Account { Id = accountId, PublicId = publicId, TenantId = tenantId, AccountName = "Gamla Namnet", Iban = "SE500123456789", Currency = "SEK" };
             var updateDto = new UpdateAccountDTO { AccountName = "Nya Namnet" };
 
-            _accountRepositoryMock.Setup(r => r.GetAccountByIdAsync(accountId, tenantId))
+            _accountRepositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                                   .ReturnsAsync(existingAccount);
 
             // Act
-            var result = await _service.UpdateAccountAsync(accountId, tenantId, updateDto);
+            var result = await _service.UpdateAccountAsync(publicId, tenantId, updateDto);
 
             // Assert
             Assert.NotNull(result);

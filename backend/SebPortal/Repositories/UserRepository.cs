@@ -70,5 +70,10 @@ namespace SebPortal.Api.Repositories
                 .OrderBy(u => u.Id)
                 .ToListAsync();
         }
+
+        public Task<User?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _context.Users.FirstOrDefaultAsync(u => u.PublicId == publicId && u.TenantId == tenantId);
+        }
     }
 }

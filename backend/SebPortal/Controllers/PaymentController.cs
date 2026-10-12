@@ -50,8 +50,8 @@ namespace SebPortal.Api.Controllers
         /// <returns>The payment details.</returns>
         /// <response code="200">Returns the payment details.</response>
         /// <response code="404">The payment was not found.</response>
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetPaymentById(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetPaymentById(Guid id)
         {
             var tenantId = GetUserTenantId();
             var payment = await _createPaymentService.GetPaymentById(id, tenantId);
@@ -82,8 +82,8 @@ namespace SebPortal.Api.Controllers
         {
             return new CreatePaymentResponseDTO
             {
-                Id = payment.Id,
-                FromAccountId = payment.FromAccountId,
+                Id = payment.PublicId,
+                FromAccountId = payment.FromAccount.PublicId,
                 ToIban = payment.ToIban,
                 Amount = payment.Amount,
                 Currency = payment.Currency,

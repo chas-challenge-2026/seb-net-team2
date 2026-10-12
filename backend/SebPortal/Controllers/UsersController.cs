@@ -42,8 +42,8 @@ namespace SebPortal.Api.Controllers
         /// <response code="200">Returns the user details.</response>
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         /// <response code="404">The user was not found.</response>
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<ReadUserDTO>> GetUserById(int id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<ReadUserDTO>> GetUserById(Guid id)
         {
             var tenantId = GetUserTenantId();
             var user = await _userService.GetUserByIdAsync(id, tenantId);
@@ -97,9 +97,9 @@ namespace SebPortal.Api.Controllers
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         /// <response code="403">Forbidden if the user lacks the Admin role.</response>
         /// <response code="404">The user was not found.</response>
-        [HttpPatch("{id:int}")]
+        [HttpPatch("{id:guid}")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<ActionResult<ReadUserDTO>> UpdateUser(int id, [FromBody] UpdateUserDTO dto)
+        public async Task<ActionResult<ReadUserDTO>> UpdateUser(Guid id, [FromBody] UpdateUserDTO dto)
         {
             var actingUserId = GetCurrentUserId();
             var tenantId = GetUserTenantId();
@@ -117,9 +117,9 @@ namespace SebPortal.Api.Controllers
         /// <response code="401">Unauthorized if the user is not authenticated.</response>
         /// <response code="403">Forbidden if the user lacks the Admin role.</response>
         /// <response code="404">The user was not found.</response>
-        [HttpDelete("{id:int}")]
+        [HttpDelete("{id:guid}")]
         [Authorize(Roles = UserRoles.Admin)]
-        public async Task<IActionResult> DeleteUser(int id)
+        public async Task<IActionResult> DeleteUser(Guid id)
         {
             var actingUserId = GetCurrentUserId();
             var tenantId = GetUserTenantId();

@@ -25,26 +25,28 @@ namespace SebPortal.Tests
         {
             // Arrange
             int id = 1;
+            var publicId = Guid.NewGuid();
             int tenantId = 10;
 
             var existingLimit = new ApprovalLimit
             {
                 Id = id,
+                PublicId = publicId,
                 TenantId = tenantId,
                 MinAmount = 1000m,
                 RequiredApprovals = 2,
                 Description = "Testgräns"
             };
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync(existingLimit);
 
             // Act
-            var result = await _approvalLimitService.GetByIdAsync(id, tenantId);
+            var result = await _approvalLimitService.GetByIdAsync(publicId, tenantId);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(id, result.Id);
+            Assert.Equal(publicId, result.Id);
             Assert.Equal(tenantId, result.TenantId);
             Assert.Equal(1000m, result.MinAmount);
             Assert.Equal(2, result.RequiredApprovals);
@@ -55,19 +57,19 @@ namespace SebPortal.Tests
         public async Task GetByIdAsync_ShouldThrowException_WhenLimitNotExists()
         {
             // Arrange
-            int id = 1;
+            var publicId = Guid.NewGuid();
             int tenantId = 10;
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync((ApprovalLimit?)null);
 
             // Act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _approvalLimitService.GetByIdAsync(id, tenantId);
+                await _approvalLimitService.GetByIdAsync(publicId, tenantId);
             });
 
-            Assert.Equal($"Attestbeloppgräns med id: {id} hittades inte", exception.Message);
+            Assert.Equal($"Attestbeloppgräns med id: {publicId} hittades inte", exception.Message);
 
         }
 
@@ -107,12 +109,12 @@ namespace SebPortal.Tests
             var limitList = result.ToList();
             Assert.Equal(2, limitList.Count);
             //limit 1 
-            Assert.Equal(1, limitList[0].Id);
+            Assert.Equal(limits[0].PublicId, limitList[0].Id);
             Assert.Equal(tenantId, limitList[0].TenantId);
             Assert.Equal(50000, limitList[0].MinAmount);
             Assert.Equal(1, limitList[0].RequiredApprovals);
             //limit 2 
-            Assert.Equal(2, limitList[1].Id);
+            Assert.Equal(limits[1].PublicId, limitList[1].Id);
             Assert.Equal(tenantId, limitList[1].TenantId);
             Assert.Equal(200000, limitList[1].MinAmount);
             Assert.Equal(2, limitList[1].RequiredApprovals);
@@ -155,8 +157,7 @@ namespace SebPortal.Tests
                 e.UserId == userId &&
                 e.TenantId == tenantId && 
                 e.Action == "CREATE_APPROVAL_LIMIT" &&
-                e.EntityType == "approvalLimit" &&
-                e.EntityId == result.Id)), Times.Once);
+                e.EntityType == "approvalLimit")), Times.Once);
         }
 
         [Fact]
@@ -232,21 +233,23 @@ namespace SebPortal.Tests
             // Arrange
             int tenantId = 10;
             int id = 1;
+            var publicId = Guid.NewGuid();
             int userId = 42;
             string modifiedBy = "Admin";
 
             var existingLimit = new ApprovalLimit
             {
                 Id = id,
+                PublicId = publicId,
                 TenantId = tenantId,
                 MinAmount = 1000m,
                 RequiredApprovals = 1,
                 Description = "Gammal beskrivning"
             };
 
-            // GetByIdAsync must be called with (id, tenantId) exactly as the repository expects -
+            // GetByPublicIdAsync must be called with (publicId, tenantId) exactly as the repository expects -
             // this pins down the parameter order bug where id and tenantId were swapped.
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync(existingLimit);
 
             _repositoryMock.Setup(r => r.GetOrderedLimitsAsync(tenantId))
@@ -260,16 +263,16 @@ namespace SebPortal.Tests
             };
 
             // Act
-            var result = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userId, modifiedBy, dto);
+            var result = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, publicId, userId, modifiedBy, dto);
 
             // Assert
-            Assert.Equal(id, result.Id);
+            Assert.Equal(publicId, result.Id);
             Assert.Equal(tenantId, result.TenantId);
             Assert.Equal(2000m, result.MinAmount);
             Assert.Equal(2, result.RequiredApprovals);
             Assert.Equal("Ny beskrivning", result.Description);
             Assert.Equal(modifiedBy, result.LastModifiedBy);
-            _repositoryMock.Verify(r => r.GetByIdAsync(id, tenantId), Times.Once);
+            _repositoryMock.Verify(r => r.GetByPublicIdAsync(publicId, tenantId), Times.Once);
 
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.Is<AuditEntries>(e =>
                 e.UserId == userId &&
@@ -284,24 +287,26 @@ namespace SebPortal.Tests
         {
             int tenantId = 1;
             int id = 1;
+            var publicId = Guid.NewGuid();
             int userId = 42;
 
             var existingLimit = new ApprovalLimit
             {
                 TenantId = tenantId,
                 Id = id,
+                PublicId = publicId,
                 MinAmount = 1000,
                 RequiredApprovals = 1,
                 Description = "Onödig attest"
             };
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync(existingLimit);
 
             _repositoryMock.Setup(r => r.DeleteApprovalLimitAsync(id, tenantId))
                 .ReturnsAsync(true);
 
-            var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id, userId);
+            var result = await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, publicId, userId);
             Assert.True(result);
             _repositoryMock.Verify(r => r.DeleteApprovalLimitAsync(id, tenantId), Times.Once);
 
@@ -316,19 +321,19 @@ namespace SebPortal.Tests
         public async Task DeleteApprovalLimitAsync_ShouldThrowException_WhenLimitNotFound()
         {
             int tenantId = 1;
-            int id = 100;
+            var publicId = Guid.NewGuid();
             int userId = 42;
 
-            _repositoryMock.Setup(r => r.GetByIdAsync(id, tenantId))
+            _repositoryMock.Setup(r => r.GetByPublicIdAsync(publicId, tenantId))
                 .ReturnsAsync((ApprovalLimit?)null);
 
             //act & assert
             var exception = await Assert.ThrowsAsync<Exception>(async () =>
             {
-                await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, id, userId);
+                await _approvalLimitService.DeleteApprovalLimitAsync(tenantId, publicId, userId);
             });
 
-            Assert.Equal($"Attestbeloppgräns med id: {id} hittades inte", exception.Message);
+            Assert.Equal($"Attestbeloppgräns med id: {publicId} hittades inte", exception.Message);
             _auditRepositoryMock.Verify(a => a.AddEntryAsync(It.IsAny<AuditEntries>()), Times.Never);
         }
     }

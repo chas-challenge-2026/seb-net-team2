@@ -29,6 +29,14 @@ namespace SebPortal.Api.Repositories
                 .ToListAsync();
         }
 
+        public Task<ApprovalStep?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .FirstOrDefaultAsync(s => s.PublicId == publicId && s.Payment.TenantId == tenantId);
+        }
+
         public async Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId, int tenantId)
         {
             return await _dbContext.ApprovalSteps
@@ -54,6 +62,28 @@ namespace SebPortal.Api.Repositories
                     .ThenInclude(p => p.CreatedByUser)
                 .Where(s => s.Payment.TenantId == tenantId && s.Status == "pending" && s.Payment.Status == "pending_approval")
                 .OrderBy(s => s.Payment.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ApprovalStep>> GetRecentApprovalsForTenantAsync(int tenantId)
+        {
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .Where(s => s.Payment.TenantId == tenantId && s.Status == "completed" && s.Payment.Status == "completed")
+                .OrderByDescending(s => s.DecidedAt)
+                .Take(50)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ApprovalStep>> GetApprovalHistoryForAttestantAsync(int attestantId, int tenantId)
+        {
+            return await _dbContext.ApprovalSteps
+                .Include(s => s.Payment)
+                    .ThenInclude(p => p.CreatedByUser)
+                .Where(s => s.AttestantId == attestantId && s.Payment.TenantId == tenantId && s.Status != "pending")
+                .OrderByDescending(s => s.DecidedAt)
+                .Take(50)
                 .ToListAsync();
         }
 

@@ -46,10 +46,18 @@ namespace SebPortal.Api.Services
                     throw new ArgumentException("Amount must be greater than zero.");
                 }
 
+                var fromAccount = await _context.Accounts
+                    .FirstOrDefaultAsync(a => a.PublicId == createPaymentDTO.FromAccountId && a.TenantId == user.TenantId);
+
+                if (fromAccount == null)
+                {
+                    throw new InvalidOperationException("Account not found or insufficient balance.");
+                }
+
                 // Check if the account exists and has sufficient balance, and update the balance atomically
                 var affectedRows = await _context.Accounts
                     .Where(a =>
-                        a.Id == createPaymentDTO.FromAccountId &&
+                        a.Id == fromAccount.Id &&
                         a.TenantId == user.TenantId &&
                         a.Balance >= createPaymentDTO.Amount)
                     .ExecuteUpdateAsync(setters => setters
@@ -65,7 +73,8 @@ namespace SebPortal.Api.Services
                 var payment = new Payment
                 {
                     TenantId = user.TenantId,
-                    FromAccountId = createPaymentDTO.FromAccountId,
+                    FromAccountId = fromAccount.Id,
+                    FromAccount = fromAccount,
                     ToIban = createPaymentDTO.ToIban,
                     Amount = createPaymentDTO.Amount,
                     Currency = createPaymentDTO.Currency,
@@ -168,9 +177,9 @@ namespace SebPortal.Api.Services
             }
         }
 
-        public async Task<Payment?> GetPaymentById(int paymentId, int tenantId)
+        public async Task<Payment?> GetPaymentById(Guid paymentId, int tenantId)
         {
-            var payment = await _paymentRepository.GetPaymentByIdAsync(paymentId, tenantId);
+            var payment = await _paymentRepository.GetByPublicIdAsync(paymentId, tenantId);
             return payment;
         }
 

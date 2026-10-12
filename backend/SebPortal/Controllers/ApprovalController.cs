@@ -69,8 +69,8 @@ namespace SebPortal.Api.Controllers
         /// <returns>A list of approval steps for the payment.</returns>
         /// <response code="200">Returns the approval steps.</response>
         /// <response code="401">Unauthorized if the user ID claim is missing.</response>
-        [HttpGet("payment/{paymentId}/steps")]
-        public async Task<IActionResult> GetApprovalStepsForPayment(int paymentId)
+        [HttpGet("payment/{paymentId:guid}/steps")]
+        public async Task<IActionResult> GetApprovalStepsForPayment(Guid paymentId)
         {
             var userId = GetCurrentUserId();
             var tenantId = GetUserTenantId();
@@ -97,6 +97,37 @@ namespace SebPortal.Api.Controllers
             
             var attestantSteps = await _approvalService.GetPendingStepsForAttestantAsync(userId, tenantId);
             return Ok(attestantSteps);
+        }
+
+        /// <summary>
+        /// Retrieves the 50 most recent completed approvals for the current tenant (Admin view).
+        /// </summary>
+        /// <returns>A list of recent completed approval steps.</returns>
+        /// <response code="200">Returns the recent approvals.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+        /// <response code="403">Forbidden if the user is not an administrator.</response>
+        [HttpGet("recent")]
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> GetRecentApprovalsForTenant()
+        {
+            var tenantId = GetUserTenantId();
+            var recentApprovals = await _approvalService.GetRecentApprovalsForTenantAsync(tenantId);
+            return Ok(recentApprovals);
+        }
+
+        /// <summary>
+        /// Retrieves the approval history for the current attestant (handled steps).
+        /// </summary>
+        /// <returns>A list of the attestant's approval history.</returns>
+        /// <response code="200">Returns the approval history.</response>
+        /// <response code="401">Unauthorized if the user ID claim is missing.</response>
+        [HttpGet("history")]
+        public async Task<IActionResult> GetApprovalHistory()
+        {
+            var userId = GetCurrentUserId();
+            var tenantId = GetUserTenantId();
+            var history = await _approvalService.GetApprovalHistoryForAttestantAsync(userId, tenantId);
+            return Ok(history);
         }
 
 

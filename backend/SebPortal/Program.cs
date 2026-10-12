@@ -1,15 +1,16 @@
-using Microsoft.AspNetCore.DataProtection;
-using System.IO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
-using SebPortal.Api.Middleware;
 using SebPortal.Api.Auth;
 using SebPortal.Api.Filters;
+using SebPortal.Api.Middleware;
+using SebPortal.Api.Models;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Data;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,16 +81,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-builder.Services.AddDistributedMemoryCache();
-
 // Persist ASP.NET Core DataProtection keys to disk (fixes session cookie unprotect warnings)
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "DataProtection-Keys")))
@@ -122,10 +113,15 @@ builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
+builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddHostedService<ReminderBackgroundService>();
+
 // Global error handling middleware
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+builder.Services.Configure<ReminderOptions>(builder.Configuration.GetSection("Reminder"));
 
 
 builder.Services.AddDbContext<SebDbContext>(options =>
@@ -184,20 +180,15 @@ if (!app.Environment.IsDevelopment())
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
 app.UseExceptionHandler();
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.MapRazorPages();
-
-// Default route goes to login
-app.MapGet("/", context =>
-{
-    context.Response.Redirect("/Index");
-    return Task.CompletedTask;
-});
+// Unknown API routes should return 404 rather than the React page.
+app.MapFallback("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();

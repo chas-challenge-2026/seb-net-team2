@@ -142,12 +142,95 @@
 .messageField { grid-area: message; }
 
 .resultCard {
-    max-width: 48rem;
-    padding: clamp(1.25rem, 4vw, 2.5rem);
+    max-width: 43rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
 }
 
-.resultCard h2 {
-    margin: 0.5rem 0;
+.resultBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border-left: 4px solid transparent;
+    border-radius: var(--radius-sm);
+}
+
+.resultIcon {
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 50%;
+}
+
+.resultCompleted {
+    border-left-color: #28733b;
+    background: #edf7ef;
+    color: #205c30;
+}
+
+.resultCompleted .resultIcon {
+    background: #d5edda;
+}
+
+.resultPending {
+    border-left-color: #a76a00;
+    background: #fff7e8;
+    color: #754b00;
+}
+
+.resultPending .resultIcon {
+    background: #f7e8c5;
+}
+
+.resultRejected {
+    border-left-color: #a32119;
+    background: #fef1ef;
+    color: #8b211a;
+}
+
+.resultRejected .resultIcon {
+    background: #f8d8d4;
+}
+
+.resultUnknown {
+    border-left-color: var(--color-border-light);
+    background: var(--color-hover-light);
+    color: var(--color-text);
+}
+
+.resultUnknown .resultIcon {
+    background: var(--color-background);
+}
+
+.resultBanner h2 {
+    margin: 0.2rem 0 0.25rem;
+    font-size: 1.25rem;
+}
+
+.resultBanner p {
+    margin: 0;
+    color: inherit;
+    font-size: 0.9rem;
+    line-height: 1.45;
+}
+
+.resultAmount {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.resultAmount span {
+    color: var(--color-text-soft);
+    font-size: 0.9rem;
+}
+
+.resultAmount strong {
     color: #163226;
     font-size: 1.5rem;
 }
@@ -162,15 +245,15 @@
 
 .resultDetails {
     display: grid;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
+    gap: 0;
+    margin: 0 0 1.5rem;
 }
 
 .resultDetails div {
     display: flex;
     justify-content: space-between;
     gap: 1rem;
-    padding-bottom: 0.75rem;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -183,6 +266,33 @@
     font-weight: 600;
     overflow-wrap: anywhere;
     text-align: right;
+}
+
+@media (max-width: 520px) {
+    .resultBanner {
+        gap: 0.75rem;
+        padding: 0.85rem;
+    }
+
+    .resultIcon {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    .resultAmount {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .resultDetails div {
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .resultDetails dd {
+        text-align: left;
+    }
 }
 .sectionHeading {
     display: flex;

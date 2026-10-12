@@ -83,7 +83,7 @@ public class CreatePaymentServiceIntegrationTests
 
             var dto = new CreatePaymentDTO
             {
-                FromAccountId = account.Id,
+                FromAccountId = account.PublicId,
                 ToIban = "SE4550000000054910000004",
                 Amount = 500m,
                 Currency = "SEK",
@@ -172,7 +172,7 @@ public class CreatePaymentServiceIntegrationTests
             // Act
             var payment = await service.CreatePaymentAsync(new CreatePaymentDTO
             {
-                FromAccountId = account.Id,
+                FromAccountId = account.PublicId,
                 ToIban = "SE4550000000054910000004",
                 Amount = 500m,
                 Currency = "SEK",

@@ -40,9 +40,9 @@ namespace SebPortal.Api.Services
             return MapToDto(newAccount);
         }
 
-        public async Task<AccountResponseDTO?> GetAccountByIdAsync(int accountId, int tenantId)
+        public async Task<AccountResponseDTO?> GetAccountByIdAsync(Guid accountId, int tenantId)
         {
-            var account = await _accountRepository.GetAccountByIdAsync(accountId, tenantId);
+            var account = await _accountRepository.GetByPublicIdAsync(accountId, tenantId);
             if (account == null || account.TenantId != tenantId)
             {
                 return null;
@@ -57,9 +57,9 @@ namespace SebPortal.Api.Services
             return accounts.Select(MapToDto);
         }
 
-        public async Task<AccountResponseDTO?> UpdateAccountAsync(int id, int tenantId, UpdateAccountDTO dto)
+        public async Task<AccountResponseDTO?> UpdateAccountAsync(Guid id, int tenantId, UpdateAccountDTO dto)
         {
-            var account = await _accountRepository.GetAccountByIdAsync(id, tenantId);
+            var account = await _accountRepository.GetByPublicIdAsync(id, tenantId);
             if (account == null || account.TenantId != tenantId)
             {
                 return null;
@@ -86,7 +86,7 @@ namespace SebPortal.Api.Services
         //Helpmethod to avoid duplicate code
         private static AccountResponseDTO MapToDto(Account account) => new()
         {
-            Id = account.Id,
+            Id = account.PublicId,
             TenantId = account.TenantId,
             AccountName = account.AccountName,
             Iban = account.Iban,

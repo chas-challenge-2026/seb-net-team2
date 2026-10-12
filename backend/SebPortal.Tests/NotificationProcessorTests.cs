@@ -15,6 +15,7 @@ namespace SebPortal.Tests
         private readonly Mock<INotificationRepository> _repositoryMock;
         private readonly Mock<ILogger<NotificationProcessor>> _loggerMock;
         private readonly NotificationProcessor _processor;
+        private readonly Mock<IInAppNotificationService> _inAppNotificationServiceMock = new();
 
         public NotificationProcessorTests()
         {
@@ -24,6 +25,7 @@ namespace SebPortal.Tests
             _processor = new NotificationProcessor(
                 _emailSenderMock.Object,
                 _repositoryMock.Object,
+                _inAppNotificationServiceMock.Object,
                 _loggerMock.Object
              );
         }

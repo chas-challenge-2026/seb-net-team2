@@ -65,5 +65,13 @@ namespace SebPortal.Api.Repositories
                 .ExecuteUpdateAsync(setters => setters
                     .SetProperty(p => p.Status, "rejected"));
         }
+
+        public Task<Payment?> GetByPublicIdAsync(Guid publicId, int tenantId)
+        {
+            return _context.Payments.Include(p => p.Tenant)
+                .Include(p => p.FromAccount)
+                .Include(p => p.CreatedByUser)
+                .FirstOrDefaultAsync(p => p.PublicId == publicId && p.TenantId == tenantId);
+        }
     }
 }

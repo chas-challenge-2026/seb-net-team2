@@ -42,7 +42,7 @@ namespace SebPortal.Api.Services
                 return ApprovalStepValidationResult.InvalidDecision;
 
             // Retrieve the approval step from the repository using the provided StepId
-            var approvalStep = await _approvalRepository.GetApprovalStepByIdAsync(dto.StepId, tenantId);
+            var approvalStep = await _approvalRepository.GetByPublicIdAsync(dto.StepId, tenantId);
             if (approvalStep == null)
                 return ApprovalStepValidationResult.StepNotFound;
 
@@ -96,7 +96,7 @@ namespace SebPortal.Api.Services
 
                     if (!stillPending)
                     {
-                        await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId, payment.TenantId );
+                        await _paymentRepository.CompletePaymentAsync(approvalStep.PaymentId, payment.TenantId);
 
                         await _auditRepository.AddEntryAsync(new AuditEntries
                         {
@@ -204,16 +204,50 @@ namespace SebPortal.Api.Services
             return _approvalRepository.UpdateApprovalStepAsync(approvalStep, tenantId);
         }
 
-        public Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId, int tenantId)
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(Guid paymentId, int attestantId, int tenantId)
         {
-            return _approvalRepository.GetPendingStepsForAttestantAsync(paymentId, attestantId, tenantId);
+            var payment = await _paymentRepository.GetByPublicIdAsync(paymentId, tenantId);
+            if (payment == null)
+            {
+                return Enumerable.Empty<PendingApprovalStepDTO>();
+            }
+
+            var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(payment.Id, attestantId, tenantId);
+
+            return steps.Select(step => MapToPendingDto(step, payment));
         }
 
         public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForAttestantAsync(int attestantId, int tenantId)
         {
             var steps = await _approvalRepository.GetPendingStepsForAttestantAsync(attestantId, tenantId);
 
-            return steps.Select(step => new PendingApprovalStepDTO
+            return steps.Select(step => MapToPendingDto(step, step.Payment));
+        }
+
+        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForTenantAsync(int tenantId)
+        {
+            var allTenantsteps = await _approvalRepository.GetPendingStepsForTenantAsync(tenantId);
+            return allTenantsteps.Select(step => MapToPendingDto(step, step.Payment));
+        }
+
+        private static PendingApprovalStepDTO MapToPendingDto(ApprovalStep step, Payment payment) => new()
+        {
+            StepId = step.PublicId,
+            StepNumber = step.StepNumber,
+            PaymentId = payment.PublicId,
+            Amount = payment.Amount,
+            Currency = payment.Currency,
+            ToIban = payment.ToIban,
+            Reference = payment.Reference,
+            CreatedByUserId = payment.CreatedByUser.PublicId,
+            CreatedByUserName = payment.CreatedByUser.Name,
+            PaymentCreatedAt = payment.CreatedAt
+        };
+        //gets the 50 most recent approval steps for a tenant, with status completed (approved or rejected), ordered by decidedAt descending
+        public async Task<IEnumerable<RecentApprovalStepDTO>> GetRecentApprovalsForTenantAsync(int tenantId)
+        {
+            var recentApprovals = await _approvalRepository.GetRecentApprovalsForTenantAsync(tenantId);
+            return recentApprovals.Select(step => new RecentApprovalStepDTO
             {
                 StepId = step.Id,
                 StepNumber = step.StepNumber,
@@ -228,10 +262,11 @@ namespace SebPortal.Api.Services
             });
         }
 
-        public async Task<IEnumerable<PendingApprovalStepDTO>> GetPendingStepsForTenantAsync(int tenantId)
+        //gets the 50 most recent approval steps for a attestant, with status completed (approved or rejected), ordered by decidedAt descending
+        public async Task<IEnumerable<RecentApprovalStepDTO>> GetApprovalHistoryForAttestantAsync(int attestantId, int tenantId)
         {
-            var allTenantsteps = await _approvalRepository.GetPendingStepsForTenantAsync(tenantId);
-            return allTenantsteps.Select(step => new PendingApprovalStepDTO
+            var history = await _approvalRepository.GetApprovalHistoryForAttestantAsync(attestantId, tenantId);
+            return history.Select(step => new RecentApprovalStepDTO
             {
                 StepId = step.Id,
                 StepNumber = step.StepNumber,

@@ -417,7 +417,7 @@ export default function EditApprovalLimit() {
         from: "/admin/approval-limits/$limitId/edit",
     });
 
-    const id = Number(limitId);
+    const id = limitId;
 
     const {
         data: limit,

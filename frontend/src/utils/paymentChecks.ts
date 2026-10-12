@@ -46,7 +46,7 @@ export type PaymentChecks = {
     // Country code when the recipient is outside HOME_COUNTRY, otherwise null.
     foreignCountry: string | null;
     // Other pending payments with the same recipient and amount: a possible double payment.
-    duplicateOf: number[];
+    duplicateOf: string[];
     highAmount: boolean;
 };
 
