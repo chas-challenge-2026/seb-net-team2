@@ -648,7 +648,8 @@
 }
 
 .actions button:disabled,
-.modalActions button:disabled {
+.modalActions button:disabled,
+.modalActions button[aria-disabled="true"] {
     cursor: not-allowed;
 
     opacity: 0.6;
@@ -1411,4 +1412,18 @@
     outline: 3px solid var(--seb-green);
     outline-offset: 2px;
     border-color: var(--color-text);
+}
+
+/* Text for screen readers only */
+
+.visuallyHidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

@@ -176,7 +176,7 @@ export function Attestkorg() {
     }
 
     function handleConfirm() {
-        if (!confirmAction) return;
+        if (!confirmAction || decisionMutation.isPending) return;
         if (isRejectReasonMissing) {
             setReasonError(true);
             requestAnimationFrame(() => focusField("confirm-comment"));
@@ -706,6 +706,11 @@ export function Attestkorg() {
                             </div>
                         )}
 
+                        {/* Always rendered, so screen readers pick up the text when it appears. */}
+                        <p className={styles.visuallyHidden} role="status">
+                            {decisionMutation.isPending ? t("approvalInbox.actions.processing") : ""}
+                        </p>
+
                         <div className={styles.modalActions}>
                             <button
                                 type="button"
@@ -724,7 +729,9 @@ export function Attestkorg() {
                                         ? styles.approve
                                         : styles.reject
                                 }
-                                disabled={decisionMutation.isPending}
+                                // aria-disabled instead of disabled: a disabled button loses focus,
+                                // which drops keyboard and screen reader users to the top of the page.
+                                aria-disabled={decisionMutation.isPending}
                                 onClick={handleConfirm}
                             >
                                 {decisionMutation.isPending ? (
