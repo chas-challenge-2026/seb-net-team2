@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const accountResponseSchema = z.object({
-    id: z.coerce.number(),
+    id: z.union([z.string().uuid(), z.number()]).transform(String),
     tenantId: z.coerce.number(),
     accountName: z.string(),
     iban: z.string(),

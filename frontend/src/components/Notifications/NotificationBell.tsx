@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { fetchNotifications } from "../../services/notificationService";
+import { fetchNotifications, markNotificationAsRead } from "../../services/notificationService";
 import type { Notification, NotificationType } from "../../types/notifications";
 
 import styles from "./NotificationBell.module.css";
@@ -18,12 +18,30 @@ export function NotificationBell() {
 
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [actionError, setActionError] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     useEffect(() => {
-        void fetchNotifications().then(setNotifications);
+        let isCurrent = true;
+
+        void fetchNotifications()
+            .then((items) => {
+                if (isCurrent) setNotifications(items);
+            })
+            .catch(() => {
+                if (isCurrent) setLoadError(true);
+            })
+            .finally(() => {
+                if (isCurrent) setIsLoading(false);
+            });
+
+        return () => {
+            isCurrent = false;
+        };
     }, []);
 
     useEffect(() => {
@@ -51,7 +69,11 @@ export function NotificationBell() {
         };
     }, [isOpen]);
 
-    function markAsRead(notificationId: string) {
+    async function markAsRead(notificationId: string) {
+        const notification = notifications.find((item) => item.id === notificationId);
+        if (!notification || notification.isRead) return;
+
+        setActionError(false);
         setNotifications((current) =>
             current.map((notification) =>
                 notification.id === notificationId
@@ -59,15 +81,45 @@ export function NotificationBell() {
                     : notification
             )
         );
+        try {
+            await markNotificationAsRead(notificationId);
+        } catch {
+            setNotifications((current) =>
+                current.map((item) =>
+                    item.id === notificationId
+                        ? { ...item, isRead: notification.isRead }
+                        : item
+                )
+            );
+            setActionError(true);
+        }
     }
 
-    function markAllAsRead() {
+    async function markAllAsRead() {
+        const unreadNotifications = notifications.filter((notification) => !notification.isRead);
+        if (unreadNotifications.length === 0) return;
+
+        const previousNotifications = notifications;
+        setActionError(false);
         setNotifications((current) =>
             current.map((notification) => ({
                 ...notification,
                 isRead: true,
             }))
         );
+
+        const results = await Promise.allSettled(
+            unreadNotifications.map((notification) => markNotificationAsRead(notification.id))
+        );
+
+        if (results.some((result) => result.status === "rejected")) {
+            setActionError(true);
+            try {
+                setNotifications(await fetchNotifications());
+            } catch {
+                setNotifications(previousNotifications);
+            }
+        }
     }
 
     const unreadCount = notifications.filter(
@@ -140,7 +192,21 @@ export function NotificationBell() {
                         )}
                     </div>
 
-                    {notifications.length === 0 ? (
+                    {loadError && (
+                        <p role="alert" className={styles.loadError}>
+                            {t("notifications.loadError")}
+                        </p>
+                    )}
+
+                    {actionError && (
+                        <p role="alert" className={styles.loadError}>
+                            {t("notifications.updateError")}
+                        </p>
+                    )}
+
+                    {isLoading ? (
+                        <p role="status" className={styles.empty}>{t("notifications.loading")}</p>
+                    ) : loadError ? null : notifications.length === 0 ? (
                         <div className={styles.empty}>
                             <span aria-hidden="true">🔕</span>
                             <p>{t("notifications.empty")}</p>
@@ -166,7 +232,7 @@ export function NotificationBell() {
                                     </span>
 
                                     <span className={styles.itemBody}>
-                                        <strong>{notification.title}</strong>
+                                        <strong>{t(notification.title)}</strong>
                                         <span>{notification.message}</span>
                                         <small>{notification.createdAt}</small>
                                     </span>

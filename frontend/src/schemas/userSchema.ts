@@ -8,8 +8,10 @@ export const userRoleSchema = z.enum([
     "Initiator",
 ]);
 
+const userIdSchema = z.union([z.number(), z.string().uuid()]);
+
 export const currentUserSchema = z.object({
-    id: z.number(),
+    id: userIdSchema,
     name: z.string(),
     email: z.string().email(),
     role: userRoleSchema,
@@ -48,7 +50,7 @@ export const updateUserSchema = z.object({
 export const loginResponseSchema = z.object({
     token: z.string(),
     refreshToken: z.string(),
-    userId: z.number(),
+    userId: userIdSchema,
     email: z.string().email(),
     role: userRoleSchema,
     tenantId: z.number(),

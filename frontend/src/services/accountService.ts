@@ -85,7 +85,7 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
 
 export type CreatePaymentRequest = {
     tenantId: number
-    fromAccountId: number
+    fromAccountId: string
     toIban: string
     amount: number
     currency: 'SEK'

@@ -9,9 +9,11 @@ import { createPayment } from "../../services/accountService";
 
 jest.mock("react-i18next", () => ({
     useTranslation: () => ({
-        t: (key: string) => {
+        t: (key: string, options?: Record<string, unknown>) => {
             const translations: Record<string, string> = {
                 "common.loading": "Loading...",
+                "validation.summary": "Please fix the errors below.",
+                "validation.required": "{{field}} is required.",
                 "payment.eyebrow": "PAYMENTS",
                 "payment.title": "Create a new payment",
                 "payment.description": "Send a secure payment from your company account.",
@@ -66,7 +68,7 @@ jest.mock("react-i18next", () => ({
                 "payment.result.paymentId": "Payment ID",
             };
 
-            return translations[key] ?? key;
+            return (translations[key] ?? key).replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(options?.[name] ?? ""));
         },
         i18n: { resolvedLanguage: "en" },
     }),
@@ -84,7 +86,7 @@ const mockedCreatePayment = jest.mocked(createPayment);
 
 const accounts = [
     {
-        id: "12",
+        id: "9d21cccb-d39d-4cae-99aa-fda8a311cf66",
         name: "Operating account",
         balance: 1250000.5,
         currency: "SEK",
@@ -129,7 +131,7 @@ describe("New payment flow", () => {
     it("renders the account returned by the accounts hook and payment fields", () => {
         render(<NyBetalning />);
 
-        expect(screen.getByRole("combobox")).toHaveValue("12");
+        expect(screen.getByRole("combobox")).toHaveValue("9d21cccb-d39d-4cae-99aa-fda8a311cf66");
         expect(screen.getByRole("option", { name: /Operating account/ })).toBeInTheDocument();
         expect(screen.getByPlaceholderText("Company or person")).toBeInTheDocument();
         expect(screen.getByPlaceholderText("SE00 0000 0000 0000 0000 0000")).toBeInTheDocument();
@@ -145,7 +147,7 @@ describe("New payment flow", () => {
         expect(screen.getByRole("status")).toHaveTextContent("Enter a valid IBAN.");
 
         fireEvent.click(screen.getByRole("button", { name: /Continue to review/ }));
-        expect(screen.getByText("Enter a recipient.")).toBeInTheDocument();
+        expect(screen.getAllByText("Recipient is required.").length).toBeGreaterThan(0);
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
@@ -158,15 +160,15 @@ describe("New payment flow", () => {
         const iban = screen.getByPlaceholderText("SE00 0000 0000 0000 0000 0000");
         const amount = screen.getByPlaceholderText("0.00");
 
-        expect(screen.getByText("Enter a recipient.")).toBeInTheDocument();
+        expect(screen.getAllByText("Recipient is required.").length).toBeGreaterThan(0);
         expect(recipient).toHaveAttribute("aria-invalid", "true");
         expect(recipient).toHaveAttribute("aria-describedby", "recipient-error");
 
-        expect(screen.getByText("Enter a valid IBAN.")).toBeInTheDocument();
+        expect(screen.getAllByText("IBAN is required.").length).toBeGreaterThan(0);
         expect(iban).toHaveAttribute("aria-invalid", "true");
         expect(iban.getAttribute("aria-describedby")).toContain("iban-error");
 
-        expect(screen.getByText("Enter an amount.")).toBeInTheDocument();
+        expect(screen.getAllByText("Amount is required.").length).toBeGreaterThan(0);
         expect(amount).toHaveAttribute("aria-invalid", "true");
         expect(amount).toHaveAttribute("aria-describedby", "amount-error");
     });
@@ -181,7 +183,7 @@ describe("New payment flow", () => {
         fireEvent.click(screen.getByRole("button", { name: /Continue to review/ }));
 
         const amount = screen.getByPlaceholderText("0.00");
-        expect(screen.getByText("The payment amount exceeds the account balance.")).toBeInTheDocument();
+        expect(screen.getAllByText("The payment amount exceeds the account balance.").length).toBeGreaterThan(0);
         expect(amount).toHaveAttribute("aria-invalid", "true");
         expect(amount).toHaveAttribute("aria-describedby", "amount-error");
     });
@@ -198,9 +200,9 @@ describe("New payment flow", () => {
 
         fireEvent.click(screen.getByRole("button", { name: /Continue to review/ }));
 
-        expect(screen.getByText("Reference must be 100 characters or fewer.")).toBeInTheDocument();
+        expect(screen.getAllByText("Reference must be 100 characters or fewer.").length).toBeGreaterThan(0);
         expect(screen.getByPlaceholderText("Invoice or OCR")).toHaveAttribute("aria-describedby", "reference-error");
-        expect(screen.getByText("Message must be 500 characters or fewer.")).toBeInTheDocument();
+        expect(screen.getAllByText("Message must be 500 characters or fewer.").length).toBeGreaterThan(0);
         expect(screen.getByPlaceholderText("Write a message to the recipient")).toHaveAttribute("aria-describedby", "message-error");
     });
 
@@ -217,10 +219,39 @@ describe("New payment flow", () => {
         expect(mockedCreatePayment).not.toHaveBeenCalled();
     });
 
+    it("moves focus into the review dialog and restores it when Escape closes the dialog", async () => {
+        render(<NyBetalning />);
+        enterValidPaymentDetails();
+        const continueButton = screen.getByRole("button", { name: /Continue to review/ });
+
+        fireEvent.click(continueButton);
+
+        const dialogHeading = screen.getByRole("heading", { name: "Review payment" });
+        await waitFor(() => expect(document.activeElement).toBe(dialogHeading));
+
+        fireEvent.keyDown(document, { key: "Escape" });
+
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        await waitFor(() => expect(document.activeElement).toBe(continueButton));
+    });
+
+    it("keeps keyboard focus inside the review dialog when tabbing past its last control", () => {
+        render(<NyBetalning />);
+        enterValidPaymentDetails();
+        fireEvent.click(screen.getByRole("button", { name: /Continue to review/ }));
+
+        const goBackButton = screen.getByRole("button", { name: /Go back/ });
+        const confirmButton = screen.getByRole("button", { name: /Confirm payment/ });
+        confirmButton.focus();
+
+        fireEvent.keyDown(confirmButton, { key: "Tab" });
+        expect(document.activeElement).toBe(goBackButton);
+    });
+
     it("submits after confirmation and shows the API approval status", async () => {
         mockedCreatePayment.mockResolvedValue({
-            id: 42,
-            fromAccountId: 12,
+            id: "c6a91a61-a18a-41ca-a2f7-7937cd187425",
+            fromAccountId: "9d21cccb-d39d-4cae-99aa-fda8a311cf66",
             toIban: "SE3550000000054910000003",
             amount: 2500,
             currency: "SEK",
@@ -237,7 +268,7 @@ describe("New payment flow", () => {
         await waitFor(() => {
             expect(mockedCreatePayment).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    fromAccountId: 12,
+                    fromAccountId: "9d21cccb-d39d-4cae-99aa-fda8a311cf66",
                     toIban: "SE3550000000054910000003",
                     amount: 2500,
                     reference: "Invoice 42",

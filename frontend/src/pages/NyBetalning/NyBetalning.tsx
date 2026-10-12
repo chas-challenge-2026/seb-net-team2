@@ -1,10 +1,9 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     ArrowLeft,
     ArrowRight,
     CircleCheck,
-    Clock3,
     ClipboardCheck,
     CreditCard,
     RotateCcw,
@@ -13,6 +12,8 @@ import {
 
 import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
+import { ErrorSummary, FieldError } from "../../components/FormValidation/FormErrors";
+import { useFormValidation } from "../../components/FormValidation/useFormValidation";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
 import { createPayment } from "../../services/accountService";
@@ -31,24 +32,26 @@ const initialForm: PaymentForm = {
 
 export function NyBetalning() {
     const { t, i18n } = useTranslation();
+    const validation = useFormValidation();
     const { user } = useAuth();
     const { data: accounts = [], isLoading: isLoadingAccounts, isError: accountsError } = useAccounts();
 
     const [form, setForm] = useState(initialForm);
-    const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof PaymentForm, string>>>({});
     const [createdPayment, setCreatedPayment] = useState<CreatedPayment | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const reviewHeadingRef = useRef<HTMLHeadingElement | null>(null);
+    const resultHeadingRef = useRef<HTMLHeadingElement>(null);
+    const restoreReviewFocusRef = useRef(false);
 
     const selectedAccount = accounts.find((account) => account.id === form.fromAccountId) ?? accounts[0];
     const amount = Number(form.amount) || 0;
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
     const hasIbanInput = form.iban.trim().length > 0;
     const ibanIsValid = hasIbanInput && isValidIban(form.iban);
-    const describedBy = (...ids: Array<string | undefined | false>) =>
-        ids.filter(Boolean).join(" ") || undefined;
     const currentStep = createdPayment ? 2 : isReviewOpen ? 1 : 0;
     const paymentSteps = [
         t("payment.steps.details"),
@@ -57,13 +60,6 @@ export function NyBetalning() {
     ];
 
     const resultStatus = createdPayment?.status.toLowerCase().replaceAll("-", "_");
-    const resultTitle = resultStatus === "completed"
-        ? t("payment.result.completedTitle")
-        : resultStatus === "pending_approval"
-            ? t("payment.result.pendingTitle")
-            : resultStatus === "rejected"
-                ? t("payment.result.rejectedTitle")
-                : t("payment.result.title");
     const resultMessage = resultStatus === "completed"
         ? t("payment.result.completed")
         : resultStatus === "pending_approval"
@@ -71,28 +67,102 @@ export function NyBetalning() {
             : resultStatus === "rejected"
                 ? t("payment.result.rejected")
                 : t("payment.result.accepted");
-    const resultAccountName = createdPayment
-        ? accounts.find((account) => Number(account.id) === createdPayment.fromAccountId)?.name
+    const resultTitle = resultStatus === "completed"
+        ? t("payment.result.completedTitle")
+        : resultStatus === "pending_approval"
+            ? t("payment.result.pendingTitle")
+            : resultStatus === "rejected"
+                ? t("payment.result.rejectedTitle")
+                : t("payment.result.title");
+    const resultTone = resultStatus === "completed"
+        ? styles.resultCompleted
+        : resultStatus === "pending_approval"
+            ? styles.resultPending
+            : resultStatus === "rejected"
+                ? styles.resultRejected
+                : styles.resultUnknown;
+    const resultSourceAccount = createdPayment
+        ? accounts.find((account) => account.id === String(createdPayment.fromAccountId))
         : undefined;
-    const createdAtLabel = createdPayment
-        ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" })
-            .format(new Date(createdPayment.createdAt))
-        : undefined;
+    const resultStatusLabel = resultStatus === "completed"
+        ? t("payment.result.statusValues.completed")
+        : resultStatus === "pending_approval"
+            ? t("payment.result.statusValues.pendingApproval")
+            : resultStatus === "rejected"
+                ? t("payment.result.statusValues.rejected")
+                : createdPayment?.status;
+
+    useEffect(() => {
+        if (!isReviewOpen) return;
+
+        function handleDialogKeyDown(event: KeyboardEvent) {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                restoreReviewFocusRef.current = true;
+                setIsReviewOpen(false);
+                return;
+            }
+
+            if (event.key !== "Tab") return;
+
+            const dialog = document.getElementById("review-payment-dialog");
+            if (!dialog) return;
+
+            const focusable = Array.from(dialog.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+            ));
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+
+            if (!first || !last) {
+                event.preventDefault();
+                reviewHeadingRef.current?.focus();
+            } else if (event.shiftKey && (document.activeElement === first || document.activeElement === reviewHeadingRef.current)) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        document.addEventListener("keydown", handleDialogKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleDialogKeyDown);
+        };
+    }, [isReviewOpen]);
+
+    useLayoutEffect(() => {
+        if (isReviewOpen) {
+            reviewHeadingRef.current?.focus();
+            return;
+        }
+
+        if (restoreReviewFocusRef.current) {
+            restoreReviewFocusRef.current = false;
+            formRef.current?.querySelector<HTMLButtonElement>('button[type="submit"]')?.focus();
+        }
+    }, [isReviewOpen]);
+
+    useLayoutEffect(() => {
+        if (createdPayment) resultHeadingRef.current?.focus();
+    }, [createdPayment]);
+
+    function closeReview() {
+        restoreReviewFocusRef.current = true;
+        setIsReviewOpen(false);
+    }
 
     function updateField(field: keyof PaymentForm, value: string) {
         setForm((current) => ({ ...current, [field]: value }));
-        setFieldErrors((current) => {
-            const next = { ...current };
-            delete next[field];
-            return next;
-        });
+        validation.clear(String(field));
         setError(null);
         setIdempotencyKey(null);
     }
 
     function clearForm() {
         setForm(initialForm);
-        setFieldErrors({});
+        validation.clear();
         setError(null);
         setIdempotencyKey(null);
     }
@@ -102,62 +172,54 @@ export function NyBetalning() {
         clearForm();
     }
 
-    function handleSubmit(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault();
+    function validatePaymentForm(formElement: HTMLFormElement, formData: PaymentForm, currentAmount: number) {
+        const result = paymentSchema.safeParse(formData);
+        const customErrors: Record<string, string> = {};
+
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0] ?? "");
+                if (field && !customErrors[field]) customErrors[field] = t(issue.message);
+            }
+        }
 
         if (!selectedAccount) {
-            setFieldErrors({ fromAccountId: t("payment.errors.selectAccount") });
-            return;
+            customErrors.fromAccountId = t("payment.errors.selectAccount");
+        } else if (currentAmount > selectedAccount.balance) {
+            customErrors.amount = t("payment.errors.insufficientBalance");
         }
 
-        const validation = paymentSchema.safeParse({
+        const nativeValidationPassed = validation.validate(formElement, customErrors);
+        return { isValid: nativeValidationPassed && result.success && Boolean(selectedAccount), result };
+    }
+
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        const { isValid } = validatePaymentForm(event.currentTarget, {
             ...form,
-            fromAccountId: selectedAccount.id,
-        });
+            fromAccountId: selectedAccount?.id ?? form.fromAccountId,
+        }, amount);
+        if (!isValid) return;
 
-        if (!validation.success) {
-            const nextErrors: Partial<Record<keyof PaymentForm, string>> = {};
-            for (const issue of validation.error.issues) {
-                const field = issue.path[0] as keyof PaymentForm | undefined;
-                if (field && !nextErrors[field]) nextErrors[field] = t(issue.message);
-            }
-            setFieldErrors(nextErrors);
-            setError(null);
-            return;
-        }
-
-        if (amount > selectedAccount.balance) {
-            setFieldErrors({ amount: t("payment.errors.insufficientBalance") });
-            return;
-        }
-
-        setFieldErrors({});
         setError(null);
         setIsReviewOpen(true);
     }
 
     async function confirmPayment() {
-        const validation = paymentSchema.safeParse({
+        const formElement = document.querySelector<HTMLFormElement>("form");
+        if (!formElement) return;
+
+        const { isValid, result } = validatePaymentForm(formElement, {
             ...form,
             fromAccountId: selectedAccount?.id ?? form.fromAccountId,
-        });
+        }, amount);
 
-        if (!validation.success || !selectedAccount) {
+        if (!isValid || !result.success || !selectedAccount) {
             setIsReviewOpen(false);
-            if (!validation.success) {
-                const nextErrors: Partial<Record<keyof PaymentForm, string>> = {};
-                for (const issue of validation.error.issues) {
-                    const field = issue.path[0] as keyof PaymentForm | undefined;
-                    if (field && !nextErrors[field]) nextErrors[field] = t(issue.message);
-                }
-                setFieldErrors(nextErrors);
-            } else {
-                setError(t("payment.errors.selectAccount"));
-            }
             return;
         }
 
-        const validatedForm = validation.data;
+        const validatedForm = result.data;
         const paymentIdempotencyKey = idempotencyKey ?? crypto.randomUUID();
 
         if (!idempotencyKey) {
@@ -170,7 +232,7 @@ export function NyBetalning() {
             const payment = await createPayment(
                 {
                     tenantId: user?.tenantId ?? 0,
-                    fromAccountId: Number(selectedAccount.id),
+                    fromAccountId: selectedAccount.id,
                     toIban: validatedForm.iban,
                     amount: Number(validatedForm.amount),
                     currency: "SEK",
@@ -182,6 +244,7 @@ export function NyBetalning() {
             setCreatedPayment(payment);
             setIsReviewOpen(false);
             setForm(initialForm);
+            validation.clear();
             setIdempotencyKey(null);
         } catch {
             setIsReviewOpen(false);
@@ -221,22 +284,13 @@ export function NyBetalning() {
 
             {createdPayment ? (
                 <Card className={styles.resultCard}>
-                    <div className={`${styles.resultBanner} ${resultStatus === "completed"
-                        ? styles.resultCompleted
-                        : resultStatus === "pending_approval"
-                            ? styles.resultPending
-                            : resultStatus === "rejected"
-                                ? styles.resultRejected
-                                : styles.resultUnknown}`}>
+                    <span className={styles.eyebrow}>{t("payment.result.eyebrow")}</span>
+                    <div className={`${styles.resultBanner} ${resultTone}`}>
                         <span className={styles.resultIcon} aria-hidden="true">
-                            {resultStatus === "completed" ? <CircleCheck size={24} />
-                                : resultStatus === "pending_approval" ? <Clock3 size={24} />
-                                    : resultStatus === "rejected" ? <TriangleAlert size={24} />
-                                        : <CreditCard size={24} />}
+                            {resultStatus === "completed" ? <CircleCheck size={24} /> : <TriangleAlert size={24} />}
                         </span>
                         <div>
-                            <span className={styles.eyebrow}>{t("payment.result.eyebrow")}</span>
-                            <h2>{resultTitle}</h2>
+                            <h2 ref={resultHeadingRef} tabIndex={-1}>{resultTitle}</h2>
                             <p role="status" aria-live="polite">{resultMessage}</p>
                         </div>
                     </div>
@@ -248,15 +302,19 @@ export function NyBetalning() {
 
                     <dl className={styles.resultDetails}>
                         <div>
+                            <dt>{t("payment.result.status")}</dt>
+                            <dd>{resultStatusLabel}</dd>
+                        </div>
+                        {resultSourceAccount && (
+                            <div>
+                                <dt>{t("payment.result.sourceAccount")}</dt>
+                                <dd>{resultSourceAccount.name}</dd>
+                            </div>
+                        )}
+                        <div>
                             <dt>{t("payment.fields.iban")}</dt>
                             <dd>{createdPayment.toIban}</dd>
                         </div>
-                        {resultAccountName && (
-                            <div>
-                                <dt>{t("payment.result.sourceAccount")}</dt>
-                                <dd>{resultAccountName}</dd>
-                            </div>
-                        )}
                         {createdPayment.reference && (
                             <div>
                                 <dt>{t("payment.fields.reference")}</dt>
@@ -265,7 +323,7 @@ export function NyBetalning() {
                         )}
                         <div>
                             <dt>{t("payment.result.submittedAt")}</dt>
-                            <dd>{createdAtLabel}</dd>
+                            <dd>{new Date(createdPayment.createdAt).toLocaleString(locale)}</dd>
                         </div>
                     </dl>
 
@@ -276,7 +334,13 @@ export function NyBetalning() {
             ) : (
             <div className={styles.layout}>
                 <Card className={styles.formCard}>
-                    <form noValidate onSubmit={handleSubmit}>
+                    <form
+                        ref={formRef}
+                        noValidate
+                        onSubmit={handleSubmit}
+                        onChange={(event) => validation.clear((event.target as HTMLElement).id)}
+                    >
+                        <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
                         <div className={styles.sectionHeading}>
                             <div className={styles.number}>01</div>
 
@@ -287,12 +351,13 @@ export function NyBetalning() {
                         </div>
 
                         <div className={styles.formFields}>
-                        <label className={styles.accountField}>
+                        <label className={styles.accountField} htmlFor="fromAccountId">
                             {t("payment.fields.fromAccount")}
                             <select
+                                id="fromAccountId"
+                                name="fromAccountId"
                                 value={selectedAccount?.id ?? ""}
-                                aria-invalid={Boolean(fieldErrors.fromAccountId)}
-                                aria-describedby={describedBy(fieldErrors.fromAccountId && "from-account-error")}
+                                {...validation.fieldProps("fromAccountId")}
                                 disabled={isLoadingAccounts || accountsError || isSubmitting}
                                 onChange={(event) => updateField("fromAccountId", event.target.value)}
                             >
@@ -314,38 +379,38 @@ export function NyBetalning() {
                             {accountsError && (
                                 <p className={styles.fieldError}>{t("payment.errors.loadAccounts")}</p>
                             )}
-                            {fieldErrors.fromAccountId && (
-                                <p id="from-account-error" className={styles.fieldError}>{fieldErrors.fromAccountId}</p>
-                            )}
+                            <FieldError id="fromAccountId" errors={validation.errors} />
                         </label>
 
-                        <label className={styles.recipientField}>
+                        <label className={styles.recipientField} htmlFor="recipient">
                             {t("payment.fields.recipient")}
                             <input
+                                id="recipient"
+                                name="recipient"
                                 required
                                 value={form.recipient}
                                 placeholder={t("payment.placeholders.recipient")}
-                                aria-invalid={Boolean(fieldErrors.recipient)}
-                                aria-describedby={describedBy(fieldErrors.recipient && "recipient-error")}
+                                {...validation.fieldProps("recipient")}
                                 onChange={(event) => updateField("recipient", event.target.value)}
                             />
-                            {fieldErrors.recipient && (
-                                <p id="recipient-error" className={styles.fieldError}>{fieldErrors.recipient}</p>
-                            )}
+                            <FieldError id="recipient" errors={validation.errors} />
                         </label>
 
-                        <label className={styles.ibanField}>
+                        <label className={styles.ibanField} htmlFor="iban">
                             {t("payment.fields.iban")}
                             <input
+                                id="iban"
+                                name="iban"
                                 required
                                 value={form.iban}
                                 placeholder="SE00 0000 0000 0000 0000 0000"
-                                aria-invalid={Boolean(fieldErrors.iban) || (hasIbanInput && !ibanIsValid)}
-                                aria-describedby={describedBy(
+                                {...validation.fieldProps("iban", "iban-hint")}
+                                aria-invalid={Boolean(validation.errors.iban) || (hasIbanInput && !ibanIsValid)}
+                                aria-describedby={[
+                                    validation.errors.iban ? "iban-error" : undefined,
+                                    hasIbanInput ? "iban-validation" : undefined,
                                     "iban-hint",
-                                    hasIbanInput && "iban-validation",
-                                    fieldErrors.iban && "iban-error"
-                                )}
+                                ].filter(Boolean).join(" ")}
                                 onChange={(event) => updateField("iban", event.target.value)}
                             />
                             {hasIbanInput && (
@@ -359,62 +424,57 @@ export function NyBetalning() {
                                     {t(ibanIsValid ? "payment.iban.valid" : "payment.iban.invalid")}
                                 </p>
                             )}
-                            {fieldErrors.iban && (
-                                <p id="iban-error" className={styles.fieldError}>{fieldErrors.iban}</p>
-                            )}
+                            <FieldError id="iban" errors={validation.errors} />
                             <p id="iban-hint" className={styles.ibanHint}>{t("payment.iban.accountNotChecked")}</p>
                         </label>
 
-                        <label className={styles.amountField}>
+                        <label className={styles.amountField} htmlFor="amount">
                             {t("payment.fields.amount")}
                             <div className={styles.amountInput}>
                                 <input
+                                    id="amount"
+                                    name="amount"
                                     required
                                     min="1"
                                     step="0.01"
                                     type="number"
                                     value={form.amount}
                                     placeholder="0.00"
-                                    aria-invalid={Boolean(fieldErrors.amount)}
-                                    aria-describedby={describedBy(fieldErrors.amount && "amount-error")}
+                                    {...validation.fieldProps("amount")}
                                     onChange={(event) => updateField("amount", event.target.value)}
                                 />
                                 <span>SEK</span>
                             </div>
-                            {fieldErrors.amount && (
-                                <p id="amount-error" className={styles.fieldError}>{fieldErrors.amount}</p>
-                            )}
+                            <FieldError id="amount" errors={validation.errors} />
                         </label>
 
-                        <label className={styles.referenceField}>
+                        <label className={styles.referenceField} htmlFor="reference">
                             {t("payment.fields.reference")}
                             <input
+                                id="reference"
+                                name="reference"
                                 value={form.reference}
                                 placeholder={t("payment.placeholders.reference")}
-                                aria-invalid={Boolean(fieldErrors.reference)}
-                                aria-describedby={describedBy(fieldErrors.reference && "reference-error")}
+                                {...validation.fieldProps("reference")}
                                 onChange={(event) => updateField("reference", event.target.value)}
                             />
-                            {fieldErrors.reference && (
-                                <p id="reference-error" className={styles.fieldError}>{fieldErrors.reference}</p>
-                            )}
+                            <FieldError id="reference" errors={validation.errors} />
                         </label>
 
-                        <label className={styles.messageField}>
+                        <label className={styles.messageField} htmlFor="message">
                             {t("payment.fields.message")}{" "}
                             <span className={styles.optional}>{t("payment.optional")}</span>
 
                             <textarea
+                                id="message"
+                                name="message"
                                 rows={2}
                                 value={form.message}
                                 placeholder={t("payment.placeholders.message")}
-                                aria-invalid={Boolean(fieldErrors.message)}
-                                aria-describedby={describedBy(fieldErrors.message && "message-error")}
+                                {...validation.fieldProps("message")}
                                 onChange={(event) => updateField("message", event.target.value)}
                             />
-                            {fieldErrors.message && (
-                                <p id="message-error" className={styles.fieldError}>{fieldErrors.message}</p>
-                            )}
+                            <FieldError id="message" errors={validation.errors} />
                         </label>
                         </div>
 
@@ -456,22 +516,28 @@ export function NyBetalning() {
                     role="presentation"
                     onMouseDown={(event) => {
                         if (event.target === event.currentTarget) {
-                            setIsReviewOpen(false);
+                            closeReview();
                         }
                     }}
                 >
                     <section
                         className={styles.reviewModal}
+                        id="review-payment-dialog"
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="review-payment-title"
+                        aria-describedby="review-payment-description"
                     >
                         <p className={styles.eyebrow}>{t("payment.review.eyebrow")}</p>
                         <div className={styles.reviewTitle}>
                             <ClipboardCheck size={22} strokeWidth={2} aria-hidden="true" />
-                            <h2 id="review-payment-title">{t("payment.review.title")}</h2>
+                            <h2 id="review-payment-title" ref={reviewHeadingRef} tabIndex={-1}>
+                                {t("payment.review.title")}
+                            </h2>
                         </div>
-                        <p className={styles.reviewIntro}>{t("payment.review.description")}</p>
+                        <p id="review-payment-description" className={styles.reviewIntro}>
+                            {t("payment.review.description")}
+                        </p>
 
                         <div className={styles.reviewDetails}>
                             <div>
@@ -507,7 +573,7 @@ export function NyBetalning() {
                                 type="button"
                                 variant="ghost"
                                 size="medium"
-                                onClick={() => setIsReviewOpen(false)}
+                                onClick={closeReview}
                             >
                                 <span className={styles.buttonContent}>
                                     <ArrowLeft size={17} aria-hidden="true" />

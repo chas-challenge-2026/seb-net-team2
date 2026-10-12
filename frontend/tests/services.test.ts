@@ -18,11 +18,11 @@ test('US-70: hämtar konton från rätt adress och läser svaret', async () => {
 
 test('US-70: skickar betalningsdata som JSON till rätt adress', async () => {
   const details = {
-    tenantId: 3, fromAccountId: 1, toIban: 'SE4550000000058398257466',
+    tenantId: 3, fromAccountId: '9d21cccb-d39d-4cae-99aa-fda8a311cf66', toIban: 'SE4550000000058398257466',
     amount: 100, currency: 'SEK' as const, reference: 'Faktura 12',
   }
   jest.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
-    ...details, id: 42, status: 'pending_approval', createdAt: '2026-10-07',
+    ...details, id: 'c6a91a61-a18a-41ca-a2f7-7937cd187425', status: 'pending_approval', createdAt: '2026-10-07',
   })))
 
   const result = await createPayment(details, 'test-key')
@@ -32,5 +32,5 @@ test('US-70: skickar betalningsdata som JSON till rätt adress', async () => {
   expect(options?.method).toBe('POST')
   expect((options?.headers as Headers).get('Content-Type')).toBe('application/json')
   expect(JSON.parse(options?.body as string)).toEqual(details)
-  expect(result.id).toBe(42)
+  expect(result.id).toBe('c6a91a61-a18a-41ca-a2f7-7937cd187425')
 })
