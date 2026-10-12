@@ -152,6 +152,13 @@ export function Attestkorg() {
         triggerRef.current?.focus();
     }
 
+    // The link that was clicked disappears with the tab switch, so focus is moved to the
+    // "Handled" tab instead of falling back to the top of the page.
+    function showHandledTab() {
+        setActiveTab("handled");
+        requestAnimationFrame(() => document.getElementById(TAB_IDS.handled.tab)?.focus());
+    }
+
     function updateComment(stepId: string, comment: string) {
         setReasonError(false);
         setComments((current) => ({ ...current, [stepId]: comment }));
@@ -374,7 +381,7 @@ export function Attestkorg() {
                         <button
                             type="button"
                             className={styles.feedbackLink}
-                            onClick={() => setActiveTab("handled")}
+                            onClick={showHandledTab}
                         >
                             {t("approvalInbox.feedback.showHandled")}
                             <ArrowRight size={16} aria-hidden="true" />
@@ -560,7 +567,7 @@ export function Attestkorg() {
                             <button
                                 type="button"
                                 className={styles.emptyStateAction}
-                                onClick={() => setActiveTab("handled")}
+                                onClick={showHandledTab}
                             >
                                 {t("approvalInbox.empty.showHandled")}
                                 <ArrowRight size={16} aria-hidden="true" />
