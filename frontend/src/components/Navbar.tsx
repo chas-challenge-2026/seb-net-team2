@@ -29,6 +29,7 @@ export function NavigationBar() {
             </Link>
 
             <div className={styles.navbar__actions}>
+                <LanguageSelector />
                 {isAuthenticated && user && (
                     <Link
                         to="/profil"
@@ -51,7 +52,6 @@ export function NavigationBar() {
 
                 {isAuthenticated && <NotificationBell />}
 
-                <LanguageSelector />
             </div>
         </header>
     );

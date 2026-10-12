@@ -54,6 +54,18 @@
         "approvalsWithOverdue": "{{pending}} väntande, {{overdue}} försenade"
     },
     "dashboard": {
+        "currency": {
+            "originalBalance": "Kontosaldo",
+            "converted": "Ungefärligt värde i {{currency}}",
+            "copy": "Kopiera",
+            "copyIban": "Kopiera IBAN för {{account}}",
+            "copied": "IBAN kopierat.",
+            "copyFailed": "Kunde inte kopiera. Markera och kopiera IBAN-numret manuellt.",
+            "select": "Visningsvaluta",
+            "loading": "Hämtar växelkurser...",
+            "unavailable": "Omräknat saldo saknas.",
+            "rateDate": "Kursdatum:"
+        },
         "welcome": "Välkommen, {{user}}",
         "greeting": "God morgon, {{user}}",
         "createPayment": "Skapa betalning",

@@ -135,7 +135,7 @@ namespace SebPortal.Tests
                 Amount = 50000m,
                 Currency = "SEK",
                 ToIban = "SE9999999999999999999999",
-                Reference = "Leverantörsfaktura",
+                Reference = "Leverantï¿½rsfaktura",
                 CreatedByUserId = 3,
                 CreatedByUser = new User { Id = 3, TenantId = tenantId, Name = "Lisa Svensson", Email = "lisa@malmobygg.se", PasswordHash = "hash", Role = "initiator" },
                 CreatedAt = new DateTime(2026, 9, 10)

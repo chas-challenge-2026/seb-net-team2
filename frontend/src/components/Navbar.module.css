@@ -56,7 +56,7 @@
 }
 
 .navbar__user:hover {
-    background-color: var(--color-hover-light);
+    background-color: var(--color-400);
 }
 
 .navbar__user:focus-visible {
