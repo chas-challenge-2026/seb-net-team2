@@ -193,6 +193,8 @@ describe("Dashboard account information", () => {
 
         expect(screen.queryByText("Recent payments")).not.toBeInTheDocument();
         expect(screen.getByText("Operating account")).toBeInTheDocument();
+    });
+
     it("changes the display currency while preserving company account balances", () => {
         render(<Dashboard />);
         const select = screen.getByRole("button", { name: "dashboard.currency.select" });
