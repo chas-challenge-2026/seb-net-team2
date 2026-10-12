@@ -4,6 +4,7 @@ import { Coins, Check, ChevronDown } from "lucide-react";
 import { DISPLAY_CURRENCIES } from "../../constants/currency";
 import { useCurrency } from "../../hooks/useCurrency";
 import styles from "./CurrencySelector.module.css";
+import dropdown from "../Dropdown/Dropdown.module.css";
 
 const currencyLabel = (currency: string) => currency === "EUR" ? "\u20AC EUR" : currency === "USD" ? "$ USD" : currency;
 
@@ -13,7 +14,7 @@ export function CurrencySelector() {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className={styles.wrapper}
+        <div className={dropdown.wrapper}
             onBlur={(event) => {
                 if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
             }}
@@ -23,25 +24,25 @@ export function CurrencySelector() {
                     event.currentTarget.querySelector("button")?.focus();
                 }
             }}>
-            <button type="button" className={styles.trigger}
+            <button type="button" className={`${dropdown.trigger} ${styles.trigger}`}
                 aria-label={t("dashboard.currency.select")}
                 aria-expanded={isOpen}
                 onClick={() => setIsOpen(previous => !previous)}>
                 <Coins size={18} className={styles.coin} aria-hidden="true" />
                 <span>{currencyLabel(primaryCurrency)}</span>
-                <ChevronDown size={16} className={styles.chevron} aria-hidden="true" />
+                <ChevronDown size={16} className={`${dropdown.chevron} ${styles.chevron}`} aria-hidden="true" />
             </button>
             {isOpen && (
-                <div className={styles.menu}>
+                <div className={dropdown.menu}>
                     {DISPLAY_CURRENCIES.map(currency => (
-                        <button key={currency} type="button" className={styles.option}
+                        <button key={currency} type="button" className={dropdown.option}
                             aria-pressed={currency === primaryCurrency}
                             onClick={() => {
                                 setPrimaryCurrency(currency);
                                 setIsOpen(false);
                             }}>
                             <span>{currencyLabel(currency)}</span>
-                            {currency === primaryCurrency && <Check size={16} className={styles.check} aria-hidden="true" />}
+                            {currency === primaryCurrency && <Check size={16} className={dropdown.check} aria-hidden="true" />}
                         </button>
                     ))}
                 </div>

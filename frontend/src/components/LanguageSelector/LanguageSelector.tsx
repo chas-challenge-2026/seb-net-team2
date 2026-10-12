@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, ChevronDown } from "lucide-react";
-import styles from "./LanguageSelector.module.css";
+import styles from "../Dropdown/Dropdown.module.css";
 
 const languages = [
     { code: "en", label: "English", flagClass: "fi fi-gb" },

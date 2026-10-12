@@ -33,11 +33,6 @@
     outline-offset: 2px;
 }
 
-.flag {
-    font-size: 18px;
-    line-height: 1;
-}
-
 .chevron {
     width: 16px;
     height: 16px;
@@ -45,10 +40,6 @@
     margin-left: auto;
 
     transition: transform 0.2s ease;
-}
-
-.chevronOpen {
-    transform: rotate(180deg);
 }
 
 .menu {
