@@ -727,19 +727,21 @@
 
 /* Confirmation modal */
 
-.modalOverlay {
-    position: fixed;
+/* Native <dialog>: centred by the browser, the styled box is .modal inside it. */
+.modalDialog {
+    width: min(480px, calc(100% - 40px));
+    max-width: none;
+    max-height: calc(100vh - 40px);
 
-    inset: 0;
+    padding: 0;
+    border: 0;
 
-    z-index: 200;
+    overflow: visible;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: transparent;
+}
 
-    padding: 20px;
-
+.modalDialog::backdrop {
     background-color:
         rgb(0 30 80 / 45%);
 }

@@ -116,7 +116,7 @@ export function Attestkorg() {
     const cancelButtonRef = useRef<HTMLButtonElement>(null);
     const [reasonError, setReasonError] = useState(false);
     const reasonRef = useRef<HTMLTextAreaElement>(null);
-    const modalRef = useRef<HTMLDivElement>(null);
+    const dialogRef = useRef<HTMLDialogElement>(null);
     const feedbackRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -270,8 +270,13 @@ export function Attestkorg() {
         if (actionFeedback) feedbackRef.current?.focus();
     }, [actionFeedback]);
 
+    // showModal() makes the rest of the page inert, so neither Tab nor a screen reader's
+    // reading mode can reach the list behind the dialog.
     useEffect(() => {
         if (!confirmAction) return;
+
+        const dialog = dialogRef.current;
+        if (dialog && !dialog.open) dialog.showModal();
 
         if (confirmAction.kind === "reject") {
             reasonRef.current?.focus();
@@ -279,42 +284,6 @@ export function Attestkorg() {
             cancelButtonRef.current?.focus();
         }
     }, [confirmAction]);
-
-    useEffect(() => {
-        if (!confirmAction) return;
-
-        function handleKeyDown(event: KeyboardEvent) {
-            if (event.key === "Escape") {
-                if (!decisionMutation.isPending) {
-                    setConfirmAction(null);
-                    triggerRef.current?.focus();
-                }
-                return;
-            }
-
-            if (event.key !== "Tab" || !modalRef.current) return;
-
-            const focusable = modalRef.current.querySelectorAll<HTMLElement>(
-                'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-            );
-
-            if (focusable.length === 0) return;
-
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-
-            if (event.shiftKey && document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        }
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [confirmAction, decisionMutation.isPending]);
 
     if (isPending) {
         return (
@@ -597,15 +566,27 @@ export function Attestkorg() {
             )}
 
             {confirmAction && (
-                <div className={styles.modalOverlay} onClick={closeConfirm}>
-                    <div
-                        className={styles.modal}
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="confirm-modal-title"
-                        onClick={(event) => event.stopPropagation()}
-                        ref={modalRef}
-                    >
+                <dialog
+                    ref={dialogRef}
+                    className={styles.modalDialog}
+                    aria-labelledby="confirm-modal-title"
+                    // Escape: close through closeConfirm, which keeps the dialog open while sending
+                    // and returns focus to the button that opened it.
+                    onCancel={(event) => {
+                        event.preventDefault();
+                        closeConfirm();
+                    }}
+                    // Chrome may still close the dialog on a repeated Escape; keep the state in sync.
+                    onClose={() => {
+                        setConfirmAction(null);
+                        triggerRef.current?.focus();
+                    }}
+                    // A click on the backdrop lands on the dialog itself, not on its content.
+                    onClick={(event) => {
+                        if (event.target === event.currentTarget) closeConfirm();
+                    }}
+                >
+                    <div className={styles.modal}>
                         <h2 id="confirm-modal-title">
                             {confirmAction.kind === "approve"
                                 ? t("approvalInbox.modal.approveTitle")
@@ -776,7 +757,7 @@ export function Attestkorg() {
                             </button>
                         </div>
                     </div>
-                </div>
+                </dialog>
             )}
         </section>
     );
