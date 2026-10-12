@@ -213,7 +213,8 @@
             "newest": "Newest first",
             "oldest": "Oldest first",
             "amountHigh": "Amount: high to low",
-            "amountLow": "Amount: low to high"
+            "amountLow": "Amount: low to high",
+            "announcement": "List sorted: {{order}}."
         },
         "card": {
             "waitingDays_one": "Waiting {{count}} day",

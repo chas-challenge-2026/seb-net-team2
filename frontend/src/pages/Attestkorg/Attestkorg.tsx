@@ -39,6 +39,13 @@ const REJECT_REASON_MIN_LENGTH = 10;
 
 type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
 
+const SORT_LABEL_KEYS: Record<SortOption, string> = {
+    "date-desc": "approvalInbox.sort.newest",
+    "date-asc": "approvalInbox.sort.oldest",
+    "amount-desc": "approvalInbox.sort.amountHigh",
+    "amount-asc": "approvalInbox.sort.amountLow",
+};
+
 type ConfirmAction = {
     approval: PendingApprovalStep;
     kind: "approve" | "reject";
@@ -100,6 +107,8 @@ export function Attestkorg() {
 
     // Oldest first: the payments that have waited longest are the most urgent for an attestant.
     const [pendingSort, setPendingSort] = useState<SortOption>("date-asc");
+    // Empty until the user changes the order, so nothing is announced when the page loads.
+    const [sortAnnouncement, setSortAnnouncement] = useState("");
     const [comments, setComments] = useState<Record<string, string>>({});
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
@@ -442,7 +451,13 @@ export function Attestkorg() {
                         <select
                             id="pending-sort"
                             value={pendingSort}
-                            onChange={(event) => setPendingSort(event.target.value as SortOption)}
+                            onChange={(event) => {
+                                const sort = event.target.value as SortOption;
+                                setPendingSort(sort);
+                                setSortAnnouncement(t("approvalInbox.sort.announcement", {
+                                    order: t(SORT_LABEL_KEYS[sort]),
+                                }));
+                            }}
                         >
                             <option value="date-desc">{t("approvalInbox.sort.newest")}</option>
                             <option value="date-asc">{t("approvalInbox.sort.oldest")}</option>
@@ -450,6 +465,8 @@ export function Attestkorg() {
                             <option value="amount-asc">{t("approvalInbox.sort.amountLow")}</option>
                         </select>
                     </div>
+
+                    <p className={styles.visuallyHidden} role="status">{sortAnnouncement}</p>
                 </div>
             )}
 

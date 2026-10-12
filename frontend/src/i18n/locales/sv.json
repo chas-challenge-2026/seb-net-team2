@@ -213,7 +213,8 @@
             "newest": "Nyaste först",
             "oldest": "Äldsta först",
             "amountHigh": "Belopp: högst till lägst",
-            "amountLow": "Belopp: lägst till högst"
+            "amountLow": "Belopp: lägst till högst",
+            "announcement": "Listan är sorterad: {{order}}."
         },
         "card": {
             "waitingDays_one": "Väntat {{count}} dag",
