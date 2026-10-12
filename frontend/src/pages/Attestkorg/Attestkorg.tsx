@@ -524,7 +524,8 @@ export function Attestkorg() {
                                     disabled={decisionMutation.isPending}
                                     onClick={(event) => openConfirm(approval, "reject", event)}
                                     aria-label={t("approvalInbox.actions.rejectPayment", {
-                                        id: approval.paymentId,
+                                        reference: approval.reference,
+                                        amount: formatAmount(approval, locale),
                                     })}
                                 >
                                     <CircleX size={17} aria-hidden="true" />
@@ -537,7 +538,8 @@ export function Attestkorg() {
                                     disabled={decisionMutation.isPending}
                                     onClick={(event) => openConfirm(approval, "approve", event)}
                                     aria-label={t("approvalInbox.actions.approvePayment", {
-                                        id: approval.paymentId,
+                                        reference: approval.reference,
+                                        amount: formatAmount(approval, locale),
                                     })}
                                 >
                                     <CircleCheck size={17} aria-hidden="true" />

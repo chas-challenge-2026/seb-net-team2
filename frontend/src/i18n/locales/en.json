@@ -248,8 +248,8 @@
             "reject": "Reject",
             "approve": "Approve",
             "processing": "Processing...",
-            "rejectPayment": "Reject payment {{id}}",
-            "approvePayment": "Approve payment {{id}}"
+            "rejectPayment": "Reject payment {{reference}}, {{amount}}",
+            "approvePayment": "Approve payment {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "No pending approvals",

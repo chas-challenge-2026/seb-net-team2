@@ -248,8 +248,8 @@
             "reject": "Avvisa",
             "approve": "Godkänn",
             "processing": "Behandlar...",
-            "rejectPayment": "Avvisa betalning {{id}}",
-            "approvePayment": "Godkänn betalning {{id}}"
+            "rejectPayment": "Avvisa betalning {{reference}}, {{amount}}",
+            "approvePayment": "Godkänn betalning {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "Inga väntande attesteringar",
