@@ -32,7 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+		<Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" Condition="Exists('..\..\native\libcsvparser.so')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>
