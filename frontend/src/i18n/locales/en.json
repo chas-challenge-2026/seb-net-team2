@@ -190,6 +190,7 @@
     "approvalInbox": {
         "title": "Approval inbox",
         "description": "Payments awaiting your decision.",
+        "handledDescription": "Payments you have already handled.",
         "loading": "Loading approvals...",
         "pendingCount_one": "{{count}} pending",
         "pendingCount_other": "{{count}} pending",
@@ -205,7 +206,7 @@
             "approved": "{{reference}} ({{amount}}) was approved.",
             "rejected": "{{reference}} ({{amount}}) was rejected.",
             "alreadyHandled": "This payment has already been handled. The list has been updated.",
-            "showHandled": "Show in Handled →"
+            "showHandled": "Show in Handled"
         },
         "sort": {
             "label": "Sort by",
@@ -252,8 +253,8 @@
         },
         "empty": {
             "title": "No pending approvals",
-            "description": "There are no payments waiting for your approval.",
-            "showHandled": "Show handled payments →"
+            "description": "You're all caught up. New payments will appear here when they're sent for approval.",
+            "showHandled": "Show handled payments"
         },
         "modal": {
             "approveTitle": "Approve payment?",
@@ -300,7 +301,9 @@
             "count": "Showing {{visible}} of {{total}}",
             "approvedOn": "Approved {{date}}",
             "rejectedOn": "Rejected {{date}}",
-            "step": "Approval step",
+            "paymentCreated": "Payment created {{date}}",
+            "stepShort": "Step {{step}}",
+            "unknownDate": "Unknown date",
             "reason": "Reason",
             "sessionEmpty": "Payments you approve or reject now will be shown here.",
             "moreFilters": "Filter",
