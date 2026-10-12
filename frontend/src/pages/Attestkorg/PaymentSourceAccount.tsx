@@ -4,7 +4,7 @@ import { usePaymentSourceAccount } from "../../hooks/usePaymentSourceAccount";
 import { formatIban } from "../../utils/paymentChecks";
 
 // One <dt>/<dd> row for a payment's details list: "Från konto · Driftkonto · SE45 5000 …".
-export function PaymentSourceAccount({ paymentId }: { paymentId: number }) {
+export function PaymentSourceAccount({ paymentId }: { paymentId: string }) {
     const { t } = useTranslation();
     const { account, fromAccountId, isPending, isError } = usePaymentSourceAccount(paymentId);
 

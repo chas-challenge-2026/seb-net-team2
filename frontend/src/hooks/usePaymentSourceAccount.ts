@@ -6,7 +6,7 @@ import { useAccounts } from "./useAccounts";
 // Which of the company's accounts a payment is taken from.
 // Combines the payment (fromAccountId) with the account list (name and IBAN).
 // Replace with a field in /api/Approval/pending when the backend adds it, to avoid one request per payment.
-export function usePaymentSourceAccount(paymentId: number) {
+export function usePaymentSourceAccount(paymentId: string) {
     const payment = useQuery({
         queryKey: ["payment", paymentId],
         queryFn: () => fetchPaymentById(paymentId),

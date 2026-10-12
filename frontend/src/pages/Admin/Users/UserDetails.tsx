@@ -86,8 +86,8 @@ export default function UserDetails() {
         isError,
         error: loadError,
     } = useQuery({
-        queryKey: ["user", Number(userId)],
-        queryFn: () => getUserById(Number(userId)),
+        queryKey: ["user", userId],
+        queryFn: () => getUserById(userId),
     });
 
     const deleteMutation = useMutation({

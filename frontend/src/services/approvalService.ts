@@ -6,7 +6,7 @@ import { createdPaymentSchema } from "../schemas/paymentSchema";
 import type { ApprovalDecision } from "../schemas/approvalDecisionSchema";
 
 const API_URL =
-    import.meta.env.VITE_API_URL;
+    (import.meta.env.VITE_API_URL || window.location.origin);
 
 export async function fetchPendingApprovals() {
     return apiRequest(
@@ -17,7 +17,7 @@ export async function fetchPendingApprovals() {
 
 // The pending list doesn't include which account the money is taken from, but the
 // payment itself does. The backend only returns payments from the user's own company.
-export async function fetchPaymentById(paymentId: number) {
+export async function fetchPaymentById(paymentId: string) {
     return apiRequest(
         `${API_URL}/api/Payment/${paymentId}`,
         createdPaymentSchema,

@@ -3,6 +3,7 @@
     public class AuditQueryDTO
     {
         public int? UserId { get; set; }
+        public Guid? UserPublicId { get; set; }
         public string? Action { get; set; }
         public string? EntityType { get; set; }
         public int? EntityId { get; set; }

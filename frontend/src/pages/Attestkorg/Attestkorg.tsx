@@ -81,7 +81,7 @@ export function Attestkorg() {
 
     // Oldest first: the payments that have waited longest are the most urgent for an attestant.
     const [pendingSort, setPendingSort] = useState<SortOption>("date-asc");
-    const [comments, setComments] = useState<Record<number, string>>({});
+    const [comments, setComments] = useState<Record<string, string>>({});
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
@@ -133,7 +133,7 @@ export function Attestkorg() {
         triggerRef.current?.focus();
     }
 
-    function updateComment(stepId: number, comment: string) {
+    function updateComment(stepId: string, comment: string) {
         setReasonError(false);
         setComments((current) => ({ ...current, [stepId]: comment }));
     }

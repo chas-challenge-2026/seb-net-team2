@@ -3,7 +3,7 @@ import { fetchAccounts, createPayment } from '../src/services/accountService'
 
 test('US-70: hämtar konton från rätt adress och läser svaret', async () => {
   jest.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify([{
-    id: 1, tenantId: 3, accountName: 'Företagskonto',
+    id: '00000000-0000-4000-8000-000000000001', tenantId: 3, accountName: 'Företagskonto',
     balance: 1000, currency: 'SEK', iban: 'SE4550000000058398257466',
   }])))
 
@@ -18,11 +18,11 @@ test('US-70: hämtar konton från rätt adress och läser svaret', async () => {
 
 test('US-70: skickar betalningsdata som JSON till rätt adress', async () => {
   const details = {
-    tenantId: 3, fromAccountId: 1, toIban: 'SE4550000000058398257466',
+    tenantId: 3, fromAccountId: '00000000-0000-4000-8000-000000000001', toIban: 'SE4550000000058398257466',
     amount: 100, currency: 'SEK' as const, reference: 'Faktura 12',
   }
   jest.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({
-    ...details, id: 42, status: 'pending_approval', createdAt: '2026-10-07',
+    ...details, id: '00000000-0000-4000-8000-000000000042', status: 'pending_approval', createdAt: '2026-10-07',
   })))
 
   const result = await createPayment(details, 'test-key')
@@ -32,5 +32,5 @@ test('US-70: skickar betalningsdata som JSON till rätt adress', async () => {
   expect(options?.method).toBe('POST')
   expect((options?.headers as Headers).get('Content-Type')).toBe('application/json')
   expect(JSON.parse(options?.body as string)).toEqual(details)
-  expect(result.id).toBe(42)
+  expect(result.id).toBe('00000000-0000-4000-8000-000000000042')
 })

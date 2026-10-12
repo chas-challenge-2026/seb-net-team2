@@ -6,12 +6,11 @@ import {
     loginResponseSchema,
     readUserSchema,
     readUsersSchema,
-    updateUserSchema,
     type CreateUser,
     type UpdateUser,
 } from "../schemas/userSchema";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = (import.meta.env.VITE_API_URL || window.location.origin);
 
 if (!API_URL) {
     throw new Error(
@@ -53,7 +52,7 @@ export async function getAllUsers() {
     );
 }
 
-export async function getUserById(id: number) {
+export async function getUserById(id: string) {
     return apiRequest(
         `${API_URL}/api/users/${id}`,
         readUserSchema,
@@ -77,7 +76,7 @@ export async function createUser(
 }
 
 export async function deleteUserById(
-    id: number
+    id: string
 ): Promise<void> {
     return apiRequest(
         `${API_URL}/api/users/${id}`,
@@ -89,12 +88,12 @@ export async function deleteUserById(
 }
 
 export async function updateUserById(
-    id: number,
+    id: string,
     user: UpdateUser,
 ) {
     return apiRequest(
         `${API_URL}/api/users/${id}`,
-        updateUserSchema,
+        readUserSchema,
         {
             method: "PATCH",
             headers: {
