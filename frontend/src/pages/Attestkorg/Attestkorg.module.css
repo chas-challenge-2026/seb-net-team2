@@ -469,13 +469,11 @@
     margin:
         22px 0 20px;
 
+    /* Only a line above: below it come the checks box or the buttons, which separate themselves. */
     padding:
-        18px 0;
+        18px 0 0;
 
     border-top:
-        1px solid var(--color-border);
-
-    border-bottom:
         1px solid var(--color-border);
 }
 
