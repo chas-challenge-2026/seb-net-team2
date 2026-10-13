@@ -277,7 +277,6 @@
             "waitingDays_other": "Väntat {{count}} dagar",
             "reference": "Referens",
             "submittedBy": "Skickad av",
-            "submitted": "Skickad",
             "toIban": "Till IBAN",
             "approvalStep": "Atteststeg {{step}}",
             "dualApprovalShort": "Dubbelattest",

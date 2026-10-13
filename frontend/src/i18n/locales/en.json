@@ -334,7 +334,6 @@
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
-            "submitted": "Submitted",
             "toIban": "To IBAN",
             "approvalStep": "Approval step {{step}}",
             "dualApprovalShort": "Dual approval",
