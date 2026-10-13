@@ -129,6 +129,26 @@ describe("Approval inbox with keyboard and screen reader", () => {
         expect(approveButton).toHaveFocus();
     });
 
+    it("keeps focus in the Handled tab when the filters are cleared", () => {
+        // Search and filters only appear with more than five handled payments.
+        const handled = Array.from({ length: 6 }, (_, index) => ({
+            ...handledPayment,
+            stepId: String(index + 1),
+            reference: `Faktura #${index + 1}`,
+        }));
+        setHooks({ handled });
+        renderInbox();
+
+        fireEvent.click(screen.getByRole("tab", { name: /Hanterade/ }));
+        fireEvent.change(screen.getByLabelText("Sök"), { target: { value: "#1" } });
+        expect(screen.getByText("Visar 1 av 6")).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole("button", { name: "Rensa filter" }));
+
+        expect(screen.queryByRole("button", { name: "Rensa filter" })).not.toBeInTheDocument();
+        expect(screen.getByLabelText("Sök")).toHaveFocus();
+    });
+
     it("moves focus to the Handled tab from the empty inbox link", async () => {
         setHooks({ pending: [] });
         renderInbox();

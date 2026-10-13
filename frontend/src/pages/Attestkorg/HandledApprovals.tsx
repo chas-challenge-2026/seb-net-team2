@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     ChevronDown,
@@ -74,6 +74,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     const history = usingSession ? sessionDecisions : apiHistory;
 
     const [search, setSearch] = useState("");
+    const searchRef = useRef<HTMLInputElement>(null);
     const [status, setStatus] = useState<StatusFilter>("all");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
@@ -134,6 +135,9 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
         setDateTo("");
         setMinAmount("");
         setMaxAmount("");
+        // The "Clear" button disappears once nothing is filtered, so focus moves to the search field
+        // instead of falling back to the top of the page.
+        searchRef.current?.focus();
     }
 
     if (isPending) {
@@ -177,6 +181,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         <label htmlFor="history-search">{t("approvalInbox.history.search")}</label>
                         <input
                             id="history-search"
+                            ref={searchRef}
                             type="search"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
