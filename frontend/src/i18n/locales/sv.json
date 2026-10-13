@@ -304,8 +304,8 @@
             "reject": "Avvisa",
             "approve": "Godkänn",
             "processing": "Behandlar...",
-            "rejectPayment": "Avvisa betalning {{reference}}, {{amount}}",
-            "approvePayment": "Godkänn betalning {{reference}}, {{amount}}"
+            "rejectPayment": "Avvisa betalning med referens {{reference}}, {{amount}}",
+            "approvePayment": "Godkänn betalning med referens {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "Inga väntande attesteringar",
@@ -660,24 +660,6 @@
         "message_other": "{{count}} betalningar har väntat längre än {{days}} dagar på din attest.",
         "goToInbox": "Gå till attestkorgen",
         "dismiss": "Stäng påminnelsen"
-    },
-    "reminderSettings": {
-        "title": "Attestpåminnelser",
-        "description": "Få ett e-postmeddelande när betalningar har väntat på din attest för länge, så att de inte blir liggande.",
-        "emailEnabled": "Skicka ett e-postmeddelande när en betalning har väntat för länge på min attest",
-        "recipient": "Påminnelser skickas till",
-        "remindAfter": "Skicka e-post efter",
-        "dayCount_one": "{{count}} dag",
-        "dayCount_other": "{{count}} dagar",
-        "success": "Påminnelseinställningarna sparades.",
-        "saving": "Sparar...",
-        "save": "Spara inställningar",
-        "loading": "Laddar inställningar...",
-        "errors": {
-            "save": "Det gick inte att spara påminnelseinställningarna.",
-            "load": "Det gick inte att ladda påminnelseinställningarna."
-        },
-        "inAppNote": "Påminnelser i appen visas alltid efter {{days}} dagar."
     },
     "saveInvest": {
         "eyebrow": "SPARANDE & INVESTERINGAR",

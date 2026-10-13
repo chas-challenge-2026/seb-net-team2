@@ -667,7 +667,7 @@
         var(--color-text);
 }
 
-.reject:hover:not(:disabled) {
+.reject:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color:
         var(--color-hover-light);
 }
@@ -683,7 +683,7 @@
         var(--color-surface);
 }
 
-.approve:hover:not(:disabled) {
+.approve:hover:not(:disabled):not([aria-disabled="true"]) {
     border-color:
         var(--seb-green-dark-2) !important;
 
@@ -860,7 +860,7 @@
         var(--color-text);
 }
 
-.modalCancel:hover:not(:disabled) {
+.modalCancel:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color:
         var(--color-hover-light);
 }

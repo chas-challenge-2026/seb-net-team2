@@ -361,8 +361,8 @@
             "reject": "Reject",
             "approve": "Approve",
             "processing": "Processing...",
-            "rejectPayment": "Reject payment {{reference}}, {{amount}}",
-            "approvePayment": "Approve payment {{reference}}, {{amount}}"
+            "rejectPayment": "Reject payment with reference {{reference}}, {{amount}}",
+            "approvePayment": "Approve payment with reference {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "No pending approvals",
@@ -717,24 +717,6 @@
         "message_other": "{{count}} payments have been waiting more than {{days}} days for your approval.",
         "goToInbox": "Go to approval inbox",
         "dismiss": "Dismiss reminder"
-    },
-    "reminderSettings": {
-        "title": "Approval reminders",
-        "description": "Get an email when payments are waiting for your approval, so they don't get stuck.",
-        "emailEnabled": "Send me an email when a payment has waited too long for my approval",
-        "recipient": "Reminders are sent to",
-        "remindAfter": "Email me after",
-        "dayCount_one": "{{count}} day",
-        "dayCount_other": "{{count}} days",
-        "success": "Reminder settings saved.",
-        "saving": "Saving...",
-        "save": "Save settings",
-        "loading": "Loading settings...",
-        "errors": {
-            "save": "Unable to save reminder settings.",
-            "load": "Unable to load reminder settings."
-        },
-        "inAppNote": "Reminders in the app are always shown after {{days}} days."
     },
     "saveInvest": {
         "eyebrow": "SAVINGS & INVESTMENTS",

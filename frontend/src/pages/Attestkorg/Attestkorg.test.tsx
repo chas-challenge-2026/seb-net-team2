@@ -90,9 +90,9 @@ describe("Approval inbox with keyboard and screen reader", () => {
     it("names the approve and reject buttons by reference and amount instead of an id", () => {
         renderInbox();
 
-        expect(screen.getByRole("button", { name: /^Godkänn betalning Faktura #1043, 75\s000,00 SEK$/ }))
+        expect(screen.getByRole("button", { name: /^Godkänn betalning med referens Faktura #1043, 75\s000,00 SEK$/ }))
             .toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /^Avvisa betalning Faktura #1043, 75\s000,00 SEK$/ }))
+        expect(screen.getByRole("button", { name: /^Avvisa betalning med referens Faktura #1043, 75\s000,00 SEK$/ }))
             .toBeInTheDocument();
         expect(screen.queryByRole("button", { name: new RegExp(pendingPayment.paymentId) }))
             .not.toBeInTheDocument();
