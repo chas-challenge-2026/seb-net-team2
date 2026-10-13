@@ -10,7 +10,6 @@ export function InformationPage({ page }: { page: InformationPageId }) {
     return (
         <div className={styles.page}>
             <header className={styles.header}>
-                <p className={styles.eyebrow}>{t("information.project")}</p>
                 <h1>{t(`${prefix}.title`)}</h1>
                 <p className={styles.intro}>{t(`${prefix}.intro`)}</p>
             </header>
