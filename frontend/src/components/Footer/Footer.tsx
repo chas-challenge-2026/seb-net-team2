@@ -17,7 +17,6 @@ export function Footer() {
         <footer className={styles.footer}>
             <div className={styles.content}>
                 <div>
-                <p className={styles.title}>{t("footer.title")}</p>
                 <p className={styles.description}>{t("footer.description")}</p>
                 <nav className={styles.links} aria-label={t("information.navigation")}>
                     {informationPages.map(page => (
