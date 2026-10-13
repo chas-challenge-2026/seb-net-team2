@@ -582,12 +582,16 @@
     },
     "notifications": {
         "title": "Notifications",
+        "approvalTitle": "Approval needed",
         "buttonLabel_one": "Notifications, {{count}} unread",
         "buttonLabel_other": "Notifications, {{count}} unread",
         "unreadCount_one": "{{count}} unread",
         "unreadCount_other": "{{count}} unread",
         "markAllAsRead": "Mark all as read",
-        "empty": "You have no notifications."
+        "empty": "You have no notifications.",
+        "loading": "Loading notifications...",
+        "loadError": "Notifications could not be loaded. Try again later.",
+        "updateError": "A notification could not be marked as read."
     },
     "overdueReminder": {
         "title": "Reminder: approvals waiting",
