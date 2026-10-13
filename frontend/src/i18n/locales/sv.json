@@ -359,8 +359,6 @@
             "count": "Visar {{visible}} av {{total}}",
             "approvedOn": "Godkänd <time>{{date}}</time>",
             "rejectedOn": "Avvisad <time>{{date}}</time>",
-            "paymentCreated": "Betalning skapad <time>{{date}}</time>",
-            "stepShort": "Steg {{step}}",
             "unknownDate": "Okänt datum",
             "reason": "Anledning",
             "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här.",
@@ -432,7 +430,7 @@
         },
         "table": {
             "caption": "Händelser i granskningsloggen",
-            "timestamp": "Tidpunkt",
+            "timestamp": "Tid",
             "user": "Användare",
             "event": "Händelse",
             "entity": "Entitet",
@@ -454,8 +452,8 @@
         },
         "actions": {
             "CREATE_PAYMENT": "Betalning skapad",
-            "APPROVE_STEP": "Atteststeg godkänt",
-            "REJECT_STEP": "Atteststeg avvisat",
+            "APPROVE_STEP": "Godkänd",
+            "REJECT_STEP": "Avvisad",
             "EXECUTE_PAYMENT": "Betalning genomförd",
             "REJECT_PAYMENT": "Betalning avvisad",
             "CREATE_USER": "Användare skapad",
@@ -465,8 +463,20 @@
             "UPDATE_APPROVAL_LIMIT": "Attestgräns uppdaterad",
             "DELETE_APPROVAL_LIMIT": "Attestgräns borttagen"
         },
+        "export": {
+            "button": "Exportera CSV",
+            "exporting": "Exporterar…",
+            "done_one": "{{count}} händelse exporterades.",
+            "done_other": "{{count}} händelser exporterades.",
+            "error": "Det gick inte att exportera loggen. Försök igen."
+        },
+        "summary": {
+            "payment": "{{amount}} till {{iban}}",
+            "refund": "{{amount}} återfördes till kontot"
+        },
         "entityTypes": {
             "payment": "Betalning #{{id}}",
+            "paymentReference": "Betalning {{reference}}",
             "user": "Användare #{{id}}",
             "approvalLimit": "Attestgräns #{{id}}"
         },

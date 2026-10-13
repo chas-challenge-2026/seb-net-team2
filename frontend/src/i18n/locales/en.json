@@ -416,8 +416,6 @@
             "count": "Showing {{visible}} of {{total}}",
             "approvedOn": "Approved <time>{{date}}</time>",
             "rejectedOn": "Rejected <time>{{date}}</time>",
-            "paymentCreated": "Payment created <time>{{date}}</time>",
-            "stepShort": "Step {{step}}",
             "unknownDate": "Unknown date",
             "reason": "Reason",
             "sessionEmpty": "Payments you approve or reject now will be shown here.",
@@ -489,7 +487,7 @@
         },
         "table": {
             "caption": "Audit log events",
-            "timestamp": "Timestamp",
+            "timestamp": "Time",
             "user": "User",
             "event": "Event",
             "entity": "Entity",
@@ -511,8 +509,8 @@
         },
         "actions": {
             "CREATE_PAYMENT": "Payment created",
-            "APPROVE_STEP": "Approval step approved",
-            "REJECT_STEP": "Approval step rejected",
+            "APPROVE_STEP": "Approved",
+            "REJECT_STEP": "Rejected",
             "EXECUTE_PAYMENT": "Payment executed",
             "REJECT_PAYMENT": "Payment rejected",
             "CREATE_USER": "User created",
@@ -522,8 +520,20 @@
             "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
             "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
         },
+        "export": {
+            "button": "Export CSV",
+            "exporting": "Exporting…",
+            "done_one": "{{count}} event exported.",
+            "done_other": "{{count}} events exported.",
+            "error": "Could not export the log. Try again."
+        },
+        "summary": {
+            "payment": "{{amount}} to {{iban}}",
+            "refund": "{{amount}} returned to the account"
+        },
         "entityTypes": {
             "payment": "Payment #{{id}}",
+            "paymentReference": "Payment {{reference}}",
             "user": "User #{{id}}",
             "approvalLimit": "Approval limit #{{id}}"
         },
