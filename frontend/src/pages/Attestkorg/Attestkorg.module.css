@@ -147,7 +147,7 @@
 
 .feedback:focus-visible {
     outline:
-        3px solid var(--seb-green);
+        3px solid var(--seb-green-dark-2);
 
     outline-offset: 2px;
 }
@@ -178,7 +178,7 @@
 
 .feedbackClose:focus-visible {
     outline:
-        3px solid var(--seb-green);
+        3px solid var(--seb-green-dark-2);
 
     outline-offset: 2px;
 }
@@ -260,7 +260,7 @@
         8px 10px;
 
     border:
-        1px solid var(--color-border-light);
+        1px solid var(--color-control-border);
 
     border-radius:
         var(--radius-sm);
@@ -279,7 +279,7 @@
 
 .filterField select:focus-visible {
     outline:
-        3px solid var(--seb-green);
+        3px solid var(--seb-green-dark-2);
 
     outline-offset: 2px;
 
@@ -539,7 +539,7 @@
         10px 12px;
 
     border:
-        1px solid var(--color-border-light);
+        1px solid var(--color-control-border);
 
     border-radius:
         var(--radius-sm);
@@ -557,7 +557,7 @@
 
 .commentField textarea:focus-visible {
     outline:
-        3px solid var(--seb-green);
+        3px solid var(--seb-green-dark-2);
 
     outline-offset: 2px;
 
@@ -642,7 +642,7 @@
 .actions button:focus-visible,
 .modalActions button:focus-visible {
     outline:
-        3px solid var(--seb-green);
+        3px solid var(--seb-green-dark-2);
 
     outline-offset: 3px;
 }
@@ -727,21 +727,19 @@
 
 /* Confirmation modal */
 
-/* Native <dialog>: centred by the browser, the styled box is .modal inside it. */
-.modalDialog {
-    width: min(480px, calc(100% - 40px));
-    max-width: none;
-    max-height: calc(100vh - 40px);
+.modalOverlay {
+    position: fixed;
 
-    padding: 0;
-    border: 0;
+    inset: 0;
 
-    overflow: visible;
+    z-index: 200;
 
-    background: transparent;
-}
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-.modalDialog::backdrop {
+    padding: 20px;
+
     background-color:
         rgb(0 30 80 / 45%);
 }
@@ -1158,7 +1156,7 @@
 }
 
 .tab:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -1167,7 +1165,7 @@
 .filterField input {
     min-width: 150px;
     padding: 8px 10px;
-    border: 1px solid var(--color-border-light);
+    border: 1px solid var(--color-control-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font: inherit;
@@ -1176,7 +1174,7 @@
 }
 
 .filterField input:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
     border-color: var(--color-text);
 }
@@ -1198,7 +1196,7 @@
 }
 
 .resetFilters:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -1341,7 +1339,7 @@
 
 .feedbackLink:focus-visible,
 .emptyStateAction:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -1365,7 +1363,7 @@
 }
 
 .filterToggle:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -1402,7 +1400,7 @@
 .amountInputs input {
     width: 110px;
     padding: 8px 10px;
-    border: 1px solid var(--color-border-light);
+    border: 1px solid var(--color-control-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font: inherit;
@@ -1411,7 +1409,7 @@
 }
 
 .amountInputs input:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
     border-color: var(--color-text);
 }

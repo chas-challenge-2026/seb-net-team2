@@ -14,6 +14,7 @@
 }
 
 .navbar__brandLink {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
 
@@ -21,7 +22,7 @@
 }
 
 .navbar__brandLink:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -56,11 +57,11 @@
 }
 
 .navbar__user:hover {
-    background-color: var(--color-400);
+    background-color: var(--color-hover-light);
 }
 
 .navbar__user:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -93,7 +94,11 @@
 
 @media (max-width: 768px) {
     .navbar {
-        padding: 0 1rem 0 4.5rem;
+        height: auto;
+        min-height: 64px;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem 0.5rem 4.5rem;
     }
 
     .navbar__userText {
@@ -101,6 +106,7 @@
     }
 
     .navbar__actions {
-        gap: var(--spacing-sm);
+        gap: 0.4rem;
+        margin-left: auto;
     }
 }

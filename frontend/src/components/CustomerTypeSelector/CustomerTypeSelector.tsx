@@ -24,7 +24,7 @@ export default function CustomerTypeSelector({
                 : ""
                 }`}
             role="group"
-            aria-label="Customer type"
+            aria-label={t("a11y.customerType")}
         >
             <Button
                 type="button"

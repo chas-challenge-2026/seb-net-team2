@@ -1,4 +1,60 @@
 {
+    "a11y": {"notFound":"Sidan kunde inte hittas","notFoundDescription":"Kontrollera adressen eller gå tillbaka till startsidan.","home":"Till startsidan","register":"Registrera dig","customerType":"Kundtyp","login":"Logga in","skip":"Hoppa till huvudinnehållet","main":"Huvudinnehåll","dialog":"Dialog","language":"Språk","mortgage":"Bolån"},
+    "information": {
+        "project": "Företagsbetalningar",
+        "navigation": "Information och policyer",
+        "about": {
+            "title": "Om tjänsten och kontakt",
+            "intro": "Hantera företagets konton, betalningar och attestering i en samlad portal.",
+            "sections": {
+                "purpose": { "title": "En samlad överblick", "body": "Portalen samlar kontosaldon, betalningsunderlag och attestering på ett ställe. Tydliga behörigheter och en gemensam granskningslogg hjälper företaget att följa sina betalningsflöden." },
+                "features": { "title": "Funktioner i portalen", "body": "Se företagskonton, skapa betalningsunderlag och följ attestering och granskningslogg. Rollen Admin, Initiator eller Attestant avgör vilka funktioner som är tillgängliga. Dashboarden kan visa ungefärliga saldon i SEK, EUR och USD." },
+                "contact": { "title": "Frågor och kontakt", "body": "Kontakta företagets portaladministratör vid frågor om åtkomst, behörigheter eller registrerade uppgifter. Om du saknar kontaktuppgifter, vänd dig till den som gav dig tillgång till portalen." }
+            }
+        },
+        "privacy": {
+            "title": "Integritet och personuppgifter",
+            "intro": "Här beskriver vi vilka uppgifter portalen hanterar, hur de används och vart du kan vända dig med frågor.",
+            "source": "Läs om dina rättigheter hos Integritetsskyddsmyndigheten",
+            "sections": {
+                "data": { "title": "Vilka uppgifter hanteras?", "body": "Användaruppgifter: namn, e-postadress, roll och företagstillhörighet. Lösenord lagras som hashvärden.\nKonton och betalningar: kontonamn, IBAN, saldo, valuta, belopp, referens, status, skapare och tidpunkter.\nAttestering och loggar: ansvarig attestant, beslut, kommentarer, händelser och tidsstämplar. Notifikationer kan innehålla meddelanden, lässtatus och mottagaradress vid e-postutskick." },
+                "purpose": { "title": "Varför används uppgifterna?", "body": "Uppgifterna används för inloggning, behörigheter, företagskonton, betalningsflöden, attestering och påminnelser. Granskningsloggen gör det möjligt att följa vem som utfört en åtgärd och när. Namn, e-post och historik som kan kopplas till en person omfattas av personuppgiftshanteringen." },
+                "sharing": { "title": "Åtkomst och externa tjänster", "body": "Åtkomsten i portalen styrs av företagstillhörighet och roll. Den som administrerar driftmiljön kan också ha åtkomst till databas, loggar och e-postmiljö. E-postutskick använder den SMTP-tjänst som konfigurerats för miljön.\nValutakurser hämtas från Frankfurter direkt från webbläsaren. Anropet innehåller valutaparet, inte kontosaldo, IBAN eller portalens inloggningstoken. Som vid andra webbanrop får tjänsten teknisk anslutningsinformation, exempelvis IP-adress." },
+                "retention": { "title": "Lagring och historik", "body": "Uppgifter lagras i portalens databas. Granskningsloggen kan innehålla kopior av tidigare värden även om originaluppgiften ändras. En generell automatisk gallring och fasta lagringstider är ännu inte fastställda. Radering av webbläsardata raderar inte databasens uppgifter. Kontakta portaladministratören vid frågor om lagrade uppgifter." },
+                "rights": { "title": "Frågor om dina uppgifter", "body": "Beroende på behandlingen och tillämpliga undantag kan du ha rätt till information, tillgång, rättelse, radering, begränsning, invändning och dataportabilitet. Kontakta företagets portaladministratör för att få hjälp att nå ansvarig kontakt. Du kan också lämna klagomål till Integritetsskyddsmyndigheten. Portalen har ingen särskild självservice för rättighetsbegäranden." },
+                "responsibility": { "title": "Ansvar och rättslig grund", "body": "Uppgifter om personuppgiftsansvarig organisation, formell kontaktväg och rättslig grund är ännu inte publicerade. Den informationen behöver fastställas innan portalen används för behandling av verkliga personuppgifter." }
+            }
+        },
+        "terms": {
+            "title": "Användningsvillkor",
+            "intro": "Här beskrivs användningen av portalen, ditt ansvar och tjänstens begränsningar.",
+            "sections": {
+                "demo": { "title": "Tjänstens omfattning", "body": "Portalen hanterar kontoinformation, betalningsunderlag och attestering. Den nuvarande versionen är inte ansluten till bankernas betalningssystem och tillhandahåller inga insättningar eller lån." },
+                "responsibility": { "title": "Ditt ansvar som användare", "body": "Använd endast konton du fått tillgång till. Dela inte lösenord eller inloggningstoken och försök inte komma åt andra företags uppgifter. Lägg inte in känsliga personuppgifter eller hemligheter i referenser, kommentarer eller uppladdade filer." },
+                "payments": { "title": "Betalningar och attestering", "body": "Kontrollera belopp, valuta och mottagare innan du skapar eller attesterar ett betalningsunderlag. Statusen genomförd visar att portalens interna flöde är klart. Den bekräftar inte någon överföring via en bank." },
+                "rates": { "title": "Ungefärliga valutaomräkningar", "body": "Dashboardens omräknade saldon är visningsvärden baserade på referenskurser från Frankfurter. Kursdatum visas när kursen är tillgänglig. Värdena är inte bindande växlingskurser eller finansiell rådgivning och påverkar inte originalbelopp, kontovaluta eller betalningar." },
+                "availability": { "title": "Tillgänglighet och ändringar", "body": "Tjänsten utvecklas löpande och funktioner kan ändras. Tillgänglighet och bevarande av historik är inte garanterade. Kontakta företagets portaladministratör om du upplever problem." }
+            }
+        },
+        "storage": {
+            "title": "Cookies och lokal lagring",
+            "intro": "Portalen använder webbläsarlagring för inloggning och vissa val. Här förklarar vi vad som sparas och hur du kan ta bort det.",
+            "source": "Läs mer om kakor och lagring hos Post- och telestyrelsen (PTS)",
+            "sections": {
+                "overview": { "title": "Lagring i din webbläsare", "body": "Portalen använder sessionslagring och lokal lagring för funktionerna som beskrivs här. Dessa använder inte egna cookies. Inga verktyg för reklam eller besöksanalys har lagts till. Webbläsarlagring skiljer sig från cookies, men lagring på användarens enhet kan ändå omfattas av regler om sådan lagring." },
+                "session": { "title": "Inloggning och påminnelser", "body": "sessionStorage innehåller auth_token, som används för autentiserade API-anrop, och overdueReminderDismissed, som kommer ihåg om en attestpåminnelse har stängts. Uppgifterna hör till flikens webbläsarsession. Inloggningstoken tas också bort vid utloggning. Beroende på webbläsarens sessionsåterställning kan sessionsdata återställas när flikar öppnas igen." },
+                "language": { "title": "Språkval", "body": "När du byter språk sparas valet under language i localStorage. Uppgiften kan finnas kvar tills webbplatsens lagring rensas. Den nuvarande implementationen sparar valet men startar fortfarande med engelska vid en ny sidladdning." },
+                "currency": { "title": "Valutaval och kurser", "body": "Vald visningsvaluta och hämtade växelkurser hålls i appens minne. Valutan följer med när du navigerar, men återställs till SEK när sidan laddas om. Valutavalet sparas inte i localStorage eller i databasen." },
+                "control": { "title": "Så tar du bort lagringen", "body": "Du kan rensa webbplatsdata via webbläsarens inställningar eller utvecklarverktyg. Det kan logga ut dig och ta bort sparade val. Om du blockerar webbläsarlagring kan inloggning och vissa funktioner sluta fungera. Åtgärden raderar inte konton, betalningar eller loggar i portalens databas." }
+            }
+        }
+    },
+    "footer": {
+        "socialMedia": "SEB på sociala medier",
+        "socialLink": "SEB på {{name}} (öppnas i ny flik)",
+        "title": "Företagsbetalningar",
+        "description": "Konton, betalningar och attestering samlade på ett ställe. Här hittar du information om tjänsten, integritet och användningsvillkor."
+    },
     "common": {
         "loading": "Laddar...",
         "cancel": "Avbryt",

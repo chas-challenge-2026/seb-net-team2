@@ -160,7 +160,7 @@ export function Granskningslogg() {
                     )}
                 </div>
 
-                <div className={styles.tableWrapper}>
+                <div className={styles.tableWrapper} tabIndex={0} role="region" aria-label={t("auditLog.table.caption")}>
                     <table className={styles.table}>
                         <caption className={styles.visuallyHidden}>
                             {t("auditLog.table.caption")}

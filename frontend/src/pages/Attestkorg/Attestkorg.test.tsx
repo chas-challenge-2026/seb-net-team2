@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom/jest-globals";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, jest } from "@jest/globals";
+import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { Attestkorg } from "./Attestkorg";
@@ -83,13 +83,6 @@ function renderInbox() {
     );
 }
 
-beforeAll(() => {
-    // jsdom has <dialog> but not showModal(); the browser version also makes the page inert.
-    HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
-        this.setAttribute("open", "");
-    };
-});
-
 beforeEach(() => setHooks());
 afterEach(() => cleanup());
 
@@ -130,8 +123,7 @@ describe("Approval inbox with keyboard and screen reader", () => {
         const dialog = screen.getByRole("dialog", { name: "Godkänn betalning?" });
         expect(dialog).toBeInTheDocument();
 
-        // The browser turns Escape on a modal <dialog> into a "cancel" event.
-        fireEvent(dialog, new Event("cancel", { cancelable: true }));
+        fireEvent.keyDown(dialog, { key: "Escape" });
 
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         expect(approveButton).toHaveFocus();

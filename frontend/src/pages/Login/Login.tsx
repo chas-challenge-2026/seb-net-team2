@@ -24,7 +24,7 @@ export default function Login() {
     if (isInitializing) {
         return (
             <div className={styles.layout}>
-                <LoadingWheel size="medium" />
+                <LoadingWheel size="medium" announce />
             </div>
         );
     }
@@ -40,6 +40,7 @@ export default function Login() {
     return (
         <div className={styles.layout}>
             <Card variant="image" className={styles.centeredCard}>
+                <h1 className="visually-hidden">{t("a11y.login")}</h1>
                 <div className={styles.selectorContainer}>
                     <CustomerTypeSelector
                         value={customerType}

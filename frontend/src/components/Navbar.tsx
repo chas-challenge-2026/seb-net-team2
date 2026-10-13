@@ -19,7 +19,7 @@ export function NavigationBar() {
             <Link
                 to={isAuthenticated ? homeRoute : "/login"}
                 className={styles.navbar__brandLink}
-                aria-label={t("navigation.goToDashboard")}
+                aria-label={`SEB – ${t("navigation.goToDashboard")}`}
             >
                 <img
                     src="/seb-logo.svg"

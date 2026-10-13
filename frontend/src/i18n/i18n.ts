@@ -22,4 +22,10 @@ i18n
         },
     });
 
+function updateDocumentLanguage(language: string) {
+    document.documentElement.lang = language.startsWith("sv") ? "sv" : "en";
+}
+i18n.on("languageChanged", updateDocumentLanguage);
+updateDocumentLanguage(i18n.resolvedLanguage ?? "en");
+
 export default i18n;

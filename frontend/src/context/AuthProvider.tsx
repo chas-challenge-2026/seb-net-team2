@@ -52,7 +52,7 @@ export function AuthProvider({
         useState<string | null>(null);
 
     const [isInitializing, setIsInitializing] =
-        useState(!useMockAuth);
+        useState(() => !useMockAuth && Boolean(getAuthToken()));
 
     const [isLoggingIn, setIsLoggingIn] =
         useState(false);
@@ -74,7 +74,6 @@ export function AuthProvider({
         const storedToken = getAuthToken();
 
         if (!storedToken) {
-            setIsInitializing(false);
             return;
         }
 

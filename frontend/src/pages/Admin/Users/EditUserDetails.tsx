@@ -101,6 +101,7 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                         <input
                             id="name"
+                            autoComplete="name"
                             placeholder={t("validation.nameExample")}
                             {...validation.fieldProps("name")}
                             name="name"
@@ -121,6 +122,7 @@ function EditUserForm({ user }: EditUserFormProps) {
 
                         <input
                             id="email"
+                            autoComplete="email"
                             placeholder={t("validation.emailExample")}
                             {...validation.fieldProps("email")}
                             name="email"

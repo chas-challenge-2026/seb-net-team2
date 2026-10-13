@@ -85,7 +85,7 @@ export function Dashboard() {
                 </h2>
 
                 {loadingAccounts ? (
-                    <p>{t("common.loading")}</p>
+                    <p role="status">{t("common.loading")}</p>
                 ) : accountsError ? (
                     <p role="alert">{t("dashboard.errors.accounts")}</p>
                 ) : displayedAccounts.length === 0 ? (
@@ -112,7 +112,7 @@ export function Dashboard() {
                                 </div>
 
                                 {account.currency.trim().toUpperCase() !== balances.primaryCurrency && (
-                                    <div className={styles.convertedBalance}>
+                                    <div className={styles.convertedBalance} aria-live="polite">
                                         <p className={styles.conversionLabel}>{t("dashboard.currency.converted", { currency: balances.primaryCurrency })}</p>
                                         <p className={styles.conversionAmount}>{account.primaryBalance !== null
                                             ? `≈ ${formatBalance(account.primaryBalance, balances.primaryCurrency)}`
@@ -148,17 +148,18 @@ export function Dashboard() {
                 <Card
                 >
                     {loadingPayments ? (
-                        <p>{t("common.loading")}</p>
+                        <p role="status">{t("common.loading")}</p>
                     ) : (
+                        <div className={styles.tableScroll} role="region" aria-label={t("dashboard.recentPayments")} tabIndex={0}>
                         <table className={styles.paymentsTable}>
                             <thead>
                                 <tr>
-                                    <th>{t("dashboard.table.date")}</th>
-                                    <th>{t("dashboard.table.fromAccount")}</th>
-                                    <th>{t("dashboard.table.recipientIban")}</th>
-                                    <th>{t("dashboard.table.reference")}</th>
-                                    <th>{t("dashboard.table.amount")}</th>
-                                    <th>{t("dashboard.table.status")}</th>
+                                    <th scope="col">{t("dashboard.table.date")}</th>
+                                    <th scope="col">{t("dashboard.table.fromAccount")}</th>
+                                    <th scope="col">{t("dashboard.table.recipientIban")}</th>
+                                    <th scope="col">{t("dashboard.table.reference")}</th>
+                                    <th scope="col">{t("dashboard.table.amount")}</th>
+                                    <th scope="col">{t("dashboard.table.status")}</th>
                                 </tr>
                             </thead>
 
@@ -199,6 +200,7 @@ export function Dashboard() {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     )}
                 </Card>
             </section>

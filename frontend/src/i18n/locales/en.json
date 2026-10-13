@@ -1,4 +1,117 @@
 {
+    "a11y": {"notFound":"Page not found","notFoundDescription":"Check the address or return to the home page.","home":"Go to home page","register":"Register","customerType":"Customer type","login":"Log in","skip":"Skip to main content","main":"Main content","dialog":"Dialog","language":"Language","mortgage":"Mortgage"},
+    "information": {
+        "project": "Business payments",
+        "navigation": "Information and policies",
+        "about": {
+            "title": "About and contact",
+            "intro": "Manage company accounts, payments and approvals in one portal.",
+            "sections": {
+                "purpose": {
+                    "title": "A clear overview",
+                    "body": "The portal brings account balances, payment instructions and approvals together. Role-based access and a shared audit log help your company follow its payment workflows."
+                },
+                "features": {
+                    "title": "Portal features",
+                    "body": "View company accounts, create payment instructions and follow approvals and the audit log. Your Admin, Initiator or Attestant role determines which features are available. The dashboard can display approximate balances in SEK, EUR and USD."
+                },
+                "contact": {
+                    "title": "Questions and contact",
+                    "body": "Contact your company portal administrator with questions about access, permissions or recorded data. If you do not have their contact details, ask the person who gave you access to the portal."
+                }
+            }
+        },
+        "privacy": {
+            "title": "Privacy and personal data",
+            "intro": "Learn what data the portal handles, how it is used and where to direct your questions.",
+            "source": "Read about your rights at the Swedish Authority for Privacy Protection",
+            "sections": {
+                "data": {
+                    "title": "What data is handled?",
+                    "body": "Users: name, email address, role and company membership. Passwords are stored as hashes.\nAccounts and payments: account name, IBAN, balance, currency, amount, reference, status, creator and timestamps.\nApprovals and logs: assigned approver, decisions, comments, events and timestamps. Notifications may include messages, read status and recipient addresses for email delivery."
+                },
+                "purpose": {
+                    "title": "Why is data used?",
+                    "body": "Data supports authentication, permissions, company accounts, payment workflows, approvals and reminders. Audit records show who performed an action and when. Names, email addresses and history that can identify a person are part of personal data processing."
+                },
+                "sharing": {
+                    "title": "Access and external services",
+                    "body": "Portal access is controlled by company membership and role. The hosting administrator may also have access to the database, logs and email environment. Email uses the SMTP service configured for that environment.\nExchange rates are requested directly from Frankfurter by your browser. The request contains the currency pair, not account balances, IBANs or the portal's authentication token. Like other web requests, it exposes technical connection information such as your IP address to the service."
+                },
+                "retention": {
+                    "title": "Storage and history",
+                    "body": "Records are stored in the portal database. Audit logs can retain snapshots of earlier values after the original record changes. General automatic deletion and fixed retention periods have not yet been defined. Clearing browser data does not delete database records. Contact your portal administrator with questions about stored data."
+                },
+                "rights": {
+                    "title": "Questions about your data",
+                    "body": "Depending on the processing and applicable exceptions, you may have rights to information, access, rectification, erasure, restriction, objection and data portability. Contact your company portal administrator for help reaching the responsible contact. You can also lodge a complaint with the Swedish Authority for Privacy Protection. There is no dedicated self-service feature for rights requests."
+                },
+                "responsibility": {
+                    "title": "Responsibility and legal basis",
+                    "body": "Details of the data controller, formal contact channel and legal basis have not yet been published. These need to be established before the portal is used to process real personal data."
+                }
+            }
+        },
+        "terms": {
+            "title": "Terms of use",
+            "intro": "These terms describe use of the portal, your responsibilities and the limitations of the service.",
+            "sections": {
+                "demo": {
+                    "title": "Scope of the service",
+                    "body": "The portal manages account information, payment instructions and approvals. The current version is not connected to bank payment networks and does not provide deposits or loans."
+                },
+                "responsibility": {
+                    "title": "Your responsibilities",
+                    "body": "Use only accounts you have been given access to. Do not share passwords or authentication tokens or attempt to access another company's data. Do not enter sensitive personal data or secrets in references, comments or uploaded files."
+                },
+                "payments": {
+                    "title": "Payments and approvals",
+                    "body": "Check amounts, currencies and recipients before creating or approving a payment instruction. A completed status means the portal's internal workflow has finished. It does not confirm a transfer through a bank."
+                },
+                "rates": {
+                    "title": "Approximate currency conversions",
+                    "body": "Converted dashboard balances are display values based on Frankfurter reference rates. The rate date is shown when available. These are not binding exchange quotes or financial advice and do not change original amounts, account currencies or payments."
+                },
+                "availability": {
+                    "title": "Availability and changes",
+                    "body": "The service is developed continuously and features may change. Availability and preservation of history are not guaranteed. Contact your company portal administrator if you experience problems."
+                }
+            }
+        },
+        "storage": {
+            "title": "Cookies and local storage",
+            "intro": "The portal uses browser storage for authentication and some choices. Here is what is stored and how you can remove it.",
+            "source": "Read more about cookies and storage at the Swedish Post and Telecom Authority (PTS)",
+            "sections": {
+                "overview": {
+                    "title": "Storage in your browser",
+                    "body": "The portal uses session storage and local storage for the features described here. These do not use their own cookies. No advertising or visitor analytics tools have been added. Browser storage differs from cookies, but storing information on a user's device may still be covered by rules on such storage."
+                },
+                "session": {
+                    "title": "Authentication and reminders",
+                    "body": "sessionStorage holds auth_token for authenticated API requests and overdueReminderDismissed to remember whether an approval reminder was dismissed. These belong to the tab's browser session. The authentication token is also removed on logout. Depending on the browser's session restoration, session data may be restored when tabs are reopened."
+                },
+                "language": {
+                    "title": "Language choice",
+                    "body": "Changing language saves the choice under language in localStorage. It can remain until the site's storage is cleared. The current implementation saves the choice but still starts in English on a fresh page load."
+                },
+                "currency": {
+                    "title": "Currency choice and rates",
+                    "body": "The selected display currency and fetched rates are held in application memory. Your choice is preserved during navigation but resets to SEK on page reload. The currency choice is not saved in localStorage or the database."
+                },
+                "control": {
+                    "title": "How to clear storage",
+                    "body": "Clear site data through your browser settings or developer tools. This may log you out and remove saved choices. Blocking browser storage may prevent authentication and other features from working. Clearing it does not delete accounts, payments or logs in the portal database."
+                }
+            }
+        }
+    },
+    "footer": {
+        "socialMedia": "SEB on social media",
+        "socialLink": "SEB on {{name}} (opens in a new tab)",
+        "title": "Business payments",
+        "description": "Accounts, payments and approvals in one place. Find information about the service, privacy and terms of use here."
+    },
     "common": {
         "loading": "Loading...",
         "cancel": "Cancel",

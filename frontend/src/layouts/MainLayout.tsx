@@ -1,15 +1,19 @@
 import { Outlet } from "@tanstack/react-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { RouteAccessibility } from "../components/RouteAccessibility";
 
 import { NavigationBar } from "../components/Navbar";
 import { Sidebar } from "../components/Sidebar";
 import { OverdueReminder } from "../components/OverdueReminder/OverdueReminder";
+import { Footer } from "../components/Footer/Footer";
 
 import { useAuth } from "../hooks/useAuth";
 
-import styles from "../components/Sidebar.module.css";
+import layout from "./MainLayout.module.css";
 
 export function MainLayout() {
+    const { t } = useTranslation();
     const { isAuthenticated } = useAuth();
     const [collapsed, setCollapsed] = useState(false);
 
@@ -19,31 +23,34 @@ export function MainLayout() {
 
     return (
         <>
+            <RouteAccessibility />
             <a className="skip-link" href="#main-content">
-                Skip to main content
+                {t("a11y.skip")}
             </a>
 
             <NavigationBar />
 
-            {isAuthenticated && (
-                <Sidebar
-                    collapsed={collapsed}
-                    onToggleCollapsed={handleToggleCollapsed}
-                />
-            )}
-
-            <main
-                id="main-content"
-                tabIndex={-1}
-                aria-label="Main content"
-                className={
-                    isAuthenticated
-                        ? `${styles.content} ${collapsed ? styles.contentCollapsed : ""}`
-                        : ""
-                }
-            >
-                <Outlet />
-            </main>
+            <div className={layout.page}>
+                <div className={`${layout.body} ${isAuthenticated ? layout.authenticated : ""} ${collapsed ? layout.collapsed : ""}`}>
+                    {isAuthenticated && (
+                        <div className={layout.sidebarRail}>
+                            <Sidebar
+                                collapsed={collapsed}
+                                onToggleCollapsed={handleToggleCollapsed}
+                            />
+                        </div>
+                    )}
+                <main
+                    id="main-content"
+                    tabIndex={-1}
+                    aria-label={t("a11y.main")}
+                    className={layout.main}
+                >
+                    <Outlet />
+                </main>
+                </div>
+                <Footer />
+            </div>
 
             {isAuthenticated && <OverdueReminder />}
         </>

@@ -24,6 +24,7 @@ import CreateUser from './pages/Admin/Users/CreateUser';
 import Users from './pages/Admin/Users/Users'
 import './styles/reset.css'
 import './styles/variables.css'
+import './styles/fonts.css'
 import './styles/globals.css'
 import './index.css'
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout'
@@ -33,8 +34,10 @@ import ApprovalLimits from './pages/Admin/ApprovalLimits/ApprovalLimits'
 import CreateApprovalLimit from './pages/Admin/ApprovalLimits/CreateApprovalLimit'
 import EditApprovalLimit from './pages/Admin/ApprovalLimits/EditApprovalLimit'
 import AdminDashboard from './pages/Admin/AdminDashboard/AdminDashboard';
+import { InformationPage } from './pages/Information/InformationPage';
+import { NotFoundPage } from './pages/Information/NotFoundPage';
 
-const rootRoute = createRootRoute({ component: MainLayout })
+const rootRoute = createRootRoute({ component: MainLayout, notFoundComponent: NotFoundPage })
 
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Login })
 const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', component: Login })
@@ -48,6 +51,10 @@ const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path
 const profilRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profil', component: () => <ProtectedRoute><Profil /></ProtectedRoute> })
 const loggaUtRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logout', component: () => <ProtectedRoute><Logout /></ProtectedRoute> })
 const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: "/register", component: () => <Register /> })
+const aboutRoute = createRoute({ getParentRoute: () => rootRoute, path: "/om-projektet", component: () => <InformationPage page="about" /> })
+const privacyRoute = createRoute({ getParentRoute: () => rootRoute, path: "/integritet", component: () => <InformationPage page="privacy" /> })
+const termsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/anvandningsvillkor", component: () => <InformationPage page="terms" /> })
+const storageRoute = createRoute({ getParentRoute: () => rootRoute, path: "/lokal-lagring", component: () => <InformationPage page="storage" /> })
 
 // ADMIN ROUTES
 const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: "/admin", component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><AdminLayout /></RoleProtectedRoute> })
@@ -84,6 +91,10 @@ const routeTree = rootRoute.addChildren([
   profilRoute,
   loggaUtRoute,
   registerRoute,
+  aboutRoute,
+  privacyRoute,
+  termsRoute,
+  storageRoute,
   adminRouteTree,
 ]);
 

@@ -1,0 +1,47 @@
+@font-face {
+    font-family: "SEB SansSerif";
+    src: url("/fonts/seb-sans-serif/SEBSansSerif-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "SEB SansSerif";
+    src: url("/fonts/seb-sans-serif/SEBSansSerif-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "SEB SansSerif";
+    src: url("/fonts/seb-sans-serif/SEBSansSerif-Book.woff2") format("woff2");
+    font-weight: 450;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "SEB SansSerif";
+    src: url("/fonts/seb-sans-serif/SEBSansSerif-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "SEB SansSerif";
+    src: url("/fonts/seb-sans-serif/SEBSansSerif-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "SEB SansSerif";
+    src: url("/fonts/seb-sans-serif/SEBSansSerif-Italic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
