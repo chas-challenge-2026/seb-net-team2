@@ -5,13 +5,13 @@
 .trigger {
     box-sizing: border-box;
     width: 135px;
-    height: 2.75rem;
+    min-height: 2.75rem;
 
     display: flex;
     align-items: center;
     gap: 8px;
 
-    padding: 0 12px;
+    padding: 0.5rem 12px;
 
     font: inherit;
     color: inherit;
@@ -23,8 +23,13 @@
     cursor: pointer;
 }
 
+.trigger span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
 .trigger:hover {
-    background: var(--color-400);
+    background: var(--color-hover-light);
     border-color: var(--color-border-light);
 }
 
@@ -80,7 +85,13 @@
 }
 
 .option:hover {
-    background: var(--color-400);
+    background: var(--color-hover-light);
+}
+
+.option[aria-pressed="true"] {
+    background: var(--color-selected);
+    color: var(--color-text);
+    font-weight: 600;
 }
 
 .check {

@@ -1,6 +1,7 @@
 import { useFormValidation } from "../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useModalFocus } from "../../hooks/useModalFocus";
 import { useTranslation } from "react-i18next";
 import {
     CircleCheck,
@@ -52,6 +53,14 @@ export function SaveInvest() {
     const [goalList, setGoalList] = useState(goals);
     const [showAllAccounts, setShowAllAccounts] = useState(false);
     const [modal, setModal] = useState<"account" | "goal" | "manage" | null>(null);
+    const modalRef = useRef<HTMLElement>(null);
+    useModalFocus(modal !== null, modalRef);
+    useEffect(() => {
+        if (!modal) return;
+        const close = (event: KeyboardEvent) => { if (event.key === "Escape") setModal(null); };
+        document.addEventListener("keydown", close);
+        return () => document.removeEventListener("keydown", close);
+    }, [modal]);
     const [accountName, setAccountName] = useState("");
     const [goalName, setGoalName] = useState("");
     const [goalTarget, setGoalTarget] = useState("");
@@ -149,6 +158,7 @@ export function SaveInvest() {
                     <button
                         key={tab}
                         className={activeTab === tab ? styles.activeTab : ""}
+                        aria-pressed={activeTab === tab}
                         onClick={() => setActiveTab(tab)}
                     >
                         {tab === "savings" && <WalletCards size={17} aria-hidden="true" />}
@@ -308,6 +318,8 @@ export function SaveInvest() {
             {modal && (
                 <div className={styles.modalBackdrop} role="presentation">
                     <section
+                        ref={modalRef}
+                        tabIndex={-1}
                         className={styles.modal}
                         role="dialog"
                         aria-modal="true"

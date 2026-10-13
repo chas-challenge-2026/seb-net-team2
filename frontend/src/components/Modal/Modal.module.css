@@ -16,6 +16,8 @@
 .modal {
     width: 100%;
     max-width: 500px;
+    max-height: calc(100dvh - 3rem);
+    overflow-y: auto;
 
     background-color: var(--color-surface);
 
@@ -66,7 +68,7 @@
 }
 
 .closeButton:hover {
-    background-color: var(--color-400);
+    background-color: var(--color-hover-light);
 }
 
 .closeButton:focus-visible {

@@ -333,7 +333,7 @@ export function Batch() {
                 <Card title={t("batch.format.title")} className={styles.formatCard}>
                     <p>{t("batch.format.description")}</p>
 
-                    <pre className={styles.formatExample}>{EXAMPLE_CSV}</pre>
+                    <pre tabIndex={0} className={styles.formatExample}>{EXAMPLE_CSV}</pre>
 
                     <div className={styles.warning}>
                         <TriangleAlert size={17} aria-hidden="true" />
@@ -371,7 +371,7 @@ export function Batch() {
                         )}
                     </p>
 
-                    <div className={styles.tableWrapper}>
+                    <div className={styles.tableWrapper} tabIndex={0} role="region" aria-label={t("batch.result.title")}>
                         <table className={styles.table}>
                             <thead>
                                 <tr>

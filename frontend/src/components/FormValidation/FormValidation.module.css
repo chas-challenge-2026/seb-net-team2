@@ -7,7 +7,7 @@
 .errorIcon { flex-shrink: 0; margin-top: 0.15rem; }
 .errorSummary { border: 2px solid #a32020; border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem; background: #fff5f5; color: #691414; }
 .errorSummary ul { padding-left: 1.5rem; list-style: disc; }
-.errorSummary a { color: inherit; text-decoration: underline; }
+.errorSummary a { display: inline-flex; align-items: center; min-height: 24px; color: inherit; text-decoration: underline; }
 .errorSummary a:focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
 
 .announcements { grid-column: 1 / -1; }

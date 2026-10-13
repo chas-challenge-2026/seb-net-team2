@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
+import { useModalFocus } from "../hooks/useModalFocus";
 import { useApprovals } from "../hooks/useApprovals";
 import { countOverdue } from "../utils/approvalReminders";
 
@@ -37,6 +38,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { user } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+  useModalFocus(isOpen, sidebarRef);
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 769px)");
+    const close = () => { if (desktop.matches) setIsOpen(false); };
+    desktop.addEventListener("change", close);
+    return () => desktop.removeEventListener("change", close);
+  }, []);
   const [badgePulsing, setBadgePulsing] = useState(false);
 
   const sidebarId = useId();
@@ -126,10 +135,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
+        ref={sidebarRef}
+        tabIndex={-1}
         id={sidebarId}
         aria-label={t("sidebar.secondaryNavigation")}
         className={`${styles.sidebar} ${isOpen ? styles.open : ""} ${collapsed ? styles.collapsed : ""}`}
       >
+        {isOpen && <button type="button" className={styles.mobileClose} onClick={() => setIsOpen(false)} aria-label={t("sidebar.closeMenu")}>
+          <ChevronLeft size={20} aria-hidden="true" />
+        </button>}
         <button
           type="button"
           className={styles["collapse-toggle"]}

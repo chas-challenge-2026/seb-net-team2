@@ -68,7 +68,7 @@
     width: fit-content;
     min-width: 140px;
     padding: 8px 10px;
-    border: 1px solid var(--color-border-light);
+    border: 1px solid var(--color-control-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font: inherit;
@@ -83,7 +83,7 @@
 
 .checkboxRow input:focus-visible,
 .field select:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 

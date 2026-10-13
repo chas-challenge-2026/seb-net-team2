@@ -1,0 +1,32 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 64px);
+}
+
+.body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.main {
+    min-width: 0;
+}
+
+@media (min-width: 769px) {
+    .authenticated {
+        grid-template-columns: 280px minmax(0, 1fr);
+        transition: grid-template-columns 0.25s ease;
+    }
+
+    .authenticated.collapsed {
+        grid-template-columns: 72px minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebarRail {
+        position: absolute;
+    }
+}

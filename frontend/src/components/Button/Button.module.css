@@ -21,16 +21,16 @@
 
 
 .primary {
-    background-color: var(--seb-green);
-    color: var(--color-text);
+    background-color: #1a1a1a;
+    color: #ffffff;
 }
 
-.primary:hover {
-    background-color: var(--seb-green-dark-1);
+.primary:hover:not(:disabled) {
+    background-color: #333333;
 }
 
-.primary:active {
-    background-color: var(--seb-green-dark-2);
+.primary:active:not(:disabled) {
+    background-color: #000000;
 }
 
 

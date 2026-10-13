@@ -14,7 +14,7 @@ export function ProtectedRoute({
     } = useAuth();
 
     if (isInitializing) {
-        return <LoadingWheel size="medium" />;
+        return <LoadingWheel size="medium" announce />;
     }
 
     if (!isAuthenticated) {

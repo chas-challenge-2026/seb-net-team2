@@ -152,7 +152,7 @@
     cursor: pointer;
 }
 .copyButton:hover { background: var(--color-hover-light); }
-.copyButton:focus-visible { outline: 3px solid var(--seb-green); outline-offset: 2px; }
+.copyButton:focus-visible { outline: 3px solid var(--seb-green-dark-2); outline-offset: 2px; }
 
 
 
@@ -205,6 +205,11 @@
 .paymentsTable {
     width: 100%;
     border-collapse: collapse;
+}
+
+.tableScroll {
+    max-width: 100%;
+    overflow-x: auto;
 }
 
 .paymentsTable th {
