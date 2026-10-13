@@ -108,6 +108,9 @@ describe("Approval inbox with keyboard and screen reader", () => {
         expect(handledTab).toHaveAttribute("aria-selected", "true");
         expect(handledTab).toHaveFocus();
         expect(screen.getByText("Betongleverans Q3")).toBeInTheDocument();
+        // The date is a real <time> element, so assistive technology knows it is a date.
+        const created = document.querySelector(`time[datetime="${handledPayment.paymentCreatedAt}"]`);
+        expect(created?.parentElement).toHaveTextContent(/^Betalning skapad .+ · Steg 1$/);
 
         fireEvent.keyDown(handledTab, { key: "ArrowLeft" });
         expect(screen.getByRole("tab", { name: "Att hantera (1)" })).toHaveFocus();

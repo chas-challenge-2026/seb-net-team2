@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import {
     ChevronDown,
     CircleCheck,
@@ -321,20 +321,29 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                                                             ) : (
                                                                 <CircleX size={16} aria-hidden="true" />
                                                             )}
-                                                            {t(approved
-                                                                ? "approvalInbox.history.approvedOn"
-                                                                : "approvalInbox.history.rejectedOn", {
-                                                                date: date ? formatDate(date, locale) : "",
-                                                            })}
+                                                            <Trans
+                                                                i18nKey={approved
+                                                                    ? "approvalInbox.history.approvedOn"
+                                                                    : "approvalInbox.history.rejectedOn"}
+                                                                values={{ date: date ? formatDate(date, locale) : "" }}
+                                                                components={{ time: <time dateTime={date || undefined} /> }}
+                                                            />
                                                             {` · ${step}`}
                                                         </p>
                                                     ) : (
                                                         // The backend doesn't send the decision yet. The tab already says "Handled",
                                                         // so only the payment's creation date is shown, clearly labelled as such.
                                                         <p className={styles.decisionHandled}>
-                                                            {date && `${t("approvalInbox.history.paymentCreated", {
-                                                                date: formatDate(date, locale),
-                                                            })} · `}
+                                                            {date && (
+                                                                <>
+                                                                    <Trans
+                                                                        i18nKey="approvalInbox.history.paymentCreated"
+                                                                        values={{ date: formatDate(date, locale) }}
+                                                                        components={{ time: <time dateTime={date} /> }}
+                                                                    />
+                                                                    {" · "}
+                                                                </>
+                                                            )}
                                                             {step}
                                                         </p>
                                                     )}

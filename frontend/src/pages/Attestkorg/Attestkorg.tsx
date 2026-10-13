@@ -528,7 +528,11 @@ export function Attestkorg() {
 
                                 <div>
                                     <dt>{t("approvalInbox.card.submitted")}</dt>
-                                    <dd>{formatDate(approval.paymentCreatedAt, locale)}</dd>
+                                    <dd>
+                                        <time dateTime={approval.paymentCreatedAt}>
+                                            {formatDate(approval.paymentCreatedAt, locale)}
+                                        </time>
+                                    </dd>
                                 </div>
 
                                 <div>
