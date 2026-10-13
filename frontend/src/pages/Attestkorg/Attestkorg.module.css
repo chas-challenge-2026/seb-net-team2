@@ -1155,6 +1155,12 @@
     color: var(--color-text);
 }
 
+.tabPanel:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+}
+
 .tab:focus-visible {
     outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;

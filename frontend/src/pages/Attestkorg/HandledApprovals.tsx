@@ -142,7 +142,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (isPending) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.loadingState} role="status">
                     {t("approvalInbox.history.loading")}
                 </div>
@@ -152,7 +152,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (isError && !usingSession) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.error} role="alert">
                     {t("approvalInbox.history.error")}
                 </div>
@@ -162,7 +162,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (usingSession && sessionDecisions.length === 0) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.emptyState}>
                     <History size={32} aria-hidden="true" />
                     <h2>{t("approvalInbox.history.unavailableTitle")}</h2>
@@ -173,7 +173,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     }
 
     return (
-        <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+        <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
             {/* With only a few decisions the list is easy to scan, so filters would just be in the way. */}
             {showFilters && (
                 <div className={styles.toolbar}>

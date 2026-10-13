@@ -427,6 +427,10 @@ export function Attestkorg() {
                 id={TAB_IDS.pending.panel}
                 role="tabpanel"
                 aria-labelledby={TAB_IDS.pending.tab}
+                // Focusable, as in the ARIA tabs pattern, so Tab from the tab reaches the panel
+                // even when it has no buttons (empty inbox, short history).
+                tabIndex={0}
+                className={styles.tabPanel}
             >
             {overdueCount > 0 && (
                 <div className={styles.overdueBanner} role="status">
