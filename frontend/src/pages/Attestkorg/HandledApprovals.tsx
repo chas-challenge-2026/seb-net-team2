@@ -281,12 +281,15 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                 </div>
             )}
 
-            {/* Only meaningful when the filters actually hide something. */}
-            {hasActiveFilters && (
-                <p className={styles.historyCount} aria-live="polite">
-                    {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
-                </p>
-            )}
+            {/* The live region is always there, so screen readers also announce the first count.
+                The count itself is only meaningful when the filters actually hide something. */}
+            <div aria-live="polite">
+                {hasActiveFilters && (
+                    <p className={styles.historyCount}>
+                        {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
+                    </p>
+                )}
+            </div>
 
             {filtered.length > 0 ? (
                 <div className={styles.historyGroups}>
