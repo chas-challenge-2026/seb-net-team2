@@ -30,8 +30,8 @@ import { HandledApprovals } from "./HandledApprovals";
 import {
     APPROVAL_HISTORY_QUERY_KEY,
     isHistoryUnavailable,
-    useApprovalHistory,
 } from "../../hooks/useApprovalHistory";
+import { useHandledHistory } from "../../hooks/useAdminDecisionHistory";
 import { addSessionDecision, useSessionDecisions } from "../../hooks/useSessionDecisions";
 import styles from "./Attestkorg.module.css";
 
@@ -98,7 +98,7 @@ export function Attestkorg() {
 
     // Number shown on the "Handled" tab: the real history when the backend has it,
     // otherwise this session's decisions.
-    const historyQuery = useApprovalHistory(true);
+    const historyQuery = useHandledHistory(user);
     const sessionDecisions = useSessionDecisions(user?.id);
     const handledCount = historyQuery.isError && isHistoryUnavailable(historyQuery.error)
         ? sessionDecisions.length
