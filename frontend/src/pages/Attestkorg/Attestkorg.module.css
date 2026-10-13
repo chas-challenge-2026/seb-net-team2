@@ -54,6 +54,12 @@
     overflow-wrap: anywhere;
 }
 
+/* RouteAccessibility focuses the page heading so screen readers announce the page.
+   The heading can't be clicked or typed in, so it doesn't need a visible focus ring. */
+.header h1:focus-visible {
+    outline: none;
+}
+
 .intro {
     margin:
         12px 0 0;
