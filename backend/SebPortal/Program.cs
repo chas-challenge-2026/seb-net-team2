@@ -73,15 +73,12 @@ builder.Services.AddCors(options =>
           .AllowAnyHeader()
           .AllowAnyMethod();
     });
-    options.AddPolicy("StagePolicy", policy =>
-    {
-        policy.WithOrigins("https://seb-net-team2-dev.team.chas-challenge.comerit.se")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
     options.AddPolicy("ProductionPolicy", policy =>
     {
-        policy.WithOrigins("https://seb-net-team2.team.chas-challenge.comerit.se")
+        policy.WithOrigins(
+                "https://seb-net-team2.team.chas-challenge.comerit.se", //prod
+                "https://seb-net-team2-dev.team.chas-challenge.comerit.se" //stage
+                )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -158,6 +155,7 @@ var app = builder.Build();
     var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
     db.Database.Migrate();
 
+    // Primary seed path comes from configuration
     var seedPath = app.Configuration["Seed:Path"];
     if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
         db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));

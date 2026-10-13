@@ -42,6 +42,7 @@ services:
       ASPNETCORE_URLS: "http://+:8081"
       ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION}
       Jwt__Secret: ${JWT_SECRET}
+      Seed__Path: "/seed/seed.sql"
     depends_on:
       db:
         condition: service_healthy
