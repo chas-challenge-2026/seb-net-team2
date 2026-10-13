@@ -472,7 +472,7 @@ export function Attestkorg() {
                         </select>
                     </div>
 
-                    <p className={styles.visuallyHidden} role="status">{sortAnnouncement}</p>
+                    <p className="visually-hidden" role="status">{sortAnnouncement}</p>
                 </div>
             )}
 
@@ -729,7 +729,7 @@ export function Attestkorg() {
                                 <span aria-hidden="true">
                                     {(comments[confirmAction.approval.stepId] ?? "").length}/{COMMENT_MAX_LENGTH}
                                 </span>
-                                <span className={styles.visuallyHidden}>
+                                <span className="visually-hidden">
                                     {t("approvalInbox.comment.characterCount", {
                                         count: (comments[confirmAction.approval.stepId] ?? "").length,
                                         max: COMMENT_MAX_LENGTH,
@@ -748,7 +748,7 @@ export function Attestkorg() {
                         )}
 
                         {/* Always rendered, so screen readers pick up the text when it appears. */}
-                        <p className={styles.visuallyHidden} role="status">
+                        <p className="visually-hidden" role="status">
                             {decisionMutation.isPending ? t("approvalInbox.actions.processing") : ""}
                         </p>
 
