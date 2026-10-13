@@ -84,17 +84,6 @@
     font-weight: 600;
 }
 
-.countZero {
-    border-color:
-        var(--seb-green);
-
-    background-color:
-        #f2f9ef;
-
-    color:
-        var(--seb-green-dark-2);
-}
-
 
 /* Feedback */
 
@@ -1218,6 +1207,17 @@
     font-size: var(--font-size-sm);
 }
 
+.historyGroups {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.historyMonth {
+    margin: 0 0 var(--spacing-sm);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
 .historyList {
     display: grid;
     gap: 12px;
@@ -1251,7 +1251,8 @@
 }
 
 .decisionApproved,
-.decisionRejected {
+.decisionRejected,
+.decisionHandled {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -1266,6 +1267,10 @@
 
 .decisionRejected {
     color: var(--color-error);
+}
+
+.decisionHandled {
+    color: var(--placeholder-grey);
 }
 
 .historyDetails {
@@ -1307,6 +1312,9 @@
 
 .feedbackLink,
 .emptyStateAction {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding: 0;
     border: 0;
     background: none;

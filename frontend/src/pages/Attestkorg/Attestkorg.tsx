@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
+    ArrowRight,
     CircleCheck,
     CircleX,
     ClipboardCheck,
@@ -331,17 +332,20 @@ export function Attestkorg() {
                         <ClipboardCheck size={24} strokeWidth={2} aria-hidden="true" />
                         <h1 id="approval-inbox-title">{t("approvalInbox.title")}</h1>
                     </div>
-                    <p className={styles.intro}>{t("approvalInbox.description")}</p>
+                    <p className={styles.intro}>
+                        {t(activeTab === "handled"
+                            ? "approvalInbox.handledDescription"
+                            : "approvalInbox.description")}
+                    </p>
                 </div>
 
-                <span
-                    className={`${styles.count} ${approvals.length === 0 ? styles.countZero : ""}`}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {t("approvalInbox.pendingCount", { count: approvals.length })}
-                    {approvals.length > 0 && ` · ${pendingTotal}`}
-                </span>
+                {/* The tabs already show the counts, so the badge is only kept where it adds the total amount. */}
+                {activeTab === "pending" && approvals.length > 0 && (
+                    <span className={styles.count} role="status" aria-live="polite">
+                        {t("approvalInbox.pendingCount", { count: approvals.length })}
+                        {` · ${pendingTotal}`}
+                    </span>
+                )}
             </header>
 
             {actionFeedback && (
@@ -375,6 +379,7 @@ export function Attestkorg() {
                             onClick={() => setActiveTab("handled")}
                         >
                             {t("approvalInbox.feedback.showHandled")}
+                            <ArrowRight size={16} aria-hidden="true" />
                         </button>
                     )}
 
@@ -545,17 +550,22 @@ export function Attestkorg() {
                     ))
                 ) : (
                     <div className={styles.emptyState}>
+                        <ClipboardCheck size={32} aria-hidden="true" />
                         <h2>{t("approvalInbox.empty.title")}</h2>
                         <p>{t("approvalInbox.empty.description")}</p>
 
-                        {/* Keeps the inbox useful when everything is handled: go to the decisions. */}
-                        <button
-                            type="button"
-                            className={styles.emptyStateAction}
-                            onClick={() => setActiveTab("handled")}
-                        >
-                            {t("approvalInbox.empty.showHandled")}
-                        </button>
+                        {/* Keeps the inbox useful when everything is handled: go to the decisions.
+                            Hidden when there are none, so it doesn't lead to another empty tab. */}
+                        {handledCount > 0 && (
+                            <button
+                                type="button"
+                                className={styles.emptyStateAction}
+                                onClick={() => setActiveTab("handled")}
+                            >
+                                {t("approvalInbox.empty.showHandled")}
+                                <ArrowRight size={16} aria-hidden="true" />
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
