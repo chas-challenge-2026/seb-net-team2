@@ -1,0 +1,79 @@
+.page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 3rem) 1.5rem;
+}
+
+.header h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.7rem, 4vw, 2.3rem);
+    line-height: 1.2;
+}
+
+.eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--seb-green-dark-2);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.intro {
+    max-width: 70ch;
+    color: var(--color-text-soft);
+    line-height: 1.7;
+}
+
+.navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
+.link:hover {
+    background: var(--color-hover-light);
+}
+
+.link[aria-current="page"] {
+    background: var(--color-selected);
+    font-weight: 600;
+}
+
+.article {
+    max-width: 72ch;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.section h2 {
+    margin: 0 0 0.6rem;
+    font-size: 1.2rem;
+    line-height: 1.4;
+}
+
+.section p {
+    margin: 0;
+    line-height: 1.8;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.source a {
+    color: var(--seb-green-dark-2);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}

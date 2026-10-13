@@ -1,3 +1,6 @@
+import { useTranslation } from "react-i18next";
+
 export function Mortgage() {
-    return <h1>Mortgage</h1>
+    const { t } = useTranslation();
+    return <h1>{t("a11y.mortgage")}</h1>
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, ChevronDown } from "lucide-react";
 import styles from "../Dropdown/Dropdown.module.css";
@@ -10,6 +10,7 @@ const languages = [
 
 export default function LanguageSelector() {
     const [isOpen, setIsOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
     const { t, i18n } = useTranslation();
     const currentLanguage = languages.find(language => i18n.resolvedLanguage?.startsWith(language.code)) ?? languages[0];
 
@@ -24,8 +25,8 @@ export default function LanguageSelector() {
                     event.currentTarget.querySelector("button")?.focus();
                 }
             }}>
-            <button type="button" className={styles.trigger}
-                aria-label={t("navigation.language", { defaultValue: "Language" })}
+            <button ref={triggerRef} type="button" className={styles.trigger}
+                aria-label={`${t("a11y.language")}: ${currentLanguage.label}`}
                 aria-expanded={isOpen}
                 onClick={() => setIsOpen(previous => !previous)}>
                 <span className={currentLanguage.flagClass} aria-hidden="true" />
@@ -41,6 +42,7 @@ export default function LanguageSelector() {
                                 void i18n.changeLanguage(language.code);
                                 localStorage.setItem("language", language.code);
                                 setIsOpen(false);
+                                triggerRef.current?.focus();
                             }}>
                             <span className={language.flagClass} aria-hidden="true" />
                             <span>{language.label}</span>

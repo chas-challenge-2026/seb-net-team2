@@ -14,6 +14,7 @@ import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
 import { ErrorSummary, FieldError } from "../../components/FormValidation/FormErrors";
 import { useFormValidation } from "../../components/FormValidation/useFormValidation";
+import { useModalFocus } from "../../hooks/useModalFocus";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
 import { createPayment } from "../../services/accountService";
@@ -44,6 +45,8 @@ export function NyBetalning() {
     const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
     const reviewHeadingRef = useRef<HTMLHeadingElement | null>(null);
+    const reviewDialogRef = useRef<HTMLElement>(null);
+    useModalFocus(isReviewOpen, reviewDialogRef, false);
     const resultHeadingRef = useRef<HTMLHeadingElement>(null);
     const restoreReviewFocusRef = useRef(false);
 
@@ -361,7 +364,7 @@ export function NyBetalning() {
                                 id="fromAccountId"
                                 name="fromAccountId"
                                 value={selectedAccount?.id ?? ""}
-                                {...validation.fieldProps("fromAccountId")}
+                                {...validation.fieldProps("fromAccountId", accountsError || isLoadingAccounts ? "source-account-status" : undefined)}
                                 disabled={isLoadingAccounts || accountsError || isSubmitting}
                                 onChange={(event) => updateField("fromAccountId", event.target.value)}
                             >
@@ -379,6 +382,11 @@ export function NyBetalning() {
                                     </option>
                                 ))}
                             </select>
+                            {(accountsError || isLoadingAccounts) && (
+                                <span id="source-account-status" role={accountsError ? "alert" : "status"}>
+                                    {t(accountsError ? "payment.errors.loadAccounts" : "payment.loadingAccounts")}
+                                </span>
+                            )}
 
                             {accountsError && (
                                 <p className={styles.fieldError}>{t("payment.errors.loadAccounts")}</p>
@@ -526,6 +534,7 @@ export function NyBetalning() {
                 >
                     <section
                         className={styles.reviewModal}
+                        ref={reviewDialogRef}
                         id="review-payment-dialog"
                         role="dialog"
                         aria-modal="true"

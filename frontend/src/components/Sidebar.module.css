@@ -23,6 +23,23 @@
     transform 0.3s ease;
 }
 
+.mobileClose { display: none; }
+
+@media (max-width: 768px) {
+  .mobileClose {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-end;
+    min-width: 44px;
+    min-height: 44px;
+    margin: 0.5rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+  }
+}
+
 
 /* Collapse */
 
@@ -65,11 +82,11 @@
 }
 
 .collapse-toggle:hover {
-  background-color: var(--color-400);
+  background-color: var(--color-hover-light);
 }
 
 .collapse-toggle:focus-visible {
-  outline: 3px solid var(--seb-green);
+  outline: 3px solid var(--seb-green-dark-2);
   outline-offset: 2px;
 }
 
@@ -145,7 +162,7 @@
 }
 
 .nav-item:hover {
-  background-color: var(--color-400);
+  background-color: var(--color-hover-light);
   color: var(--color-text);
 
   text-decoration: none;
@@ -156,18 +173,18 @@
 }
 
 .nav-item.active {
-  background-color: var(--color-400);
+  background-color: var(--color-selected);
   color: var(--color-text);
 
   font-weight: 600;
 }
 
 .nav-item.active svg {
-  color: var(--seb-green-dark-2);
+  color: var(--color-text);
 }
 
 .nav-item:focus-visible {
-  outline: 3px solid var(--seb-green);
+  outline: 3px solid var(--seb-green-dark-2);
   outline-offset: 2px;
 }
 
@@ -184,7 +201,7 @@
   box-sizing: border-box;
 
   background-color: #e3a008;
-  color: var(--color-surface);
+  color: var(--color-text);
 
   border-radius: var(--radius-pill);
 
@@ -222,8 +239,6 @@
 
 .sidebar-footer {
   padding: var(--spacing-md);
-
-  border-top: 1px solid var(--color-border-light);
 }
 
 .logout-btn,
@@ -266,7 +281,7 @@
 
 .logout-btn:hover,
 .logout-link:hover {
-  background-color: var(--color-400);
+  background-color: var(--color-hover-light);
 }
 
 .logout-btn:hover svg,
@@ -276,7 +291,7 @@
 
 .logout-btn:focus-visible,
 .logout-link:focus-visible {
-  outline: 3px solid var(--seb-green);
+  outline: 3px solid var(--seb-green-dark-2);
   outline-offset: 2px;
 }
 
@@ -359,11 +374,11 @@
 }
 
 .hamburger-btn:hover {
-  background-color: var(--color-400);
+  background-color: var(--color-hover-light);
 }
 
 .hamburger-btn:focus-visible {
-  outline: 3px solid var(--seb-green);
+  outline: 3px solid var(--seb-green-dark-2);
   outline-offset: 2px;
 }
 
@@ -398,6 +413,10 @@
 }
 
 @media (min-width: 769px) {
+  .sidebar {
+    position: sticky;
+  }
+
   .content.contentCollapsed {
     margin-left: 72px;
   }

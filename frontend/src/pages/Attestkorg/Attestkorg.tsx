@@ -1,4 +1,5 @@
 import { focusField } from "../../components/FormValidation/useFormValidation";
+import { useModalFocus } from "../../hooks/useModalFocus";
 import { FieldError } from "../../components/FormValidation/FormErrors";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -108,6 +109,7 @@ export function Attestkorg() {
     const [reasonError, setReasonError] = useState(false);
     const reasonRef = useRef<HTMLTextAreaElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    useModalFocus(confirmAction !== null, modalRef, false);
     const feedbackRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 

@@ -197,7 +197,7 @@ describe("Dashboard account information", () => {
 
     it("changes the display currency while preserving company account balances", () => {
         render(<Dashboard />);
-        const select = screen.getByRole("button", { name: "dashboard.currency.select" });
+        const select = screen.getByRole("button", { name: /^dashboard\.currency\.select:/ });
         expect(select).toHaveTextContent("SEK");
         expect(screen.queryByText("dashboard.currency.converted")).not.toBeInTheDocument();
         expect(screen.queryByText("dashboard.currency.sameCurrency")).not.toBeInTheDocument();
@@ -222,12 +222,12 @@ describe("Dashboard account information", () => {
             </CurrencyProvider>
         );
         const view = renderComponent(page(true));
-        fireEvent.click(screen.getByRole("button", { name: "dashboard.currency.select" }));
+        fireEvent.click(screen.getByRole("button", { name: /^dashboard\.currency\.select:/ }));
         fireEvent.click(screen.getByRole("button", { name: "\u20AC EUR" }));
         view.rerender(page(false));
-        expect(screen.queryByRole("button", { name: "dashboard.currency.select" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /^dashboard\.currency\.select:/ })).not.toBeInTheDocument();
         view.rerender(page(true));
-        expect(screen.getByRole("button", { name: "dashboard.currency.select" })).toHaveTextContent("\u20AC EUR");
+        expect(screen.getByRole("button", { name: /^dashboard\.currency\.select:/ })).toHaveTextContent("\u20AC EUR");
         expect(mockedUseExchangeRates).toHaveBeenLastCalledWith(["SEK", "SEK"], "EUR");
     });
 

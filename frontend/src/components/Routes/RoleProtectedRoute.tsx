@@ -22,7 +22,7 @@ export function RoleProtectedRoute({
     } = useAuth();
 
     if (isInitializing) {
-        return <LoadingWheel size="medium" />;
+        return <LoadingWheel size="medium" announce />;
     }
 
     if (!isAuthenticated) {

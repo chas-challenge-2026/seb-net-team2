@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Coins, Check, ChevronDown } from "lucide-react";
 import { DISPLAY_CURRENCIES } from "../../constants/currency";
@@ -12,6 +12,7 @@ export function CurrencySelector() {
     const { t } = useTranslation();
     const { primaryCurrency, setPrimaryCurrency } = useCurrency();
     const [isOpen, setIsOpen] = useState(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     return (
         <div className={dropdown.wrapper}
@@ -24,8 +25,8 @@ export function CurrencySelector() {
                     event.currentTarget.querySelector("button")?.focus();
                 }
             }}>
-            <button type="button" className={`${dropdown.trigger} ${styles.trigger}`}
-                aria-label={t("dashboard.currency.select")}
+            <button ref={triggerRef} type="button" className={`${dropdown.trigger} ${styles.trigger}`}
+                aria-label={`${t("dashboard.currency.select")}: ${currencyLabel(primaryCurrency)}`}
                 aria-expanded={isOpen}
                 onClick={() => setIsOpen(previous => !previous)}>
                 <Coins size={18} className={styles.coin} aria-hidden="true" />
@@ -40,6 +41,7 @@ export function CurrencySelector() {
                             onClick={() => {
                                 setPrimaryCurrency(currency);
                                 setIsOpen(false);
+                                triggerRef.current?.focus();
                             }}>
                             <span>{currencyLabel(currency)}</span>
                             {currency === primaryCurrency && <Check size={16} className={dropdown.check} aria-hidden="true" />}
