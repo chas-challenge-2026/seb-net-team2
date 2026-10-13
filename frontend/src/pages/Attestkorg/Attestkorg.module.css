@@ -1052,11 +1052,14 @@
 
 /* Decision support checks on each card */
 
+/* Styled as a warning (light amber with a stripe), not as neutral grey,
+   so it reads as "check this" and the amber text has enough contrast. */
 .checks {
     margin: 0 0 var(--spacing-md);
     padding: 12px var(--spacing-md);
+    border-left: 4px solid #e3a008;
     border-radius: var(--radius-sm);
-    background-color: var(--color-hover-light);
+    background-color: #fff8e6;
 }
 
 .checksTitle {
