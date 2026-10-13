@@ -279,7 +279,7 @@
             "submittedBy": "Skickad av",
             "submitted": "Skickad",
             "toIban": "Till IBAN",
-            "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
+            "approvalStep": "Atteststeg {{step}}",
             "waitingToday": "Skickad i dag",
             "dualApproval": "Dubbelattest – betalningen kräver två attestanter",
             "recipientBank": "Mottagarbank",

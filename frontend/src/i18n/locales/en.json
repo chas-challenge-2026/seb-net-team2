@@ -336,7 +336,7 @@
             "submittedBy": "Submitted by",
             "submitted": "Submitted",
             "toIban": "To IBAN",
-            "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
+            "approvalStep": "Approval step {{step}}",
             "waitingToday": "Submitted today",
             "dualApproval": "Dual approval – this payment requires two attestants",
             "recipientBank": "Recipient bank",

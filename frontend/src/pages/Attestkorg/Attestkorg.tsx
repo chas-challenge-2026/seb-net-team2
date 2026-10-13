@@ -483,9 +483,10 @@ export function Attestkorg() {
                             <div className={styles.cardHeader}>
                                 <div>
                                     <p className={styles.paymentId}>
-                                        {t("approvalInbox.card.stepAndPayment", {
+                                        {/* No payment id: it is a UUID that means nothing to the attestant,
+                                            who recognises the payment by its reference and amount. */}
+                                        {t("approvalInbox.card.approvalStep", {
                                             step: approval.stepNumber,
-                                            id: approval.paymentId,
                                         })}
                                     </p>
 
