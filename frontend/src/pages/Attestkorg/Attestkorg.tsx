@@ -530,33 +530,28 @@ export function Attestkorg() {
                             <dl className={styles.details}>
                                 <RecipientAndDueRows approval={approval} />
 
+                                {/* Grouped in pairs: where the money goes and where it comes from,
+                                    then who submitted it and when. */}
                                 <div>
-                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
-                                    <dd>{approval.createdByUserName}</dd>
+                                    <dt>{t("approvalInbox.card.toIban")}</dt>
+                                    <dd>
+                                        {formatIban(approval.toIban)}
+                                        {recipientBank(approval.toIban) && ` · ${recipientBank(approval.toIban)}`}
+                                    </dd>
                                 </div>
 
+                                <PaymentSourceAccount paymentId={approval.paymentId} />
+
                                 <div>
-                                    <dt>{t("approvalInbox.card.submitted")}</dt>
+                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
                                     <dd>
+                                        {approval.createdByUserName}
+                                        {" · "}
                                         <time dateTime={approval.paymentCreatedAt}>
                                             {formatDate(approval.paymentCreatedAt, locale)}
                                         </time>
                                     </dd>
                                 </div>
-
-                                <div>
-                                    <dt>{t("approvalInbox.card.toIban")}</dt>
-                                    <dd>{formatIban(approval.toIban)}</dd>
-                                </div>
-
-                                {recipientBank(approval.toIban) && (
-                                    <div>
-                                        <dt>{t("approvalInbox.card.recipientBank")}</dt>
-                                        <dd>{recipientBank(approval.toIban)}</dd>
-                                    </div>
-                                )}
-
-                                <PaymentSourceAccount paymentId={approval.paymentId} />
                             </dl>
 
                             <PaymentChecks approval={approval} allPending={approvals} />
