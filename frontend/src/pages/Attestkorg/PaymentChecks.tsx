@@ -71,8 +71,13 @@ export function PaymentChecks({ approval, allPending }: PaymentChecksProps) {
                 {checks.duplicateOf.length > 0 && (
                     <li className={styles.checkWarning}>
                         <TriangleAlert size={16} aria-hidden="true" />
+                        {/* References, not ids: the payment id is a UUID the attestant can't recognise. */}
                         {t("approvalInbox.checks.duplicate", {
-                            payments: checks.duplicateOf.map((id) => `#${id}`).join(", "),
+                            count: checks.duplicateOf.length,
+                            payments: checks.duplicateOf
+                                .map((id) => allPending.find((other) => other.paymentId === id)?.reference ?? id)
+                                .map((reference) => `“${reference}”`)
+                                .join(", "),
                         })}
                     </li>
                 )}

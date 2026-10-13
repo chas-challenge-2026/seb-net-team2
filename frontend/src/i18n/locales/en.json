@@ -380,7 +380,8 @@
         "checks": {
             "title": "Check before deciding",
             "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
-            "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
+            "duplicate_one": "Possible duplicate: same recipient and amount as the payment with reference {{payments}}",
+            "duplicate_other": "Possible duplicate: same recipient and amount as the payments with references {{payments}}",
             "highAmount": "High amount – check extra carefully",
             "sameAccount": "The recipient is the same account the money is taken from – check that this is intended",
             "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"

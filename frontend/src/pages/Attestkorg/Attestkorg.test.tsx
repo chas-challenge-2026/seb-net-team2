@@ -111,6 +111,21 @@ describe("Approval inbox with keyboard and screen reader", () => {
         expect(screen.getByText(/Mottagaren är samma konto som pengarna dras från/)).toBeInTheDocument();
     });
 
+    it("names a possible duplicate by its reference instead of its id", () => {
+        const duplicate = {
+            ...pendingPayment,
+            stepId: "9a1b2c3d-4e5f-4a6b-8c7d-0e1f2a3b4c5d",
+            paymentId: "7c6b5a49-3827-4615-a4b3-c2d1e0f9a8b7",
+            reference: "Faktura #1044",
+        };
+        setHooks({ pending: [pendingPayment, duplicate] });
+
+        renderInbox();
+
+        expect(screen.getByText(/som betalningen med referens “Faktura #1044”$/)).toBeInTheDocument();
+        expect(screen.queryByText(new RegExp(duplicate.paymentId))).not.toBeInTheDocument();
+    });
+
     it("moves between the tabs with the arrow keys", () => {
         renderInbox();
 
