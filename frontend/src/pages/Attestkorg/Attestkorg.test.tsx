@@ -98,6 +98,19 @@ describe("Approval inbox with keyboard and screen reader", () => {
             .not.toBeInTheDocument();
     });
 
+    it("warns when the recipient is the same account the money is taken from", () => {
+        mockedUsePaymentSourceAccount.mockReturnValue({
+            account: { id: "12", name: "Lönekonto", iban: "SE08 5000 0000 0549 1000 0004", balance: 0, currency: "SEK" },
+            fromAccountId: "12",
+            isPending: false,
+            isError: false,
+        } as unknown as ReturnType<typeof usePaymentSourceAccount>);
+
+        renderInbox();
+
+        expect(screen.getByText(/Mottagaren är samma konto som pengarna dras från/)).toBeInTheDocument();
+    });
+
     it("moves between the tabs with the arrow keys", () => {
         renderInbox();
 

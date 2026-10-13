@@ -384,6 +384,7 @@
             "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
             "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
             "highAmount": "High amount – check extra carefully",
+            "sameAccount": "The recipient is the same account the money is taken from – check that this is intended",
             "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
         },
         "tabs": {
