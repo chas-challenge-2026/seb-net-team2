@@ -39,6 +39,12 @@ main:focus-visible {
     outline: none;
 }
 
+/* RouteAccessibility focuses the page heading so screen readers announce the new page.
+   The heading can't be clicked or typed in, so it doesn't need a visible focus ring. */
+h1[tabindex="-1"]:focus-visible {
+    outline: none;
+}
+
 .skip-link {
     position: fixed;
     top: 0.75rem;
