@@ -190,6 +190,7 @@
     "approvalInbox": {
         "title": "Attestkorg",
         "description": "Betalningar som väntar på ditt beslut.",
+        "handledDescription": "Betalningar som du redan har hanterat.",
         "loading": "Laddar attesteringar...",
         "pendingCount_one": "{{count}} väntande",
         "pendingCount_other": "{{count}} väntande",
@@ -205,7 +206,7 @@
             "approved": "{{reference}} ({{amount}}) godkändes.",
             "rejected": "{{reference}} ({{amount}}) avvisades.",
             "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats.",
-            "showHandled": "Visa i Hanterade →"
+            "showHandled": "Visa i Hanterade"
         },
         "sort": {
             "label": "Sortera efter",
@@ -252,8 +253,8 @@
         },
         "empty": {
             "title": "Inga väntande attesteringar",
-            "description": "Det finns inga betalningar som väntar på ditt godkännande.",
-            "showHandled": "Visa hanterade betalningar →"
+            "description": "Du är klar för nu. Nya betalningar visas här när de skickas för attest.",
+            "showHandled": "Visa hanterade betalningar"
         },
         "modal": {
             "approveTitle": "Godkänn betalning?",
@@ -300,7 +301,9 @@
             "count": "Visar {{visible}} av {{total}}",
             "approvedOn": "Godkänd {{date}}",
             "rejectedOn": "Avvisad {{date}}",
-            "step": "Atteststeg",
+            "paymentCreated": "Betalning skapad {{date}}",
+            "stepShort": "Steg {{step}}",
+            "unknownDate": "Okänt datum",
             "reason": "Anledning",
             "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här.",
             "moreFilters": "Filtrera",
