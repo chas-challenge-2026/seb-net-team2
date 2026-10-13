@@ -117,6 +117,17 @@ namespace SebPortal.Api.Services
                                 automatic = false
                             })
                         });
+                        var inAppNotification = new NotificationMessageDTO
+                        {
+                            TenantId = payment.TenantId,
+                            Channel = NotificationChannel.InApp,
+                            UserId = payment.CreatedByUserId,
+                            ApprovalStepId = approvalStep.Id,
+                            Subject = "Betalning godkänd",
+                            Message = $"Din betalning med referens '{payment.Reference}' har godkänts."
+                        };
+
+                        await _notificationService.SendNotificationMessageAsync(inAppNotification);
                     }
                 }
                 else
@@ -154,6 +165,19 @@ namespace SebPortal.Api.Services
                     };
 
                     await _notificationService.SendNotificationMessageAsync(notificationDTO);
+
+                    //Inapp notification
+                    var inAppNotification = new NotificationMessageDTO
+                    {
+                        TenantId = payment.TenantId,
+                        Channel = NotificationChannel.InApp,
+                        UserId = payment.CreatedByUserId,
+                        ApprovalStepId = approvalStep.Id,
+                        Subject = "Betalning avslagen",
+                        Message = $"Din betalning med referens '{payment.Reference}' har avslagits."
+                    };
+
+                    await _notificationService.SendNotificationMessageAsync(inAppNotification);
                 }
 
                 await transaction.CommitAsync();
