@@ -112,36 +112,34 @@ VALUES
 
 -- Approval steps
 INSERT INTO approval_steps
-    (payment_id, attestant_id, step_number, status, decided_at, comment)
+    (payment_id, attestant_id, step_number, status, decided_at, comment, last_reminder_sent_at)
 VALUES
 -- Tenant 1
-(2,  4,  1, 'pending',  NULL,                        NULL),
-(4,  3,  1, 'approved', NOW() - INTERVAL '2 days',   'Stämmer med offert'),
-(4,  4,  2, 'pending',  NULL,                        NULL),
-(5,  4,  1, 'approved', NOW() - INTERVAL '13 days',  NULL),
-(6,  3,  1, 'rejected', NOW() - INTERVAL '9 days',   'Fel mottagare, kontrollera IBAN'),
+(2,  4,  1, 'pending',  NULL,                        NULL, NULL),
+(4,  3,  1, 'approved', NOW() - INTERVAL '2 days',   'Stämmer med offert', NULL),
+(4,  4,  2, 'pending',  NULL,                        NULL, NULL),
+(5,  4,  1, 'approved', NOW() - INTERVAL '13 days',  NULL, NULL),
+(6,  3,  1, 'rejected', NOW() - INTERVAL '9 days',   'Fel mottagare, kontrollera IBAN', NULL),
 -- Betalning 7: steg 1 avslaget, steg 2 ligger kvar som pending.
 -- Återskapar buggen där ett pending-steg finns kvar på en avslagen betalning.
 -- Ska INTE synas i Hannas pending-lista eller i PendingApprovalsCount.
-(7,  4,  1, 'rejected', NOW() - INTERVAL '6 days',   'Ej budgeterat i år'),
-(7,  3,  2, 'pending',  NULL,                        NULL),
-(8,  3,  1, 'pending',  NULL,                        NULL),
+(7,  4,  1, 'rejected', NOW() - INTERVAL '6 days',   'Ej budgeterat i år', NULL),
+(7,  3,  2, 'pending',  NULL,                        NULL, NULL),
+(8,  3,  1, 'pending',  NULL,                        NULL, NULL),
 
 -- Tenant 2
-(10, 8,  1, 'pending',  NULL,                        NULL),
-(11, 9,  1, 'pending',  NULL,                        NULL),
-(11, 8,  2, 'pending',  NULL,                        NULL),
-(12, 9,  1, 'approved', NOW() - INTERVAL '17 days',  NULL),
-(13, 8,  1, 'rejected', NOW() - INTERVAL '8 days',   'Dubbelfakturerad'),
-
+(10, 8,  1, 'pending',  NULL,                        NULL, NULL),
+(11, 9,  1, 'pending',  NULL,                        NULL, NULL),
+(11, 8,  2, 'pending',  NULL,                        NULL, NULL),
+(12, 9,  1, 'approved', NOW() - INTERVAL '17 days',  NULL, NULL),
+(13, 8,  1, 'rejected', NOW() - INTERVAL '8 days',   'Dubbelfakturerad', NULL),
 -- Tenant 3
-(16, 12, 1, 'pending',  NULL,                        NULL),
-(17, 13, 1, 'approved', NOW() - INTERVAL '4 days',   NULL),
-(17, 12, 2, 'pending',  NULL,                        NULL),
-
+(16, 12, 1, 'pending',  NULL,                        NULL, NULL),
+(17, 13, 1, 'approved', NOW() - INTERVAL '4 days',   NULL, NULL),
+(17, 12, 2, 'pending',  NULL,                        NULL, NULL),
 -- Tenant 4
-(19, 16, 1, 'pending',  NULL,                        NULL),
-(20, 16, 1, 'approved', NOW() - INTERVAL '11 days',  NULL);
+(19, 16, 1, 'pending',  NULL,                        NULL, NULL),
+(20, 16, 1, 'approved', NOW() - INTERVAL '11 days',  NULL, NULL);
 
 
 -- Audit log
