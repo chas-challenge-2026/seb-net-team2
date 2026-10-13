@@ -410,12 +410,44 @@ export function Attestkorg() {
                 </div>
             )}
 
-            <ApprovalTabs
-                activeTab={activeTab}
-                onChange={setActiveTab}
-                pendingCount={approvals.length}
-                handledCount={handledCount}
-            />
+            {/* Sorting sits on the tab row, so the first payment starts higher up. */}
+            <div className={styles.tabsRow}>
+                <ApprovalTabs
+                    activeTab={activeTab}
+                    onChange={setActiveTab}
+                    pendingCount={approvals.length}
+                    handledCount={handledCount}
+                />
+
+                {activeTab === "pending" && approvals.length > 0 && (
+                    <div className={styles.sortField}>
+                        <div className={styles.filterField}>
+                            <label htmlFor="pending-sort">
+                                {t("approvalInbox.sort.label")}
+                            </label>
+
+                            <select
+                                id="pending-sort"
+                                value={pendingSort}
+                                onChange={(event) => {
+                                    const sort = event.target.value as SortOption;
+                                    setPendingSort(sort);
+                                    setSortAnnouncement(t("approvalInbox.sort.announcement", {
+                                        order: t(SORT_LABEL_KEYS[sort]),
+                                    }));
+                                }}
+                            >
+                                <option value="date-desc">{t("approvalInbox.sort.newest")}</option>
+                                <option value="date-asc">{t("approvalInbox.sort.oldest")}</option>
+                                <option value="amount-desc">{t("approvalInbox.sort.amountHigh")}</option>
+                                <option value="amount-asc">{t("approvalInbox.sort.amountLow")}</option>
+                            </select>
+                        </div>
+
+                        <p className="visually-hidden" role="status">{sortAnnouncement}</p>
+                    </div>
+                )}
+            </div>
 
             {activeTab === "handled" ? (
                 <HandledApprovals
@@ -444,35 +476,6 @@ export function Attestkorg() {
                         </strong>{" "}
                         {t("approvalInbox.overdueFirst")}
                     </span>
-                </div>
-            )}
-
-            {approvals.length > 0 && (
-                <div className={styles.toolbar}>
-                    <div className={styles.filterField}>
-                        <label htmlFor="pending-sort">
-                            {t("approvalInbox.sort.label")}
-                        </label>
-
-                        <select
-                            id="pending-sort"
-                            value={pendingSort}
-                            onChange={(event) => {
-                                const sort = event.target.value as SortOption;
-                                setPendingSort(sort);
-                                setSortAnnouncement(t("approvalInbox.sort.announcement", {
-                                    order: t(SORT_LABEL_KEYS[sort]),
-                                }));
-                            }}
-                        >
-                            <option value="date-desc">{t("approvalInbox.sort.newest")}</option>
-                            <option value="date-asc">{t("approvalInbox.sort.oldest")}</option>
-                            <option value="amount-desc">{t("approvalInbox.sort.amountHigh")}</option>
-                            <option value="amount-asc">{t("approvalInbox.sort.amountLow")}</option>
-                        </select>
-                    </div>
-
-                    <p className="visually-hidden" role="status">{sortAnnouncement}</p>
                 </div>
             )}
 
