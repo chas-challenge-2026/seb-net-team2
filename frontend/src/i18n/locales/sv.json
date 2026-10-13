@@ -1,7 +1,6 @@
 {
     "a11y": {"notFound":"Sidan kunde inte hittas","notFoundDescription":"Kontrollera adressen eller gå tillbaka till startsidan.","home":"Till startsidan","register":"Registrera dig","customerType":"Kundtyp","login":"Logga in","skip":"Hoppa till huvudinnehållet","main":"Huvudinnehåll","dialog":"Dialog","language":"Språk","mortgage":"Bolån"},
     "information": {
-        "project": "Företagsbetalningar",
         "navigation": "Information och policyer",
         "about": {
             "title": "Om tjänsten och kontakt",
@@ -52,7 +51,6 @@
     "footer": {
         "socialMedia": "SEB på sociala medier",
         "socialLink": "SEB på {{name}} (öppnas i ny flik)",
-        "title": "Företagsbetalningar",
         "description": "Konton, betalningar och attestering samlade på ett ställe. Här hittar du information om tjänsten, integritet och användningsvillkor."
     },
     "common": {

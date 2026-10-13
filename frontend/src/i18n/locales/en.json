@@ -1,7 +1,6 @@
 {
     "a11y": {"notFound":"Page not found","notFoundDescription":"Check the address or return to the home page.","home":"Go to home page","register":"Register","customerType":"Customer type","login":"Log in","skip":"Skip to main content","main":"Main content","dialog":"Dialog","language":"Language","mortgage":"Mortgage"},
     "information": {
-        "project": "Business payments",
         "navigation": "Information and policies",
         "about": {
             "title": "About and contact",
@@ -109,7 +108,6 @@
     "footer": {
         "socialMedia": "SEB on social media",
         "socialLink": "SEB on {{name}} (opens in a new tab)",
-        "title": "Business payments",
         "description": "Accounts, payments and approvals in one place. Find information about the service, privacy and terms of use here."
     },
     "common": {
