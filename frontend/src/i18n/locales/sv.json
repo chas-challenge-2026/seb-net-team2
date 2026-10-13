@@ -587,12 +587,16 @@
     },
     "notifications": {
         "title": "Notiser",
+        "approvalTitle": "Attest krävs",
         "buttonLabel_one": "Notiser, {{count}} oläst",
         "buttonLabel_other": "Notiser, {{count}} olästa",
         "unreadCount_one": "{{count}} oläst",
         "unreadCount_other": "{{count}} olästa",
         "markAllAsRead": "Markera alla som lästa",
-        "empty": "Du har inga notiser."
+        "empty": "Du har inga notiser.",
+        "loading": "Laddar notiser...",
+        "loadError": "Notiserna kunde inte hämtas. Försök igen senare.",
+        "updateError": "En notis kunde inte markeras som läst."
     },
     "overdueReminder": {
         "title": "Påminnelse: väntande attester",
