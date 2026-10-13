@@ -1247,6 +1247,18 @@
     gap: var(--spacing-md);
 }
 
+/* Reference and the "Submitted today" / due badges on one line */
+.titleLine {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-xs) 12px;
+}
+
+.titleLine > p {
+    margin: 0;
+}
+
 /* The "Reference" label before the reference in card headings: lighter, so the reference stays the focus. */
 .referenceLabel {
     color: var(--placeholder-grey);

@@ -492,31 +492,36 @@ export function Attestkorg() {
                                         {t("approvalInbox.card.approvalStep", {
                                             step: approval.stepNumber,
                                         })}
+                                        {approval.stepNumber > 1 && (
+                                            <>
+                                                {" · "}
+                                                <span className={styles.dualApproval}>
+                                                    {t("approvalInbox.card.dualApprovalShort")}
+                                                </span>
+                                            </>
+                                        )}
                                     </p>
 
-                                    {/* Labelled, because a reference like "1050" says nothing on its own. */}
-                                    <h2 id={`payment-${approval.paymentId}`}>
-                                        <span className={styles.referenceLabel}>
-                                            {t("approvalInbox.card.reference")}
-                                        </span>{" "}
-                                        {approval.reference}
-                                    </h2>
+                                    {/* Reference and waiting time on one line, so the card header stays short. */}
+                                    <div className={styles.titleLine}>
+                                        {/* Labelled, because a reference like "1050" says nothing on its own. */}
+                                        <h2 id={`payment-${approval.paymentId}`}>
+                                            <span className={styles.referenceLabel}>
+                                                {t("approvalInbox.card.reference")}
+                                            </span>{" "}
+                                            {approval.reference}
+                                        </h2>
 
-                                    <p className={isOverdue(approval) ? styles.overdue : styles.waiting}>
-                                        {daysWaiting(approval) === 0
-                                            ? t("approvalInbox.card.waitingToday")
-                                            : t("approvalInbox.card.waitingDays", {
-                                                count: daysWaiting(approval),
-                                            })}
-                                    </p>
-
-                                    <DueBadge approval={approval} />
-
-                                    {approval.stepNumber > 1 && (
-                                        <p className={styles.dualApproval}>
-                                            {t("approvalInbox.card.dualApproval")}
+                                        <p className={isOverdue(approval) ? styles.overdue : styles.waiting}>
+                                            {daysWaiting(approval) === 0
+                                                ? t("approvalInbox.card.waitingToday")
+                                                : t("approvalInbox.card.waitingDays", {
+                                                    count: daysWaiting(approval),
+                                                })}
                                         </p>
-                                    )}
+
+                                        <DueBadge approval={approval} />
+                                    </div>
                                 </div>
 
                                 <strong>{formatAmount(approval, locale)}</strong>
