@@ -494,7 +494,11 @@ export function Attestkorg() {
                                         })}
                                     </p>
 
+                                    {/* Labelled, because a reference like "1050" says nothing on its own. */}
                                     <h2 id={`payment-${approval.paymentId}`}>
+                                        <span className={styles.referenceLabel}>
+                                            {t("approvalInbox.card.reference")}
+                                        </span>{" "}
                                         {approval.reference}
                                     </h2>
 

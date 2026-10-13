@@ -347,7 +347,12 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                                                             {step}
                                                         </p>
                                                     )}
-                                                    <h3>{entry.reference}</h3>
+                                                    <h3>
+                                                        <span className={styles.referenceLabel}>
+                                                            {t("approvalInbox.card.reference")}
+                                                        </span>{" "}
+                                                        {entry.reference}
+                                                    </h3>
                                                 </div>
 
                                                 <strong>{formatAmount(entry, locale)}</strong>

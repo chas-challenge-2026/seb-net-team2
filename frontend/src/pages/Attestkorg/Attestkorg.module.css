@@ -1247,6 +1247,13 @@
     gap: var(--spacing-md);
 }
 
+/* The "Reference" label before the reference in card headings: lighter, so the reference stays the focus. */
+.referenceLabel {
+    color: var(--placeholder-grey);
+    font-size: var(--font-size-md);
+    font-weight: 400;
+}
+
 .historyItemHeader h3 {
     margin: 4px 0 0;
     color: var(--color-text);
