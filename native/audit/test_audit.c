@@ -28,7 +28,7 @@ static int setup_test_log(void **state)
     return 0;
 }
 
-/* Modifies one line in the audit log. */
+/* Ändrar en specifik rad i Audit-loggen för att testa integritetskontroller. */
 static void tamper_line(int line_no, void (*mutate)(char *line))
 {
     FILE *file = fopen("audit.log", "r+");
