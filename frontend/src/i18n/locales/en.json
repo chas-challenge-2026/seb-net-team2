@@ -714,6 +714,8 @@
     "notifications": {
         "title": "Notifications",
         "approvalTitle": "Approval needed",
+        "paymentStatusTitle": "Payment update",
+        "newApprovalMessage": "A new payment is waiting for your approval: {{reference}}",
         "buttonLabel_one": "Notifications, {{count}} unread",
         "buttonLabel_other": "Notifications, {{count}} unread",
         "unreadCount_one": "{{count}} unread",
@@ -722,6 +724,7 @@
         "empty": "You have no notifications.",
         "loading": "Loading notifications...",
         "loadError": "Notifications could not be loaded. Try again later.",
+        "approvalWatchError": "New approvals could not be checked. Retrying...",
         "updateError": "A notification could not be marked as read."
     },
     "overdueReminder": {
