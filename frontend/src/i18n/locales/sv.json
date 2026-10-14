@@ -329,7 +329,7 @@
             "duplicate_one": "Möjlig dubblett: samma mottagare och belopp som betalningen med referens {{payments}}",
             "duplicate_other": "Möjlig dubblett: samma mottagare och belopp som betalningarna med referens {{payments}}",
             "highAmount": "Högt belopp – kontrollera extra noga",
-            "sameAccount": "Mottagaren är samma konto som pengarna dras från – kontrollera att det är avsiktligt",
+            "sameAccount": "Mottagarkontot är samma som avsändarkontot – kontrollera att det är avsiktligt",
             "foreignRecipient": "Utländsk mottagare ({{country}}) – kontrollera att det stämmer med fakturan"
         },
         "tabs": {

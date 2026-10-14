@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom/jest-globals";
 import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,6 +9,8 @@ import { useApprovalHistory } from "../../hooks/useApprovalHistory";
 import { useSessionDecisions } from "../../hooks/useSessionDecisions";
 import { useAuth } from "../../hooks/useAuth";
 import { usePaymentSourceAccount } from "../../hooks/usePaymentSourceAccount";
+import { decideApproval } from "../../services/approvalService";
+import { AppError } from "../../errors/AppError";
 import { fetchAuditLog, fetchEntityHistory } from "../../services/auditService";
 import type { PendingApprovalStep } from "../../schemas/pendingApprovalSchema";
 import type { DecidedApproval } from "../../schemas/approvalHistorySchema";
@@ -37,6 +39,7 @@ const mockedUseAuth = jest.mocked(useAuth);
 const mockedUsePaymentSourceAccount = jest.mocked(usePaymentSourceAccount);
 const mockedFetchAuditLog = jest.mocked(fetchAuditLog);
 const mockedFetchEntityHistory = jest.mocked(fetchEntityHistory);
+const mockedDecideApproval = jest.mocked(decideApproval);
 
 const pendingPayment: PendingApprovalStep = {
     stepId: "8f14e45f-ceea-4a7b-9c3e-2a1b5c6d7e8f",
@@ -112,7 +115,7 @@ describe("Approval inbox with keyboard and screen reader", () => {
 
         renderInbox();
 
-        expect(screen.getByText(/Mottagaren är samma konto som pengarna dras från/)).toBeInTheDocument();
+        expect(screen.getByText(/Mottagarkontot är samma som avsändarkontot/)).toBeInTheDocument();
     });
 
     it("names a possible duplicate by its reference instead of its id", () => {
@@ -228,5 +231,151 @@ describe("Approval inbox with keyboard and screen reader", () => {
         fireEvent.click(screen.getByRole("button", { name: "Visa hanterade betalningar" }));
 
         await waitFor(() => expect(screen.getByRole("tab", { name: /Hanterade/ })).toHaveFocus());
+    });
+});
+
+// US-71: approving and rejecting keep working when the code changes.
+describe("Approving and rejecting payments", () => {
+    function openDialog(kind: "Godkänn" | "Avvisa") {
+        fireEvent.click(screen.getByRole("button", { name: new RegExp(`^${kind} betalning med referens`) }));
+        return screen.getByRole("dialog");
+    }
+
+    function confirm(dialog: HTMLElement, kind: "Godkänn" | "Avvisa") {
+        fireEvent.click(within(dialog).getByRole("button", { name: kind }));
+    }
+
+    // What the inbox sent to the backend (the mutation function also gets a context argument).
+    function sentDecision() {
+        return mockedDecideApproval.mock.calls[0]?.[0];
+    }
+
+    it("approves without a comment", async () => {
+        mockedDecideApproval.mockResolvedValue(undefined as never);
+        renderInbox();
+
+        confirm(openDialog("Godkänn"), "Godkänn");
+
+        await waitFor(() => expect(mockedDecideApproval).toHaveBeenCalledTimes(1));
+        expect(sentDecision()).toEqual({ stepId: pendingPayment.stepId, decision: "approved" });
+        expect(await screen.findByText(/^Faktura #1043 \(75\s000,00 SEK\) godkändes\.$/)).toBeInTheDocument();
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("sends an optional comment without surrounding spaces", async () => {
+        mockedDecideApproval.mockResolvedValue(undefined as never);
+        renderInbox();
+
+        const dialog = openDialog("Godkänn");
+        fireEvent.change(within(dialog).getByLabelText(/^Kommentar/), { target: { value: "  Stämmer med fakturan  " } });
+        confirm(dialog, "Godkänn");
+
+        await waitFor(() => expect(mockedDecideApproval).toHaveBeenCalledTimes(1));
+        expect(sentDecision()).toEqual({
+            stepId: pendingPayment.stepId,
+            decision: "approved",
+            comment: "Stämmer med fakturan",
+        });
+    });
+
+    it.each([
+        ["no reason", ""],
+        ["a reason shorter than 10 characters", "För dyrt"],
+    ])("does not reject with %s", (_, reason) => {
+        renderInbox();
+
+        const dialog = openDialog("Avvisa");
+        const field = within(dialog).getByLabelText(/^Anledning till avvisning/);
+        fireEvent.change(field, { target: { value: reason } });
+        confirm(dialog, "Avvisa");
+
+        expect(mockedDecideApproval).not.toHaveBeenCalled();
+        expect(field).toHaveAttribute("aria-invalid", "true");
+        expect(within(dialog).getByText("Ange ett skäl för avslag med minst 10 tecken.")).toBeInTheDocument();
+    });
+
+    it("rejects with a valid reason", async () => {
+        mockedDecideApproval.mockResolvedValue(undefined as never);
+        renderInbox();
+
+        const dialog = openDialog("Avvisa");
+        fireEvent.change(within(dialog).getByLabelText(/^Anledning till avvisning/), {
+            target: { value: "Fel mottagare enligt fakturan" },
+        });
+        confirm(dialog, "Avvisa");
+
+        await waitFor(() => expect(mockedDecideApproval).toHaveBeenCalledTimes(1));
+        expect(sentDecision()).toEqual({
+            stepId: pendingPayment.stepId,
+            decision: "rejected",
+            comment: "Fel mottagare enligt fakturan",
+        });
+        expect(await screen.findByText(/^Faktura #1043 \(75\s000,00 SEK\) avvisades\.$/)).toBeInTheDocument();
+    });
+
+    it("sends nothing when the attestant cancels", () => {
+        renderInbox();
+
+        const dialog = openDialog("Godkänn");
+        fireEvent.click(within(dialog).getByRole("button", { name: "Avbryt" }));
+
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(mockedDecideApproval).not.toHaveBeenCalled();
+    });
+
+    it("sends a decision only once when Confirm is clicked twice", async () => {
+        // Never resolves, so the decision stays "sending" during the second click.
+        mockedDecideApproval.mockReturnValue(new Promise(() => {}) as never);
+        renderInbox();
+
+        const dialog = openDialog("Godkänn");
+        confirm(dialog, "Godkänn");
+        await waitFor(() => expect(within(dialog).getByRole("button", { name: "Behandlar..." }))
+            .toHaveAttribute("aria-disabled", "true"));
+        fireEvent.click(within(dialog).getByRole("button", { name: "Behandlar..." }));
+
+        expect(mockedDecideApproval).toHaveBeenCalledTimes(1);
+    });
+
+    it("explains when another attestant already handled the payment (409)", async () => {
+        mockedDecideApproval.mockRejectedValue(new AppError("Conflict", 409));
+        renderInbox();
+
+        confirm(openDialog("Godkänn"), "Godkänn");
+
+        expect(await screen.findByText("Betalningen har redan hanterats. Listan har uppdaterats.")).toBeInTheDocument();
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("keeps the dialog open and shows an error when the server fails", async () => {
+        mockedDecideApproval.mockRejectedValue(new Error("Internal Server Error"));
+        renderInbox();
+
+        const dialog = openDialog("Godkänn");
+        confirm(dialog, "Godkänn");
+
+        expect(await within(dialog).findByRole("alert")).toHaveTextContent("Det gick inte att behandla attestbeslutet.");
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    it("shows overdue payments first, then the oldest, and keeps overdue first after re-sorting", () => {
+        const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+        const payment = (reference: string, days: number, id: string): PendingApprovalStep => ({
+            ...pendingPayment,
+            stepId: `00000000-0000-4000-8000-00000000000${id}`,
+            paymentId: `10000000-0000-4000-8000-00000000000${id}`,
+            reference,
+            paymentCreatedAt: daysAgo(days),
+        });
+        setHooks({ pending: [payment("Ny", 0, "1"), payment("Igår", 1, "2"), payment("Försenad", 3, "3")] });
+        renderInbox();
+
+        const order = () => screen.getAllByRole("heading", { level: 2, name: /^Referens / })
+            .map((heading) => heading.textContent?.replace("Referens ", ""));
+
+        expect(order()).toEqual(["Försenad", "Igår", "Ny"]);
+
+        fireEvent.change(screen.getByLabelText("Sortera efter"), { target: { value: "date-desc" } });
+        expect(order()).toEqual(["Försenad", "Ny", "Igår"]);
     });
 });
