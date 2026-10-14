@@ -20,6 +20,19 @@ export const decisionDetailsSchema = z.object({
     totalSteps: z.number().nullish(),
 });
 
+// APPROVE_STEP / REJECT_STEP details, read for the admin's "Handled" tab.
+export const stepDecisionDetailsSchema = decisionDetailsSchema.extend({
+    decision: z.enum(["approved", "rejected"]),
+    amount: z.number(),
+    currency: z.string(),
+});
+
+// CREATE_PAYMENT details: what the decision entries don't contain (reference and recipient).
+export const createPaymentDetailsSchema = z.object({
+    reference: z.string(),
+    toIban: z.string(),
+});
+
 export const auditPageSchema = z.object({
     items: z.array(auditEntrySchema),
     totalCount: z.number(),

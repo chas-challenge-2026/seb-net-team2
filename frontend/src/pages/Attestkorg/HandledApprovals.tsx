@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import {
     ChevronDown,
     CircleCheck,
@@ -9,7 +9,8 @@ import {
     SlidersHorizontal,
 } from "lucide-react";
 
-import { isHistoryUnavailable, useApprovalHistory } from "../../hooks/useApprovalHistory";
+import { isHistoryUnavailable } from "../../hooks/useApprovalHistory";
+import { useHandledHistory } from "../../hooks/useAdminDecisionHistory";
 import { useAuth } from "../../hooks/useAuth";
 import { useSessionDecisions } from "../../hooks/useSessionDecisions";
 import { historyEntryDate, type DecidedApproval } from "../../schemas/approvalHistorySchema";
@@ -66,7 +67,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
 
     const { user } = useAuth();
-    const { data: apiHistory = [], isPending, isError, error } = useApprovalHistory(true);
+    const { data: apiHistory = [], isPending, isError, error } = useHandledHistory(user);
     const sessionDecisions = useSessionDecisions(user?.id);
 
     // Until the backend has a history endpoint, show the decisions made since the page was opened.
@@ -74,6 +75,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     const history = usingSession ? sessionDecisions : apiHistory;
 
     const [search, setSearch] = useState("");
+    const searchRef = useRef<HTMLInputElement>(null);
     const [status, setStatus] = useState<StatusFilter>("all");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
@@ -134,11 +136,14 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
         setDateTo("");
         setMinAmount("");
         setMaxAmount("");
+        // The "Clear" button disappears once nothing is filtered, so focus moves to the search field
+        // instead of falling back to the top of the page.
+        searchRef.current?.focus();
     }
 
     if (isPending) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.loadingState} role="status">
                     {t("approvalInbox.history.loading")}
                 </div>
@@ -148,7 +153,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (isError && !usingSession) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.error} role="alert">
                     {t("approvalInbox.history.error")}
                 </div>
@@ -158,7 +163,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (usingSession && sessionDecisions.length === 0) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.emptyState}>
                     <History size={32} aria-hidden="true" />
                     <h2>{t("approvalInbox.history.unavailableTitle")}</h2>
@@ -169,7 +174,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     }
 
     return (
-        <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+        <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
             {/* With only a few decisions the list is easy to scan, so filters would just be in the way. */}
             {showFilters && (
                 <div className={styles.toolbar}>
@@ -177,6 +182,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         <label htmlFor="history-search">{t("approvalInbox.history.search")}</label>
                         <input
                             id="history-search"
+                            ref={searchRef}
                             type="search"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
@@ -276,12 +282,15 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                 </div>
             )}
 
-            {/* Only meaningful when the filters actually hide something. */}
-            {hasActiveFilters && (
-                <p className={styles.historyCount} aria-live="polite">
-                    {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
-                </p>
-            )}
+            {/* The live region is always there, so screen readers also announce the first count.
+                The count itself is only meaningful when the filters actually hide something. */}
+            <div aria-live="polite">
+                {hasActiveFilters && (
+                    <p className={styles.historyCount}>
+                        {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
+                    </p>
+                )}
+            </div>
 
             {filtered.length > 0 ? (
                 <div className={styles.historyGroups}>
@@ -296,9 +305,20 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                                 {group.entries.map((entry) => {
                                     const approved = entry.decision === "approved";
                                     const bank = recipientBank(entry.toIban);
-                                    const date = historyEntryDate(entry);
-                                    // A single digit doesn't need its own column, so the step goes in the top line.
-                                    const step = t("approvalInbox.history.stepShort", { step: entry.stepNumber });
+                                    // Same top line as the cards under "To handle": step, and dual approval from step 2.
+                                    const step = (
+                                        <>
+                                            {t("approvalInbox.card.approvalStep", { step: entry.stepNumber })}
+                                            {entry.stepNumber > 1 && (
+                                                <>
+                                                    {" · "}
+                                                    <span className={styles.dualApproval}>
+                                                        {t("approvalInbox.card.dualApprovalShort")}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </>
+                                    );
 
                                     return (
                                         <li key={entry.stepId} className={styles.historyItem}>
@@ -313,24 +333,26 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                                                             ) : (
                                                                 <CircleX size={16} aria-hidden="true" />
                                                             )}
-                                                            {t(approved
-                                                                ? "approvalInbox.history.approvedOn"
-                                                                : "approvalInbox.history.rejectedOn", {
-                                                                date: date ? formatDate(date, locale) : "",
-                                                            })}
-                                                            {` · ${step}`}
-                                                        </p>
-                                                    ) : (
-                                                        // The backend doesn't send the decision yet. The tab already says "Handled",
-                                                        // so only the payment's creation date is shown, clearly labelled as such.
-                                                        <p className={styles.decisionHandled}>
-                                                            {date && `${t("approvalInbox.history.paymentCreated", {
-                                                                date: formatDate(date, locale),
-                                                            })} · `}
+                                                            <Trans
+                                                                i18nKey={approved
+                                                                    ? "approvalInbox.history.approvedOn"
+                                                                    : "approvalInbox.history.rejectedOn"}
+                                                                values={{ date: entry.decidedAt ? formatDate(entry.decidedAt, locale) : "" }}
+                                                                components={{ time: <time dateTime={entry.decidedAt ?? undefined} /> }}
+                                                            />
+                                                            {" · "}
                                                             {step}
                                                         </p>
+                                                    ) : (
+                                                        // The backend doesn't send the decision yet; the tab already says "Handled".
+                                                        <p className={styles.decisionHandled}>{step}</p>
                                                     )}
-                                                    <h3>{entry.reference}</h3>
+                                                    <h3>
+                                                        <span className={styles.referenceLabel}>
+                                                            {t("approvalInbox.card.reference")}
+                                                        </span>{" "}
+                                                        {entry.reference}
+                                                    </h3>
                                                 </div>
 
                                                 <strong>{formatAmount(entry, locale)}</strong>
@@ -351,7 +373,17 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
                                                 <div>
                                                     <dt>{t("approvalInbox.card.submittedBy")}</dt>
-                                                    <dd>{entry.createdByUserName}</dd>
+                                                    <dd>
+                                                        {entry.createdByUserName}
+                                                        {entry.paymentCreatedAt && (
+                                                            <>
+                                                                {" · "}
+                                                                <time dateTime={entry.paymentCreatedAt}>
+                                                                    {formatDate(entry.paymentCreatedAt, locale)}
+                                                                </time>
+                                                            </>
+                                                        )}
+                                                    </dd>
                                                 </div>
                                             </dl>
 

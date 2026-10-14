@@ -19,7 +19,7 @@ const SWEDISH_BANK_CODES: Record<string, string> = {
     "902": "Länsförsäkringar Bank",
 };
 
-function normalizeIban(iban: string): string {
+export function normalizeIban(iban: string): string {
     return iban.replace(/\s/g, "").toUpperCase();
 }
 

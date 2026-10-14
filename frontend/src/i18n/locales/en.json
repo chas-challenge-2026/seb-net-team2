@@ -324,16 +324,17 @@
             "newest": "Newest first",
             "oldest": "Oldest first",
             "amountHigh": "Amount: high to low",
-            "amountLow": "Amount: low to high"
+            "amountLow": "Amount: low to high",
+            "announcement": "List sorted: {{order}}."
         },
         "card": {
             "waitingDays_one": "Waiting {{count}} day",
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
-            "submitted": "Submitted",
             "toIban": "To IBAN",
-            "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
+            "approvalStep": "Approval step {{step}}",
+            "dualApprovalShort": "Dual approval",
             "waitingToday": "Submitted today",
             "dualApproval": "Dual approval – this payment requires two attestants",
             "recipientBank": "Recipient bank",
@@ -353,14 +354,15 @@
             "placeholder": "Add a comment",
             "rejectReasonLabel": "Reason for rejection",
             "required": "(required)",
-            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters."
+            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters.",
+            "characterCount": "{{count}} of {{max}} characters"
         },
         "actions": {
             "reject": "Reject",
             "approve": "Approve",
             "processing": "Processing...",
-            "rejectPayment": "Reject payment {{id}}",
-            "approvePayment": "Approve payment {{id}}"
+            "rejectPayment": "Reject payment with reference {{reference}}, {{amount}}",
+            "approvePayment": "Approve payment with reference {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "No pending approvals",
@@ -378,8 +380,10 @@
         "checks": {
             "title": "Check before deciding",
             "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
-            "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
+            "duplicate_one": "Possible duplicate: same recipient and amount as the payment with reference {{payments}}",
+            "duplicate_other": "Possible duplicate: same recipient and amount as the payments with references {{payments}}",
             "highAmount": "High amount – check extra carefully",
+            "sameAccount": "The recipient is the same account the money is taken from – check that this is intended",
             "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
         },
         "tabs": {
@@ -410,10 +414,8 @@
             "maxAmount": "Max amount",
             "clear": "Clear filters",
             "count": "Showing {{visible}} of {{total}}",
-            "approvedOn": "Approved {{date}}",
-            "rejectedOn": "Rejected {{date}}",
-            "paymentCreated": "Payment created {{date}}",
-            "stepShort": "Step {{step}}",
+            "approvedOn": "Approved <time>{{date}}</time>",
+            "rejectedOn": "Rejected <time>{{date}}</time>",
             "unknownDate": "Unknown date",
             "reason": "Reason",
             "sessionEmpty": "Payments you approve or reject now will be shown here.",
@@ -485,7 +487,7 @@
         },
         "table": {
             "caption": "Audit log events",
-            "timestamp": "Timestamp",
+            "timestamp": "Time",
             "user": "User",
             "event": "Event",
             "entity": "Entity",
@@ -507,8 +509,8 @@
         },
         "actions": {
             "CREATE_PAYMENT": "Payment created",
-            "APPROVE_STEP": "Approval step approved",
-            "REJECT_STEP": "Approval step rejected",
+            "APPROVE_STEP": "Approved",
+            "REJECT_STEP": "Rejected",
             "EXECUTE_PAYMENT": "Payment executed",
             "REJECT_PAYMENT": "Payment rejected",
             "CREATE_USER": "User created",
@@ -518,8 +520,20 @@
             "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
             "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
         },
+        "export": {
+            "button": "Export CSV",
+            "exporting": "Exporting…",
+            "done_one": "{{count}} event exported.",
+            "done_other": "{{count}} events exported.",
+            "error": "Could not export the log. Try again."
+        },
+        "summary": {
+            "payment": "{{amount}} to {{iban}}",
+            "refund": "{{amount}} returned to the account"
+        },
         "entityTypes": {
             "payment": "Payment #{{id}}",
+            "paymentReference": "Payment {{reference}}",
             "user": "User #{{id}}",
             "approvalLimit": "Approval limit #{{id}}"
         },
@@ -713,24 +727,6 @@
         "message_other": "{{count}} payments have been waiting more than {{days}} days for your approval.",
         "goToInbox": "Go to approval inbox",
         "dismiss": "Dismiss reminder"
-    },
-    "reminderSettings": {
-        "title": "Approval reminders",
-        "description": "Get an email when payments are waiting for your approval, so they don't get stuck.",
-        "emailEnabled": "Send me an email when a payment has waited too long for my approval",
-        "recipient": "Reminders are sent to",
-        "remindAfter": "Email me after",
-        "dayCount_one": "{{count}} day",
-        "dayCount_other": "{{count}} days",
-        "success": "Reminder settings saved.",
-        "saving": "Saving...",
-        "save": "Save settings",
-        "loading": "Loading settings...",
-        "errors": {
-            "save": "Unable to save reminder settings.",
-            "load": "Unable to load reminder settings."
-        },
-        "inAppNote": "Reminders in the app are always shown after {{days}} days."
     },
     "saveInvest": {
         "eyebrow": "SAVINGS & INVESTMENTS",

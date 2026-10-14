@@ -47,12 +47,13 @@
     color:
         var(--color-text);
 
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     line-height: 1.2;
 
     overflow-wrap: anywhere;
 }
+
 
 .intro {
     margin:
@@ -80,8 +81,8 @@
     color:
         var(--color-text);
 
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--font-size-md);
+    font-weight: 500;
 }
 
 
@@ -250,7 +251,7 @@
     font-size:
         var(--font-size-sm);
 
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .filterField select {
@@ -356,7 +357,7 @@
     border-radius: var(--radius-pill);
     color: var(--color-error);
     font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .waiting {
@@ -367,14 +368,14 @@
     border-radius: var(--radius-pill);
     color: var(--color-text-soft);
     font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .dualApproval {
     margin: 8px 0 0;
     color: var(--color-primary);
     font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .overdueBanner {
@@ -437,8 +438,8 @@
     color:
         var(--color-text);
 
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: 700;
 }
 
 .cardHeader strong {
@@ -469,13 +470,11 @@
     margin:
         22px 0 20px;
 
+    /* Only a line above: below it come the checks box or the buttons, which separate themselves. */
     padding:
-        18px 0;
+        18px 0 0;
 
     border-top:
-        1px solid var(--color-border);
-
-    border-bottom:
         1px solid var(--color-border);
 }
 
@@ -528,7 +527,7 @@
     font-size:
         var(--font-size-sm);
 
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .commentField textarea {
@@ -631,7 +630,7 @@
     font-size:
         var(--font-size-md);
 
-    font-weight: 600;
+    font-weight: 500;
 
     transition:
         background-color 0.2s ease,
@@ -648,7 +647,8 @@
 }
 
 .actions button:disabled,
-.modalActions button:disabled {
+.modalActions button:disabled,
+.modalActions button[aria-disabled="true"] {
     cursor: not-allowed;
 
     opacity: 0.6;
@@ -662,7 +662,7 @@
         var(--color-text);
 }
 
-.reject:hover:not(:disabled) {
+.reject:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color:
         var(--color-hover-light);
 }
@@ -678,7 +678,7 @@
         var(--color-surface);
 }
 
-.approve:hover:not(:disabled) {
+.approve:hover:not(:disabled):not([aria-disabled="true"]) {
     border-color:
         var(--seb-green-dark-2) !important;
 
@@ -711,7 +711,7 @@
     color:
         var(--seb-green-dark-2);
 
-    font-size: 22px;
+    font-size: var(--font-size-xl);
     font-weight: 500;
 }
 
@@ -782,7 +782,7 @@
     color:
         var(--color-text-soft);
 
-    font-size: 15px;
+    font-size: var(--font-size-lg);
     line-height: 1.5;
 }
 
@@ -855,7 +855,7 @@
         var(--color-text);
 }
 
-.modalCancel:hover:not(:disabled) {
+.modalCancel:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color:
         var(--color-hover-light);
 }
@@ -1051,11 +1051,14 @@
 
 /* Decision support checks on each card */
 
+/* Styled as a warning (light amber with a stripe), not as neutral grey,
+   so it reads as "check this" and the amber text has enough contrast. */
 .checks {
     margin: 0 0 var(--spacing-md);
     padding: 12px var(--spacing-md);
+    border-left: 4px solid #e3a008;
     border-radius: var(--radius-sm);
-    background-color: var(--color-hover-light);
+    background-color: #fff8e6;
 }
 
 .checksTitle {
@@ -1089,12 +1092,12 @@
 
 .checkError {
     color: var(--color-error);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .checkWarning {
     color: #8a5a00;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 
@@ -1120,7 +1123,7 @@
     border-radius: var(--radius-pill);
     color: #b54708;
     font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 /* Tabs: "Att hantera" / "Hanterade" */
@@ -1130,6 +1133,32 @@
     gap: var(--spacing-xs);
     margin: 0 0 var(--spacing-lg);
     border-bottom: 1px solid var(--color-border-light);
+}
+
+/* Tabs on the left, "Sort by" on the right, sharing the tabs' bottom line */
+.tabsRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--spacing-sm) var(--spacing-md);
+    margin: 0 0 var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.tabsRow .tabs {
+    margin: 0;
+    border-bottom: 0;
+}
+
+.sortField {
+    padding-bottom: var(--spacing-sm);
+}
+
+.sortField .filterField {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .tab {
@@ -1142,7 +1171,7 @@
     cursor: pointer;
     font: inherit;
     font-size: var(--font-size-md);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .tab:hover {
@@ -1152,6 +1181,12 @@
 .tabActive {
     border-bottom-color: var(--seb-green-dark-2);
     color: var(--color-text);
+}
+
+.tabPanel:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
 }
 
 .tab:focus-visible {
@@ -1215,7 +1250,7 @@
 .historyMonth {
     margin: 0 0 var(--spacing-sm);
     font-size: var(--font-size-md);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .historyList {
@@ -1240,6 +1275,25 @@
     gap: var(--spacing-md);
 }
 
+/* Reference and the "Submitted today" / due badges on one line */
+.titleLine {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-xs) 12px;
+}
+
+.titleLine > p {
+    margin: 0;
+}
+
+/* The "Reference" label before the reference in card headings: lighter, so the reference stays the focus. */
+.referenceLabel {
+    color: var(--placeholder-grey);
+    font-size: var(--font-size-md);
+    font-weight: 400;
+}
+
 .historyItemHeader h3 {
     margin: 4px 0 0;
     color: var(--color-text);
@@ -1258,7 +1312,7 @@
     gap: 6px;
     margin: 0;
     font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .decisionApproved {
@@ -1321,7 +1375,7 @@
     color: inherit;
     cursor: pointer;
     font: inherit;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: underline;
     text-underline-offset: 2px;
     white-space: nowrap;
@@ -1358,7 +1412,7 @@
     cursor: pointer;
     font: inherit;
     font-size: var(--font-size-md);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .filterToggle:focus-visible {
@@ -1387,7 +1441,7 @@
     padding: 0;
     color: var(--placeholder-grey);
     font-size: var(--font-size-sm);
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .amountInputs {
@@ -1412,3 +1466,4 @@
     outline-offset: 2px;
     border-color: var(--color-text);
 }
+
