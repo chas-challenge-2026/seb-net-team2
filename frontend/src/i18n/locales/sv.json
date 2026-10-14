@@ -1,4 +1,5 @@
 {
+    "errors": {"connection":"Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.","request":"Begäran misslyckades. Försök igen.","configuration":"Serveradressen är inte konfigurerad.","exchangeConnection":"Kunde inte ansluta till valutatjänsten.","exchangeFetch":"Kunde inte hämta växelkursen.","exchangeMismatch":"Växelkursen motsvarar inte de valda valutorna."},
     "a11y": {"notFound":"Sidan kunde inte hittas","notFoundDescription":"Kontrollera adressen eller gå tillbaka till startsidan.","home":"Till startsidan","register":"Registrera dig","customerType":"Kundtyp","login":"Logga in","skip":"Hoppa till huvudinnehållet","main":"Huvudinnehåll","dialog":"Dialog","language":"Språk","mortgage":"Bolån"},
     "information": {
         "navigation": "Information och policyer",
@@ -42,7 +43,7 @@
             "sections": {
                 "overview": { "title": "Lagring i din webbläsare", "body": "Portalen använder sessionslagring och lokal lagring för funktionerna som beskrivs här. Dessa använder inte egna cookies. Inga verktyg för reklam eller besöksanalys har lagts till. Webbläsarlagring skiljer sig från cookies, men lagring på användarens enhet kan ändå omfattas av regler om sådan lagring." },
                 "session": { "title": "Inloggning och påminnelser", "body": "sessionStorage innehåller auth_token, som används för autentiserade API-anrop, och overdueReminderDismissed, som kommer ihåg om en attestpåminnelse har stängts. Uppgifterna hör till flikens webbläsarsession. Inloggningstoken tas också bort vid utloggning. Beroende på webbläsarens sessionsåterställning kan sessionsdata återställas när flikar öppnas igen." },
-                "language": { "title": "Språkval", "body": "När du byter språk sparas valet under language i localStorage. Uppgiften kan finnas kvar tills webbplatsens lagring rensas. Den nuvarande implementationen sparar valet men startar fortfarande med engelska vid en ny sidladdning." },
+                "language": { "title": "Språkval", "body": "När du byter språk sparas valet i webbläsarens lokala lagring och återställs när sidan laddas om. Svenska används om inget språk har valts. Valet finns kvar tills webbplatsens lagring rensas." },
                 "currency": { "title": "Valutaval och kurser", "body": "Vald visningsvaluta och hämtade växelkurser hålls i appens minne. Valutan följer med när du navigerar, men återställs till SEK när sidan laddas om. Valutavalet sparas inte i localStorage eller i databasen." },
                 "control": { "title": "Så tar du bort lagringen", "body": "Du kan rensa webbplatsdata via webbläsarens inställningar eller utvecklarverktyg. Det kan logga ut dig och ta bort sparade val. Om du blockerar webbläsarlagring kan inloggning och vissa funktioner sluta fungera. Åtgärden raderar inte konton, betalningar eller loggar i portalens databas." }
             }
@@ -71,6 +72,8 @@
         "goToDashboard": "Gå till översikten"
     },
     "login": {
+        "welcome": "Välkommen till SEB",
+        "description": "Logga in med din e-postadress och ditt lösenord för att hantera ditt konto eller företagets ekonomi.",
         "invalidCredentials": "Fel e-postadress eller lösenord. Kontrollera båda och försök igen.",
         "unavailable": "Det gick inte att logga in. Kontrollera din e-postadress och ditt lösenord och försök igen. Om problemet kvarstår, försök senare.",
         "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.",
@@ -672,6 +675,7 @@
         "dismiss": "Stäng påminnelsen"
     },
     "saveInvest": {
+        "examples": {"emergencyFund":"Buffertsparande","longTermSavings":"Långsiktigt sparande","holidaySavings":"Semestersparande","newHome":"Ny bostad","summerHoliday":"Sommarsemester"},
         "eyebrow": "SPARANDE & INVESTERINGAR",
         "title": "Spara och investera",
         "description": "Bygg din ekonomiska framtid med enkla och flexibla alternativ.",

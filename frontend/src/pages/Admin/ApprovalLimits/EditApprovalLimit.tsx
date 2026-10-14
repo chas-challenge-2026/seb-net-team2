@@ -1,4 +1,5 @@
-import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { RequiredMark } from "../../../components/FormValidation/RequiredField";
+import { useFormValidation, type ValidationErrors } from "../../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import {
@@ -115,11 +116,11 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
             description: description.trim(),
         });
 
-        const fieldErrors: Record<string, string> = {};
+        const fieldErrors: ValidationErrors = {};
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = String(issue.path[0]);
-                fieldErrors[field] = t(`validation.approval.${field}`);
+                fieldErrors[field] = { key: `validation.approval.${field}` };
             }
         }
         if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
@@ -181,6 +182,8 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                             className={styles.label}
                         >
                             {t("approvalLimits.form.minAmount")}
+
+                            <RequiredMark />
                         </label>
 
                         <input
@@ -211,6 +214,8 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                             className={styles.label}
                         >
                             {t("approvalLimits.form.requiredApprovals")}
+
+                            <RequiredMark />
                         </label>
 
                         <input
@@ -241,6 +246,8 @@ function EditApprovalLimitForm({ limit }: EditApprovalLimitFormProps) {
                             className={styles.label}
                         >
                             {t("approvalLimits.form.description")}
+
+                            <RequiredMark />
                         </label>
 
                         <textarea

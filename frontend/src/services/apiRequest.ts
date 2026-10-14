@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import { z } from "zod";
 
 import { AppError } from "../errors/AppError";
@@ -40,7 +41,7 @@ export async function apiRequest<T extends z.ZodType>(
         });
     } catch {
         throw new AppError(
-            "Unable to connect to the server."
+            i18n.t("errors.connection")
         );
     }
 

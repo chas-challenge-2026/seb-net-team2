@@ -1,12 +1,21 @@
 .layout {
-    min-height: 100vh;
+    min-height: 100%;
 
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: var(--spacing-lg);
 
     padding: var(--spacing-lg);
     box-sizing: border-box;
+}
+
+.logo {
+    display: block;
+    width: 120px;
+    max-width: 100%;
+    height: auto;
 }
 
 .centeredCard {
@@ -21,32 +30,24 @@
     overflow: hidden;
 }
 
-.selectorContainer {
-    width: 100%;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    padding: 16px 40px 10px;
-    box-sizing: border-box;
+.welcome {
+    padding: var(--spacing-xl) 40px var(--spacing-md);
 }
 
-.line {
-    margin: 12px 0;
+.welcome h1 {
+    margin: 0 0 var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: var(--font-size-xl);
+    color: var(--color-text);
 }
 
-.line::before {
-    content: "";
-
-    display: block;
-
-    width: 200px;
-    height: 1px;
-
-    margin: 0 auto;
-
-    background-color: var(--color-border-light);
+.welcome p {
+    margin: 0;
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border-light);
+    line-height: 1.5;
+    color: var(--color-text-soft);
 }
 
 
@@ -75,7 +76,7 @@
     display: flex;
     flex-direction: column;
 
-    gap: 2px;
+    gap: var(--spacing-sm);
 }
 
 .label {
@@ -207,14 +208,10 @@
         width: 100%;
     }
 
-    .selectorContainer,
+    .welcome,
     .form {
         padding-left: var(--spacing-lg);
         padding-right: var(--spacing-lg);
-    }
-
-    .selectorContainer>* {
-        width: 100%;
     }
 
     .sessionExpired {

@@ -1,3 +1,4 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { useFormValidation } from "../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
 import { useState } from "react";
@@ -14,7 +15,7 @@ import { getLoginErrorMessage } from "./loginErrorMessage";
 
 import styles from "./Login.module.css";
 
-export default function PrivateLogin() {
+export default function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -56,13 +57,15 @@ export default function PrivateLogin() {
             <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
             <div className={styles.inputGrid}>
                 <div className={styles.formGroup}>
-                    <label htmlFor="private-email" className={styles.label}>
+                    <label htmlFor="login-email" className={styles.label}>
                         {t("login.email")}
+
+                        <RequiredMark />
                     </label>
 
                     <input
-                        id="private-email"
-                        {...validation.fieldProps("private-email")}
+                        id="login-email"
+                        {...validation.fieldProps("login-email")}
                         name="email"
                         type="email"
                         autoComplete="username"
@@ -74,17 +77,19 @@ export default function PrivateLogin() {
                         className={styles.input}
                         disabled={isLoggingIn}
                     />
-                    <FieldError id="private-email" errors={validation.errors} />
+                    <FieldError id="login-email" errors={validation.errors} />
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label htmlFor="private-password" className={styles.label}>
+                    <label htmlFor="login-password" className={styles.label}>
                         {t("login.password")}
+
+                        <RequiredMark />
                     </label>
 
                     <PasswordInput
-                        id="private-password"
-                        {...validation.fieldProps("private-password")}
+                        id="login-password"
+                        {...validation.fieldProps("login-password")}
                         name="password"
                         value={password}
                         onChange={handlePassword}
@@ -92,7 +97,7 @@ export default function PrivateLogin() {
                         required
                         disabled={isLoggingIn}
                     />
-                    <FieldError id="private-password" errors={validation.errors} />
+                    <FieldError id="login-password" errors={validation.errors} />
                 </div>
             </div>
 
@@ -103,6 +108,8 @@ export default function PrivateLogin() {
                     size="medium"
                     className={styles.formButton}
                     disabled={isLoggingIn}
+                    aria-label={t("login.login")}
+                    aria-busy={isLoggingIn}
                 >
                     {isLoggingIn ? (
                         <LoadingWheel size="small" />

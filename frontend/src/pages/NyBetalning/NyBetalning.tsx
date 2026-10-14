@@ -1,3 +1,4 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { type FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,7 +14,7 @@ import {
 import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
 import { ErrorSummary, FieldError } from "../../components/FormValidation/FormErrors";
-import { useFormValidation } from "../../components/FormValidation/useFormValidation";
+import { useFormValidation, type ValidationErrors } from "../../components/FormValidation/useFormValidation";
 import { useModalFocus } from "../../hooks/useModalFocus";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
@@ -181,19 +182,19 @@ export function NyBetalning() {
 
     function validatePaymentForm(formElement: HTMLFormElement, formData: PaymentForm, currentAmount: number) {
         const result = paymentSchema.safeParse(formData);
-        const customErrors: Record<string, string> = {};
+        const customErrors: ValidationErrors = {};
 
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = String(issue.path[0] ?? "");
-                if (field && !customErrors[field]) customErrors[field] = t(issue.message);
+                if (field && !customErrors[field]) customErrors[field] = { key: issue.message };
             }
         }
 
         if (!selectedAccount) {
-            customErrors.fromAccountId = t("payment.errors.selectAccount");
+            customErrors.fromAccountId = { key: "payment.errors.selectAccount" };
         } else if (currentAmount > selectedAccount.balance) {
-            customErrors.amount = t("payment.errors.insufficientBalance");
+            customErrors.amount = { key: "payment.errors.insufficientBalance" };
         }
 
         const nativeValidationPassed = validation.validate(formElement, customErrors);
@@ -360,13 +361,15 @@ export function NyBetalning() {
                         <div className={styles.formFields}>
                         <label className={styles.accountField} htmlFor="fromAccountId">
                             {t("payment.fields.fromAccount")}
+
+                            <RequiredMark />
                             <select
                                 id="fromAccountId"
                                 name="fromAccountId"
                                 value={selectedAccount?.id ?? ""}
                                 {...validation.fieldProps("fromAccountId", accountsError || isLoadingAccounts ? "source-account-status" : undefined)}
                                 disabled={isLoadingAccounts || accountsError || isSubmitting}
-                                onChange={(event) => updateField("fromAccountId", event.target.value)}
+                                onChange={(event) => updateField("fromAccountId", event.target.value)} required
                             >
                                 {accounts.length === 0 && (
                                     <option value="">
@@ -396,6 +399,8 @@ export function NyBetalning() {
 
                         <label className={styles.recipientField} htmlFor="recipient">
                             {t("payment.fields.recipient")}
+
+                            <RequiredMark />
                             <input
                                 id="recipient"
                                 name="recipient"
@@ -410,6 +415,8 @@ export function NyBetalning() {
 
                         <label className={styles.ibanField} htmlFor="iban">
                             {t("payment.fields.iban")}
+
+                            <RequiredMark />
                             <input
                                 id="iban"
                                 name="iban"
@@ -442,6 +449,8 @@ export function NyBetalning() {
 
                         <label className={styles.amountField} htmlFor="amount">
                             {t("payment.fields.amount")}
+
+                            <RequiredMark />
                             <div className={styles.amountInput}>
                                 <input
                                     id="amount"

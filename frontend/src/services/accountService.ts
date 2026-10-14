@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 
 import { z } from 'zod'
 
@@ -29,7 +30,7 @@ export async function fetchAccounts(): Promise<Account[]> {
     const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
-        throw new Error('VITE_API_URL is not configured.')
+        throw new Error(i18n.t("errors.configuration"))
     }
 
     const accounts = await apiRequest(
@@ -61,7 +62,7 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
     const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
-        throw new Error('VITE_API_URL is not configured.')
+        throw new Error(i18n.t("errors.configuration"))
     }
 
     const payments = await apiRequest(
@@ -99,7 +100,7 @@ export async function createPayment(
     const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
-        throw new Error('VITE_API_URL is not configured.')
+        throw new Error(i18n.t("errors.configuration"))
     }
 
     return apiRequest(

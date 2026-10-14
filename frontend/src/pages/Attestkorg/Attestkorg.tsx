@@ -1,3 +1,4 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { focusField } from "../../components/FormValidation/useFormValidation";
 import { useModalFocus } from "../../hooks/useModalFocus";
 import { FieldError } from "../../components/FormValidation/FormErrors";
@@ -695,7 +696,7 @@ export function Attestkorg() {
                             <label htmlFor="confirm-comment">
                                 {confirmAction.kind === "reject"
                                     ? `${t("approvalInbox.comment.rejectReasonLabel")} ${t("approvalInbox.comment.required")}`
-                                    : `${t("approvalInbox.comment.label")} ${t("approvalInbox.comment.optional")}`}
+                                    : `${t("approvalInbox.comment.label")} ${t("approvalInbox.comment.optional")}`}{confirmAction.kind === "reject" && <RequiredMark />}
                             </label>
 
                             <textarea
