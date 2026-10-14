@@ -69,13 +69,16 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
-    policy.AllowAnyOrigin()
+    policy.WithOrigins("http://localhost:3000")
           .AllowAnyHeader()
           .AllowAnyMethod();
     });
     options.AddPolicy("ProductionPolicy", policy =>
     {
-        policy.WithOrigins("https://our-production-domain.com")
+        policy.WithOrigins(
+                "https://seb-net-team2.team.chas-challenge.comerit.se", //prod
+                "https://seb-net-team2-dev.team.chas-challenge.comerit.se" //stage
+                )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -146,19 +149,21 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Migrera och seeda lokal databas
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
+    db.Database.Migrate();
+
+    // Primary seed path comes from configuration
+    var seedPath = app.Configuration["Seed:Path"];
+    if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
+        db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
+}
+  
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Migrera och seeda lokal databas (endast Development)
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
-        db.Database.Migrate();
-
-        var seedPath = app.Configuration["Seed:Path"];
-        if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
-            db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
-    }
     app.UseSwagger();
     app.MapScalarApiReference(options =>
     {
