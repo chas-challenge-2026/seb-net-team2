@@ -4,6 +4,15 @@ import { initReactI18next } from "react-i18next";
 import en from './locales/en.json';
 import sv from './locales/sv.json';
 
+function getSavedLanguage() {
+    try {
+        const language = localStorage.getItem("language");
+        return language === "sv" || language === "en" ? language : "sv";
+    } catch {
+        return "sv";
+    }
+}
+
 i18n
     .use(initReactI18next)
     .init({
@@ -15,8 +24,8 @@ i18n
                 translation: sv
             },
         },
-        lng: "en",
-        fallbackLng: "en",
+        lng: getSavedLanguage(),
+        fallbackLng: "sv",
         interpolation: {
             escapeValue: false,
         },
@@ -26,6 +35,6 @@ function updateDocumentLanguage(language: string) {
     document.documentElement.lang = language.startsWith("sv") ? "sv" : "en";
 }
 i18n.on("languageChanged", updateDocumentLanguage);
-updateDocumentLanguage(i18n.resolvedLanguage ?? "en");
+updateDocumentLanguage(i18n.resolvedLanguage ?? "sv");
 
 export default i18n;

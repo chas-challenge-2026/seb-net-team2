@@ -14,8 +14,7 @@ const notificationListSchema = z.array(notificationDtoSchema);
 const emptyResponseSchema = z.undefined();
 
 export async function fetchNotifications(): Promise<Notification[]> {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (!apiUrl) throw new Error("VITE_API_URL is not configured.");
+    const apiUrl = import.meta.env.VITE_API_URL || window.location.origin;
 
     const data = await apiRequest(
         `${apiUrl}/api/Notifications`,
@@ -34,8 +33,7 @@ export async function fetchNotifications(): Promise<Notification[]> {
 }
 
 export async function markNotificationAsRead(id: string): Promise<void> {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (!apiUrl) throw new Error("VITE_API_URL is not configured.");
+    const apiUrl = import.meta.env.VITE_API_URL || window.location.origin;
 
     await apiRequest(
         `${apiUrl}/api/Notifications/${id}/read`,

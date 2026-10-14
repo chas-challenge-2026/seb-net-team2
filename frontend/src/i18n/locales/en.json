@@ -1,4 +1,5 @@
 {
+    "errors": {"connection":"Unable to connect to the server. Check your connection and try again.","request":"Request failed. Please try again.","configuration":"The server address is not configured.","exchangeConnection":"Unable to connect to the exchange rate service.","exchangeFetch":"Unable to fetch the exchange rate.","exchangeMismatch":"The exchange rate does not match the requested currencies."},
     "a11y": {"notFound":"Page not found","notFoundDescription":"Check the address or return to the home page.","home":"Go to home page","register":"Register","customerType":"Customer type","login":"Log in","skip":"Skip to main content","main":"Main content","dialog":"Dialog","language":"Language","mortgage":"Mortgage"},
     "information": {
         "navigation": "Information and policies",
@@ -92,7 +93,7 @@
                 },
                 "language": {
                     "title": "Language choice",
-                    "body": "Changing language saves the choice under language in localStorage. It can remain until the site's storage is cleared. The current implementation saves the choice but still starts in English on a fresh page load."
+                    "body": "Your language choice is saved in the browser's local storage and restored when the page reloads. Swedish is used if no language has been selected. Your choice remains until the website's storage is cleared."
                 },
                 "currency": {
                     "title": "Currency choice and rates",
@@ -128,6 +129,8 @@
         "goToDashboard": "Go to dashboard"
     },
     "login": {
+        "welcome": "Welcome to SEB",
+        "description": "Log in with your email address and password to manage your account or your company's finances.",
         "invalidCredentials": "Incorrect email or password. Check both and try again.",
         "unavailable": "We could not log you in. Check your email and password and try again. If the problem continues, try again later.",
         "connectionFailed": "Could not connect to the server. Check your connection and try again.",
@@ -729,6 +732,7 @@
         "dismiss": "Dismiss reminder"
     },
     "saveInvest": {
+        "examples": {"emergencyFund":"Emergency fund","longTermSavings":"Long-term savings","holidaySavings":"Holiday savings","newHome":"New home","summerHoliday":"Summer holiday"},
         "eyebrow": "SAVINGS & INVESTMENTS",
         "title": "Save and invest",
         "description": "Build your financial future with simple, flexible options.",

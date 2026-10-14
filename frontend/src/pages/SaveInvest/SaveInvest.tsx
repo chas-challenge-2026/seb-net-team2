@@ -1,3 +1,4 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { useFormValidation } from "../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
 import { useEffect, useRef, useState, type FormEvent } from "react";
@@ -22,25 +23,27 @@ type Tab = "savings" | "investments" | "goals";
 
 type SavingsAccount = {
     name: string;
+    nameKey?: string;
     balance: number;
     rate: string;
 };
 
 type SavingsGoal = {
     name: string;
+    nameKey?: string;
     saved: number;
     target: number;
 };
 
 const accounts: SavingsAccount[] = [
-    { name: "Emergency fund", balance: 125000, rate: "2.85%" },
-    { name: "Long-term savings", balance: 299000, rate: "3.50%" },
-    { name: "Holiday savings", balance: 42000, rate: "2.40%" },
+    { name: "Emergency fund", nameKey: "saveInvest.examples.emergencyFund", balance: 125000, rate: "2.85%" },
+    { name: "Long-term savings", nameKey: "saveInvest.examples.longTermSavings", balance: 299000, rate: "3.50%" },
+    { name: "Holiday savings", nameKey: "saveInvest.examples.holidaySavings", balance: 42000, rate: "2.40%" },
 ];
 
 const goals: SavingsGoal[] = [
-    { name: "New home", saved: 185000, target: 350000 },
-    { name: "Summer holiday", saved: 18000, target: 30000 },
+    { name: "New home", nameKey: "saveInvest.examples.newHome", saved: 185000, target: 350000 },
+    { name: "Summer holiday", nameKey: "saveInvest.examples.summerHoliday", saved: 18000, target: 30000 },
 ];
 
 export function SaveInvest() {
@@ -75,7 +78,7 @@ export function SaveInvest() {
 
     function handleCreateAccount(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        if (!validation.validate(event.currentTarget, { "savings-account-name": !accountName.trim() ? t("validation.required", { field: t("saveInvest.modals.account.name") }) : "" })) return;
+        if (!validation.validate(event.currentTarget, { "savings-account-name": !accountName.trim() ? { key: "validation.required", fieldKey: "saveInvest.modals.account.name" } : "" })) return;
 
         if (!accountName.trim()) return;
 
@@ -90,12 +93,12 @@ export function SaveInvest() {
 
         setAccountName("");
         setModal(null);
-        showActionMessage(t("saveInvest.messages.accountCreated"));
+        showActionMessage("saveInvest.messages.accountCreated");
     }
 
     function handleCreateGoal(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        if (!validation.validate(event.currentTarget, { "savings-goal-name": !goalName.trim() ? t("validation.required", { field: t("saveInvest.modals.goal.name") }) : "" })) return;
+        if (!validation.validate(event.currentTarget, { "savings-goal-name": !goalName.trim() ? { key: "validation.required", fieldKey: "saveInvest.modals.goal.name" } : "" })) return;
 
         const target = Number(goalTarget);
 
@@ -113,7 +116,7 @@ export function SaveInvest() {
         setGoalName("");
         setGoalTarget("");
         setModal(null);
-        showActionMessage(t("saveInvest.messages.goalCreated"));
+        showActionMessage("saveInvest.messages.goalCreated");
     }
 
     return (
@@ -140,7 +143,7 @@ export function SaveInvest() {
                 <div className={styles.actionMessage} role="status">
                     <span className={styles.actionMessageText}>
                         <CircleCheck size={18} aria-hidden="true" />
-                        {actionMessage}
+                        {t(actionMessage)}
                     </span>
 
                     <button
@@ -207,7 +210,7 @@ export function SaveInvest() {
                                 .slice(0, showAllAccounts ? accountList.length : 2)
                                 .map((account) => (
                                     <Card key={account.name} className={styles.accountCard}>
-                                        <span className={styles.cardLabel}>{account.name}</span>
+                                        <span className={styles.cardLabel}>{account.nameKey ? t(account.nameKey) : account.name}</span>
 
                                         <strong>
                                             {account.balance.toLocaleString(locale)} SEK
@@ -292,7 +295,7 @@ export function SaveInvest() {
                             const progress = Math.round((goal.saved / goal.target) * 100);
 
                             return (
-                                <Card key={goal.name} title={goal.name}>
+                                <Card key={goal.name} title={goal.nameKey ? t(goal.nameKey) : goal.name}>
                                     <div className={styles.goalAmounts}>
                                         <strong>{goal.saved.toLocaleString(locale)} SEK</strong>
                                         <span>
@@ -347,6 +350,8 @@ export function SaveInvest() {
                                 <label className={styles.modalLabel}>
                                     {t("saveInvest.modals.account.name")}
 
+                                    <RequiredMark />
+
                                     <input id="savings-account-name" required {...validation.fieldProps("savings-account-name")}
                                         value={accountName}
                                         onChange={(event) => setAccountName(event.target.value)}
@@ -375,6 +380,8 @@ export function SaveInvest() {
                                 <label className={styles.modalLabel}>
                                     {t("saveInvest.modals.goal.name")}
 
+                                    <RequiredMark />
+
                                     <input id="savings-goal-name" required {...validation.fieldProps("savings-goal-name")}
                                         value={goalName}
                                         onChange={(event) => setGoalName(event.target.value)}
@@ -385,6 +392,8 @@ export function SaveInvest() {
 
                                 <label className={styles.modalLabel}>
                                     {t("saveInvest.modals.goal.target")}
+
+                                    <RequiredMark />
 
                                     <input id="savings-goal-target" required {...validation.fieldProps("savings-goal-target")}
                                         type="number"
@@ -410,7 +419,7 @@ export function SaveInvest() {
                         {modal === "manage" && selectedAccount && (
                             <>
                                 <p className={styles.eyebrow}>{t("saveInvest.modals.manage.eyebrow")}</p>
-                                <h2 id="save-invest-modal-title">{selectedAccount.name}</h2>
+                                <h2 id="save-invest-modal-title">{selectedAccount.nameKey ? t(selectedAccount.nameKey) : selectedAccount.name}</h2>
 
                                 <p className={styles.investmentTotal}>
                                     {selectedAccount.balance.toLocaleString(locale)} SEK
@@ -426,7 +435,7 @@ export function SaveInvest() {
                                     variant="ghost"
                                     onClick={() => {
                                         setModal(null);
-                                        showActionMessage(t("saveInvest.messages.accountOpened"));
+                                        showActionMessage("saveInvest.messages.accountOpened");
                                     }}
                                 >
                                     {t("common.done")}

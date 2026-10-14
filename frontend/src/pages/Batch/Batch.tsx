@@ -1,8 +1,9 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { focusField } from "../../components/FormValidation/useFormValidation";
 import validationStyles from "../../components/FormValidation/FormValidation.module.css";
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { TFunction } from "i18next";
+import type { TranslatedError } from "../../components/FormValidation/useFormValidation";
 import { z } from "zod";
 import {
     CircleCheck,
@@ -34,7 +35,7 @@ type BatchRow = {
     amount: number;
     reference: string;
     success: boolean;
-    error?: string;
+    error?: TranslatedError;
 };
 
 function splitCsvLines(content: string): string[] {
@@ -50,8 +51,8 @@ function isValidHeader(headerLine: string): boolean {
     );
 }
 
-function parseBatchRows(dataLines: string[], validAccountIds: string[], t: TFunction): BatchRow[] {
-    return dataLines.map((line, index) => {
+function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRow[] {
+    return dataLines.map((line, index): BatchRow => {
         const rowNumber = index + 2;
         const parts = line.split(",").map((part) => part.trim());
 
@@ -62,7 +63,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[], t: TFunc
                 amount: 0,
                 reference: parts[3] ?? "",
                 success: false,
-                error: t("batch.errors.columns", { count: parts.length }),
+                error: { key: "batch.errors.columns", values: { count: parts.length } },
             };
         }
 
@@ -76,7 +77,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[], t: TFunc
                 amount: 0,
                 reference,
                 success: false,
-                error: t("batch.errors.unknownAccount", { id: fromAccountId }),
+                error: { key: "batch.errors.unknownAccount", values: { id: fromAccountId } },
             };
         }
 
@@ -87,7 +88,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[], t: TFunc
                 amount: 0,
                 reference,
                 success: false,
-                error: t("batch.errors.invalidIban", { iban: toIbanRaw }),
+                error: { key: "batch.errors.invalidIban", values: { iban: toIbanRaw } },
             };
         }
 
@@ -100,7 +101,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[], t: TFunc
                 amount: 0,
                 reference,
                 success: false,
-                error: t("batch.errors.invalidAmount", { amount: amountRaw }),
+                error: { key: "batch.errors.invalidAmount", values: { amount: amountRaw } },
             };
         }
 
@@ -113,8 +114,8 @@ export function Batch() {
     const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts();
 
     const [file, setFile] = useState<File | null>(null);
-    const [generalError, setGeneralError] = useState<string | null>(null);
-    const [fileError, setFileError] = useState<string | null>(null);
+    const [generalError, setGeneralError] = useState<TranslatedError | null>(null);
+    const [fileError, setFileError] = useState<TranslatedError | null>(null);
     const [results, setResults] = useState<BatchRow[] | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -124,12 +125,12 @@ export function Batch() {
     const csvFileSchema = z.object({
         name: z.string().refine(
             (name) => name.toLowerCase().endsWith(".csv"),
-            { message: t("batch.errors.csvOnly") }
+            { message: "batch.errors.csvOnly" }
         ),
-        size: z.number().max(MAX_FILE_SIZE_BYTES, t("batch.errors.fileTooLarge")),
+        size: z.number().max(MAX_FILE_SIZE_BYTES, "batch.errors.fileTooLarge"),
     });
 
-    function reportFileError(message: string) {
+    function reportFileError(message: TranslatedError) {
         setFileError(message);
         requestAnimationFrame(() => focusField("batch-file"));
     }
@@ -154,7 +155,7 @@ export function Batch() {
 
         if (!result.success) {
             setFile(selected);
-            reportFileError(result.error.issues[0].message);
+            reportFileError({ key: result.error.issues[0].message });
             return;
         }
 
@@ -173,18 +174,18 @@ export function Batch() {
         event.preventDefault();
 
         if (!file) {
-            reportFileError(t("batch.errors.chooseFile"));
+            reportFileError({ key: "batch.errors.chooseFile" });
             return;
         }
 
         if (isLoadingAccounts) {
-            setGeneralError(t("batch.errors.accountsLoading"));
+            setGeneralError({ key: "batch.errors.accountsLoading" });
             return;
         }
 
         const fileValidation = csvFileSchema.safeParse(file);
         if (!fileValidation.success) {
-            reportFileError(fileValidation.error.issues[0].message);
+            reportFileError({ key: fileValidation.error.issues[0].message });
             return;
         }
         setFileError(null);
@@ -197,9 +198,7 @@ export function Batch() {
 
             if (lines.length === 0 || !isValidHeader(lines[0])) {
                 reportFileError(
-                    t("batch.errors.header", {
-                        header: EXPECTED_HEADER.join(","),
-                    })
+                    { key: "batch.errors.header", values: { header: EXPECTED_HEADER.join(",") } }
                 );
 
                 return;
@@ -208,21 +207,21 @@ export function Batch() {
             const dataLines = lines.slice(1);
 
             if (dataLines.length === 0) {
-                reportFileError(t("batch.errors.empty"));
+                reportFileError({ key: "batch.errors.empty" });
                 return;
             }
 
             const validAccountIds = accounts.map((account) => account.id);
 
-            const rows = parseBatchRows(dataLines, validAccountIds, t);
+            const rows = parseBatchRows(dataLines, validAccountIds);
             setResults(rows);
             if (rows.some(row => !row.success)) {
-                reportFileError(t("validation.batchRows"));
+                reportFileError({ key: "validation.batchRows" });
             } else {
                 resetFileInput();
             }
         } catch {
-            setGeneralError(t("validation.fileRead"));
+            setGeneralError({ key: "validation.fileRead" });
         } finally {
             setIsProcessing(false);
         }
@@ -263,7 +262,7 @@ export function Batch() {
 
             <div className={styles.layout}>
                 <Card>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <div className={styles.sectionHeading}>
                             <h2>{t("batch.file.title")}</h2>
                             <p>{t("batch.file.description")}</p>
@@ -271,6 +270,8 @@ export function Batch() {
 
                         <label>
                             {t("batch.file.label")}
+
+                            <RequiredMark />
                             <input
                                 id="batch-file"
                                 className={validationStyles.control}
@@ -281,6 +282,7 @@ export function Batch() {
                                 type="file"
                                 accept=".csv"
                                 onChange={handleFileChange}
+                                required
                             />
                         </label>
 
@@ -289,11 +291,11 @@ export function Batch() {
                         {fileError && (
                             <div id="batch-file-error" className={styles.errorBanner} role="alert">
                                 <TriangleAlert size={18} aria-hidden="true" />
-                                <span>{fileError}</span>
+                                <span>{t(fileError.key, fileError.values)}</span>
                             </div>
                         )}
 
-                        {generalError && <div className={styles.errorBanner} role="alert">{generalError}</div>}
+                        {generalError && <div className={styles.errorBanner} role="alert">{t(generalError.key, generalError.values)}</div>}
 
                         <div className={styles.actions}>
                             <Button
@@ -406,7 +408,7 @@ export function Batch() {
                                             ) : (
                                                 <span className={styles.statusError}>
                                                     <CircleX size={16} aria-hidden="true" />
-                                                    {row.error}
+                                                    {row.error && t(row.error.key, row.error.values)}
                                                 </span>
                                             )}
                                         </td>

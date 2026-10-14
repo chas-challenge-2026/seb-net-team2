@@ -112,7 +112,7 @@
 
 .layout > * {
     width: 100%;
-    max-width: 54rem;
+    max-width: 100%;
 }
 
 .formCard {

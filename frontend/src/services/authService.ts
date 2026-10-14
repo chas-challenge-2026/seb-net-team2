@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import { apiRequest } from "./apiRequest";
 import { z } from 'zod';
 
@@ -14,7 +15,7 @@ const API_URL = (import.meta.env.VITE_API_URL || window.location.origin);
 
 if (!API_URL) {
     throw new Error(
-        "VITE_API_URL is not configured."
+        i18n.t("errors.configuration")
     );
 }
 

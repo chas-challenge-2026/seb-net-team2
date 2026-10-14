@@ -1,5 +1,6 @@
+import { RequiredMark } from "../../../components/FormValidation/RequiredField";
 import { createUserSchema } from "../../../schemas/userSchema";
-import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { useFormValidation, type ValidationErrors } from "../../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import { Link } from "@tanstack/react-router";
@@ -50,14 +51,14 @@ export default function CreateUser() {
         event.preventDefault();
         if (!user) return;
         const result = createUserSchema.safeParse({ tenantId: user.tenantId, name: name.trim(), email: email.trim(), password, role });
-        const fieldErrors: Record<string, string> = {};
+        const fieldErrors: ValidationErrors = {};
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = String(issue.path[0]);
-                const label = t(`users.form.${field}`);
+                const fieldKey = `users.form.${field}`;
                 fieldErrors[field] = issue.code === "too_big"
-                    ? t("validation.maxLength", { field: label, max: issue.maximum })
-                    : field === "email" ? t("validation.email") : t("validation.required", { field: label });
+                    ? { key: "validation.maxLength", fieldKey, values: { max: Number(issue.maximum) } }
+                    : field === "email" ? { key: "validation.email" } : { key: "validation.required", fieldKey };
             }
         }
         if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
@@ -95,6 +96,8 @@ export default function CreateUser() {
                     <div className={styles.formGroup}>
                         <label htmlFor="name" className={styles.label}>
                             {t("users.form.name")}
+
+                            <RequiredMark />
                         </label>
 
                         <input
@@ -116,6 +119,8 @@ export default function CreateUser() {
                     <div className={styles.formGroup}>
                         <label htmlFor="email" className={styles.label}>
                             {t("users.form.email")}
+
+                            <RequiredMark />
                         </label>
 
                         <input
@@ -138,6 +143,8 @@ export default function CreateUser() {
                     <div className={styles.formGroup}>
                         <label htmlFor="password" className={styles.label}>
                             {t("users.form.password")}
+
+                            <RequiredMark />
                         </label>
 
                         <PasswordInput
@@ -157,6 +164,8 @@ export default function CreateUser() {
                     <div className={styles.formGroup}>
                         <label htmlFor="role" className={styles.label}>
                             {t("users.form.role")}
+
+                            <RequiredMark />
                         </label>
 
                         <select
@@ -166,7 +175,7 @@ export default function CreateUser() {
                             className={styles.select}
                             value={role}
                             disabled={createMutation.isPending}
-                            onChange={(event) => setRole(event.target.value as UserRole)}
+                            onChange={(event) => setRole(event.target.value as UserRole)} required
                         >
                             <option value="User">{t("users.roles.User")}</option>
                             <option value="Initiator">{t("users.roles.Initiator")}</option>

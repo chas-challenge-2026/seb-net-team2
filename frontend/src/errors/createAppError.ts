@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import { AppError } from './AppError';
 import type { ProblemDetails } from "./ProblemDetails";
 
@@ -20,13 +21,13 @@ export async function createAppError(
             const problem = data as ProblemDetails;
 
             return new AppError(
-                problem.title ?? "Request failed.",
+                problem.title ?? i18n.t("errors.request"),
                 response.status,
                 problem.detail
             );
         } catch {
             return new AppError(
-                "Request failed.",
+                i18n.t("errors.request"),
                 response.status
             );
         }
@@ -35,7 +36,7 @@ export async function createAppError(
     const message = await response.text();
 
     return new AppError(
-        message || "Request failed.",
+        message || i18n.t("errors.request"),
         response.status
     );
 }

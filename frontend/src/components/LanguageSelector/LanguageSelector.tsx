@@ -4,8 +4,8 @@ import { Check, ChevronDown } from "lucide-react";
 import styles from "../Dropdown/Dropdown.module.css";
 
 const languages = [
-    { code: "en", label: "English", flagClass: "fi fi-gb" },
     { code: "sv", label: "Svenska", flagClass: "fi fi-se" },
+    { code: "en", label: "English", flagClass: "fi fi-gb" },
 ] as const;
 
 export default function LanguageSelector() {

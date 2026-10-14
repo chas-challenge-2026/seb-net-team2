@@ -1,3 +1,4 @@
+import i18n from "../i18n/i18n";
 import { PRIMARY_CURRENCY } from "../constants/currency";
 import { AppError } from "../errors/AppError";
 import { exchangeRateSchema, type ExchangeRate } from "../schemas/exchangeRateSchema";
@@ -11,18 +12,18 @@ export async function fetchExchangeRate(currency: string, primaryCurrency: strin
     try {
         response = await fetch(url);
     } catch {
-        throw new AppError("Unable to connect to the exchange rate service.");
+        throw new AppError(i18n.t("errors.exchangeConnection"));
     }
 
     if (!response.ok) {
-        throw new AppError("Unable to fetch the exchange rate.", response.status);
+        throw new AppError(i18n.t("errors.exchangeFetch"), response.status);
     }
 
     const data: unknown = await response.json();
     const exchangeRate = exchangeRateSchema.parse(data);
 
     if (exchangeRate.base !== base || exchangeRate.quote !== primaryCurrency) {
-        throw new AppError("The exchange rate does not match the requested currencies.");
+        throw new AppError(i18n.t("errors.exchangeMismatch"));
     }
 
     return exchangeRate;
