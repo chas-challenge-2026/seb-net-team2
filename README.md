@@ -148,3 +148,14 @@ lösenordet och bygger upp användarobjektet med det innehåll en användare ska
 Servicen lämnar sedan över till repositoryt, som ansvarar för kommunikationen
 med databasen. Repositoryt använder DbContext (EF Core) för att skriva och läsa
 data, och slutligen sparas användaren i databasen.
+
+## Contributors
+- https://github.com/LisaEbbhagen
+- https://github.com/oligerta-braholli
+- https://github.com/meskilsson
+- https://github.com/AlCapone1234
+- https://github.com/Grahnnen
+- https://github.com/niklaserikssoon
+- https://github.com/JohannesFolkesson
+- https://github.com/isashiphotmailcom
+- https://github.com/CitizenSmithDev
