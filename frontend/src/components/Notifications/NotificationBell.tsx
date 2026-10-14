@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { fetchNotifications, markNotificationAsRead } from "../../services/notificationService";
+import { fetchPendingApprovals } from "../../services/approvalService";
+import { useAuth } from "../../hooks/useAuth";
+import { APPROVALS_QUERY_KEY } from "../../hooks/useApprovals";
 import type { Notification, NotificationType } from "../../types/notifications";
 
 import styles from "./NotificationBell.module.css";
@@ -15,6 +19,14 @@ const typeIcons: Record<NotificationType, string> = {
 
 export function NotificationBell() {
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const canWatchApprovals = user?.role === "Attestant" || user?.role === "Admin";
+    const { data: pendingApprovals, isError: approvalWatchError } = useQuery({
+        queryKey: APPROVALS_QUERY_KEY,
+        queryFn: fetchPendingApprovals,
+        enabled: canWatchApprovals,
+        refetchInterval: 15_000,
+    });
 
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -24,25 +36,77 @@ export function NotificationBell() {
 
     const containerRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const previousPendingIdsRef = useRef<Set<string> | null>(null);
+
+    useEffect(() => {
+        if (!canWatchApprovals) {
+            previousPendingIdsRef.current = null;
+            return;
+        }
+
+        if (!pendingApprovals) return;
+
+        const currentIds = new Set(pendingApprovals.map((approval) => approval.stepId));
+        const previousIds = previousPendingIdsRef.current;
+
+        const newNotifications: Notification[] = pendingApprovals
+            .filter((approval) => !previousIds?.has(approval.stepId))
+            .map((approval) => ({
+                id: `pending:${approval.stepId}`,
+                title: "notifications.approvalTitle",
+                message: t("notifications.newApprovalMessage", {
+                    reference: approval.reference || approval.paymentId,
+                }),
+                type: "approval",
+                createdAt: new Date().toISOString(),
+                isRead: false,
+                href: "/attestkorg",
+            }));
+
+        if (newNotifications.length > 0) {
+            setNotifications((current) => {
+                const currentIds = new Set(current.map((notification) => notification.id));
+                return [
+                    ...newNotifications.filter((notification) => !currentIds.has(notification.id)),
+                    ...current,
+                ];
+            });
+        }
+
+        previousPendingIdsRef.current = currentIds;
+    }, [canWatchApprovals, pendingApprovals, t]);
 
     useEffect(() => {
         let isCurrent = true;
 
-        void fetchNotifications()
-            .then((items) => {
-                if (isCurrent) setNotifications(items);
-            })
-            .catch(() => {
-                if (isCurrent) setLoadError(true);
-            })
-            .finally(() => {
-                if (isCurrent) setIsLoading(false);
-            });
+        function loadNotifications() {
+            void fetchNotifications(user?.role)
+                .then((items) => {
+                    if (!isCurrent) return;
+                    setLoadError(false);
+                    setNotifications((current) => [
+                        ...current.filter((notification) =>
+                            canWatchApprovals && notification.id.startsWith("pending:")
+                        ),
+                        ...items,
+                    ]);
+                })
+                .catch(() => {
+                    if (isCurrent) setLoadError(true);
+                })
+                .finally(() => {
+                    if (isCurrent) setIsLoading(false);
+                });
+        }
+
+        loadNotifications();
+        const timer = window.setInterval(loadNotifications, 15_000);
 
         return () => {
             isCurrent = false;
+            window.clearInterval(timer);
         };
-    }, []);
+    }, [canWatchApprovals, user?.role]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -81,6 +145,8 @@ export function NotificationBell() {
                     : notification
             )
         );
+        if (notification.id.startsWith("pending:")) return;
+
         try {
             await markNotificationAsRead(notificationId);
         } catch {
@@ -109,20 +175,25 @@ export function NotificationBell() {
         );
 
         const results = await Promise.allSettled(
-            unreadNotifications.map((notification) => markNotificationAsRead(notification.id))
+            unreadNotifications
+                .filter((notification) => !notification.id.startsWith("pending:"))
+                .map((notification) => markNotificationAsRead(notification.id))
         );
 
         if (results.some((result) => result.status === "rejected")) {
             setActionError(true);
             try {
-                setNotifications(await fetchNotifications());
+                setNotifications(await fetchNotifications(user?.role));
             } catch {
                 setNotifications(previousNotifications);
             }
         }
     }
 
-    const unreadCount = notifications.filter(
+    const visibleNotifications = user?.role === "Initiator"
+        ? notifications.filter((notification) => notification.type === "payment")
+        : notifications;
+    const unreadCount = visibleNotifications.filter(
         (notification) => !notification.isRead
     ).length;
 
@@ -198,22 +269,28 @@ export function NotificationBell() {
                         </p>
                     )}
 
+                    {approvalWatchError && (
+                        <p role="alert" className={styles.loadError}>
+                            {t("notifications.approvalWatchError")}
+                        </p>
+                    )}
+
                     {actionError && (
                         <p role="alert" className={styles.loadError}>
                             {t("notifications.updateError")}
                         </p>
                     )}
 
-                    {isLoading ? (
+                    {isLoading && visibleNotifications.length === 0 ? (
                         <p role="status" className={styles.empty}>{t("notifications.loading")}</p>
-                    ) : loadError ? null : notifications.length === 0 ? (
+                    ) : visibleNotifications.length === 0 ? (
                         <div className={styles.empty}>
                             <span aria-hidden="true">🔕</span>
                             <p>{t("notifications.empty")}</p>
                         </div>
                     ) : (
                         <div className={styles.list}>
-                            {notifications.map((notification) => (
+                            {visibleNotifications.map((notification) => (
                                 <Link
                                     key={notification.id}
                                     to={notification.href ?? "/dashboard"}

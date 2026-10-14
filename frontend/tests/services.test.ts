@@ -1,5 +1,6 @@
 import { expect, jest, test } from '@jest/globals'
 import { fetchAccounts, createPayment } from '../src/services/accountService'
+import { fetchNotifications } from '../src/services/notificationService'
 
 test('US-70: hämtar konton från rätt adress och läser svaret', async () => {
   jest.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify([{
@@ -33,4 +34,30 @@ test('US-70: skickar betalningsdata som JSON till rätt adress', async () => {
   expect((options?.headers as Headers).get('Content-Type')).toBe('application/json')
   expect(JSON.parse(options?.body as string)).toEqual(details)
   expect(result.id).toBe('00000000-0000-4000-8000-000000000042')
+})
+
+test('initiators only receive payment decision notifications', async () => {
+  jest.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify([
+    { id: 1, paymentId: 10, message: 'Du har en betalning att attestera.', isRead: false, createdAt: '2026-10-14T10:00:00Z' },
+    { id: 2, paymentId: 11, message: "Din betalning med referens 'Faktura 12' har godkänts.", isRead: false, createdAt: '2026-10-14T10:05:00Z' },
+    { id: 3, paymentId: 12, message: "Din betalning med referens 'Faktura 13' har avslagits.", isRead: false, createdAt: '2026-10-14T10:10:00Z' },
+  ])))
+
+  const notifications = await fetchNotifications('Initiator')
+
+  expect(notifications).toHaveLength(2)
+  expect(notifications.map((notification) => notification.type)).toEqual(['payment', 'payment'])
+  expect(notifications.map((notification) => notification.href)).toEqual(['/dashboard', '/dashboard'])
+})
+
+test('attestants still receive approval reminders', async () => {
+  jest.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify([
+    { id: 1, paymentId: 10, message: 'Du har en betalning att attestera.', isRead: false, createdAt: '2026-10-14T10:00:00Z' },
+  ])))
+
+  const notifications = await fetchNotifications('Attestant')
+
+  expect(notifications).toHaveLength(1)
+  expect(notifications[0].type).toBe('approval')
+  expect(notifications[0].href).toBe('/attestkorg')
 })

@@ -657,6 +657,8 @@
     "notifications": {
         "title": "Notiser",
         "approvalTitle": "Attest krävs",
+        "paymentStatusTitle": "Uppdatering om betalning",
+        "newApprovalMessage": "En ny betalning väntar på din attest: {{reference}}",
         "buttonLabel_one": "Notiser, {{count}} oläst",
         "buttonLabel_other": "Notiser, {{count}} olästa",
         "unreadCount_one": "{{count}} oläst",
@@ -665,6 +667,7 @@
         "empty": "Du har inga notiser.",
         "loading": "Laddar notiser...",
         "loadError": "Notiserna kunde inte hämtas. Försök igen senare.",
+        "approvalWatchError": "Nya attesteringar kunde inte kontrolleras. Försöker igen...",
         "updateError": "En notis kunde inte markeras som läst."
     },
     "overdueReminder": {

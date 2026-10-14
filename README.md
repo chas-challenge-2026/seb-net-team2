@@ -28,15 +28,14 @@ REST-API med separat React-frontend.
 
 ## Teknisk stack
 
-| Del       | Teknik                                    |
-|-----------|-------------------------------------------|
-| Backend   | ASP.NET Core 8 Web API, EF Core 8         |
-| Databas   | PostgreSQL                                |
-| Frontend  | React 18, TypeScript, Vite, TanStack Query/Router |
-| Native    | C-moduler för CSV-parsning, IBAN och audit |
-| Drift     | Docker Compose                            |
-| API-dokumentation | Scalar / OpenAPI (`/scalar/v1`)   |
-
+| Del               | Teknik                                            |
+| ----------------- | ------------------------------------------------- |
+| Backend           | ASP.NET Core 8 Web API, EF Core 8                 |
+| Databas           | PostgreSQL                                        |
+| Frontend          | React 18, TypeScript, Vite, TanStack Query/Router |
+| Native            | C-moduler för CSV-parsning, IBAN och audit        |
+| Drift             | Docker Compose                                    |
+| API-dokumentation | Scalar / OpenAPI (`/scalar/v1`)                   |
 
 ## Köra lokalt
 
@@ -92,24 +91,24 @@ Felsvar uppstår på tre ställen:
 3. **Exceptions**: alla exceptions fångas av en global felhanterare
    (`GlobalExceptionHandler`) som översätter dem till rätt statuskod:
 
-| Exception | Statuskod |
-|---|---|
-| `ValidationException`, `BusinessRuleException` | 400 Bad Request |
-| `UnauthorizedAccessException` | 403 Forbidden |
-| `NotFoundException` | 404 Not Found |
-| `ServiceUnavailableException` | 503 Service Unavailable |
-| Övriga (oväntade fel) | 500 Internal Server Error |
+| Exception                                      | Statuskod                 |
+| ---------------------------------------------- | ------------------------- |
+| `ValidationException`, `BusinessRuleException` | 400 Bad Request           |
+| `UnauthorizedAccessException`                  | 403 Forbidden             |
+| `NotFoundException`                            | 404 Not Found             |
+| `ServiceUnavailableException`                  | 503 Service Unavailable   |
+| Övriga (oväntade fel)                          | 500 Internal Server Error |
 
 # Betalningsflöde och affärsregler
 
 Varje tenant har egna gränser.
 
 Exempel
-| Belopp       | Krav                                    |
+| Belopp | Krav |
 |-----------|-------------------------------------------|
-| Under 50 000kr   | Genomförs direkt, ingen attest        |
-| 50 000 - 199 999kr   | 1 attestant                                |
-| 200 000kr och mer  | 2 attestanter |
+| Under 50 000kr | Genomförs direkt, ingen attest |
+| 50 000 - 199 999kr | 1 attestant |
+| 200 000kr och mer | 2 attestanter |
 
 De andra företagen har andra gränser, t.ex. 25 000 och 100 000 för tenant 2. En Admin kan ändra gränserna för sitt eget företag.
 
@@ -122,12 +121,14 @@ Affärsregler i koden
 - Betalningen genomförs först när alla steg är godkända.
 - En Admin kan besluta i stället för den tilldelade attestanten, men aldrig på sin egen betalning.
 - Stegen behöver inte godkännas i ordning. Steg 2 kan godkännas före steg 1. Jag hittar ingen kontroll av ordningen i koden. Det är inte nödvändigtvis fel, men om ni beskriver flödet som "steg 1, sedan steg 2" stämmer det inte.
-- 
+-
+
 # Arkitektur
 
 System översikt
 
 flowchart LR
+
 - FE[React-frontend] -->|REST + JWT| API[ASP.NET Core Web API]
 - API --> DB[(PostgreSQL)]
 - API -->|P/Invoke| NAT[C-moduler<br/>CSV / IBAN / audit]
@@ -148,6 +149,18 @@ lösenordet och bygger upp användarobjektet med det innehåll en användare ska
 Servicen lämnar sedan över till repositoryt, som ansvarar för kommunikationen
 med databasen. Repositoryt använder DbContext (EF Core) för att skriva och läsa
 data, och slutligen sparas användaren i databasen.
+
+## Frontendarkitektur
+
+Frontend är byggd med React och TypeScript. `main.tsx` sätter upp routingen med
+TanStack Router och omsluter appen med TanStack Query samt providers för
+inloggning och valuta. Skyddade routes kontrollerar användarens session och roll.
+
+Sidorna i `src/pages` innehåller appens vyer och arbetsflöden. Återanvändbara
+gränssnittskomponenter finns i `src/components`, medan `src/hooks` samlar
+återanvändbar data- och statehantering. API-anrop ligger i `src/services` och går
+via en gemensam funktion som skickar JWT och validerar svar med Zod-scheman från
+`src/schemas`. Translations finns i `src/i18n`.
 
 ## Contributors
 - https://github.com/LisaEbbhagen

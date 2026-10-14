@@ -69,9 +69,9 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
-    policy.WithOrigins("http://localhost:3000")
-          .AllowAnyHeader()
-          .AllowAnyMethod();
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
     options.AddPolicy("ProductionPolicy", policy =>
     {
@@ -160,7 +160,7 @@ var app = builder.Build();
     if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
         db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
 }
-  
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
