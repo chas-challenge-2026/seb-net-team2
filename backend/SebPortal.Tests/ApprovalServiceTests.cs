@@ -4,6 +4,7 @@ using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Data;
 using SebPortal.Models;
+using SebPortal.Api.Dtos;
 
 namespace SebPortal.Tests
 {
@@ -23,7 +24,7 @@ namespace SebPortal.Tests
             _accountRepositoryMock = new Mock<IAccountRepository>();
             _auditRepositoryMock = new Mock<IAuditRepository>();
             _notificationServiceMock = new Mock<INotificationService>();
-
+           
 
             var options = new DbContextOptionsBuilder<SebDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -232,6 +233,59 @@ namespace SebPortal.Tests
 
             // Assert
             Assert.Empty(result);
+        }
+
+        [Fact]
+        public async Task DecideStepAsync_ShouldThrowForbiddenOrBusinessRule_WhenStepDoesNotBelongToAttestant()
+        {
+            // Arrange
+            Guid stepId = Guid.NewGuid();
+            int id = 1;
+            int assignedAttestantId = 7;
+            int unassignedAttestantId = 99; 
+            int tenantId = 1;
+
+
+            var payment = new Payment
+            {
+                Id = 1001,
+                TenantId = tenantId,
+                Status = "pending_approval",
+                ToIban = "SE1234567890123456789012",
+                Reference = "Faktura 123",
+                CreatedByUserId = 3
+            };
+                
+            var step = new ApprovalStep
+            {
+                Id = id,
+                AttestantId = assignedAttestantId,
+                Status = "pending",
+                PaymentId = payment.Id,
+            };
+
+            _approvalRepositoryMock
+                .Setup(r => r.GetByPublicIdAsync(stepId, tenantId))
+                .ReturnsAsync(step);
+
+            var dto = new ApprovalDecisionDTO
+            {
+                StepId = stepId,
+                Decision = "approved",
+                Comment = "Looks good to me."
+            };
+
+            // Act
+            var result = await _service.DecideAsync(dto, unassignedAttestantId, isAdmin:false, tenantId);
+            
+            //Assert
+            // Försök att attestera med ett annat ID än den som är tilldelad
+            Assert.Equal(ApprovalStepValidationResult.NotAssignedAttestant, result);
+
+            // Verifiera att inget sparande sker om behörigheten saknas
+            _approvalRepositoryMock.Verify(
+                r => r.UpdateApprovalStepAsync(It.IsAny<ApprovalStep>(), tenantId), 
+                Times.Never);
         }
     }
 }
