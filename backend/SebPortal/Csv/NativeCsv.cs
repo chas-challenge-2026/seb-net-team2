@@ -20,6 +20,32 @@ namespace SebPortal.Csv
             public nuint dataLength;   // size_t
         }
 
+        public enum ErrorCode
+        {
+            Csv_Error_Content_Is_NULL = -10,
+            Csv_Error_Out_Csv_Is_NULL,
+            Csv_Error_Content_Length_Is_Invalid,           
+            Csv_Error_Invalid_Parsing,
+        }
+
+        public static string ErrorCodeToString(ErrorCode code)
+        {
+            switch (code)
+            {
+            case ErrorCode.Csv_Error_Content_Is_NULL:
+                return "Content is NULL";
+            case ErrorCode.Csv_Error_Content_Length_Is_Invalid:
+                return "Content Length is invalid, happens when length is less than or 0";
+            case ErrorCode.Csv_Error_Invalid_Parsing:
+                return "CSV could not parse, CSV is not formatted correctly";
+            case ErrorCode.Csv_Error_Out_Csv_Is_NULL:
+                return "Output CSV is NULL";
+            default:
+                return "ERROR is not known, something went very wrong";
+            }
+        }
+
+
         public class CSVPayment
         {
             public int FromAccountId { get; set; }
