@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 
 import { useAccounts } from "../../hooks/useAccounts";
+import { useAuth } from "../../hooks/useAuth";
+import { createPayment } from "../../services/accountService";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
 
@@ -24,13 +26,19 @@ import styles from "./Batch.module.css";
 const MAX_FILE_SIZE_BYTES = 1024 * 1024;
 const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
 const EXPECTED_HEADER = ["from_account_id", "to_iban", "amount", "reference"];
+const EXAMPLE_ACCOUNT_PLACEHOLDER = "<account-id>";
 
-const EXAMPLE_CSV = `from_account_id,to_iban,amount,reference
-1,SE8550000000054910000003,5000.00,Faktura #2001
-1,SE8550000000054910000005,12500.00,Faktura #2002`;
+function buildExampleCsv(accountId: string): string {
+    return [
+        EXPECTED_HEADER.join(","),
+        `${accountId},SE8550000000054910000003,5000.00,Faktura #2001`,
+        `${accountId},SE8550000000054910000005,12500.00,Faktura #2002`,
+    ].join("\n");
+}
 
 type BatchRow = {
     rowNumber: number;
+    fromAccountId: string;
     toIban: string;
     amount: number;
     reference: string;
@@ -59,6 +67,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
         if (parts.length !== 4) {
             return {
                 rowNumber,
+                fromAccountId: parts[0] ?? "",
                 toIban: parts[1] ?? "",
                 amount: 0,
                 reference: parts[3] ?? "",
@@ -73,6 +82,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
         if (!validAccountIds.includes(fromAccountId)) {
             return {
                 rowNumber,
+                fromAccountId,
                 toIban,
                 amount: 0,
                 reference,
@@ -84,6 +94,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
         if (!IBAN_PATTERN.test(toIban)) {
             return {
                 rowNumber,
+                fromAccountId,
                 toIban,
                 amount: 0,
                 reference,
@@ -97,6 +108,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
         if (!Number.isFinite(amount) || amount <= 0) {
             return {
                 rowNumber,
+                fromAccountId,
                 toIban,
                 amount: 0,
                 reference,
@@ -105,13 +117,18 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
             };
         }
 
-        return { rowNumber, toIban, amount, reference, success: true };
+        return { rowNumber, fromAccountId, toIban, amount, reference, success: true };
     });
+}
+
+function rowSignature(row: BatchRow): string {
+    return [row.rowNumber, row.fromAccountId, row.toIban, row.amount, row.reference].join("|");
 }
 
 export function Batch() {
     const { t, i18n } = useTranslation();
-    const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts();
+    const { user } = useAuth();
+    const { data: accounts = [], isLoading: isLoadingAccounts, isError: accountsError } = useAccounts();
 
     const [file, setFile] = useState<File | null>(null);
     const [generalError, setGeneralError] = useState<TranslatedError | null>(null);
@@ -120,7 +137,10 @@ export function Batch() {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    // Reused when the same file is retried, so rows that were already created are not created twice.
+    const idempotencyKeysRef = useRef(new Map<string, string>());
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
+    const exampleCsv = buildExampleCsv(accounts[0]?.id ?? EXAMPLE_ACCOUNT_PLACEHOLDER);
 
     const csvFileSchema = z.object({
         name: z.string().refine(
@@ -183,6 +203,11 @@ export function Batch() {
             return;
         }
 
+        if (accountsError) {
+            setGeneralError({ key: "batch.errors.accountsFailed" });
+            return;
+        }
+
         const fileValidation = csvFileSchema.safeParse(file);
         if (!fileValidation.success) {
             reportFileError({ key: fileValidation.error.issues[0].message });
@@ -214,10 +239,18 @@ export function Batch() {
             const validAccountIds = accounts.map((account) => account.id);
 
             const rows = parseBatchRows(dataLines, validAccountIds);
-            setResults(rows);
+
             if (rows.some(row => !row.success)) {
+                setResults(rows);
                 reportFileError({ key: "validation.batchRows" });
-            } else {
+                return;
+            }
+
+            const createdRows = await createPayments(rows);
+            setResults(createdRows);
+
+            if (createdRows.every(row => row.success)) {
+                idempotencyKeysRef.current.clear();
                 resetFileInput();
             }
         } catch {
@@ -227,8 +260,44 @@ export function Batch() {
         }
     }
 
+    async function createPayments(rows: BatchRow[]): Promise<BatchRow[]> {
+        const createdRows: BatchRow[] = [];
+
+        for (const row of rows) {
+            const signature = rowSignature(row);
+            const idempotencyKey = idempotencyKeysRef.current.get(signature) ?? crypto.randomUUID();
+            idempotencyKeysRef.current.set(signature, idempotencyKey);
+
+            try {
+                await createPayment(
+                    {
+                        tenantId: user?.tenantId ?? 0,
+                        fromAccountId: row.fromAccountId,
+                        toIban: row.toIban,
+                        amount: row.amount,
+                        currency: "SEK",
+                        reference: row.reference,
+                    },
+                    idempotencyKey
+                );
+                createdRows.push(row);
+            } catch (error) {
+                createdRows.push({
+                    ...row,
+                    success: false,
+                    error: {
+                        key: "batch.errors.createFailed",
+                        values: { message: error instanceof Error ? error.message : "" },
+                    },
+                });
+            }
+        }
+
+        return createdRows;
+    }
+
     function handleDownloadExample() {
-        const blob = new Blob([EXAMPLE_CSV], { type: "text/csv" });
+        const blob = new Blob([exampleCsv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
 
@@ -252,11 +321,6 @@ export function Batch() {
                         <h1>{t("batch.title")}</h1>
                     </div>
                     <p>{t("batch.description")}</p>
-                </div>
-
-                <div className={styles.headerBadge}>
-                    <span className={styles.statusDot} />
-                    {t("batch.mockMode")}
                 </div>
             </header>
 
@@ -335,7 +399,21 @@ export function Batch() {
                 <Card title={t("batch.format.title")} className={styles.formatCard}>
                     <p>{t("batch.format.description")}</p>
 
-                    <pre tabIndex={0} className={styles.formatExample}>{EXAMPLE_CSV}</pre>
+                    <pre tabIndex={0} className={styles.formatExample}>{exampleCsv}</pre>
+
+                    {accounts.length > 0 && (
+                        <>
+                            <p>{t("batch.format.accounts")}</p>
+                            <ul className={styles.accountList}>
+                                {accounts.map((account) => (
+                                    <li key={account.id}>
+                                        <span>{account.name}</span>
+                                        <code>{account.id}</code>
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    )}
 
                     <div className={styles.warning}>
                         <TriangleAlert size={17} aria-hidden="true" />
@@ -391,7 +469,7 @@ export function Batch() {
                                         <td>{row.rowNumber}</td>
                                         <td>{row.toIban || "—"}</td>
                                         <td>
-                                            {row.success
+                                            {row.amount > 0
                                                 ? row.amount.toLocaleString(locale, {
                                                     minimumFractionDigits: 2,
                                                 })
