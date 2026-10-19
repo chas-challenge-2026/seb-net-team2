@@ -102,6 +102,7 @@ AuditLog-sidan visar bara DB-poster. Batch-betalningar och delvisa atteststeg sy
 
 ---
 
+
 ## BUG-012 — Ingen filstorleksgräns för batch-uppladdning
 
 **Fil:** `Pages/BatchUpload.cshtml.cs`  
