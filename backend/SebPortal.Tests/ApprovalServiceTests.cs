@@ -240,7 +240,8 @@ namespace SebPortal.Tests
         {
             // Arrange
             Guid stepId = Guid.NewGuid();
-            int id = 1;
+            int paymentId = 1001;
+            int id = 1; 
             int assignedAttestantId = 7;
             int unassignedAttestantId = 99; 
             int tenantId = 1;
@@ -248,20 +249,25 @@ namespace SebPortal.Tests
 
             var payment = new Payment
             {
-                Id = 1001,
+                Id = paymentId,
                 TenantId = tenantId,
                 Status = "pending_approval",
                 ToIban = "SE1234567890123456789012",
                 Reference = "Faktura 123",
                 CreatedByUserId = 3
             };
-                
+            
+            _paymentRepositoryMock
+                .Setup(r => r.GetPaymentByIdAsync(paymentId, tenantId))
+                .ReturnsAsync(payment);
+
             var step = new ApprovalStep
             {
                 Id = id,
                 AttestantId = assignedAttestantId,
                 Status = "pending",
                 PaymentId = payment.Id,
+                Payment = payment
             };
 
             _approvalRepositoryMock
