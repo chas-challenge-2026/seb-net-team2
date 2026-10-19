@@ -22,6 +22,12 @@ RUN dotnet publish backend/SebPortal/SebPortal.Api.csproj -c Release -o /app/pub
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+
+# install curl for Docker healhcheck 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=build /app/publish .
 COPY --from=frontend-build /src/frontend/dist ./wwwroot
