@@ -389,7 +389,7 @@
             "title": "CSV-format",
             "description": "Filen måste innehålla följande kolumner:",
             "exampleLabel": "Exempel på CSV-fil",
-            "accounts": "Ange IBAN för ett av dina konton i from_account_id:",
+            "accounts": "Ange IBAN för ett av dina konton i kolumnen from_account_id:",
             "warning": "Obs: fält som innehåller kommatecken ska omges av citattecken, till exempel \"Malmö Bygg, faktura 99\".",
             "download": "Ladda ner example-batch.csv"
         },

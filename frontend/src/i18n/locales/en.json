@@ -446,7 +446,7 @@
             "title": "CSV format",
             "description": "The file must have the following columns:",
             "exampleLabel": "Example CSV file",
-            "accounts": "In from_account_id, use the IBAN of one of your accounts:",
+            "accounts": "Use the IBAN of one of your accounts in the from_account_id column:",
             "warning": "Note: put fields that contain commas in double quotes, for example \"Malmö Bygg, invoice 99\".",
             "download": "Download example-batch.csv"
         },
