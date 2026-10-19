@@ -84,7 +84,8 @@ namespace SebPortal.Csv
             }
             finally
             {
-                csv_free(ref csv);
+                if (rc == 0)
+                    csv_free(ref csv);
             }
         }
 
