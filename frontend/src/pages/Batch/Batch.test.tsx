@@ -45,7 +45,7 @@ const accounts = [
         name: "Salary account",
         balance: 1000,
         currency: "SEK",
-        iban: "SE1250000000058398257467",
+        iban: "SE1850000000058398257467",
     },
     {
         id: accountId,
@@ -58,8 +58,8 @@ const accounts = [
 
 const validCsv = [
     "from_account_id,to_iban,amount,reference",
-    `${accountId},SE8550000000054910000003,5000.00,Faktura #2001`,
-    `${accountId},SE8550000000054910000005,12500.00,Faktura #2002`,
+    `${accountId},SE3550000000054910000003,5000.00,Faktura #2001`,
+    `${accountId},SE7850000000054910000005,12500.00,Faktura #2002`,
 ].join("\n");
 
 function csvFile(content: string): File {
@@ -95,11 +95,11 @@ describe("Batch upload", () => {
         render(<Batch />);
 
         expect(screen.getByText(/from_account_id,to_iban,amount,reference/)).toHaveTextContent(
-            `${accountIban},SE8550000000054910000003`
+            `${accountIban},SE3550000000054910000003`
         );
         expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
             `Operating account${accountIban}`,
-            "Salary accountSE1250000000058398257467",
+            "Salary accountSE1850000000058398257467",
         ]);
         expect(screen.queryByText("batch.mockMode")).not.toBeInTheDocument();
     });
@@ -108,8 +108,8 @@ describe("Batch upload", () => {
         render(<Batch />);
         uploadCsv([
             "from_account_id,to_iban,amount,reference",
-            `${accountIban},SE8550000000054910000003,5000.00,Faktura #2001`,
-            "se45 5000 0000 0583 9825 7466,SE8550000000054910000005,12500.00,Faktura #2002",
+            `${accountIban},SE3550000000054910000003,5000.00,Faktura #2001`,
+            "se45 5000 0000 0583 9825 7466,SE7850000000054910000005,12500.00,Faktura #2002",
         ].join("\n"));
 
         expect(await screen.findByText("2 of 2 payments created.")).toBeInTheDocument();
@@ -130,7 +130,7 @@ describe("Batch upload", () => {
             {
                 tenantId: 1,
                 fromAccountId: accountId,
-                toIban: "SE8550000000054910000003",
+                toIban: "SE3550000000054910000003",
                 amount: 5000,
                 currency: "SEK",
                 reference: "Faktura #2001",
@@ -147,8 +147,8 @@ describe("Batch upload", () => {
         render(<Batch />);
         uploadCsv([
             "from_account_id,to_iban,amount,reference",
-            `${accountId},SE8550000000054910000003,5000.00,"Malmö Bygg, faktura 99"`,
-            `${accountId}, SE8550000000054910000005 ,12500.00,"Faktura ""A"""`,
+            `${accountId},SE3550000000054910000003,5000.00,"Malmö Bygg, faktura 99"`,
+            `${accountId}, SE7850000000054910000005 ,12500.00,"Faktura ""A"""`,
         ].join("\r\n"));
 
         expect(await screen.findByText("2 of 2 payments created.")).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe("Batch upload", () => {
             "Malmö Bygg, faktura 99",
             'Faktura "A"',
         ]);
-        expect(mockedCreatePayment.mock.calls[1][0].toIban).toBe("SE8550000000054910000005");
+        expect(mockedCreatePayment.mock.calls[1][0].toIban).toBe("SE7850000000054910000005");
     });
 
     it("reports the column count when an unquoted field contains a comma", async () => {
@@ -167,9 +167,17 @@ describe("Batch upload", () => {
         expect(mockedCreatePayment).not.toHaveBeenCalled();
     });
 
+    it("rejects an IBAN with a valid format but a wrong MOD97 check digit", async () => {
+        render(<Batch />);
+        uploadCsv(validCsv.replace("SE7850000000054910000005", "SE8550000000054910000005"));
+
+        expect(await screen.findByText("batch.errors.invalidIban")).toBeInTheDocument();
+        expect(mockedCreatePayment).not.toHaveBeenCalled();
+    });
+
     it("does not create any payment when a row fails validation", async () => {
         render(<Batch />);
-        uploadCsv(validCsv.replace(`${accountId},SE8550000000054910000005`, "1,SE8550000000054910000005"));
+        uploadCsv(validCsv.replace(`${accountId},SE7850000000054910000005`, "1,SE7850000000054910000005"));
 
         expect(await screen.findByText("Unknown from_account_id '1'")).toBeInTheDocument();
         expect(mockedCreatePayment).not.toHaveBeenCalled();

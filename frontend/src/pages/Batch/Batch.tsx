@@ -18,6 +18,7 @@ import {
 import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
 import { createPayment, type Account } from "../../services/accountService";
+import { isValidIban } from "../../schemas/paymentSchema";
 import Card from "../../components/Card/Card";
 import cardStyles from "../../components/Card/Card.module.css";
 import Button from "../../components/Button/Button";
@@ -25,7 +26,6 @@ import Button from "../../components/Button/Button";
 import styles from "./Batch.module.css";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024;
-const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
 const EXPECTED_HEADER = ["from_account_id", "to_iban", "amount", "reference"];
 const EXAMPLE_ACCOUNT_PLACEHOLDER = "<account-iban>";
 
@@ -36,8 +36,8 @@ function normalizeIban(value: string): string {
 function buildExampleCsv(accountIban: string): string {
     return [
         EXPECTED_HEADER.join(","),
-        `${accountIban},SE8550000000054910000003,5000.00,Faktura #2001`,
-        `${accountIban},SE8550000000054910000005,12500.00,"Malmö Bygg, faktura #2002"`,
+        `${accountIban},SE3550000000054910000003,5000.00,Faktura #2001`,
+        `${accountIban},SE7850000000054910000005,12500.00,"Malmö Bygg, faktura #2002"`,
     ].join("\n");
 }
 
@@ -133,7 +133,7 @@ function parseBatchRows(dataLines: string[], accounts: Account[]): BatchRow[] {
 
         const fromAccountId = fromAccount.id;
 
-        if (!IBAN_PATTERN.test(toIban)) {
+        if (!isValidIban(toIban)) {
             return {
                 rowNumber,
                 fromAccountId,
