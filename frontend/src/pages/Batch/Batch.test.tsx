@@ -37,14 +37,22 @@ const mockedUseAuth = jest.mocked(useAuth);
 const mockedCreatePayment = jest.mocked(createPayment);
 
 const accountId = "9d21cccb-d39d-4cae-99aa-fda8a311cf66";
+const accountIban = "SE4550000000058398257466";
 
 const accounts = [
+    {
+        id: "0b5a7f1e-3c2d-4e8f-9a6b-1c2d3e4f5a6b",
+        name: "Salary account",
+        balance: 1000,
+        currency: "SEK",
+        iban: "SE1250000000058398257467",
+    },
     {
         id: accountId,
         name: "Operating account",
         balance: 1250000.5,
         currency: "SEK",
-        iban: "SE4550000000058398257466",
+        iban: accountIban,
     },
 ];
 
@@ -83,14 +91,32 @@ describe("Batch upload", () => {
         mockedCreatePayment.mockResolvedValue({} as CreatedPayment);
     });
 
-    it("builds the example from the user's own account and lists the account IDs", () => {
+    it("builds the example from the account with the highest balance and lists accounts by name", () => {
         render(<Batch />);
 
         expect(screen.getByText(/from_account_id,to_iban,amount,reference/)).toHaveTextContent(
-            `${accountId},SE8550000000054910000003`
+            `${accountIban},SE8550000000054910000003`
         );
-        expect(screen.getByText("Operating account")).toBeInTheDocument();
+        expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+            `Operating account${accountIban}`,
+            "Salary accountSE1250000000058398257467",
+        ]);
         expect(screen.queryByText("batch.mockMode")).not.toBeInTheDocument();
+    });
+
+    it("accepts the account IBAN in the first column and sends the account ID", async () => {
+        render(<Batch />);
+        uploadCsv([
+            "from_account_id,to_iban,amount,reference",
+            `${accountIban},SE8550000000054910000003,5000.00,Faktura #2001`,
+            "se45 5000 0000 0583 9825 7466,SE8550000000054910000005,12500.00,Faktura #2002",
+        ].join("\n"));
+
+        expect(await screen.findByText("2 of 2 payments created.")).toBeInTheDocument();
+        expect(mockedCreatePayment.mock.calls.map((call) => call[0].fromAccountId)).toEqual([
+            accountId,
+            accountId,
+        ]);
     });
 
     it("creates one payment per row through the payment API", async () => {

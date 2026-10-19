@@ -17,7 +17,7 @@ import {
 
 import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
-import { createPayment } from "../../services/accountService";
+import { createPayment, type Account } from "../../services/accountService";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
 
@@ -26,14 +26,24 @@ import styles from "./Batch.module.css";
 const MAX_FILE_SIZE_BYTES = 1024 * 1024;
 const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
 const EXPECTED_HEADER = ["from_account_id", "to_iban", "amount", "reference"];
-const EXAMPLE_ACCOUNT_PLACEHOLDER = "<account-id>";
+const EXAMPLE_ACCOUNT_PLACEHOLDER = "<account-iban>";
 
-function buildExampleCsv(accountId: string): string {
+function normalizeIban(value: string): string {
+    return value.replace(/\s/g, "").toUpperCase();
+}
+
+function buildExampleCsv(accountIban: string): string {
     return [
         EXPECTED_HEADER.join(","),
-        `${accountId},SE8550000000054910000003,5000.00,Faktura #2001`,
-        `${accountId},SE8550000000054910000005,12500.00,"Malmö Bygg, faktura #2002"`,
+        `${accountIban},SE8550000000054910000003,5000.00,Faktura #2001`,
+        `${accountIban},SE8550000000054910000005,12500.00,"Malmö Bygg, faktura #2002"`,
     ].join("\n");
+}
+
+// The first column may hold the account's IBAN or its ID.
+function findAccount(accounts: Account[], value: string): Account | undefined {
+    const iban = normalizeIban(value);
+    return accounts.find((account) => account.id === value || normalizeIban(account.iban) === iban);
 }
 
 type BatchRow = {
@@ -87,7 +97,7 @@ function isValidHeader(headerLine: string): boolean {
     );
 }
 
-function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRow[] {
+function parseBatchRows(dataLines: string[], accounts: Account[]): BatchRow[] {
     return dataLines.map((line, index): BatchRow => {
         const rowNumber = index + 2;
         const parts = splitCsvLine(line);
@@ -104,20 +114,23 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
             };
         }
 
-        const [fromAccountId, toIbanRaw, amountRaw, reference] = parts;
-        const toIban = toIbanRaw.replace(/\s/g, "").toUpperCase();
+        const [fromAccountRaw, toIbanRaw, amountRaw, reference] = parts;
+        const toIban = normalizeIban(toIbanRaw);
+        const fromAccount = findAccount(accounts, fromAccountRaw);
 
-        if (!validAccountIds.includes(fromAccountId)) {
+        if (!fromAccount) {
             return {
                 rowNumber,
-                fromAccountId,
+                fromAccountId: fromAccountRaw,
                 toIban,
                 amount: 0,
                 reference,
                 success: false,
-                error: { key: "batch.errors.unknownAccount", values: { id: fromAccountId } },
+                error: { key: "batch.errors.unknownAccount", values: { id: fromAccountRaw } },
             };
         }
+
+        const fromAccountId = fromAccount.id;
 
         if (!IBAN_PATTERN.test(toIban)) {
             return {
@@ -168,7 +181,12 @@ export function Batch() {
     // Reused when the same file is retried, so rows that were already created are not created twice.
     const idempotencyKeysRef = useRef(new Map<string, string>());
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
-    const exampleCsv = buildExampleCsv(accounts[0]?.id ?? EXAMPLE_ACCOUNT_PLACEHOLDER);
+    const sortedAccounts = [...accounts].sort((a, b) => a.name.localeCompare(b.name, locale));
+    const exampleAccount = accounts.reduce<Account | undefined>(
+        (richest, account) => (!richest || account.balance > richest.balance ? account : richest),
+        undefined
+    );
+    const exampleCsv = buildExampleCsv(exampleAccount ? normalizeIban(exampleAccount.iban) : EXAMPLE_ACCOUNT_PLACEHOLDER);
 
     const csvFileSchema = z.object({
         name: z.string().refine(
@@ -264,9 +282,7 @@ export function Batch() {
                 return;
             }
 
-            const validAccountIds = accounts.map((account) => account.id);
-
-            const rows = parseBatchRows(dataLines, validAccountIds);
+            const rows = parseBatchRows(dataLines, accounts);
 
             if (rows.some(row => !row.success)) {
                 setResults(rows);
@@ -433,10 +449,10 @@ export function Batch() {
                         <>
                             <p>{t("batch.format.accounts")}</p>
                             <ul className={styles.accountList}>
-                                {accounts.map((account) => (
+                                {sortedAccounts.map((account) => (
                                     <li key={account.id}>
                                         <span>{account.name}</span>
-                                        <code>{account.id}</code>
+                                        <code>{normalizeIban(account.iban)}</code>
                                     </li>
                                 ))}
                             </ul>
