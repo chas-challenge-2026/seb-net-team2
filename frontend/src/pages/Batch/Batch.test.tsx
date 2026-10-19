@@ -140,6 +140,7 @@ describe("Batch upload", () => {
 
         const [firstKey, secondKey] = mockedCreatePayment.mock.calls.map((call) => call[1]);
         expect(firstKey).not.toBe(secondKey);
+        await waitFor(() => expect(screen.getByRole("heading", { name: "batch.result.title" })).toHaveFocus());
     });
 
     it("keeps commas and escaped quotes inside quoted fields", async () => {

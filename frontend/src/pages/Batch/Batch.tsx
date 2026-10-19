@@ -1,7 +1,7 @@
 import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { focusField } from "../../components/FormValidation/useFormValidation";
 import validationStyles from "../../components/FormValidation/FormValidation.module.css";
-import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TranslatedError } from "../../components/FormValidation/useFormValidation";
 import { z } from "zod";
@@ -19,6 +19,7 @@ import { useAccounts } from "../../hooks/useAccounts";
 import { useAuth } from "../../hooks/useAuth";
 import { createPayment, type Account } from "../../services/accountService";
 import Card from "../../components/Card/Card";
+import cardStyles from "../../components/Card/Card.module.css";
 import Button from "../../components/Button/Button";
 
 import styles from "./Batch.module.css";
@@ -178,6 +179,16 @@ export function Batch() {
     const [isProcessing, setIsProcessing] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const resultHeadingRef = useRef<HTMLHeadingElement>(null);
+    const focusResultsRef = useRef(false);
+
+    // The file input and submit button are disabled while processing, so keyboard focus is lost otherwise.
+    useEffect(() => {
+        if (results && focusResultsRef.current) {
+            focusResultsRef.current = false;
+            resultHeadingRef.current?.focus();
+        }
+    }, [results]);
     // Reused when the same file is retried, so rows that were already created are not created twice.
     const idempotencyKeysRef = useRef(new Map<string, string>());
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
@@ -291,6 +302,7 @@ export function Batch() {
             }
 
             const createdRows = await createPayments(rows);
+            focusResultsRef.current = true;
             setResults(createdRows);
 
             if (createdRows.every(row => row.success)) {
@@ -443,7 +455,7 @@ export function Batch() {
                 <Card title={t("batch.format.title")} className={styles.formatCard}>
                     <p>{t("batch.format.description")}</p>
 
-                    <pre tabIndex={0} className={styles.formatExample}>{exampleCsv}</pre>
+                    <pre tabIndex={0} aria-label={t("batch.format.exampleLabel")} className={styles.formatExample}>{exampleCsv}</pre>
 
                     {accounts.length > 0 && (
                         <>
@@ -476,7 +488,11 @@ export function Batch() {
             </div>
 
             {results && (
-                <Card title={t("batch.result.title")} className={styles.resultsCard}>
+                <Card className={styles.resultsCard}>
+                    <h2 ref={resultHeadingRef} tabIndex={-1} className={cardStyles.card__title}>
+                        {t("batch.result.title")}
+                    </h2>
+
                     <p
                         className={failed > 0 ? styles.resultWarning : styles.resultOk}
                         role="status"
