@@ -175,6 +175,21 @@ describe("Batch upload", () => {
         expect(mockedCreatePayment).not.toHaveBeenCalled();
     });
 
+    it("rejects a reference longer than 100 characters before creating anything", async () => {
+        render(<Batch />);
+        uploadCsv(validCsv.replace("Faktura #2001", "x".repeat(101)));
+
+        expect(await screen.findByText("payment.errors.referenceTooLong")).toBeInTheDocument();
+        expect(mockedCreatePayment).not.toHaveBeenCalled();
+    });
+
+    it("accepts a reference of exactly 100 characters", async () => {
+        render(<Batch />);
+        uploadCsv(validCsv.replace("Faktura #2001", "x".repeat(100)));
+
+        expect(await screen.findByText("2 of 2 payments created.")).toBeInTheDocument();
+    });
+
     it("does not create any payment when a row fails validation", async () => {
         render(<Batch />);
         uploadCsv(validCsv.replace(`${accountId},SE7850000000054910000005`, "1,SE7850000000054910000005"));

@@ -27,6 +27,7 @@ import styles from "./Batch.module.css";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024;
 const EXPECTED_HEADER = ["from_account_id", "to_iban", "amount", "reference"];
+const MAX_REFERENCE_LENGTH = 100;
 const EXAMPLE_ACCOUNT_PLACEHOLDER = "<account-iban>";
 
 function normalizeIban(value: string): string {
@@ -156,6 +157,18 @@ function parseBatchRows(dataLines: string[], accounts: Account[]): BatchRow[] {
                 reference,
                 success: false,
                 error: { key: "batch.errors.invalidAmount", values: { amount: amountRaw } },
+            };
+        }
+
+        if (reference.length > MAX_REFERENCE_LENGTH) {
+            return {
+                rowNumber,
+                fromAccountId,
+                toIban,
+                amount,
+                reference,
+                success: false,
+                error: { key: "payment.errors.referenceTooLong" },
             };
         }
 
