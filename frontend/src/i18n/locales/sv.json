@@ -389,7 +389,7 @@
             "title": "CSV-format",
             "description": "Filen måste innehålla följande kolumner:",
             "accounts": "Använd ett av dina konto-ID:n i from_account_id:",
-            "warning": "Obs: kommatecken inuti ett fält stöds inte. Undvik referenser som innehåller kommatecken.",
+            "warning": "Obs: fält som innehåller kommatecken ska omges av citattecken, till exempel \"Malmö Bygg, faktura 99\".",
             "download": "Ladda ner example-batch.csv"
         },
         "result": {
@@ -415,7 +415,7 @@
             "createFailed": "Betalningen kunde inte skapas: {{message}}",
             "header": "CSV-rubriken måste vara exakt: {{header}}",
             "empty": "CSV-filen är tom eller innehåller inga datarader.",
-            "columns": "Förväntade 4 kolumner men fick {{count}}. Kommatecken inuti ett fält stöds inte.",
+            "columns": "Förväntade 4 kolumner men fick {{count}}. Fält som innehåller kommatecken ska omges av citattecken.",
             "unknownAccount": "Okänt from_account_id '{{id}}'",
             "invalidIban": "Ogiltigt IBAN '{{iban}}'",
             "invalidAmount": "Ogiltigt belopp '{{amount}}'"

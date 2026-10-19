@@ -116,6 +116,30 @@ describe("Batch upload", () => {
         expect(firstKey).not.toBe(secondKey);
     });
 
+    it("keeps commas and escaped quotes inside quoted fields", async () => {
+        render(<Batch />);
+        uploadCsv([
+            "from_account_id,to_iban,amount,reference",
+            `${accountId},SE8550000000054910000003,5000.00,"Malmö Bygg, faktura 99"`,
+            `${accountId}, SE8550000000054910000005 ,12500.00,"Faktura ""A"""`,
+        ].join("\r\n"));
+
+        expect(await screen.findByText("2 of 2 payments created.")).toBeInTheDocument();
+        expect(mockedCreatePayment.mock.calls.map((call) => call[0].reference)).toEqual([
+            "Malmö Bygg, faktura 99",
+            'Faktura "A"',
+        ]);
+        expect(mockedCreatePayment.mock.calls[1][0].toIban).toBe("SE8550000000054910000005");
+    });
+
+    it("reports the column count when an unquoted field contains a comma", async () => {
+        render(<Batch />);
+        uploadCsv(validCsv.replace("Faktura #2001", "Malmö Bygg, faktura 99"));
+
+        expect(await screen.findByText("batch.errors.columns")).toBeInTheDocument();
+        expect(mockedCreatePayment).not.toHaveBeenCalled();
+    });
+
     it("does not create any payment when a row fails validation", async () => {
         render(<Batch />);
         uploadCsv(validCsv.replace(`${accountId},SE8550000000054910000005`, "1,SE8550000000054910000005"));

@@ -446,7 +446,7 @@
             "title": "CSV format",
             "description": "The file must have the following columns:",
             "accounts": "Use one of your account IDs in from_account_id:",
-            "warning": "Note: commas inside a field are not supported. Avoid references that contain commas.",
+            "warning": "Note: put fields that contain commas in double quotes, for example \"Malmö Bygg, invoice 99\".",
             "download": "Download example-batch.csv"
         },
         "result": {
@@ -472,7 +472,7 @@
             "createFailed": "Could not create the payment: {{message}}",
             "header": "The CSV header must be exactly: {{header}}",
             "empty": "The CSV file is empty or has no data rows.",
-            "columns": "Expected 4 columns, got {{count}}. Commas inside a field are not supported.",
+            "columns": "Expected 4 columns, got {{count}}. Put fields that contain commas in double quotes.",
             "unknownAccount": "Unknown from_account_id '{{id}}'",
             "invalidIban": "Invalid IBAN '{{iban}}'",
             "invalidAmount": "Invalid amount '{{amount}}'"

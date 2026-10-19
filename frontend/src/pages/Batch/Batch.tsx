@@ -32,7 +32,7 @@ function buildExampleCsv(accountId: string): string {
     return [
         EXPECTED_HEADER.join(","),
         `${accountId},SE8550000000054910000003,5000.00,Faktura #2001`,
-        `${accountId},SE8550000000054910000005,12500.00,Faktura #2002`,
+        `${accountId},SE8550000000054910000005,12500.00,"Malmö Bygg, faktura #2002"`,
     ].join("\n");
 }
 
@@ -50,8 +50,36 @@ function splitCsvLines(content: string): string[] {
     return content.split(/\r?\n/).filter((line) => line.trim().length > 0);
 }
 
+// RFC 4180 fields within one line: quoted fields may contain commas, and "" inside quotes is a literal quote.
+function splitCsvLine(line: string): string[] {
+    const fields: string[] = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+            if (inQuotes && line[i + 1] === '"') {
+                field += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === "," && !inQuotes) {
+            fields.push(field.trim());
+            field = "";
+        } else {
+            field += char;
+        }
+    }
+
+    fields.push(field.trim());
+    return fields;
+}
+
 function isValidHeader(headerLine: string): boolean {
-    const columns = headerLine.split(",").map((column) => column.trim().toLowerCase());
+    const columns = splitCsvLine(headerLine).map((column) => column.toLowerCase());
 
     return (
         columns.length === EXPECTED_HEADER.length &&
@@ -62,7 +90,7 @@ function isValidHeader(headerLine: string): boolean {
 function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRow[] {
     return dataLines.map((line, index): BatchRow => {
         const rowNumber = index + 2;
-        const parts = line.split(",").map((part) => part.trim());
+        const parts = splitCsvLine(line);
 
         if (parts.length !== 4) {
             return {
