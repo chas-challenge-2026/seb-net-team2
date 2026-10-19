@@ -202,4 +202,90 @@ public class CreatePaymentServiceIntegrationTests
         Assert.Contains("\"toIban\":\"SE4550000000054910000004\"", createDetails);
         Assert.Contains("\"balanceAfter\":500", createDetails);
     }
+
+    [Fact]
+    public async Task CreatePaymentAsync_ConcurrentPayments_ShouldHandleBalanceAtomically()
+    {
+        // Arrange
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<SebDbContext>().UseSqlite(connection).Options;
+
+        int tenantId;
+        int userId;
+        Guid accountPublicId;
+
+        await using (var context = new SebDbContext(options))
+        {
+            await context.Database.EnsureCreatedAsync();
+
+            var tenant = new Tenant { Name = "Concurrent Tenant" };
+            context.Tenants.Add(tenant);
+            await context.SaveChangesAsync();
+            tenantId = tenant.Id;
+
+            var user = new User
+            {
+                TenantId = tenantId,
+                Name = "Test User",
+                Email = "concurrent@example.com",
+                PasswordHash = "testhash",
+                Role = UserRoles.Initiator
+            };
+            context.Users.Add(user);
+
+            var account = new Account
+            {
+                TenantId = tenantId,
+                AccountName = "Wallet",
+                Iban = "SE9990000000054910000009",
+                Balance = 1000m,
+                Currency = "SEK"
+            };
+            context.Accounts.Add(account);
+            await context.SaveChangesAsync();
+
+            userId = user.Id;
+            accountPublicId = account.PublicId;
+        }
+
+        // Act - Kör 5 parallella anrop mot samma databasanslutning
+        var tasks = Enumerable.Range(0, 5).Select(async _ =>
+        {
+            await using var threadContext = new SebDbContext(options);
+            var mockLimitRepo = new Mock<IApprovalLimitRepository>();
+            mockLimitRepo.Setup(r => r.GetOrderedLimitsAsync(It.IsAny<int>())).ReturnsAsync(new List<ApprovalLimit>());
+
+            var engine = new ApprovalEngineService(mockLimitRepo.Object, new Mock<IUserRepository>().Object, threadContext);
+            var paymentService = new CreatePaymentService(
+                new UserRepository(threadContext),
+                new PaymentRepository(threadContext),
+                engine,
+                new Mock<INotificationService>().Object,
+                new AuditRepository(threadContext),
+                threadContext);
+
+            var dto = new CreatePaymentDTO
+            {
+                FromAccountId = accountPublicId,
+                ToIban = "SE1110000000054910000001",
+                Amount = 100m,
+                Currency = "SEK",
+                Reference = "Concurrent Payment"
+            };
+
+            await paymentService.CreatePaymentAsync(dto, userId, tenantId);
+        });
+
+        await Task.WhenAll(tasks);
+
+        // Assert - Saldot ska ha minskat från 1000 till 500
+        await using var verificationContext = new SebDbContext(options);
+        var updatedAccount = await verificationContext.Accounts.SingleAsync(a => a.PublicId == accountPublicId);
+        var totalPayments = await verificationContext.Payments.CountAsync();
+
+        Assert.Equal(500m, updatedAccount.Balance);
+        Assert.Equal(5, totalPayments);
+    }
 }

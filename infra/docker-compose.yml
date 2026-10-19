@@ -37,6 +37,12 @@ services:
       - "8081"
     volumes:
       - ./seed.sql:/seed/seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://+:8081"
