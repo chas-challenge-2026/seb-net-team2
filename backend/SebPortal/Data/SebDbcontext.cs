@@ -209,6 +209,7 @@ namespace SebPortal.Data
 
                 e.HasIndex(x => x.Key)
                     .IsUnique();
+                e.HasIndex(x => x.CreatedAt);
             });
             modelBuilder.Entity<RefreshToken>(e =>
             {
@@ -239,6 +240,7 @@ namespace SebPortal.Data
 
                 e.HasIndex(x => x.TokenHash)
                     .IsUnique();
+                e.HasIndex(x => x.ExpiresAt);
 
                 e.HasOne(x => x.User)
                     .WithMany()
