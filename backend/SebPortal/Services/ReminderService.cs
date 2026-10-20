@@ -54,7 +54,7 @@ namespace SebPortal.Api.Services
                     UserId = step.AttestantId,
                     ApprovalStepId = step.Id,
                     Subject = "Påminnelse om attest",
-                    Message = "Du har en betalning att attestera."
+                    Message = $"Betalning '{step.Payment.Reference}' ({step.Payment.Amount:N2} SEK) väntar på din attest."
                 };
 
                 await _notificationService.SendNotificationMessageAsync(notification);
