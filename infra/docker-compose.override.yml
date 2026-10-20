@@ -8,6 +8,15 @@ services:
       Jwt__Secret: "local-development-secret-change-before-production-2026"
       ASPNETCORE_ENVIRONMENT: Development
       Seed__Path: /seed/seed.sql
+      Email__SmtpHost: "smtp4dev"
+      Email__SmtpPort: "25"
   db:
     ports:
       - "5433:5432"
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: smtp4dev
+    ports:
+      - "1025:25"
+      - "3000:80"
+    restart: always
