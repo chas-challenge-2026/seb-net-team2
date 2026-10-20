@@ -15,7 +15,7 @@ export function focusField(id: string) {
 }
 
 /** Reuse HTML constraints; custom errors come from existing business validation. */
-export function useFormValidation() {
+export function useFormValidation(requiredMessages: ValidationErrors = {}) {
     const { t } = useTranslation();
     const [errorDetails, setErrors] = useState<Record<string, ValidationError>>({});
     const [attempt, setAttempt] = useState(0);
@@ -36,7 +36,7 @@ export function useFormValidation() {
             const field: Control = element;
             if (!field.id || field.disabled) continue;
             const validity = field.validity;
-            if (validity.valueMissing) next[field.id] = { key: "validation.required", field };
+            if (validity.valueMissing) next[field.id] = requiredMessages[field.id] ?? { key: "validation.required", field };
             else if (validity.typeMismatch) next[field.id] = { key: "validation.email", field };
             else if (validity.badInput) next[field.id] = { key: "validation.number", field };
             else if (validity.rangeUnderflow) next[field.id] = { key: "validation.minimum", field, values: { min: field.getAttribute("min") } };
