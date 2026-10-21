@@ -1,0 +1,239 @@
+import { RequiredMark } from "../../../components/FormValidation/RequiredField";
+import { createUserSchema } from "../../../schemas/userSchema";
+import { useFormValidation, type ValidationErrors } from "../../../components/FormValidation/useFormValidation";
+import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
+import { useState, type FormEvent } from "react";
+import { Link } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { ArrowLeft, CircleCheck, TriangleAlert, UserPlus } from "lucide-react";
+
+import Button from "../../../components/Button/Button";
+import PasswordInput from "../../../components/PasswordInput/PasswordInput";
+import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
+import { useAuth } from "../../../hooks/useAuth";
+import { createUser } from "../../../services/authService";
+import { AppError } from "../../../errors/AppError";
+import type { UserRole } from "../../../schemas/userSchema";
+
+import styles from "./CreateUser.module.css";
+
+function getErrorMessage(error: unknown, fallback: string) {
+    if (error instanceof AppError) return error.detail ?? error.message;
+    return fallback;
+}
+
+export default function CreateUser() {
+    const { t } = useTranslation();
+    const validation = useFormValidation();
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
+
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [role, setRole] = useState<UserRole>("User");
+
+    const createMutation = useMutation({
+        mutationFn: createUser,
+
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["users"] });
+
+            setName("");
+            setEmail("");
+            setPassword("");
+            setRole("User");
+        },
+    });
+
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!user) return;
+        const result = createUserSchema.safeParse({ tenantId: user.tenantId, name: name.trim(), email: email.trim(), password, role });
+        const fieldErrors: ValidationErrors = {};
+        if (!result.success) {
+            for (const issue of result.error.issues) {
+                const field = String(issue.path[0]);
+                const fieldKey = `users.form.${field}`;
+                fieldErrors[field] = issue.code === "too_big"
+                    ? { key: "validation.maxLength", fieldKey, values: { max: Number(issue.maximum) } }
+                    : field === "email" ? { key: "validation.email" } : { key: "validation.required", fieldKey };
+            }
+        }
+        if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
+
+        createMutation.mutate({
+            tenantId: user.tenantId,
+            name: name.trim(),
+            email: email.trim(),
+            password,
+            role,
+        });
+    }
+
+    return (
+        <div className={styles.layout}>
+            <header className={styles.pageHeader}>
+                <div className={styles.titleRow}>
+                    <UserPlus size={28} strokeWidth={2} aria-hidden="true" />
+
+                    <div>
+                        <h1>{t("users.create.title")}</h1>
+                        <p>{t("users.create.description")}</p>
+                    </div>
+                </div>
+            </header>
+
+            <section className={styles.formSection}>
+                <div className={styles.sectionHeader}>
+                    <h2>{t("users.form.title")}</h2>
+                    <p>{t("users.create.formDescription")}</p>
+                </div>
+
+                <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} className={styles.form} onSubmit={handleSubmit}>
+                    <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
+                    <div className={styles.formGroup}>
+                        <label htmlFor="name" className={styles.label}>
+                            {t("users.form.name")}
+
+                            <RequiredMark />
+                        </label>
+
+                        <input
+                            id="name"
+                            placeholder={t("validation.nameExample")}
+                            {...validation.fieldProps("name")}
+                            name="name"
+                            type="text"
+                            className={styles.input}
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                            autoComplete="name"
+                            disabled={createMutation.isPending}
+                            required
+                        />
+                        <FieldError id="name" errors={validation.errors} />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="email" className={styles.label}>
+                            {t("users.form.email")}
+
+                            <RequiredMark />
+                        </label>
+
+                        <input
+                            id="email"
+                            placeholder={t("validation.emailExample")}
+                            {...validation.fieldProps("email")}
+                            name="email"
+                            type="email"
+                            className={styles.input}
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            autoComplete="email"
+                            inputMode="email"
+                            disabled={createMutation.isPending}
+                            required
+                        />
+                        <FieldError id="email" errors={validation.errors} />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="password" className={styles.label}>
+                            {t("users.form.password")}
+
+                            <RequiredMark />
+                        </label>
+
+                        <PasswordInput
+                            id="password"
+                            {...validation.fieldProps("password")}
+                            name="password"
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            autoComplete="new-password"
+                            placeholder={t("users.form.password")}
+                            disabled={createMutation.isPending}
+                            required
+                        />
+                        <FieldError id="password" errors={validation.errors} />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                        <label htmlFor="role" className={styles.label}>
+                            {t("users.form.role")}
+
+                            <RequiredMark />
+                        </label>
+
+                        <select
+                            id="role"
+                            {...validation.fieldProps("role")}
+                            name="role"
+                            className={styles.select}
+                            value={role}
+                            disabled={createMutation.isPending}
+                            onChange={(event) => setRole(event.target.value as UserRole)} required
+                        >
+                            <option value="User">{t("users.roles.User")}</option>
+                            <option value="Initiator">{t("users.roles.Initiator")}</option>
+                            <option value="Attestant">{t("users.roles.Attestant")}</option>
+                            <option value="Admin">{t("users.roles.Admin")}</option>
+                        </select>
+                        <FieldError id="role" errors={validation.errors} />
+                    </div>
+
+                    {createMutation.isSuccess && (
+                        <div className={styles.success} role="status">
+                            <CircleCheck size={18} aria-hidden="true" />
+                            <span>{t("users.create.success", { name: createMutation.data.name })}</span>
+                        </div>
+                    )}
+
+                    {createMutation.isError && (
+                        <div className={styles.error} role="alert">
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{getErrorMessage(createMutation.error, t("users.errors.create"))}</span>
+                        </div>
+                    )}
+
+                    {!user && (
+                        <div className={styles.error} role="alert">
+                            <TriangleAlert size={18} aria-hidden="true" />
+                            <span>{t("users.errors.currentUser")}</span>
+                        </div>
+                    )}
+
+                    <div className={styles.actions}>
+                        <Link to="/admin/users" className={styles.cancelButton}>
+                            <ArrowLeft size={17} aria-hidden="true" />
+                            {t("common.cancel")}
+                        </Link>
+
+                        <Button
+                            type="submit"
+                            variant="square"
+                            size="medium"
+                            className={styles.formButton}
+                            disabled={createMutation.isPending || !user}
+                        >
+                            {createMutation.isPending ? (
+                                <span className={styles.loadingButton}>
+                                    <LoadingWheel size="small" />
+                                    {t("users.create.creating")}
+                                </span>
+                            ) : (
+                                <span className={styles.buttonContent}>
+                                    <UserPlus size={18} aria-hidden="true" />
+                                    {t("users.create.submit")}
+                                </span>
+                            )}
+                        </Button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    );
+}

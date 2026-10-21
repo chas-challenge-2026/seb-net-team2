@@ -14,16 +14,15 @@ name: seb
 
 services:
   db:
-    image: postgres:12
+    image: postgres:16
     environment:
-      POSTGRES_DB: seb
-      POSTGRES_USER: seb
-      POSTGRES_PASSWORD: seb123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U seb -d seb"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -32,14 +31,24 @@ services:
 
   app:
     build:
-      context: ../backend/SebPortal
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: backend/SebPortal/Dockerfile
     expose:
       - "8081"
+    volumes:
+      - ./seed.sql:/seed/seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://+:8081"
-      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=seb;Username=seb;Password=seb123"
+      ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION}
+      Jwt__Secret: ${JWT_SECRET}
+      Seed__Path: "/seed/seed.sql"
     depends_on:
       db:
         condition: service_healthy

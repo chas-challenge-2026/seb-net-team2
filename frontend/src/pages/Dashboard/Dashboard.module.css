@@ -1,0 +1,277 @@
+.dashboard {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+}
+
+.dashboard__header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+
+    padding-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.currencyRow {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.dashboard__header h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.75rem;
+    line-height: 1.2;
+}
+
+.dashboard__header p {
+    margin: 0;
+    color: var(--color-text-soft);
+    font-size: 0.9rem;
+}
+
+.createPaymentLink {
+    display: inline-flex;
+    min-height: 2.75rem;
+
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+
+    flex: 0 0 auto;
+
+    padding: 0 1rem;
+
+    border-radius: var(--radius-sm);
+
+    background: var(--seb-green-dark-2);
+    color: white;
+
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: background-color 0.15s ease;
+}
+
+.createPaymentLink:hover {
+    background: var(--seb-green-dark-1);
+    color: white;
+}
+
+.createPaymentLink:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 3px;
+}
+
+.createPaymentLink svg {
+    width: 1rem;
+    height: 1rem;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.accountsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+
+
+.summaryMeta, .balanceLabel {
+    color: var(--color-text-soft);
+    font-size: 0.85rem;
+    margin: 0.25rem 0;
+}
+
+.accountCard {
+    min-width: 0;
+    border: 1px solid var(--color-border-light);
+    padding: 1rem;
+    gap: 0.6rem;
+    background: var(--color-surface);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.balanceSection {
+    padding: 0;
+}
+
+.balanceLabel {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-weight: 600;
+}
+
+
+.accountHeader, .accountIdentity, .accountFooter {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.accountHeader { justify-content: space-between; }
+.accountIdentity { min-width: 0; }
+.currencyBadge {
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.accountFooter {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-border-light);
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.ibanDetails { min-width: 0; }
+.copyButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.75rem;
+    padding: 0.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.copyButton:hover { background: var(--color-hover-light); }
+.copyButton:focus-visible { outline: 3px solid var(--seb-green-dark-2); outline-offset: 2px; }
+
+
+
+.convertedBalance {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.5rem;
+    color: var(--color-text-soft);
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--color-hover-light);
+    line-height: 1.5;
+}
+
+.conversionLabel { font-weight: 600; color: var(--color-text); }
+.conversionAmount { font-size: 1rem; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; color: var(--color-text); }
+
+.convertedBalance p {
+    margin: 0.1rem 0;
+}
+
+.accountName {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.accountBalance {
+    margin: 0;
+    font-size: clamp(1.25rem, 2vw, 1.6rem);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+}
+
+.accountIban {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--color-text-soft);
+    overflow-wrap: anywhere;
+}
+
+.recentPayments {
+    margin-top: 2.5rem;
+}
+
+.paymentsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableScroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.paymentsTable th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+
+    border-bottom: 2px solid var(--color-border-light);
+
+    font-size: 0.85rem;
+    color: var(--color-text-soft);
+}
+
+.paymentsTable td {
+    padding: 0.6rem 0.75rem;
+
+    border-bottom: 1px solid var(--color-border-light);
+
+    font-size: 0.9rem;
+}
+
+.status {
+    display: inline-block;
+
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status--done {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status--pending {
+    background: #e8e8e8;
+    color: #444;
+}
+
+@media (max-width: 760px) {
+    .dashboard {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    .dashboard__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .accountsGrid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Icons */
+.sectionTitle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.sectionTitle svg {
+    flex-shrink: 0;
+    color: var(--seb-green-dark-2);
+}

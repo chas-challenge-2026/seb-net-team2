@@ -1,0 +1,15 @@
+.content {
+    width: 100%;
+    max-width: 1100px;
+
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+
+    box-sizing: border-box;
+}
+
+@media (max-width: 700px) {
+    .content {
+        padding: var(--spacing-md);
+    }
+}

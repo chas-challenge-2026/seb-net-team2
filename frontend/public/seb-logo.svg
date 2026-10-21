@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title">
+  <title id="title">SEB</title>
+  <rect width="640" height="360" fill="#005b35"/>
+  <g fill="#fff" font-family="Arial, Helvetica, sans-serif" font-size="170" font-weight="700" text-anchor="middle">
+    <text x="125" y="235">S</text>
+    <text x="320" y="235">E</text>
+    <text x="515" y="235">B</text>
+  </g>
+  <g fill="#fff">
+    <rect x="215" y="74" width="12" height="212"/>
+    <rect x="413" y="74" width="12" height="212"/>
+  </g>
+</svg>

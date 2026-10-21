@@ -1,0 +1,58 @@
+# This workflow uses the CodeQL GitHub Action to analyze code for security vulnerabilities.
+# Runs on pushes to the main and develop branches, pull requests targeting those branches, and on a weekly schedule.
+# the project will be deployedif ci (build-and-test, frontend and build-docker) jobs are successful, CodeQL analysis is not a blocking step for deployment.
+
+name: "CodeQL Security"
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+  schedule:
+    - cron: '30 1 * * 1' # Run at 01:30 UTC every Monday
+
+jobs:
+  analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install build tools for native code
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends make libc6-dev gcc libssl-dev
+    - name: Build native code
+      run: make -C native
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3

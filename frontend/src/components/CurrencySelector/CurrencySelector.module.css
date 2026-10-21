@@ -1,0 +1,12 @@
+.trigger {
+    background: white;
+}
+
+.chevron {
+    flex-shrink: 0;
+}
+
+.coin {
+    color: #b8860b;
+    flex-shrink: 0;
+}

@@ -1,37 +1,199 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
+using SebPortal.Api.Auth;
+using SebPortal.Api.Filters;
+using SebPortal.Api.Middleware;
+using SebPortal.Api.Models;
+using SebPortal.Api.Repositories;
+using SebPortal.Api.Services;
+using SebPortal.Data;
+using System.IO;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
-builder.Services.AddSession(options =>
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException("JWT secret is missing.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("JWT issuer is missing.");
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("JWT audience is missing.");
+
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddScoped<IdempotencyFilter>();
+
+// Swagger / OpenAPI for .NET 8 with JWT
+builder.Services.AddSwaggerGen(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+    var currentDirectory = AppContext.BaseDirectory;
+    var xmlFiles = Directory.GetFiles(currentDirectory, "*.xml");
+    foreach (var xmlFile in xmlFiles)
+    {
+        options.IncludeXmlComments(xmlFile);
+    }
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        In = ParameterLocation.Header,
+        BearerFormat = "JWT"
+    });
 builder.Services.AddDistributedMemoryCache();
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// Register CORS policies for development and production environments
+builder.Services.AddCors(options =>
+{
+
+    options.AddPolicy("DevelopmentPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+    options.AddPolicy("ProductionPolicy", policy =>
+    {
+        policy.WithOrigins(
+                "https://seb-net-team2.team.chas-challenge.comerit.se", //prod
+                "https://seb-net-team2-dev.team.chas-challenge.comerit.se" //stage
+                )
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Persist ASP.NET Core DataProtection keys to disk (fixes session cookie unprotect warnings)
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppContext.BaseDirectory, "DataProtection-Keys")))
+    .SetApplicationName("SebPortal");
+
+// Services
+builder.Services.AddScoped<IApprovalRepository, ApprovalRepository>();
+builder.Services.AddScoped<IApprovalService, ApprovalService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+builder.Services.AddScoped<ICreatePaymentService, CreatePaymentService>();
+builder.Services.AddScoped<IApprovalLimitService, ApprovalLimitService>();
+builder.Services.AddScoped<IGenerateIban, GenerateIbanService>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IAuditRepository, AuditRepository>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IApprovalEngineService, ApprovalEngineService>();
+builder.Services.AddScoped<IApprovalLimitRepository, ApprovalLimitRepository>();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+builder.Services.AddSingleton<INotificationQueue, NotificationQueue>();
+builder.Services.AddHostedService<NotificationBackgroundService>();
+builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
+
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
+builder.Services.AddScoped<IReminderService, ReminderService>();
+builder.Services.AddHostedService<ReminderBackgroundService>();
+builder.Services.AddHostedService<ExpireDateCleanupService>();
+
+// Global error handling middleware
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+builder.Services.Configure<ReminderOptions>(builder.Configuration.GetSection("Reminder"));
+
+// healthcheck for app 
+builder.Services.AddHealthChecks();
+
+builder.Services.AddDbContext<SebDbContext>(options =>
+options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.MapInboundClaims = true;
+    options.TokenValidationParameters = JwtTokenValidation.Create(
+        jwtSecret,
+        jwtIssuer,
+        jwtAudience
+    );
+});
+builder.Services.AddAuthorization();
+
+
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
+// Migrera och seeda lokal databas
 {
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
+    db.Database.Migrate();
+
+    // Primary seed path comes from configuration
+    var seedPath = app.Configuration["Seed:Path"];
+    if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
+        db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
+}
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.MapScalarApiReference(options =>
+    {
+        options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
+    });
+    app.UseCors("DevelopmentPolicy");
+}
+else
+{
+    app.UseCors("ProductionPolicy");
 }
 
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
+app.UseExceptionHandler();
+app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
 
-app.MapRazorPages();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.MapHealthChecks("/healthz");
 
-// Default route goes to login
-app.MapGet("/", context =>
-{
-    context.Response.Redirect("/Index");
-    return Task.CompletedTask;
-});
+// Unknown API routes should return 404 rather than the React page.
+app.MapFallback("/api/{**path}", () => Results.NotFound());
+app.MapFallbackToFile("index.html");
 
 app.Run();
