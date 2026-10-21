@@ -52,35 +52,95 @@ static void get_timestamp(char *buffer, size_t size)
     strftime(buffer, size, "%Y-%m-%d %H:%M:%S", time_info);
 }
 
-/* Läser sista raden i loggfilen. Returnerar 1 vid lyckad läsning, annars 0. */
-static int get_last_log_line(const char *log_path, char *last_line, size_t size)
+/*
+ * Läser sista raden i en befintlig loggfil.
+ * Returnerar:
+ *   1 = sista raden lästes korrekt
+ *   0 = loggfilen är tom
+ *  -1 = filen saknas, kan inte läsas eller innehåller en för lång rad
+ */
+static int get_last_log_line(
+    const char *log_path,
+    char *last_line,
+    size_t size)
 {
     FILE *file = fopen(log_path, "r");
+
     if (file == NULL)
-        return 0;
+        return -1;
 
     char line[1100];
     last_line[0] = '\0';
 
     while (fgets(line, sizeof(line), file) != NULL)
     {
-        line[strcspn(line, "\n")] = '\0';
-        size_t line_length = strlen(line);
+        size_t line_length = strcspn(line, "\n");
+
+        if (line[line_length] == '\n')
+            line[line_length] = '\0';
 
         if (line_length >= size)
         {
             fclose(file);
-            return 0;
+            return -1;
         }
 
-        for (size_t i = 0; i <= line_length; i++)
-        {
-            last_line[i] = line[i];
-        }
+        memcpy(last_line, line, line_length + 1);
     }
 
+    int read_error = ferror(file);
     fclose(file);
+
+    if (read_error)
+        return -1;
+
+    if (last_line[0] == '\0')
+        return 0;
+
     return 1;
+}
+
+int audit_initialize(
+    const char *log_path,
+    const char *secret_key,
+    int user_id,
+    const char *action,
+    int entity_id,
+    const char *description)
+{
+    if (!log_path || !secret_key || !action || !description)
+        return -1;
+
+    char timestamp[64], prev_hash[65], log_data[1024];
+    char hmac[65], final_log[1100];
+
+    get_timestamp(timestamp, sizeof(timestamp));
+    memset(prev_hash, '0', 64);
+    prev_hash[64] = '\0';
+
+    int len = snprintf(log_data, sizeof(log_data),
+                       "%s|%d|%s|%d|%s|%s",
+                       timestamp, user_id, action, entity_id, description, prev_hash);
+
+    if (len < 0 || len >= (int)sizeof(log_data))
+        return -1;
+
+    hmac_sha256_hex(log_data, secret_key, hmac);
+    if (strlen(hmac) != 64)
+        return -1;
+
+    len = snprintf(final_log, sizeof(final_log), "%s|%s\n", log_data, hmac);
+    if (len < 0 || len >= (int)sizeof(final_log))
+        return -1;
+
+    int fd = open(log_path, O_WRONLY | O_CREAT | O_EXCL | O_SYNC, 0644);
+    if (fd == -1)
+        return -1;
+
+    ssize_t written = write(fd, final_log, (size_t)len);
+    int close_result = close(fd);
+
+    return written == len && close_result == 0 ? 0 : -1;
 }
 
 /*
@@ -88,47 +148,102 @@ static int get_last_log_line(const char *log_path, char *last_line, size_t size)
  * Varje post innehåller: TIMESTAMP | USER_ID | ACTION | ENTITY_ID | DESCRIPTION | PREV_HASH | HMAC
  * PREV_HASH länkar posten till föregående post. HMAC-SHA256 skyddar mot ändringar.
  */
-int audit_append(const char *log_path, const char *secret_key, int user_id,
-                 const char *action, int entity_id, const char *description)
+
+static int audit_append_internal(
+    const char *log_path,
+    const char *secret_key,
+    int user_id,
+    const char *action,
+    int entity_id,
+    const char *description,
+    char *out_hash,
+    size_t out_hash_size)
 {
-    char timestamp[64], prev_hash[65], log_data[1024], hmac[65], final_log[1100], last_line[1100];
+    if (!log_path || !secret_key || !action || !description)
+        return -1;
+
+    if (out_hash && out_hash_size < 65)
+        return -1;
+
+    char timestamp[64], prev_hash[65], log_data[1024];
+    char hmac[65], final_log[1100], last_line[1100];
 
     get_timestamp(timestamp, sizeof(timestamp));
-    for (int i = 0; i < 64; i++)
-    {
-        prev_hash[i] = '0';
-    }
-    prev_hash[64] = '\0';
 
-    if (get_last_log_line(log_path, last_line, sizeof(last_line)))
-        sha256_hex(last_line, prev_hash);
+    int log_status = get_last_log_line(
+        log_path, last_line, sizeof(last_line));
 
-    if (snprintf(log_data, sizeof(log_data), "%s|%d|%s|%d|%s|%s",
-                 timestamp, user_id, action, entity_id, description, prev_hash) >= (int)sizeof(log_data))
-    {
+    /*
+     * Skapa inte automatiskt en ny loggkedja.
+     * Loggfilen måste finnas, innehålla poster och vara läsbar.
+     */
+    if (log_status != 1)
         return -1;
-    }
+
+    /* Verifiera hela kedjan innan vi lägger till en ny post. */
+    if (audit_verify(log_path, secret_key) != -1)
+        return -1;
+
+    sha256_hex(last_line, prev_hash);
+
+    int data_len = snprintf(
+        log_data, sizeof(log_data), "%s|%d|%s|%d|%s|%s",
+        timestamp, user_id, action, entity_id, description, prev_hash);
+
+    if (data_len < 0 || data_len >= (int)sizeof(log_data))
+        return -1;
 
     hmac_sha256_hex(log_data, secret_key, hmac);
 
-    if (snprintf(final_log, sizeof(final_log), "%s|%s",
-                 log_data, hmac) >= (int)sizeof(final_log))
-    {
+    if (strlen(hmac) != 64)
         return -1;
-    }
+
+    int log_len = snprintf(
+        final_log, sizeof(final_log), "%s|%s\n", log_data, hmac);
+
+    if (log_len < 0 || log_len >= (int)sizeof(final_log))
+        return -1;
 
     int fd = open(log_path, O_WRONLY | O_CREAT | O_APPEND | O_SYNC, 0644);
     if (fd == -1)
         return -1;
 
-    if (write(fd, final_log, strlen(final_log)) == -1 || write(fd, "\n", 1) == -1)
-    {
-        close(fd);
-        return -1;
-    }
+    ssize_t written = write(fd, final_log, (size_t)log_len);
+    int close_result = close(fd);
 
-    close(fd);
+    if (written != log_len || close_result == -1)
+        return -1;
+
+    if (out_hash)
+        memcpy(out_hash, hmac, 65);
+
     return 0;
+}
+
+int audit_append(const char *log_path, const char *secret_key, int user_id,
+                 const char *action, int entity_id, const char *description)
+{
+    return audit_append_internal(
+        log_path, secret_key, user_id, action, entity_id,
+        description, NULL, 0);
+}
+
+int audit_append_with_hash(
+    const char *log_path,
+    const char *secret_key,
+    int user_id,
+    const char *action,
+    int entity_id,
+    const char *description,
+    char *out_hash,
+    size_t out_hash_size)
+{
+    if (!out_hash)
+        return -1;
+
+    return audit_append_internal(
+        log_path, secret_key, user_id, action, entity_id,
+        description, out_hash, out_hash_size);
 }
 
 /*
@@ -143,7 +258,7 @@ int audit_verify(const char *log_path, const char *secret_key)
 {
     FILE *file = fopen(log_path, "r");
     if (file == NULL)
-        return -1;
+        return -2;
 
     char line[1100], previous_line[1100] = "", current_line[1100];
     int line_number = 0;
@@ -229,6 +344,14 @@ int audit_verify(const char *log_path, const char *secret_key)
         }
     }
 
+    int read_error = ferror(file);
     fclose(file);
+
+    if (read_error)
+        return -2;
+
+    if (line_number == 0)
+        return 1;
+
     return -1;
 }

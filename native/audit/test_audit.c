@@ -15,11 +15,17 @@ static void create_test_log(void)
 {
     remove("audit.log");
 
-    audit_append("audit.log", secret_key, 1,
-                 "CREATE_PAYMENT", 100, "Test payment created");
+    assert_int_equal(
+        audit_initialize("audit.log", secret_key, 1,
+                         "CREATE_PAYMENT", 100,
+                         "Test payment created"),
+        0);
 
-    audit_append("audit.log", secret_key, 2,
-                 "APPROVE_PAYMENT", 100, "Test payment approved");
+    assert_int_equal(
+        audit_append("audit.log", secret_key, 2,
+                     "APPROVE_PAYMENT", 100,
+                     "Test payment approved"),
+        0);
 }
 
 static int setup_test_log(void **state)
@@ -114,7 +120,7 @@ static void remove_hmac(char *line)
 
 static void test_append_success(void **state)
 {
-    remove("audit.log");
+    create_test_log();
 
     assert_int_equal(
         audit_append("audit.log", secret_key, 1,
@@ -143,9 +149,43 @@ static void test_description_too_long(void **state)
     assert_null(file);
 }
 
+static void test_existing_empty_log(void **state)
+{
+    (void)state;
+    const char *path = "audit_empty_test.log";
+    remove(path);
+
+    FILE *file = fopen(path, "w");
+    assert_non_null(file);
+    assert_int_equal(fclose(file), 0);
+
+    assert_int_equal(
+        audit_append(path, secret_key, 1,
+                     "EMPTY_LOG_TEST", 100, "First entry"),
+        -1);
+    assert_int_equal(audit_verify(path, secret_key), 1);
+
+    remove(path);
+}
+
+static void test_verify_empty_log_fails(void **state)
+{
+    (void)state;
+    const char *path = "audit_empty_verify_test.log";
+    remove(path);
+
+    FILE *file = fopen(path, "w");
+    assert_non_null(file);
+    assert_int_equal(fclose(file), 0);
+
+    assert_int_equal(audit_verify(path, secret_key), 1);
+
+    remove(path);
+}
+
 static void test_empty_description(void **state)
 {
-    remove("audit.log");
+    create_test_log();
 
     assert_int_equal(
         audit_append("audit.log", secret_key, 1,
@@ -159,9 +199,9 @@ static void test_empty_description(void **state)
 
 static void test_multiple_entries(void **state)
 {
-    remove("audit.log");
+    create_test_log();
 
-    for (int i = 1; i <= 10; i++)
+    for (int i = 3; i <= 10; i++)
     {
         assert_int_equal(
             audit_append("audit.log", secret_key, i,
@@ -186,7 +226,7 @@ static void test_corrupt_log_line(void **state)
 
 static void test_notification_events(void **state)
 {
-    remove("audit.log");
+    create_test_log();
 
     assert_int_equal(
         audit_append("audit.log", secret_key, 1,
@@ -216,6 +256,52 @@ static void test_valid_log(void **state)
     assert_int_equal(
         audit_verify("audit.log", secret_key),
         -1);
+}
+
+static void test_append_with_hash(void **state)
+{
+    (void)state;
+
+    create_test_log();
+
+    char hash[65] = {0};
+
+    assert_int_equal(
+        audit_append_with_hash(
+            "audit.log", secret_key, 7,
+            "CREATE_PAYMENT", 123, "Hash return test",
+            hash, sizeof(hash)),
+        0);
+
+    assert_int_equal(strlen(hash), 64);
+
+    for (int i = 0; i < 64; i++)
+    {
+        assert_true(
+            (hash[i] >= '0' && hash[i] <= '9') ||
+            (hash[i] >= 'a' && hash[i] <= 'f'));
+    }
+
+    FILE *file = fopen("audit.log", "r");
+    assert_non_null(file);
+
+    char line[1100];
+    assert_non_null(fgets(line, sizeof(line), file));
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        /* Behåll den senast lästa raden. */
+    }
+
+    fclose(file);
+
+    line[strcspn(line, "\n")] = '\0';
+
+    char *separator = strrchr(line, '|');
+    assert_non_null(separator);
+
+    assert_string_equal(separator + 1, hash);
+    assert_int_equal(audit_verify("audit.log", secret_key), -1);
 }
 
 static void test_tampered_action(void **state)
@@ -260,14 +346,30 @@ static void test_removed_first_line(void **state)
         audit_verify("audit.log", secret_key),
         1);
 }
+static void test_missing_log_file(void **state)
+{
+    const char *missing_log = "audit_missing_test.log";
+    remove(missing_log);
+
+    assert_int_equal(
+        audit_verify(missing_log, secret_key),
+        -2);
+
+    remove(missing_log);
+}
+
 int main(void)
 {
     secret_key = getenv("AUDIT_SIGNING_KEY");
     assert_non_null(secret_key);
 
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_missing_log_file),
         cmocka_unit_test(test_append_success),
+        cmocka_unit_test(test_append_with_hash),
         cmocka_unit_test(test_description_too_long),
+        cmocka_unit_test(test_existing_empty_log),
+        cmocka_unit_test(test_verify_empty_log_fails),
         cmocka_unit_test(test_empty_description),
         cmocka_unit_test(test_multiple_entries),
         cmocka_unit_test(test_notification_events),
