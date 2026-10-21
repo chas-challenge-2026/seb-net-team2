@@ -434,7 +434,6 @@
         "eyebrow": "PAYMENTS",
         "title": "Batch upload",
         "description": "Upload multiple payments at once via a CSV file.",
-        "mockMode": "Mock mode",
         "file": {
             "title": "CSV file",
             "description": "Choose a file, then upload and process it.",
@@ -448,12 +447,14 @@
         "format": {
             "title": "CSV format",
             "description": "The file must have the following columns:",
-            "warning": "Note: commas inside a field are not supported. Avoid references that contain commas.",
+            "exampleLabel": "Example CSV file",
+            "accounts": "Use the IBAN of one of your accounts in the from_account_id column:",
+            "warning": "Note: put fields that contain commas in double quotes, for example \"Malmö Bygg, invoice 99\".",
             "download": "Download example-batch.csv"
         },
         "result": {
             "title": "Result",
-            "processed": "{{succeeded}} of {{total}} payments processed.",
+            "processed": "{{succeeded}} of {{total}} payments created.",
             "failed_one": "{{count}} row failed — see below.",
             "failed_other": "{{count}} rows failed — see below."
         },
@@ -463,17 +464,19 @@
             "amount": "Amount",
             "reference": "Reference",
             "status": "Status",
-            "success": "Success"
+            "success": "Created"
         },
         "errors": {
             "csvOnly": "Only .csv files are supported.",
             "fileTooLarge": "The file is larger than 1 MB.",
             "chooseFile": "Choose a CSV file first.",
             "accountsLoading": "Account data is still loading — try again in a moment.",
+            "accountsFailed": "Could not load your accounts. Reload the page and try again.",
+            "createFailed": "Could not create the payment: {{message}}",
             "header": "The CSV header must be exactly: {{header}}",
             "empty": "The CSV file is empty or has no data rows.",
-            "columns": "Expected 4 columns, got {{count}}. Commas inside a field are not supported.",
-            "unknownAccount": "Unknown from_account_id '{{id}}'",
+            "columns": "Expected 4 columns, got {{count}}. Put fields that contain commas in double quotes.",
+            "unknownAccount": "Unknown account '{{id}}'. Use the IBAN of one of your accounts.",
             "invalidIban": "Invalid IBAN '{{iban}}'",
             "invalidAmount": "Invalid amount '{{amount}}'"
         }
