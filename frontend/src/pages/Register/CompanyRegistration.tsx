@@ -1,3 +1,4 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { useTranslation } from "react-i18next";
 import { useFormValidation } from "../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
@@ -45,6 +46,8 @@ export default function CompanyRegistration() {
                     className={styles.label}
                 >
                     {t("registration.companyName")}
+
+                    <RequiredMark />
                 </label>
 
                 <input
@@ -70,6 +73,8 @@ export default function CompanyRegistration() {
                     className={styles.label}
                 >
                     {t("users.form.email")}
+
+                    <RequiredMark />
                 </label>
 
                 <input
@@ -96,6 +101,8 @@ export default function CompanyRegistration() {
                     className={styles.label}
                 >
                     {t("users.form.password")}
+
+                    <RequiredMark />
                 </label>
 
                 <PasswordInput

@@ -1,7 +1,9 @@
 .page {
-    max-width: 1080px;
+    overflow-wrap: anywhere;
+    width: 100%;
+    max-width: 1040px;
     margin: 0 auto;
-    padding: 1.5rem 1.5rem 3rem;
+    padding: clamp(3rem, 7vh, 5rem) 1.5rem 3rem;
 }
 
 .header {
@@ -110,11 +112,19 @@
 
 .layout > * {
     width: 100%;
-    max-width: 54rem;
+    max-width: 100%;
 }
 
 .formCard {
-    padding: 1rem 1.25rem;
+    padding: 1.5rem 1.75rem;
+}
+
+.formCard input,
+.formCard select,
+.formCard textarea {
+    min-height: 48px;
+    padding: 0.8rem 0.9rem;
+    font-size: 1rem;
 }
 
 .formFields {
@@ -125,13 +135,13 @@
         "recipient amount"
         "iban iban"
         "reference message";
-    column-gap: 1rem;
+    column-gap: 1.5rem;
     align-items: start;
 }
 
 .formFields label {
     min-width: 0;
-    margin-bottom: 0.65rem;
+    margin-bottom: 1rem;
 }
 
 .accountField { grid-area: account; }
@@ -323,14 +333,14 @@ label {
     font-weight: 750;
 }
 
-input,
-select,
-textarea {
+.page input,
+.page select,
+.page textarea {
     box-sizing: border-box;
     width: 100%;
     margin-top: 0.3rem;
     padding: 0.65rem 0.75rem;
-    border: 1px solid #cbd8ce;
+    border: 1px solid var(--color-control-border);
     border-radius: 4px;
     background: #fbfdfb;
     color: #193326;
@@ -338,14 +348,14 @@ textarea {
     font-size: 0.95rem;
 }
 
-input:focus,
-select:focus,
-textarea:focus {
-    outline: 3px solid rgb(96 205 24 / 20%);
+.page input:focus,
+.page select:focus,
+.page textarea:focus {
+    outline: 3px solid var(--seb-green-dark-2);
     border-color: var(--seb-green-dark-1);
 }
 
-textarea {
+.page textarea {
     resize: vertical;
 }
 
@@ -367,14 +377,14 @@ textarea {
     position: absolute;
     top: 50%;
     right: 0.9rem;
-    color: #6e7c73;
+    color: #56635a;
     font-size: 0.8rem;
     font-weight: 700;
     transform: translateY(-25%);
 }
 
 .optional {
-    color: #8a978e;
+    color: #56635a;
     font-weight: 400;
 }
 
@@ -542,6 +552,8 @@ textarea {
 
 .reviewModal {
     width: min(100%, 30rem);
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
     padding: 2rem;
     border: 1px solid #dce5df;
     background: #fff;
@@ -574,7 +586,7 @@ textarea {
 }
 
 .reviewDetails span {
-    color: #7b8780;
+    color: #56635a;
     font-size: 0.8rem;
 }
 
@@ -602,6 +614,8 @@ textarea {
     }
 
     .headerBadge {
+        max-width: 100%;
+        white-space: normal;
         width: fit-content;
         margin-top: 1rem;
     }

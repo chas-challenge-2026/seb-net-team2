@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { CircleAlert, TriangleAlert } from "lucide-react";
 
 import type { PendingApprovalStep } from "../../schemas/pendingApprovalSchema";
-import { checkPayment } from "../../utils/paymentChecks";
+import { usePaymentSourceAccount } from "../../hooks/usePaymentSourceAccount";
+import { checkPayment, normalizeIban } from "../../utils/paymentChecks";
 
 import styles from "./Attestkorg.module.css";
 
@@ -27,11 +28,16 @@ export function PaymentChecks({ approval, allPending }: PaymentChecksProps) {
     const { t, i18n } = useTranslation();
     const checks = checkPayment(approval, allPending);
 
+    // Same query as the "From account" row, so React Query shares it instead of fetching twice.
+    const { account } = usePaymentSourceAccount(approval.paymentId);
+    const sameAccount = !!account && normalizeIban(account.iban) === normalizeIban(approval.toIban);
+
     const hasWarnings =
         !checks.ibanValid ||
         checks.foreignCountry !== null ||
         checks.duplicateOf.length > 0 ||
-        checks.highAmount;
+        checks.highAmount ||
+        sameAccount;
 
     if (!hasWarnings) return null;
 
@@ -65,9 +71,21 @@ export function PaymentChecks({ approval, allPending }: PaymentChecksProps) {
                 {checks.duplicateOf.length > 0 && (
                     <li className={styles.checkWarning}>
                         <TriangleAlert size={16} aria-hidden="true" />
+                        {/* References, not ids: the payment id is a UUID the attestant can't recognise. */}
                         {t("approvalInbox.checks.duplicate", {
-                            payments: checks.duplicateOf.map((id) => `#${id}`).join(", "),
+                            count: checks.duplicateOf.length,
+                            payments: checks.duplicateOf
+                                .map((id) => allPending.find((other) => other.paymentId === id)?.reference ?? id)
+                                .map((reference) => `“${reference}”`)
+                                .join(", "),
                         })}
+                    </li>
+                )}
+
+                {sameAccount && (
+                    <li className={styles.checkWarning}>
+                        <TriangleAlert size={16} aria-hidden="true" />
+                        {t("approvalInbox.checks.sameAccount")}
                     </li>
                 )}
 

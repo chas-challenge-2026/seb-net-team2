@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { UserPlus } from "lucide-react";
 
 import Card from "../../components/Card/Card";
@@ -12,6 +13,7 @@ import CompanyRegistration from "./CompanyRegistration";
 import styles from "./Register.module.css";
 
 export default function Register() {
+    const { t } = useTranslation();
     const [customerType, setCustomerType] =
         useState<CustomerType>("private");
 
@@ -25,7 +27,7 @@ export default function Register() {
                     <div className={styles.headerTitle}>
                         <UserPlus size={22} aria-hidden="true" />
                         <h1 className={styles.header}>
-                            Welcome to SEB
+                            {t("a11y.register")}
                         </h1>
                     </div>
 

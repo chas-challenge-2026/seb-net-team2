@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { useMemo, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import {
     ChevronDown,
     CircleCheck,
@@ -9,10 +9,11 @@ import {
     SlidersHorizontal,
 } from "lucide-react";
 
-import { isHistoryUnavailable, useApprovalHistory } from "../../hooks/useApprovalHistory";
+import { isHistoryUnavailable } from "../../hooks/useApprovalHistory";
+import { useHandledHistory } from "../../hooks/useAdminDecisionHistory";
 import { useAuth } from "../../hooks/useAuth";
 import { useSessionDecisions } from "../../hooks/useSessionDecisions";
-import type { DecidedApproval } from "../../schemas/approvalHistorySchema";
+import { historyEntryDate, type DecidedApproval } from "../../schemas/approvalHistorySchema";
 import { formatIban, recipientBank } from "../../utils/paymentChecks";
 
 import styles from "./Attestkorg.module.css";
@@ -33,6 +34,32 @@ function formatDate(date: string, locale: string): string {
     return new Date(date).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
 }
 
+type MonthGroup = { key: string; label: string; entries: DecidedApproval[] };
+
+// Splits an already sorted list into "October 2026", "September 2026", ...
+function groupByMonth(entries: DecidedApproval[], locale: string, unknownLabel: string): MonthGroup[] {
+    const groups: MonthGroup[] = [];
+
+    for (const entry of entries) {
+        const date = historyEntryDate(entry);
+        const key = date ? date.slice(0, 7) : "unknown";
+        const last = groups[groups.length - 1];
+
+        if (last?.key === key) {
+            last.entries.push(entry);
+            continue;
+        }
+
+        const month = date
+            ? new Date(date).toLocaleDateString(locale, { month: "long", year: "numeric" })
+            : unknownLabel;
+        // Swedish month names are lowercase ("oktober 2026"), but this is a heading.
+        groups.push({ key, label: month.charAt(0).toUpperCase() + month.slice(1), entries: [entry] });
+    }
+
+    return groups;
+}
+
 // The attestant's earlier decisions, so the inbox stays useful after everything is handled:
 // "what did I approve last month, and why did I reject that one?"
 export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: string }) {
@@ -40,7 +67,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
 
     const { user } = useAuth();
-    const { data: apiHistory = [], isPending, isError, error } = useApprovalHistory(true);
+    const { data: apiHistory = [], isPending, isError, error } = useHandledHistory(user);
     const sessionDecisions = useSessionDecisions(user?.id);
 
     // Until the backend has a history endpoint, show the decisions made since the page was opened.
@@ -48,6 +75,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     const history = usingSession ? sessionDecisions : apiHistory;
 
     const [search, setSearch] = useState("");
+    const searchRef = useRef<HTMLInputElement>(null);
     const [status, setStatus] = useState<StatusFilter>("all");
     const [dateFrom, setDateFrom] = useState("");
     const [dateTo, setDateTo] = useState("");
@@ -62,6 +90,9 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
         search !== "" || status !== "all" || dateFrom !== "" || dateTo !== "" ||
         minAmount !== "" || maxAmount !== "";
 
+    // The decision filter is only useful once the backend sends the decision.
+    const hasDecisions = history.some((entry) => entry.decision !== undefined);
+
     const filtered = useMemo(() => {
         const query = search.trim().toLowerCase();
         const min = minAmount === "" ? null : Number(minAmount);
@@ -69,7 +100,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
         return history
             .filter((entry) => {
-                const decidedDate = entry.decidedAt.slice(0, 10);
+                const decidedDate = historyEntryDate(entry).slice(0, 10);
 
                 if (status !== "all" && entry.decision !== status) return false;
                 if (dateFrom && decidedDate < dateFrom) return false;
@@ -95,7 +126,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
                 return true;
             })
-            .sort((a, b) => b.decidedAt.localeCompare(a.decidedAt));
+            .sort((a, b) => historyEntryDate(b).localeCompare(historyEntryDate(a)));
     }, [history, search, status, dateFrom, dateTo, minAmount, maxAmount]);
 
     function resetFilters() {
@@ -105,11 +136,14 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
         setDateTo("");
         setMinAmount("");
         setMaxAmount("");
+        // The "Clear" button disappears once nothing is filtered, so focus moves to the search field
+        // instead of falling back to the top of the page.
+        searchRef.current?.focus();
     }
 
     if (isPending) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.loadingState} role="status">
                     {t("approvalInbox.history.loading")}
                 </div>
@@ -119,7 +153,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (isError && !usingSession) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.error} role="alert">
                     {t("approvalInbox.history.error")}
                 </div>
@@ -129,7 +163,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
     if (usingSession && sessionDecisions.length === 0) {
         return (
-            <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+            <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
                 <div className={styles.emptyState}>
                     <History size={32} aria-hidden="true" />
                     <h2>{t("approvalInbox.history.unavailableTitle")}</h2>
@@ -140,7 +174,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     }
 
     return (
-        <div id={id} role="tabpanel" aria-labelledby={labelledBy}>
+        <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
             {/* With only a few decisions the list is easy to scan, so filters would just be in the way. */}
             {showFilters && (
                 <div className={styles.toolbar}>
@@ -148,6 +182,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         <label htmlFor="history-search">{t("approvalInbox.history.search")}</label>
                         <input
                             id="history-search"
+                            ref={searchRef}
                             type="search"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
@@ -182,18 +217,20 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
 
             {showFilters && filtersOpen && (
                 <div id="history-more-filters" className={styles.toolbar}>
-                    <div className={styles.filterField}>
-                        <label htmlFor="history-status">{t("approvalInbox.history.status")}</label>
-                        <select
-                            id="history-status"
-                            value={status}
-                            onChange={(event) => setStatus(event.target.value as StatusFilter)}
-                        >
-                            <option value="all">{t("approvalInbox.history.statusAll")}</option>
-                            <option value="approved">{t("approvalInbox.history.statusApproved")}</option>
-                            <option value="rejected">{t("approvalInbox.history.statusRejected")}</option>
-                        </select>
-                    </div>
+                    {hasDecisions && (
+                        <div className={styles.filterField}>
+                            <label htmlFor="history-status">{t("approvalInbox.history.status")}</label>
+                            <select
+                                id="history-status"
+                                value={status}
+                                onChange={(event) => setStatus(event.target.value as StatusFilter)}
+                            >
+                                <option value="all">{t("approvalInbox.history.statusAll")}</option>
+                                <option value="approved">{t("approvalInbox.history.statusApproved")}</option>
+                                <option value="rejected">{t("approvalInbox.history.statusRejected")}</option>
+                            </select>
+                        </div>
+                    )}
 
                     <div className={styles.filterField}>
                         <label htmlFor="history-from">{t("approvalInbox.history.fromDate")}</label>
@@ -245,79 +282,126 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                 </div>
             )}
 
-            {/* Only meaningful when the filters actually hide something. */}
-            {hasActiveFilters && (
-                <p className={styles.historyCount} aria-live="polite">
-                    {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
-                </p>
-            )}
+            {/* The live region is always there, so screen readers also announce the first count.
+                The count itself is only meaningful when the filters actually hide something. */}
+            <div aria-live="polite">
+                {hasActiveFilters && (
+                    <p className={styles.historyCount}>
+                        {t("approvalInbox.history.count", { visible: filtered.length, total: history.length })}
+                    </p>
+                )}
+            </div>
 
             {filtered.length > 0 ? (
-                <ul className={styles.historyList}>
-                    {filtered.map((entry) => {
-                        const approved = entry.decision === "approved";
-                        const bank = recipientBank(entry.toIban);
+                <div className={styles.historyGroups}>
+                    {/* Grouped by month so a long history stays easy to scan. */}
+                    {groupByMonth(filtered, locale, t("approvalInbox.history.unknownDate")).map((group) => (
+                        <section key={group.key} aria-labelledby={`history-month-${group.key}`}>
+                            <h2 id={`history-month-${group.key}`} className={styles.historyMonth}>
+                                {group.label}
+                            </h2>
 
-                        return (
-                            <li key={entry.stepId} className={styles.historyItem}>
-                                <div className={styles.historyItemHeader}>
-                                    <div>
-                                        <p
-                                            className={approved ? styles.decisionApproved : styles.decisionRejected}
-                                        >
-                                            {approved ? (
-                                                <CircleCheck size={16} aria-hidden="true" />
-                                            ) : (
-                                                <CircleX size={16} aria-hidden="true" />
+                            <ul className={styles.historyList}>
+                                {group.entries.map((entry) => {
+                                    const approved = entry.decision === "approved";
+                                    const bank = recipientBank(entry.toIban);
+                                    // Same top line as the cards under "To handle": step, and dual approval from step 2.
+                                    const step = (
+                                        <>
+                                            {t("approvalInbox.card.approvalStep", { step: entry.stepNumber })}
+                                            {entry.stepNumber > 1 && (
+                                                <>
+                                                    {" · "}
+                                                    <span className={styles.dualApproval}>
+                                                        {t("approvalInbox.card.dualApprovalShort")}
+                                                    </span>
+                                                </>
                                             )}
-                                            {t(approved
-                                                ? "approvalInbox.history.approvedOn"
-                                                : "approvalInbox.history.rejectedOn", {
-                                                date: formatDate(entry.decidedAt, locale),
-                                            })}
-                                        </p>
-                                        <h3>{entry.reference}</h3>
-                                    </div>
+                                        </>
+                                    );
 
-                                    <strong>{formatAmount(entry, locale)}</strong>
-                                </div>
+                                    return (
+                                        <li key={entry.stepId} className={styles.historyItem}>
+                                            <div className={styles.historyItemHeader}>
+                                                <div>
+                                                    {entry.decision ? (
+                                                        <p
+                                                            className={approved ? styles.decisionApproved : styles.decisionRejected}
+                                                        >
+                                                            {approved ? (
+                                                                <CircleCheck size={16} aria-hidden="true" />
+                                                            ) : (
+                                                                <CircleX size={16} aria-hidden="true" />
+                                                            )}
+                                                            <Trans
+                                                                i18nKey={approved
+                                                                    ? "approvalInbox.history.approvedOn"
+                                                                    : "approvalInbox.history.rejectedOn"}
+                                                                values={{ date: entry.decidedAt ? formatDate(entry.decidedAt, locale) : "" }}
+                                                                components={{ time: <time dateTime={entry.decidedAt ?? undefined} /> }}
+                                                            />
+                                                            {" · "}
+                                                            {step}
+                                                        </p>
+                                                    ) : (
+                                                        // The backend doesn't send the decision yet; the tab already says "Handled".
+                                                        <p className={styles.decisionHandled}>{step}</p>
+                                                    )}
+                                                    <h3>
+                                                        <span className={styles.referenceLabel}>
+                                                            {t("approvalInbox.card.reference")}
+                                                        </span>{" "}
+                                                        {entry.reference}
+                                                    </h3>
+                                                </div>
 
-                                <dl className={styles.historyDetails}>
-                                    {entry.recipientName && (
-                                        <div>
-                                            <dt>{t("approvalInbox.card.recipient")}</dt>
-                                            <dd>{entry.recipientName}</dd>
-                                        </div>
-                                    )}
+                                                <strong>{formatAmount(entry, locale)}</strong>
+                                            </div>
 
-                                    <div>
-                                        <dt>{t("approvalInbox.card.toIban")}</dt>
-                                        <dd>{formatIban(entry.toIban)}{bank ? ` · ${bank}` : ""}</dd>
-                                    </div>
+                                            <dl className={styles.historyDetails}>
+                                                {entry.recipientName && (
+                                                    <div>
+                                                        <dt>{t("approvalInbox.card.recipient")}</dt>
+                                                        <dd>{entry.recipientName}</dd>
+                                                    </div>
+                                                )}
 
-                                    <div>
-                                        <dt>{t("approvalInbox.card.submittedBy")}</dt>
-                                        <dd>{entry.createdByUserName}</dd>
-                                    </div>
+                                                <div>
+                                                    <dt>{t("approvalInbox.card.toIban")}</dt>
+                                                    <dd>{formatIban(entry.toIban)}{bank ? ` · ${bank}` : ""}</dd>
+                                                </div>
 
-                                    <div>
-                                        <dt>{t("approvalInbox.history.step")}</dt>
-                                        <dd>{entry.stepNumber}</dd>
-                                    </div>
-                                </dl>
+                                                <div>
+                                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
+                                                    <dd>
+                                                        {entry.createdByUserName}
+                                                        {entry.paymentCreatedAt && (
+                                                            <>
+                                                                {" · "}
+                                                                <time dateTime={entry.paymentCreatedAt}>
+                                                                    {formatDate(entry.paymentCreatedAt, locale)}
+                                                                </time>
+                                                            </>
+                                                        )}
+                                                    </dd>
+                                                </div>
+                                            </dl>
 
-                                {entry.comment?.trim() && (
-                                    <p className={styles.historyComment}>
-                                        {approved
-                                            ? t("approvalInbox.comment.label")
-                                            : t("approvalInbox.history.reason")}
-                                        : “{entry.comment.trim()}”
-                                    </p>
-                                )}
-                            </li>
-                        );
-                    })}
-                </ul>
+                                            {entry.comment?.trim() && (
+                                                <p className={styles.historyComment}>
+                                                    {approved
+                                                        ? t("approvalInbox.comment.label")
+                                                        : t("approvalInbox.history.reason")}
+                                                    : “{entry.comment.trim()}”
+                                                </p>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </section>
+                    ))}
+                </div>
             ) : (
                 <div className={styles.emptyState}>
                     <History size={32} aria-hidden="true" />

@@ -3,16 +3,20 @@
 
     --color-background: #ffffff;
     --color-surface: #ffffff;
+    --color-footer-background: #1a1a1a;
+    --color-footer-text: #e7eaee;
 
     --color-text: #1a1a1a;
     --color-text-soft: #3a3a3a;
 
     --color-border: #767676;
+    --color-control-border: #767676;
     --color-border-light: #d1d5db;
     --color-border-lighter: #e7eaee;
 
-    --placeholder-grey: #6b7280;
-    --color-hover-light: #f6f3f3;
+    --placeholder-grey: #56635a;
+    --color-hover-light: #e7e7e7;
+    --color-selected: var(--color-hover-light);
 
     --color-error: #b42318;
     --color-danger: #b42318;

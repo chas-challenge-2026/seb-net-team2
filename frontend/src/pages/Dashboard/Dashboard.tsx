@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Landmark, ReceiptText } from "lucide-react";
 
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
 import { useAuth } from "../../hooks/useAuth";
+import { useExchangeRates } from "../../hooks/useExchangeRates";
+import { calculateAccountBalances } from "../../utils/accountBalances";
+import { useCurrency } from "../../hooks/useCurrency";
 
 import Card from "../../components/Card/Card";
+import { CurrencySelector } from "../../components/CurrencySelector/CurrencySelector";
 
 import styles from "./Dashboard.module.css";
 
@@ -14,10 +19,33 @@ export function Dashboard() {
     const { data: accounts, isLoading: loadingAccounts, isError: accountsError } = useAccounts();
     const { data: payments, isLoading: loadingPayments } = usePayments();
     const { user } = useAuth();
+    const { primaryCurrency } = useCurrency();
+    const [copyMessage, setCopyMessage] = useState("");
+    async function copyIban(iban: string) {
+        try {
+            await navigator.clipboard.writeText(iban);
+            setCopyMessage(t("dashboard.currency.copied"));
+        } catch {
+            setCopyMessage(t("dashboard.currency.copyFailed"));
+        }
+    }
+    const displayedAccounts = accounts ?? [];
+    const rateQueries = useExchangeRates(displayedAccounts.map((account) => account.currency), primaryCurrency);
+    const rates = rateQueries.flatMap((query) => query.data ? [query.data] : []);
+    const balances = calculateAccountBalances(displayedAccounts, rates, primaryCurrency);
+    const loadingRates = rateQueries.some((query) => query.isPending);
+
+    // Only initiators may create payments (the backend rejects other roles).
+    const canCreatePayments = user?.role === "Initiator";
 
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-GB";
+    const formatBalance = (amount: number, currency: string) => {
+        const symbol = currency.trim().toUpperCase() === "EUR" ? "€ "
+            : currency.trim().toUpperCase() === "USD" ? "$ " : "";
+        return `${symbol}${amount.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
 
     const formattedDate = new Intl.DateTimeFormat(locale, {
         weekday: "long",
@@ -46,6 +74,9 @@ export function Dashboard() {
                 </div>
 
             </header>
+            <div className={styles.currencyRow}>
+                <CurrencySelector />
+            </div>
 
             <section>
                 <h2 className={styles.sectionTitle}>
@@ -54,33 +85,60 @@ export function Dashboard() {
                 </h2>
 
                 {loadingAccounts ? (
-                    <p>{t("common.loading")}</p>
+                    <p role="status">{t("common.loading")}</p>
                 ) : accountsError ? (
                     <p role="alert">{t("dashboard.errors.accounts")}</p>
-                ) : accounts?.length === 0 ? (
+                ) : displayedAccounts.length === 0 ? (
                     <p>{t("dashboard.accountsEmpty")}</p>
                 ) : (
+                    <>
                     <div className={styles.accountsGrid}>
-                        {accounts?.map((account) => (
+                        {balances.accounts.map((account) => (
                             <Card key={account.id}
-                                variant="secondary"
+                                variant="ghost"
+                                className={styles.accountCard}
                             >
-                                <p className={styles.accountName}>{account.name}</p>
+                                <div className={styles.accountHeader}>
+                                    <div className={styles.accountIdentity}>
+                                        <h3 className={styles.accountName}>{account.name}</h3>
+                                    </div>
+                                    <span className={styles.currencyBadge}>{account.currency}</span>
+                                </div>
 
-                                <p className={styles.accountBalance}>
-                                    {account.balance.toLocaleString(locale, {
-                                        minimumFractionDigits: 2,
-                                    })}{" "}
-                                    {account.currency}
-                                </p>
+                                <div className={styles.balanceSection}>
+                                    <p className={styles.accountBalance}>
+                                        {formatBalance(account.balance, account.currency)}
+                                    </p>
+                                </div>
 
-                                <p className={styles.accountIban}>{account.iban}</p>
+                                {account.currency.trim().toUpperCase() !== balances.primaryCurrency && (
+                                    <div className={styles.convertedBalance} aria-live="polite">
+                                        <p className={styles.conversionLabel}>{t("dashboard.currency.converted", { currency: balances.primaryCurrency })}</p>
+                                        <p className={styles.conversionAmount}>{account.primaryBalance !== null
+                                            ? `≈ ${formatBalance(account.primaryBalance, balances.primaryCurrency)}`
+                                            : t(loadingRates ? "dashboard.currency.loading" : "dashboard.currency.unavailable")}</p>
+                                        {account.rateDate && <p>{t("dashboard.currency.rateDate")} <time dateTime={account.rateDate}>{new Date(`${account.rateDate}T00:00:00`).toLocaleDateString(locale)}</time></p>}
+                                    </div>
+                                )}
+                                <div className={styles.accountFooter}>
+                                    <div className={styles.ibanDetails}><span className={styles.balanceLabel}>IBAN</span><p className={styles.accountIban}>{account.iban}</p></div>
+                                    <button type="button" className={styles.copyButton}
+                                        aria-label={t("dashboard.currency.copyIban", { account: account.name })}
+                                        onClick={() => { void copyIban(account.iban); }}>
+                                        {t("dashboard.currency.copy")}
+                                    </button>
+                                </div>
                             </Card>
                         ))}
                     </div>
+                    <p role="status" className={styles.summaryMeta}>{copyMessage}</p>
+                    </>
                 )}
             </section>
 
+            {/* "Recent payments" lists the user's own payments, so it is always empty for roles
+                that cannot create payments. */}
+            {canCreatePayments && (
             <section className={styles.recentPayments}>
                 <h2 className={styles.sectionTitle}>
                     <ReceiptText size={20} strokeWidth={2} aria-hidden="true" />
@@ -90,17 +148,18 @@ export function Dashboard() {
                 <Card
                 >
                     {loadingPayments ? (
-                        <p>{t("common.loading")}</p>
+                        <p role="status">{t("common.loading")}</p>
                     ) : (
+                        <div className={styles.tableScroll} role="region" aria-label={t("dashboard.recentPayments")} tabIndex={0}>
                         <table className={styles.paymentsTable}>
                             <thead>
                                 <tr>
-                                    <th>{t("dashboard.table.date")}</th>
-                                    <th>{t("dashboard.table.fromAccount")}</th>
-                                    <th>{t("dashboard.table.recipientIban")}</th>
-                                    <th>{t("dashboard.table.reference")}</th>
-                                    <th>{t("dashboard.table.amount")}</th>
-                                    <th>{t("dashboard.table.status")}</th>
+                                    <th scope="col">{t("dashboard.table.date")}</th>
+                                    <th scope="col">{t("dashboard.table.fromAccount")}</th>
+                                    <th scope="col">{t("dashboard.table.recipientIban")}</th>
+                                    <th scope="col">{t("dashboard.table.reference")}</th>
+                                    <th scope="col">{t("dashboard.table.amount")}</th>
+                                    <th scope="col">{t("dashboard.table.status")}</th>
                                 </tr>
                             </thead>
 
@@ -141,9 +200,11 @@ export function Dashboard() {
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     )}
                 </Card>
             </section>
+            )}
         </div>
     );
 }

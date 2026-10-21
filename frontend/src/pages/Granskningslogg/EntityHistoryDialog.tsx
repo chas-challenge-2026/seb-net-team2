@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useEntityHistory, type AuditEntityRef } from "../../hooks/useAuditLog";
-import { actionKind, formatTimestamp, readDecisionDetails } from "./auditFormat";
+import { actionKind, describeEntry, formatTimestamp, readDecisionDetails } from "./auditFormat";
 
 import styles from "./Granskningslogg.module.css";
 
@@ -30,7 +30,7 @@ export function EntityHistoryDialog({ entity, onClose }: EntityHistoryDialogProp
 
     if (!entity) return null;
 
-    const entityLabel = t(`auditLog.entityTypes.${entity.entityType}`, {
+    const entityLabel = entity.label ?? t(`auditLog.entityTypes.${entity.entityType}`, {
         id: entity.entityId,
         defaultValue: `${entity.entityType} #${entity.entityId}`,
     });
@@ -74,6 +74,8 @@ export function EntityHistoryDialog({ entity, onClose }: EntityHistoryDialogProp
                     {events.map((event) => {
                         const kind = actionKind(event.action);
                         const { step, totalSteps, comment } = readDecisionDetails(event.details);
+                        // Same translated summary as in the table; nothing extra for decisions.
+                        const summary = describeEntry(event.action, event.details, t, locale);
 
                         return (
                             <li key={event.id} className={styles.timelineItem}>
@@ -98,7 +100,9 @@ export function EntityHistoryDialog({ entity, onClose }: EntityHistoryDialogProp
                                         {formatTimestamp(event.timeStamp, locale)}
                                     </time>
 
-                                    <p className={styles.timelineDescription}>{event.description}</p>
+                                    {summary !== "" && (
+                                        <p className={styles.timelineDescription}>{summary ?? event.description}</p>
+                                    )}
 
                                     {step !== null && totalSteps !== null && (
                                         <span className={styles.detail}>
@@ -108,7 +112,7 @@ export function EntityHistoryDialog({ entity, onClose }: EntityHistoryDialogProp
 
                                     {comment && (
                                         <span className={styles.comment}>
-                                            <span className={styles.visuallyHidden}>
+                                            <span className="visually-hidden">
                                                 {t("auditLog.details.comment")}:{" "}
                                             </span>
                                             “{comment}”

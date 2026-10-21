@@ -1,4 +1,59 @@
 {
+    "errors": {"connection":"Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.","request":"Begäran misslyckades. Försök igen.","configuration":"Serveradressen är inte konfigurerad.","exchangeConnection":"Kunde inte ansluta till valutatjänsten.","exchangeFetch":"Kunde inte hämta växelkursen.","exchangeMismatch":"Växelkursen motsvarar inte de valda valutorna."},
+    "a11y": {"notFound":"Sidan kunde inte hittas","notFoundDescription":"Kontrollera adressen eller gå tillbaka till startsidan.","home":"Till startsidan","register":"Registrera dig","customerType":"Kundtyp","login":"Logga in","skip":"Hoppa till huvudinnehållet","main":"Huvudinnehåll","dialog":"Dialog","language":"Språk","mortgage":"Bolån"},
+    "information": {
+        "navigation": "Information och policyer",
+        "about": {
+            "title": "Om tjänsten och kontakt",
+            "intro": "Hantera företagets konton, betalningar och attestering i en samlad portal.",
+            "sections": {
+                "purpose": { "title": "En samlad överblick", "body": "Portalen samlar kontosaldon, betalningsunderlag och attestering på ett ställe. Tydliga behörigheter och en gemensam granskningslogg hjälper företaget att följa sina betalningsflöden." },
+                "features": { "title": "Funktioner i portalen", "body": "Se företagskonton, skapa betalningsunderlag och följ attestering och granskningslogg. Rollen Admin, Initiator eller Attestant avgör vilka funktioner som är tillgängliga. Dashboarden kan visa ungefärliga saldon i SEK, EUR och USD." },
+                "contact": { "title": "Frågor och kontakt", "body": "Kontakta företagets portaladministratör vid frågor om åtkomst, behörigheter eller registrerade uppgifter. Om du saknar kontaktuppgifter, vänd dig till den som gav dig tillgång till portalen." }
+            }
+        },
+        "privacy": {
+            "title": "Integritet och personuppgifter",
+            "intro": "Här beskriver vi vilka uppgifter portalen hanterar, hur de används och vart du kan vända dig med frågor.",
+            "source": "Läs om dina rättigheter hos Integritetsskyddsmyndigheten",
+            "sections": {
+                "data": { "title": "Vilka uppgifter hanteras?", "body": "Användaruppgifter: namn, e-postadress, roll och företagstillhörighet. Lösenord lagras som hashvärden.\nKonton och betalningar: kontonamn, IBAN, saldo, valuta, belopp, referens, status, skapare och tidpunkter.\nAttestering och loggar: ansvarig attestant, beslut, kommentarer, händelser och tidsstämplar. Notifikationer kan innehålla meddelanden, lässtatus och mottagaradress vid e-postutskick." },
+                "purpose": { "title": "Varför används uppgifterna?", "body": "Uppgifterna används för inloggning, behörigheter, företagskonton, betalningsflöden, attestering och påminnelser. Granskningsloggen gör det möjligt att följa vem som utfört en åtgärd och när. Namn, e-post och historik som kan kopplas till en person omfattas av personuppgiftshanteringen." },
+                "sharing": { "title": "Åtkomst och externa tjänster", "body": "Åtkomsten i portalen styrs av företagstillhörighet och roll. Den som administrerar driftmiljön kan också ha åtkomst till databas, loggar och e-postmiljö. E-postutskick använder den SMTP-tjänst som konfigurerats för miljön.\nValutakurser hämtas från Frankfurter direkt från webbläsaren. Anropet innehåller valutaparet, inte kontosaldo, IBAN eller portalens inloggningstoken. Som vid andra webbanrop får tjänsten teknisk anslutningsinformation, exempelvis IP-adress." },
+                "retention": { "title": "Lagring och historik", "body": "Uppgifter lagras i portalens databas. Granskningsloggen kan innehålla kopior av tidigare värden även om originaluppgiften ändras. En generell automatisk gallring och fasta lagringstider är ännu inte fastställda. Radering av webbläsardata raderar inte databasens uppgifter. Kontakta portaladministratören vid frågor om lagrade uppgifter." },
+                "rights": { "title": "Frågor om dina uppgifter", "body": "Beroende på behandlingen och tillämpliga undantag kan du ha rätt till information, tillgång, rättelse, radering, begränsning, invändning och dataportabilitet. Kontakta företagets portaladministratör för att få hjälp att nå ansvarig kontakt. Du kan också lämna klagomål till Integritetsskyddsmyndigheten. Portalen har ingen särskild självservice för rättighetsbegäranden." },
+                "responsibility": { "title": "Ansvar och rättslig grund", "body": "Uppgifter om personuppgiftsansvarig organisation, formell kontaktväg och rättslig grund är ännu inte publicerade. Den informationen behöver fastställas innan portalen används för behandling av verkliga personuppgifter." }
+            }
+        },
+        "terms": {
+            "title": "Användningsvillkor",
+            "intro": "Här beskrivs användningen av portalen, ditt ansvar och tjänstens begränsningar.",
+            "sections": {
+                "demo": { "title": "Tjänstens omfattning", "body": "Portalen hanterar kontoinformation, betalningsunderlag och attestering. Den nuvarande versionen är inte ansluten till bankernas betalningssystem och tillhandahåller inga insättningar eller lån." },
+                "responsibility": { "title": "Ditt ansvar som användare", "body": "Använd endast konton du fått tillgång till. Dela inte lösenord eller inloggningstoken och försök inte komma åt andra företags uppgifter. Lägg inte in känsliga personuppgifter eller hemligheter i referenser, kommentarer eller uppladdade filer." },
+                "payments": { "title": "Betalningar och attestering", "body": "Kontrollera belopp, valuta och mottagare innan du skapar eller attesterar ett betalningsunderlag. Statusen genomförd visar att portalens interna flöde är klart. Den bekräftar inte någon överföring via en bank." },
+                "rates": { "title": "Ungefärliga valutaomräkningar", "body": "Dashboardens omräknade saldon är visningsvärden baserade på referenskurser från Frankfurter. Kursdatum visas när kursen är tillgänglig. Värdena är inte bindande växlingskurser eller finansiell rådgivning och påverkar inte originalbelopp, kontovaluta eller betalningar." },
+                "availability": { "title": "Tillgänglighet och ändringar", "body": "Tjänsten utvecklas löpande och funktioner kan ändras. Tillgänglighet och bevarande av historik är inte garanterade. Kontakta företagets portaladministratör om du upplever problem." }
+            }
+        },
+        "storage": {
+            "title": "Cookies och lokal lagring",
+            "intro": "Portalen använder webbläsarlagring för inloggning och vissa val. Här förklarar vi vad som sparas och hur du kan ta bort det.",
+            "source": "Läs mer om kakor och lagring hos Post- och telestyrelsen (PTS)",
+            "sections": {
+                "overview": { "title": "Lagring i din webbläsare", "body": "Portalen använder sessionslagring och lokal lagring för funktionerna som beskrivs här. Dessa använder inte egna cookies. Inga verktyg för reklam eller besöksanalys har lagts till. Webbläsarlagring skiljer sig från cookies, men lagring på användarens enhet kan ändå omfattas av regler om sådan lagring." },
+                "session": { "title": "Inloggning och påminnelser", "body": "sessionStorage innehåller auth_token, som används för autentiserade API-anrop, och overdueReminderDismissed, som kommer ihåg om en attestpåminnelse har stängts. Uppgifterna hör till flikens webbläsarsession. Inloggningstoken tas också bort vid utloggning. Beroende på webbläsarens sessionsåterställning kan sessionsdata återställas när flikar öppnas igen." },
+                "language": { "title": "Språkval", "body": "När du byter språk sparas valet i webbläsarens lokala lagring och återställs när sidan laddas om. Svenska används om inget språk har valts. Valet finns kvar tills webbplatsens lagring rensas." },
+                "currency": { "title": "Valutaval och kurser", "body": "Vald visningsvaluta och hämtade växelkurser hålls i appens minne. Valutan följer med när du navigerar, men återställs till SEK när sidan laddas om. Valutavalet sparas inte i localStorage eller i databasen." },
+                "control": { "title": "Så tar du bort lagringen", "body": "Du kan rensa webbplatsdata via webbläsarens inställningar eller utvecklarverktyg. Det kan logga ut dig och ta bort sparade val. Om du blockerar webbläsarlagring kan inloggning och vissa funktioner sluta fungera. Åtgärden raderar inte konton, betalningar eller loggar i portalens databas." }
+            }
+        }
+    },
+    "footer": {
+        "socialMedia": "SEB på sociala medier",
+        "socialLink": "SEB på {{name}} (öppnas i ny flik)",
+        "description": "Konton, betalningar och attestering samlade på ett ställe. Här hittar du information om tjänsten, integritet och användningsvillkor."
+    },
     "common": {
         "loading": "Laddar...",
         "cancel": "Avbryt",
@@ -17,16 +72,20 @@
         "goToDashboard": "Gå till översikten"
     },
     "login": {
-        "invalidCredentials": "Fel e-postadress eller lösenord. Kontrollera båda och försök igen.",
-        "unavailable": "Det gick inte att logga in. Kontrollera din e-postadress och ditt lösenord och försök igen. Om problemet kvarstår, försök senare.",
-        "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.",
+        "welcome": "Välkommen till SEB",
+        "description": "Logga in med din e-postadress och ditt lösenord för att hantera ditt konto eller företagets ekonomi.",
+        "invalidCredentials": "E-postadressen eller lösenordet stämmer inte. Kontrollera båda och försök igen.",
+        "unavailable": "Det går inte att logga in just nu. Försök igen om en stund.",
+        "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din internetanslutning och försök igen.",
+        "emailRequired": "Ange e-postadressen som du använder för att logga in.",
+        "passwordRequired": "Ange ditt lösenord för att logga in.",
         "private": "Privat",
         "company": "Bolag",
         "email": "E-post",
         "password": "Lösenord",
         "login": "Logga in",
         "missingCredentials": "Ange både e-post och lösenord.",
-        "generic": "Något gick fel."
+        "generic": "Det gick inte att logga in. Försök igen."
     },
     "session": {
         "sessionExpired": "Din session har gått ut. Logga in igen."
@@ -54,6 +113,18 @@
         "approvalsWithOverdue": "{{pending}} väntande, {{overdue}} försenade"
     },
     "dashboard": {
+        "currency": {
+            "originalBalance": "Kontosaldo",
+            "converted": "Ungefärligt värde i {{currency}}",
+            "copy": "Kopiera",
+            "copyIban": "Kopiera IBAN för {{account}}",
+            "copied": "IBAN kopierat.",
+            "copyFailed": "Kunde inte kopiera. Markera och kopiera IBAN-numret manuellt.",
+            "select": "Visningsvaluta",
+            "loading": "Hämtar växelkurser...",
+            "unavailable": "Omräknat saldo saknas.",
+            "rateDate": "Kursdatum:"
+        },
         "welcome": "Välkommen, {{user}}",
         "greeting": "God morgon, {{user}}",
         "createPayment": "Skapa betalning",
@@ -178,6 +249,7 @@
     "approvalInbox": {
         "title": "Attestkorg",
         "description": "Betalningar som väntar på ditt beslut.",
+        "handledDescription": "Betalningar som du redan har hanterat.",
         "loading": "Laddar attesteringar...",
         "pendingCount_one": "{{count}} väntande",
         "pendingCount_other": "{{count}} väntande",
@@ -193,23 +265,24 @@
             "approved": "{{reference}} ({{amount}}) godkändes.",
             "rejected": "{{reference}} ({{amount}}) avvisades.",
             "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats.",
-            "showHandled": "Visa i Hanterade →"
+            "showHandled": "Visa i Hanterade"
         },
         "sort": {
             "label": "Sortera efter",
             "newest": "Nyaste först",
             "oldest": "Äldsta först",
             "amountHigh": "Belopp: högst till lägst",
-            "amountLow": "Belopp: lägst till högst"
+            "amountLow": "Belopp: lägst till högst",
+            "announcement": "Listan är sorterad: {{order}}."
         },
         "card": {
             "waitingDays_one": "Väntat {{count}} dag",
             "waitingDays_other": "Väntat {{count}} dagar",
             "reference": "Referens",
             "submittedBy": "Skickad av",
-            "submitted": "Skickad",
             "toIban": "Till IBAN",
-            "stepAndPayment": "Atteststeg {{step}} · Betalning #{{id}}",
+            "approvalStep": "Atteststeg {{step}}",
+            "dualApprovalShort": "Dubbelattest",
             "waitingToday": "Skickad i dag",
             "dualApproval": "Dubbelattest – betalningen kräver två attestanter",
             "recipientBank": "Mottagarbank",
@@ -229,19 +302,20 @@
             "placeholder": "Lägg till en kommentar",
             "rejectReasonLabel": "Anledning till avvisning",
             "required": "(obligatoriskt)",
-            "rejectReasonHint": "Initiativtagaren ser din motivering. Minst {{min}} tecken."
+            "rejectReasonHint": "Initiativtagaren ser din motivering. Minst {{min}} tecken.",
+            "characterCount": "{{count}} av {{max}} tecken"
         },
         "actions": {
             "reject": "Avvisa",
             "approve": "Godkänn",
             "processing": "Behandlar...",
-            "rejectPayment": "Avvisa betalning {{id}}",
-            "approvePayment": "Godkänn betalning {{id}}"
+            "rejectPayment": "Avvisa betalning med referens {{reference}}, {{amount}}",
+            "approvePayment": "Godkänn betalning med referens {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "Inga väntande attesteringar",
-            "description": "Det finns inga betalningar som väntar på ditt godkännande.",
-            "showHandled": "Visa hanterade betalningar →"
+            "description": "Du är klar för nu. Nya betalningar visas här när de skickas för attest.",
+            "showHandled": "Visa hanterade betalningar"
         },
         "modal": {
             "approveTitle": "Godkänn betalning?",
@@ -254,8 +328,10 @@
         "checks": {
             "title": "Kontrollera innan beslut",
             "ibanInvalid": "IBAN är ogiltigt – kontrollera kontonumret med initiativtagaren",
-            "duplicate": "Möjlig dubblett: samma mottagare och belopp som betalning {{payments}}",
+            "duplicate_one": "Möjlig dubblett: samma mottagare och belopp som betalningen med referens {{payments}}",
+            "duplicate_other": "Möjlig dubblett: samma mottagare och belopp som betalningarna med referens {{payments}}",
             "highAmount": "Högt belopp – kontrollera extra noga",
+            "sameAccount": "Mottagarkontot är samma som avsändarkontot – kontrollera att det är avsiktligt",
             "foreignRecipient": "Utländsk mottagare ({{country}}) – kontrollera att det stämmer med fakturan"
         },
         "tabs": {
@@ -286,9 +362,9 @@
             "maxAmount": "Högsta belopp",
             "clear": "Rensa filter",
             "count": "Visar {{visible}} av {{total}}",
-            "approvedOn": "Godkänd {{date}}",
-            "rejectedOn": "Avvisad {{date}}",
-            "step": "Atteststeg",
+            "approvedOn": "Godkänd <time>{{date}}</time>",
+            "rejectedOn": "Avvisad <time>{{date}}</time>",
+            "unknownDate": "Okänt datum",
             "reason": "Anledning",
             "sessionEmpty": "Betalningar som du godkänner eller avvisar nu visas här.",
             "moreFilters": "Filtrera",
@@ -359,7 +435,7 @@
         },
         "table": {
             "caption": "Händelser i granskningsloggen",
-            "timestamp": "Tidpunkt",
+            "timestamp": "Tid",
             "user": "Användare",
             "event": "Händelse",
             "entity": "Entitet",
@@ -381,8 +457,8 @@
         },
         "actions": {
             "CREATE_PAYMENT": "Betalning skapad",
-            "APPROVE_STEP": "Atteststeg godkänt",
-            "REJECT_STEP": "Atteststeg avvisat",
+            "APPROVE_STEP": "Godkänd",
+            "REJECT_STEP": "Avvisad",
             "EXECUTE_PAYMENT": "Betalning genomförd",
             "REJECT_PAYMENT": "Betalning avvisad",
             "CREATE_USER": "Användare skapad",
@@ -392,8 +468,20 @@
             "UPDATE_APPROVAL_LIMIT": "Attestgräns uppdaterad",
             "DELETE_APPROVAL_LIMIT": "Attestgräns borttagen"
         },
+        "export": {
+            "button": "Exportera CSV",
+            "exporting": "Exporterar…",
+            "done_one": "{{count}} händelse exporterades.",
+            "done_other": "{{count}} händelser exporterades.",
+            "error": "Det gick inte att exportera loggen. Försök igen."
+        },
+        "summary": {
+            "payment": "{{amount}} till {{iban}}",
+            "refund": "{{amount}} återfördes till kontot"
+        },
         "entityTypes": {
             "payment": "Betalning #{{id}}",
+            "paymentReference": "Betalning {{reference}}",
             "user": "Användare #{{id}}",
             "approvalLimit": "Attestgräns #{{id}}"
         },
@@ -570,12 +658,19 @@
     },
     "notifications": {
         "title": "Notiser",
+        "approvalTitle": "Attest krävs",
+        "paymentStatusTitle": "Uppdatering om betalning",
+        "newApprovalMessage": "En ny betalning väntar på din attest: {{reference}}",
         "buttonLabel_one": "Notiser, {{count}} oläst",
         "buttonLabel_other": "Notiser, {{count}} olästa",
         "unreadCount_one": "{{count}} oläst",
         "unreadCount_other": "{{count}} olästa",
         "markAllAsRead": "Markera alla som lästa",
-        "empty": "Du har inga notiser."
+        "empty": "Du har inga notiser.",
+        "loading": "Laddar notiser...",
+        "loadError": "Notiserna kunde inte hämtas. Försök igen senare.",
+        "approvalWatchError": "Nya attesteringar kunde inte kontrolleras. Försöker igen...",
+        "updateError": "En notis kunde inte markeras som läst."
     },
     "overdueReminder": {
         "title": "Påminnelse: väntande attester",
@@ -584,25 +679,8 @@
         "goToInbox": "Gå till attestkorgen",
         "dismiss": "Stäng påminnelsen"
     },
-    "reminderSettings": {
-        "title": "Attestpåminnelser",
-        "description": "Få ett e-postmeddelande när betalningar har väntat på din attest för länge, så att de inte blir liggande.",
-        "emailEnabled": "Skicka ett e-postmeddelande när en betalning har väntat för länge på min attest",
-        "recipient": "Påminnelser skickas till",
-        "remindAfter": "Skicka e-post efter",
-        "dayCount_one": "{{count}} dag",
-        "dayCount_other": "{{count}} dagar",
-        "success": "Påminnelseinställningarna sparades.",
-        "saving": "Sparar...",
-        "save": "Spara inställningar",
-        "loading": "Laddar inställningar...",
-        "errors": {
-            "save": "Det gick inte att spara påminnelseinställningarna.",
-            "load": "Det gick inte att ladda påminnelseinställningarna."
-        },
-        "inAppNote": "Påminnelser i appen visas alltid efter {{days}} dagar."
-    },
     "saveInvest": {
+        "examples": {"emergencyFund":"Buffertsparande","longTermSavings":"Långsiktigt sparande","holidaySavings":"Semestersparande","newHome":"Ny bostad","summerHoliday":"Sommarsemester"},
         "eyebrow": "SPARANDE & INVESTERINGAR",
         "title": "Spara och investera",
         "description": "Bygg din ekonomiska framtid med enkla och flexibla alternativ.",

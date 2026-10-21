@@ -21,8 +21,8 @@ namespace SebPortal.Api.Services
 
             using var client = new SmtpClient();
 
-            var host = _configuration["Email:SmtpHost"] ?? "localhost";
-            var port = int.Parse(_configuration["Email:SmtpPort"] ?? "1025");
+            var host = _configuration["Email:SmtpHost"] ?? "smtp4dev";
+            var port = int.Parse(_configuration["Email:SmtpPort"] ?? "25");
 
             // Connect to SMTP mock (Smtp4dev) 
             await client.ConnectAsync(host, port, false, cancellationToken);

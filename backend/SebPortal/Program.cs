@@ -22,14 +22,12 @@ var jwtAudience = builder.Configuration["Jwt:Audience"]
     ?? throw new InvalidOperationException("JWT audience is missing.");
 
 
-builder
-    .Services.AddControllers();
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IdempotencyFilter>();
 
 // Swagger / OpenAPI for .NET 8 with JWT
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     var currentDirectory = AppContext.BaseDirectory;
@@ -69,13 +67,16 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
-    policy.AllowAnyOrigin()
-          .AllowAnyHeader()
-          .AllowAnyMethod();
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
     options.AddPolicy("ProductionPolicy", policy =>
     {
-        policy.WithOrigins("https://our-production-domain.com")
+        policy.WithOrigins(
+                "https://seb-net-team2.team.chas-challenge.comerit.se", //prod
+                "https://seb-net-team2-dev.team.chas-challenge.comerit.se" //stage
+                )
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -117,6 +118,7 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
 builder.Services.AddHostedService<ReminderBackgroundService>();
+builder.Services.AddHostedService<ExpireDateCleanupService>();
 
 // Global error handling middleware
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -124,6 +126,8 @@ builder.Services.AddProblemDetails();
 
 builder.Services.Configure<ReminderOptions>(builder.Configuration.GetSection("Reminder"));
 
+// healthcheck for app 
+builder.Services.AddHealthChecks();
 
 builder.Services.AddDbContext<SebDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -147,19 +151,21 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Migrera och seeda lokal databas
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
+    db.Database.Migrate();
+
+    // Primary seed path comes from configuration
+    var seedPath = app.Configuration["Seed:Path"];
+    if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
+        db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Migrera och seeda lokal databas (endast Development)
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<SebDbContext>();
-        db.Database.Migrate();
-
-        var seedPath = app.Configuration["Seed:Path"];
-        if (seedPath is not null && File.Exists(seedPath) && !db.Users.Any())
-            db.Database.ExecuteSqlRaw(File.ReadAllText(seedPath));
-    }
     app.UseSwagger();
     app.MapScalarApiReference(options =>
     {
@@ -172,12 +178,6 @@ else
     app.UseCors("ProductionPolicy");
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-}
-
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
 app.UseExceptionHandler();
@@ -188,6 +188,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/healthz");
+
 // Unknown API routes should return 404 rather than the React page.
 app.MapFallback("/api/{**path}", () => Results.NotFound());
 app.MapFallbackToFile("index.html");

@@ -117,6 +117,43 @@ namespace SebPortal.Api.Services
                                 automatic = false
                             })
                         });
+                        var inAppNotification = new NotificationMessageDTO
+                        {
+                            TenantId = payment.TenantId,
+                            Channel = NotificationChannel.InApp,
+                            UserId = payment.CreatedByUserId,
+                            ApprovalStepId = approvalStep.Id,
+                            Subject = "Betalning godkänd",
+                            Message = $"Din betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har godkänts."
+                        };
+
+                        await _notificationService.SendNotificationMessageAsync(inAppNotification);
+                    }
+                    if (stillPending == true)
+                    {
+                        var nextStep = steps
+                            .Where(s => s.Status == "pending")
+                            .OrderBy(s => s.StepNumber)
+                            .FirstOrDefault();
+                        if (nextStep != null)
+                        {
+                            var nextAttestant = await _context.Users
+                                .FirstOrDefaultAsync(u => u.Id == nextStep.AttestantId && u.TenantId == tenantId);
+
+                            if (nextAttestant != null)
+                            {
+                                var nextEmailDTO = new NotificationMessageDTO
+                                {
+                                    TenantId = payment.TenantId,
+                                    Channel = NotificationChannel.Email,
+                                    RecipientEmail = nextAttestant.Email,
+                                    Subject = $"Attest krävs för betalning {payment.Reference}",
+                                    Message = $"Hej {nextAttestant.Name},\n\nBetalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har gått vidare och väntar nu på din attestering.\n\nMvh,\nSEB Företagsbetalningar"
+                                };
+
+                                await _notificationService.SendNotificationMessageAsync(nextEmailDTO);
+                            }
+                        }
                     }
                 }
                 else
@@ -148,12 +185,26 @@ namespace SebPortal.Api.Services
                     var notificationDTO = new NotificationMessageDTO
                     {
                         TenantId = payment.TenantId,
+                        Channel = NotificationChannel.Email,
                         RecipientEmail = payment.CreatedByUser.Email,
-                        Subject = "Betalning avslagen",
-                        Message = $"Betalningen med referens '{payment.Reference}' har avslagits."
+                        Subject = $"Betalning {payment.Reference} har avslagits",
+                        Message = $"Hej {payment.CreatedByUser.Name},\n\nTyvärr har din betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} avslagits.\n\nMvh,\nSEB Företagsbetalningar"
                     };
 
                     await _notificationService.SendNotificationMessageAsync(notificationDTO);
+
+                    //Inapp notification
+                    var inAppNotification = new NotificationMessageDTO
+                    {
+                        TenantId = payment.TenantId,
+                        Channel = NotificationChannel.InApp,
+                        UserId = payment.CreatedByUserId,
+                        ApprovalStepId = approvalStep.Id,
+                        Subject = "Betalning avslagen",
+                        Message = $"Din betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har avslagits."
+                    };
+
+                    await _notificationService.SendNotificationMessageAsync(inAppNotification);
                 }
 
                 await transaction.CommitAsync();

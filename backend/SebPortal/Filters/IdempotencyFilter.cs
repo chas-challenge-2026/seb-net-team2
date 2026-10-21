@@ -15,7 +15,7 @@ namespace SebPortal.Api.Filters
         private readonly SebDbContext _context;
 
         //Idempotency keys are valid for 1 minute. After that, they can be reused. CHANGE THIS LATER
-        private static readonly TimeSpan IdempotencyKeyLifetime = TimeSpan.FromMinutes(1);
+        public static readonly TimeSpan IdempotencyKeyLifetime = TimeSpan.FromMinutes(1);
 
         public IdempotencyFilter(SebDbContext context)
         {

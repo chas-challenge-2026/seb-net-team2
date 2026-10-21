@@ -15,10 +15,11 @@ using System.Security.Claims;
 public class ApprovalLimitsController: ControllerBase
 {
     private readonly IApprovalLimitService _approvalLimitService;
-
-    public ApprovalLimitsController(IApprovalLimitService approvalLimitService)
+    private readonly ICurrentUserService _currentUserService;
+    public ApprovalLimitsController(IApprovalLimitService approvalLimitService, ICurrentUserService currentUserService)
     {
         _approvalLimitService = approvalLimitService;
+        _currentUserService = currentUserService;
     }
 
     /// <summary>
@@ -51,7 +52,15 @@ public class ApprovalLimitsController: ControllerBase
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();
 
-        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System"; // Get from token
+        var currentUser = await _currentUserService.GetCurrentUserAsync(userId, tenantId);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var userEmail = currentUser.Email;
+
         var createdLimit = await _approvalLimitService.CreateApprovalLimitAsync(tenantId, userId, userEmail, dto);
         return CreatedAtAction(nameof(GetApprovalLimits), new { id = createdLimit.Id }, createdLimit);
     }
@@ -72,7 +81,15 @@ public class ApprovalLimitsController: ControllerBase
         var tenantId = GetUserTenantId();
         var userId = GetCurrentUserId();
 
-        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System"; // Get from token
+        var currentUser = await _currentUserService.GetCurrentUserAsync(userId, tenantId);
+
+        if (currentUser == null)
+        {
+            return Unauthorized();
+        }
+
+        var userEmail = currentUser.Email;
+
         var updatedLimit = await _approvalLimitService.UpdateApprovalLimitAsync(tenantId, id, userId, userEmail, dto);
         return Ok(updatedLimit);
     }

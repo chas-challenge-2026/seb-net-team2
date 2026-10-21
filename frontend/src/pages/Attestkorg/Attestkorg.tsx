@@ -1,9 +1,12 @@
+import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { focusField } from "../../components/FormValidation/useFormValidation";
+import { useModalFocus } from "../../hooks/useModalFocus";
 import { FieldError } from "../../components/FormValidation/FormErrors";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
+    ArrowRight,
     CircleCheck,
     CircleX,
     ClipboardCheck,
@@ -28,8 +31,8 @@ import { HandledApprovals } from "./HandledApprovals";
 import {
     APPROVAL_HISTORY_QUERY_KEY,
     isHistoryUnavailable,
-    useApprovalHistory,
 } from "../../hooks/useApprovalHistory";
+import { useHandledHistory } from "../../hooks/useAdminDecisionHistory";
 import { addSessionDecision, useSessionDecisions } from "../../hooks/useSessionDecisions";
 import styles from "./Attestkorg.module.css";
 
@@ -37,6 +40,13 @@ const COMMENT_MAX_LENGTH = 300;
 const REJECT_REASON_MIN_LENGTH = 10;
 
 type SortOption = "date-desc" | "date-asc" | "amount-desc" | "amount-asc";
+
+const SORT_LABEL_KEYS: Record<SortOption, string> = {
+    "date-desc": "approvalInbox.sort.newest",
+    "date-asc": "approvalInbox.sort.oldest",
+    "amount-desc": "approvalInbox.sort.amountHigh",
+    "amount-asc": "approvalInbox.sort.amountLow",
+};
 
 type ConfirmAction = {
     approval: PendingApprovalStep;
@@ -89,7 +99,7 @@ export function Attestkorg() {
 
     // Number shown on the "Handled" tab: the real history when the backend has it,
     // otherwise this session's decisions.
-    const historyQuery = useApprovalHistory(true);
+    const historyQuery = useHandledHistory(user);
     const sessionDecisions = useSessionDecisions(user?.id);
     const handledCount = historyQuery.isError && isHistoryUnavailable(historyQuery.error)
         ? sessionDecisions.length
@@ -99,6 +109,8 @@ export function Attestkorg() {
 
     // Oldest first: the payments that have waited longest are the most urgent for an attestant.
     const [pendingSort, setPendingSort] = useState<SortOption>("date-asc");
+    // Empty until the user changes the order, so nothing is announced when the page loads.
+    const [sortAnnouncement, setSortAnnouncement] = useState("");
     const [comments, setComments] = useState<Record<string, string>>({});
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
@@ -107,6 +119,7 @@ export function Attestkorg() {
     const [reasonError, setReasonError] = useState(false);
     const reasonRef = useRef<HTMLTextAreaElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    useModalFocus(confirmAction !== null, modalRef, false);
     const feedbackRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 
@@ -151,6 +164,13 @@ export function Attestkorg() {
         triggerRef.current?.focus();
     }
 
+    // The link that was clicked disappears with the tab switch, so focus is moved to the
+    // "Handled" tab instead of falling back to the top of the page.
+    function showHandledTab() {
+        setActiveTab("handled");
+        requestAnimationFrame(() => document.getElementById(TAB_IDS.handled.tab)?.focus());
+    }
+
     function updateComment(stepId: string, comment: string) {
         setReasonError(false);
         setComments((current) => ({ ...current, [stepId]: comment }));
@@ -168,7 +188,7 @@ export function Attestkorg() {
     }
 
     function handleConfirm() {
-        if (!confirmAction) return;
+        if (!confirmAction || decisionMutation.isPending) return;
         if (isRejectReasonMissing) {
             setReasonError(true);
             requestAnimationFrame(() => focusField("confirm-comment"));
@@ -329,17 +349,20 @@ export function Attestkorg() {
                         <ClipboardCheck size={24} strokeWidth={2} aria-hidden="true" />
                         <h1 id="approval-inbox-title">{t("approvalInbox.title")}</h1>
                     </div>
-                    <p className={styles.intro}>{t("approvalInbox.description")}</p>
+                    <p className={styles.intro}>
+                        {t(activeTab === "handled"
+                            ? "approvalInbox.handledDescription"
+                            : "approvalInbox.description")}
+                    </p>
                 </div>
 
-                <span
-                    className={`${styles.count} ${approvals.length === 0 ? styles.countZero : ""}`}
-                    role="status"
-                    aria-live="polite"
-                >
-                    {t("approvalInbox.pendingCount", { count: approvals.length })}
-                    {approvals.length > 0 && ` · ${pendingTotal}`}
-                </span>
+                {/* The tabs already show the counts, so the badge is only kept where it adds the total amount. */}
+                {activeTab === "pending" && approvals.length > 0 && (
+                    <span className={styles.count} role="status" aria-live="polite">
+                        {t("approvalInbox.pendingCount", { count: approvals.length })}
+                        {` · ${pendingTotal}`}
+                    </span>
+                )}
             </header>
 
             {actionFeedback && (
@@ -370,9 +393,10 @@ export function Attestkorg() {
                         <button
                             type="button"
                             className={styles.feedbackLink}
-                            onClick={() => setActiveTab("handled")}
+                            onClick={showHandledTab}
                         >
                             {t("approvalInbox.feedback.showHandled")}
+                            <ArrowRight size={16} aria-hidden="true" />
                         </button>
                     )}
 
@@ -387,12 +411,44 @@ export function Attestkorg() {
                 </div>
             )}
 
-            <ApprovalTabs
-                activeTab={activeTab}
-                onChange={setActiveTab}
-                pendingCount={approvals.length}
-                handledCount={handledCount}
-            />
+            {/* Sorting sits on the tab row, so the first payment starts higher up. */}
+            <div className={styles.tabsRow}>
+                <ApprovalTabs
+                    activeTab={activeTab}
+                    onChange={setActiveTab}
+                    pendingCount={approvals.length}
+                    handledCount={handledCount}
+                />
+
+                {activeTab === "pending" && approvals.length > 0 && (
+                    <div className={styles.sortField}>
+                        <div className={styles.filterField}>
+                            <label htmlFor="pending-sort">
+                                {t("approvalInbox.sort.label")}
+                            </label>
+
+                            <select
+                                id="pending-sort"
+                                value={pendingSort}
+                                onChange={(event) => {
+                                    const sort = event.target.value as SortOption;
+                                    setPendingSort(sort);
+                                    setSortAnnouncement(t("approvalInbox.sort.announcement", {
+                                        order: t(SORT_LABEL_KEYS[sort]),
+                                    }));
+                                }}
+                            >
+                                <option value="date-desc">{t("approvalInbox.sort.newest")}</option>
+                                <option value="date-asc">{t("approvalInbox.sort.oldest")}</option>
+                                <option value="amount-desc">{t("approvalInbox.sort.amountHigh")}</option>
+                                <option value="amount-asc">{t("approvalInbox.sort.amountLow")}</option>
+                            </select>
+                        </div>
+
+                        <p className="visually-hidden" role="status">{sortAnnouncement}</p>
+                    </div>
+                )}
+            </div>
 
             {activeTab === "handled" ? (
                 <HandledApprovals
@@ -404,6 +460,10 @@ export function Attestkorg() {
                 id={TAB_IDS.pending.panel}
                 role="tabpanel"
                 aria-labelledby={TAB_IDS.pending.tab}
+                // Focusable, as in the ARIA tabs pattern, so Tab from the tab reaches the panel
+                // even when it has no buttons (empty inbox, short history).
+                tabIndex={0}
+                className={styles.tabPanel}
             >
             {overdueCount > 0 && (
                 <div className={styles.overdueBanner} role="status">
@@ -420,27 +480,6 @@ export function Attestkorg() {
                 </div>
             )}
 
-            {approvals.length > 0 && (
-                <div className={styles.toolbar}>
-                    <div className={styles.filterField}>
-                        <label htmlFor="pending-sort">
-                            {t("approvalInbox.sort.label")}
-                        </label>
-
-                        <select
-                            id="pending-sort"
-                            value={pendingSort}
-                            onChange={(event) => setPendingSort(event.target.value as SortOption)}
-                        >
-                            <option value="date-desc">{t("approvalInbox.sort.newest")}</option>
-                            <option value="date-asc">{t("approvalInbox.sort.oldest")}</option>
-                            <option value="amount-desc">{t("approvalInbox.sort.amountHigh")}</option>
-                            <option value="amount-asc">{t("approvalInbox.sort.amountLow")}</option>
-                        </select>
-                    </div>
-                </div>
-            )}
-
             <div className={styles.list}>
                 {sortedApprovals.length > 0 ? (
                     sortedApprovals.map((approval) => (
@@ -452,31 +491,41 @@ export function Attestkorg() {
                             <div className={styles.cardHeader}>
                                 <div>
                                     <p className={styles.paymentId}>
-                                        {t("approvalInbox.card.stepAndPayment", {
+                                        {/* No payment id: it is a UUID that means nothing to the attestant,
+                                            who recognises the payment by its reference and amount. */}
+                                        {t("approvalInbox.card.approvalStep", {
                                             step: approval.stepNumber,
-                                            id: approval.paymentId,
                                         })}
+                                        {approval.stepNumber > 1 && (
+                                            <>
+                                                {" · "}
+                                                <span className={styles.dualApproval}>
+                                                    {t("approvalInbox.card.dualApprovalShort")}
+                                                </span>
+                                            </>
+                                        )}
                                     </p>
 
-                                    <h2 id={`payment-${approval.paymentId}`}>
-                                        {approval.reference}
-                                    </h2>
+                                    {/* Reference and waiting time on one line, so the card header stays short. */}
+                                    <div className={styles.titleLine}>
+                                        {/* Labelled, because a reference like "1050" says nothing on its own. */}
+                                        <h2 id={`payment-${approval.paymentId}`}>
+                                            <span className={styles.referenceLabel}>
+                                                {t("approvalInbox.card.reference")}
+                                            </span>{" "}
+                                            {approval.reference}
+                                        </h2>
 
-                                    <p className={isOverdue(approval) ? styles.overdue : styles.waiting}>
-                                        {daysWaiting(approval) === 0
-                                            ? t("approvalInbox.card.waitingToday")
-                                            : t("approvalInbox.card.waitingDays", {
-                                                count: daysWaiting(approval),
-                                            })}
-                                    </p>
-
-                                    <DueBadge approval={approval} />
-
-                                    {approval.stepNumber > 1 && (
-                                        <p className={styles.dualApproval}>
-                                            {t("approvalInbox.card.dualApproval")}
+                                        <p className={isOverdue(approval) ? styles.overdue : styles.waiting}>
+                                            {daysWaiting(approval) === 0
+                                                ? t("approvalInbox.card.waitingToday")
+                                                : t("approvalInbox.card.waitingDays", {
+                                                    count: daysWaiting(approval),
+                                                })}
                                         </p>
-                                    )}
+
+                                        <DueBadge approval={approval} />
+                                    </div>
                                 </div>
 
                                 <strong>{formatAmount(approval, locale)}</strong>
@@ -485,29 +534,28 @@ export function Attestkorg() {
                             <dl className={styles.details}>
                                 <RecipientAndDueRows approval={approval} />
 
-                                <div>
-                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
-                                    <dd>{approval.createdByUserName}</dd>
-                                </div>
-
-                                <div>
-                                    <dt>{t("approvalInbox.card.submitted")}</dt>
-                                    <dd>{formatDate(approval.paymentCreatedAt, locale)}</dd>
-                                </div>
-
+                                {/* Grouped in pairs: where the money goes and where it comes from,
+                                    then who submitted it and when. */}
                                 <div>
                                     <dt>{t("approvalInbox.card.toIban")}</dt>
-                                    <dd>{formatIban(approval.toIban)}</dd>
+                                    <dd>
+                                        {formatIban(approval.toIban)}
+                                        {recipientBank(approval.toIban) && ` · ${recipientBank(approval.toIban)}`}
+                                    </dd>
                                 </div>
 
-                                {recipientBank(approval.toIban) && (
-                                    <div>
-                                        <dt>{t("approvalInbox.card.recipientBank")}</dt>
-                                        <dd>{recipientBank(approval.toIban)}</dd>
-                                    </div>
-                                )}
-
                                 <PaymentSourceAccount paymentId={approval.paymentId} />
+
+                                <div>
+                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
+                                    <dd>
+                                        {approval.createdByUserName}
+                                        {" · "}
+                                        <time dateTime={approval.paymentCreatedAt}>
+                                            {formatDate(approval.paymentCreatedAt, locale)}
+                                        </time>
+                                    </dd>
+                                </div>
                             </dl>
 
                             <PaymentChecks approval={approval} allPending={approvals} />
@@ -519,7 +567,8 @@ export function Attestkorg() {
                                     disabled={decisionMutation.isPending}
                                     onClick={(event) => openConfirm(approval, "reject", event)}
                                     aria-label={t("approvalInbox.actions.rejectPayment", {
-                                        id: approval.paymentId,
+                                        reference: approval.reference,
+                                        amount: formatAmount(approval, locale),
                                     })}
                                 >
                                     <CircleX size={17} aria-hidden="true" />
@@ -532,7 +581,8 @@ export function Attestkorg() {
                                     disabled={decisionMutation.isPending}
                                     onClick={(event) => openConfirm(approval, "approve", event)}
                                     aria-label={t("approvalInbox.actions.approvePayment", {
-                                        id: approval.paymentId,
+                                        reference: approval.reference,
+                                        amount: formatAmount(approval, locale),
                                     })}
                                 >
                                     <CircleCheck size={17} aria-hidden="true" />
@@ -543,17 +593,22 @@ export function Attestkorg() {
                     ))
                 ) : (
                     <div className={styles.emptyState}>
+                        <ClipboardCheck size={32} aria-hidden="true" />
                         <h2>{t("approvalInbox.empty.title")}</h2>
                         <p>{t("approvalInbox.empty.description")}</p>
 
-                        {/* Keeps the inbox useful when everything is handled: go to the decisions. */}
-                        <button
-                            type="button"
-                            className={styles.emptyStateAction}
-                            onClick={() => setActiveTab("handled")}
-                        >
-                            {t("approvalInbox.empty.showHandled")}
-                        </button>
+                        {/* Keeps the inbox useful when everything is handled: go to the decisions.
+                            Hidden when there are none, so it doesn't lead to another empty tab. */}
+                        {handledCount > 0 && (
+                            <button
+                                type="button"
+                                className={styles.emptyStateAction}
+                                onClick={showHandledTab}
+                            >
+                                {t("approvalInbox.empty.showHandled")}
+                                <ArrowRight size={16} aria-hidden="true" />
+                            </button>
+                        )}
                     </div>
                 )}
             </div>
@@ -641,7 +696,7 @@ export function Attestkorg() {
                             <label htmlFor="confirm-comment">
                                 {confirmAction.kind === "reject"
                                     ? `${t("approvalInbox.comment.rejectReasonLabel")} ${t("approvalInbox.comment.required")}`
-                                    : `${t("approvalInbox.comment.label")} ${t("approvalInbox.comment.optional")}`}
+                                    : `${t("approvalInbox.comment.label")} ${t("approvalInbox.comment.optional")}`}{confirmAction.kind === "reject" && <RequiredMark />}
                             </label>
 
                             <textarea
@@ -657,7 +712,7 @@ export function Attestkorg() {
                                 placeholder={t("approvalInbox.comment.placeholder")}
                                 required={confirmAction.kind === "reject"}
                                 aria-invalid={reasonError}
-                                aria-describedby={[confirmAction.kind === "reject" ? "confirm-comment-hint" : "", reasonError ? "confirm-comment-error" : ""].filter(Boolean).join(" ") || undefined}
+                                aria-describedby={[confirmAction.kind === "reject" ? "confirm-comment-hint" : "", reasonError ? "confirm-comment-error" : "", "confirm-comment-count"].filter(Boolean).join(" ")}
                             />
 
                             <div aria-live="assertive">
@@ -673,8 +728,17 @@ export function Attestkorg() {
                                 </span>
                             )}
 
-                            <span className={styles.commentCount}>
-                                {(comments[confirmAction.approval.stepId] ?? "").length}/{COMMENT_MAX_LENGTH}
+                            {/* "12/300" visually, "12 of 300 characters" for screen readers. */}
+                            <span id="confirm-comment-count" className={styles.commentCount}>
+                                <span aria-hidden="true">
+                                    {(comments[confirmAction.approval.stepId] ?? "").length}/{COMMENT_MAX_LENGTH}
+                                </span>
+                                <span className="visually-hidden">
+                                    {t("approvalInbox.comment.characterCount", {
+                                        count: (comments[confirmAction.approval.stepId] ?? "").length,
+                                        max: COMMENT_MAX_LENGTH,
+                                    })}
+                                </span>
                             </span>
                         </div>
 
@@ -686,6 +750,11 @@ export function Attestkorg() {
                                 )}
                             </div>
                         )}
+
+                        {/* Always rendered, so screen readers pick up the text when it appears. */}
+                        <p className="visually-hidden" role="status">
+                            {decisionMutation.isPending ? t("approvalInbox.actions.processing") : ""}
+                        </p>
 
                         <div className={styles.modalActions}>
                             <button
@@ -705,7 +774,9 @@ export function Attestkorg() {
                                         ? styles.approve
                                         : styles.reject
                                 }
-                                disabled={decisionMutation.isPending}
+                                // aria-disabled instead of disabled: a disabled button loses focus,
+                                // which drops keyboard and screen reader users to the top of the page.
+                                aria-disabled={decisionMutation.isPending}
                                 onClick={handleConfirm}
                             >
                                 {decisionMutation.isPending ? (

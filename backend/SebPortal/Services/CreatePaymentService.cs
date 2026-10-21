@@ -94,15 +94,26 @@ namespace SebPortal.Api.Services
 
                 await transaction.CommitAsync();
 
-                var notificationDTO = new NotificationMessageDTO
-                {
-                    TenantId = user.TenantId,
-                    RecipientEmail = "attestant@seb.se", //change later
-                    Subject = "Attest krävs",
-                    Message = "En ny betalning har skapats och väntar på din attestering."
-                };
+                //Get first approvalstep to send email to right attestant
+                var firstApprovalStep = await _context.ApprovalSteps
+                    .Include(s => s.Attestant)
+                    .Where(s => s.PaymentId == payment.Id && s.StepNumber == 1)
+                    .FirstOrDefaultAsync();
 
-                await _notificationService.SendNotificationMessageAsync(notificationDTO);
+                if (firstApprovalStep != null)
+                {
+
+                    var notificationDTO = new NotificationMessageDTO
+                    {
+                        TenantId = user.TenantId,
+                        Channel = NotificationChannel.Email,
+                        RecipientEmail = firstApprovalStep.Attestant.Email, 
+                        Subject = $"Attest krävs för betalning {payment.Reference}",
+                        Message = $"Hej {firstApprovalStep.Attestant.Name},\n\nEn ny betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har skapats och väntar på din attestering.\n\nMvh,\nSEB Företagsbetalningar"
+                    };
+
+                    await _notificationService.SendNotificationMessageAsync(notificationDTO);
+                }
 
                 return payment;
             }

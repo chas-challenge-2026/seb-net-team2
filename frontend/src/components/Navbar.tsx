@@ -19,7 +19,7 @@ export function NavigationBar() {
             <Link
                 to={isAuthenticated ? homeRoute : "/login"}
                 className={styles.navbar__brandLink}
-                aria-label={t("navigation.goToDashboard")}
+                aria-label={`SEB – ${t("navigation.goToDashboard")}`}
             >
                 <img
                     src="/seb-logo.svg"
@@ -29,6 +29,7 @@ export function NavigationBar() {
             </Link>
 
             <div className={styles.navbar__actions}>
+                <LanguageSelector />
                 {isAuthenticated && user && (
                     <Link
                         to="/profil"
@@ -51,7 +52,6 @@ export function NavigationBar() {
 
                 {isAuthenticated && <NotificationBell />}
 
-                <LanguageSelector />
             </div>
         </header>
     );

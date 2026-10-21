@@ -1,30 +1,23 @@
-import { useState } from "react";
 import { Navigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { TriangleAlert } from "lucide-react";
 
 import Card from "../../components/Card/Card";
-import CustomerTypeSelector, {
-    type CustomerType,
-} from "../../components/CustomerTypeSelector/CustomerTypeSelector";
 import LoadingWheel from "../../components/LoadingState/LoadingWheel";
 
-import PrivateLogin from "./PrivateLogin";
-import CompanyLogin from "./CompanyLogin";
+import LoginForm from "./LoginForm";
 import { useAuth } from "../../hooks/useAuth";
 
 import styles from "./Login.module.css";
 
 export default function Login() {
-    const [customerType, setCustomerType] = useState<CustomerType>("private");
-
     const { t } = useTranslation();
     const { user, isAuthenticated, isInitializing, sessionExpired } = useAuth();
 
     if (isInitializing) {
         return (
             <div className={styles.layout}>
-                <LoadingWheel size="medium" />
+                <LoadingWheel size="medium" announce />
             </div>
         );
     }
@@ -39,21 +32,14 @@ export default function Login() {
 
     return (
         <div className={styles.layout}>
+            <img src="/seb-wordmark-logo.svg" alt="SEB" className={styles.logo} />
             <Card variant="image" className={styles.centeredCard}>
-                <div className={styles.selectorContainer}>
-                    <CustomerTypeSelector
-                        value={customerType}
-                        onChange={setCustomerType}
-                    />
-                </div>
+                <header className={styles.welcome}>
+                    <h1>{t("login.welcome")}</h1>
+                    <p>{t("login.description")}</p>
+                </header>
 
-                <div className={styles.line} />
-
-                {customerType === "private" ? (
-                    <PrivateLogin />
-                ) : (
-                    <CompanyLogin />
-                )}
+                <LoginForm />
 
                 {sessionExpired && (
                     <p className={styles.sessionExpired} role="status">

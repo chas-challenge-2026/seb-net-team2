@@ -73,7 +73,7 @@
 }
 
 .createButton:focus-visible {
-    outline: 3px solid var(--seb-green);
+    outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
 
@@ -215,7 +215,7 @@
 }
 
 .userLink:hover .userCard {
-    background-color: var(--color-200);
+    background-color: var(--color-hover-light);
 }
 
 .userLink:focus-visible {

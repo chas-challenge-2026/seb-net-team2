@@ -6,6 +6,7 @@ import './i18n/i18n';
 import "flag-icons/css/flag-icons.min.css";
 import { MainLayout } from './layouts/MainLayout'
 import { AuthProvider } from './context/AuthProvider'
+import { CurrencyProvider } from './context/CurrencyProvider'
 import { Dashboard } from './pages/Dashboard/Dashboard';
 import { NyBetalning } from './pages/NyBetalning/NyBetalning'
 import { SaveInvest } from './pages/SaveInvest/SaveInvest'
@@ -23,6 +24,7 @@ import CreateUser from './pages/Admin/Users/CreateUser';
 import Users from './pages/Admin/Users/Users'
 import './styles/reset.css'
 import './styles/variables.css'
+import './styles/fonts.css'
 import './styles/globals.css'
 import './index.css'
 import { AdminLayout } from './layouts/AdminLayout/AdminLayout'
@@ -32,21 +34,27 @@ import ApprovalLimits from './pages/Admin/ApprovalLimits/ApprovalLimits'
 import CreateApprovalLimit from './pages/Admin/ApprovalLimits/CreateApprovalLimit'
 import EditApprovalLimit from './pages/Admin/ApprovalLimits/EditApprovalLimit'
 import AdminDashboard from './pages/Admin/AdminDashboard/AdminDashboard';
+import { InformationPage } from './pages/Information/InformationPage';
+import { NotFoundPage } from './pages/Information/NotFoundPage';
 
-const rootRoute = createRootRoute({ component: MainLayout })
+const rootRoute = createRootRoute({ component: MainLayout, notFoundComponent: NotFoundPage })
 
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', component: Login })
 const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', component: Login })
 const overviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/dashboard', component: () => <ProtectedRoute><Dashboard /></ProtectedRoute> })
-const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <ProtectedRoute><NyBetalning /></ProtectedRoute> })
+const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <RoleProtectedRoute allowedRoles={["Initiator"]}><NyBetalning /></RoleProtectedRoute> })
 const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SaveInvest /></ProtectedRoute> })
 const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
-const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <ProtectedRoute><Attestkorg /></ProtectedRoute> })
-const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch', component: () => <ProtectedRoute><Batch /></ProtectedRoute> })
-const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <ProtectedRoute><Granskningslogg /></ProtectedRoute> })
+const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <RoleProtectedRoute allowedRoles={["Attestant", "Admin"]}><Attestkorg /></RoleProtectedRoute> })
+const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch', component: () => <RoleProtectedRoute allowedRoles={["Initiator"]}><Batch /></RoleProtectedRoute> })
+const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><Granskningslogg /></RoleProtectedRoute> })
 const profilRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profil', component: () => <ProtectedRoute><Profil /></ProtectedRoute> })
 const loggaUtRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logout', component: () => <ProtectedRoute><Logout /></ProtectedRoute> })
 const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: "/register", component: () => <Register /> })
+const aboutRoute = createRoute({ getParentRoute: () => rootRoute, path: "/om-projektet", component: () => <InformationPage page="about" /> })
+const privacyRoute = createRoute({ getParentRoute: () => rootRoute, path: "/integritet", component: () => <InformationPage page="privacy" /> })
+const termsRoute = createRoute({ getParentRoute: () => rootRoute, path: "/anvandningsvillkor", component: () => <InformationPage page="terms" /> })
+const storageRoute = createRoute({ getParentRoute: () => rootRoute, path: "/lokal-lagring", component: () => <InformationPage page="storage" /> })
 
 // ADMIN ROUTES
 const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: "/admin", component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><AdminLayout /></RoleProtectedRoute> })
@@ -83,6 +91,10 @@ const routeTree = rootRoute.addChildren([
   profilRoute,
   loggaUtRoute,
   registerRoute,
+  aboutRoute,
+  privacyRoute,
+  termsRoute,
+  storageRoute,
   adminRouteTree,
 ]);
 
@@ -100,7 +112,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <CurrencyProvider>
+          <RouterProvider router={router} />
+        </CurrencyProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

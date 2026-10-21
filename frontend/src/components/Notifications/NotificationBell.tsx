@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { fetchNotifications } from "../../services/notificationService";
+import { fetchNotifications, markNotificationAsRead } from "../../services/notificationService";
+import { fetchPendingApprovals } from "../../services/approvalService";
+import { useAuth } from "../../hooks/useAuth";
+import { APPROVALS_QUERY_KEY } from "../../hooks/useApprovals";
 import type { Notification, NotificationType } from "../../types/notifications";
 
 import styles from "./NotificationBell.module.css";
@@ -15,16 +19,94 @@ const typeIcons: Record<NotificationType, string> = {
 
 export function NotificationBell() {
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const canWatchApprovals = user?.role === "Attestant" || user?.role === "Admin";
+    const { data: pendingApprovals, isError: approvalWatchError } = useQuery({
+        queryKey: APPROVALS_QUERY_KEY,
+        queryFn: fetchPendingApprovals,
+        enabled: canWatchApprovals,
+        refetchInterval: 15_000,
+    });
 
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [actionError, setActionError] = useState(false);
 
     const containerRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const previousPendingIdsRef = useRef<Set<string> | null>(null);
 
     useEffect(() => {
-        void fetchNotifications().then(setNotifications);
-    }, []);
+        if (!canWatchApprovals) {
+            previousPendingIdsRef.current = null;
+            return;
+        }
+
+        if (!pendingApprovals) return;
+
+        const currentIds = new Set(pendingApprovals.map((approval) => approval.stepId));
+        const previousIds = previousPendingIdsRef.current;
+
+        const newNotifications: Notification[] = pendingApprovals
+            .filter((approval) => !previousIds?.has(approval.stepId))
+            .map((approval) => ({
+                id: `pending:${approval.stepId}`,
+                title: "notifications.approvalTitle",
+                message: t("notifications.newApprovalMessage", {
+                    reference: approval.reference || approval.paymentId,
+                }),
+                type: "approval",
+                createdAt: new Date().toISOString(),
+                isRead: false,
+                href: "/attestkorg",
+            }));
+
+        if (newNotifications.length > 0) {
+            setNotifications((current) => {
+                const currentIds = new Set(current.map((notification) => notification.id));
+                return [
+                    ...newNotifications.filter((notification) => !currentIds.has(notification.id)),
+                    ...current,
+                ];
+            });
+        }
+
+        previousPendingIdsRef.current = currentIds;
+    }, [canWatchApprovals, pendingApprovals, t]);
+
+    useEffect(() => {
+        let isCurrent = true;
+
+        function loadNotifications() {
+            void fetchNotifications(user?.role)
+                .then((items) => {
+                    if (!isCurrent) return;
+                    setLoadError(false);
+                    setNotifications((current) => [
+                        ...current.filter((notification) =>
+                            canWatchApprovals && notification.id.startsWith("pending:")
+                        ),
+                        ...items,
+                    ]);
+                })
+                .catch(() => {
+                    if (isCurrent) setLoadError(true);
+                })
+                .finally(() => {
+                    if (isCurrent) setIsLoading(false);
+                });
+        }
+
+        loadNotifications();
+        const timer = window.setInterval(loadNotifications, 15_000);
+
+        return () => {
+            isCurrent = false;
+            window.clearInterval(timer);
+        };
+    }, [canWatchApprovals, user?.role]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -51,7 +133,11 @@ export function NotificationBell() {
         };
     }, [isOpen]);
 
-    function markAsRead(notificationId: string) {
+    async function markAsRead(notificationId: string) {
+        const notification = notifications.find((item) => item.id === notificationId);
+        if (!notification || notification.isRead) return;
+
+        setActionError(false);
         setNotifications((current) =>
             current.map((notification) =>
                 notification.id === notificationId
@@ -59,18 +145,55 @@ export function NotificationBell() {
                     : notification
             )
         );
+        if (notification.id.startsWith("pending:")) return;
+
+        try {
+            await markNotificationAsRead(notificationId);
+        } catch {
+            setNotifications((current) =>
+                current.map((item) =>
+                    item.id === notificationId
+                        ? { ...item, isRead: notification.isRead }
+                        : item
+                )
+            );
+            setActionError(true);
+        }
     }
 
-    function markAllAsRead() {
+    async function markAllAsRead() {
+        const unreadNotifications = notifications.filter((notification) => !notification.isRead);
+        if (unreadNotifications.length === 0) return;
+
+        const previousNotifications = notifications;
+        setActionError(false);
         setNotifications((current) =>
             current.map((notification) => ({
                 ...notification,
                 isRead: true,
             }))
         );
+
+        const results = await Promise.allSettled(
+            unreadNotifications
+                .filter((notification) => !notification.id.startsWith("pending:"))
+                .map((notification) => markNotificationAsRead(notification.id))
+        );
+
+        if (results.some((result) => result.status === "rejected")) {
+            setActionError(true);
+            try {
+                setNotifications(await fetchNotifications(user?.role));
+            } catch {
+                setNotifications(previousNotifications);
+            }
+        }
     }
 
-    const unreadCount = notifications.filter(
+    const visibleNotifications = user?.role === "Initiator"
+        ? notifications.filter((notification) => notification.type === "payment")
+        : notifications;
+    const unreadCount = visibleNotifications.filter(
         (notification) => !notification.isRead
     ).length;
 
@@ -140,14 +263,34 @@ export function NotificationBell() {
                         )}
                     </div>
 
-                    {notifications.length === 0 ? (
+                    {loadError && (
+                        <p role="alert" className={styles.loadError}>
+                            {t("notifications.loadError")}
+                        </p>
+                    )}
+
+                    {approvalWatchError && (
+                        <p role="alert" className={styles.loadError}>
+                            {t("notifications.approvalWatchError")}
+                        </p>
+                    )}
+
+                    {actionError && (
+                        <p role="alert" className={styles.loadError}>
+                            {t("notifications.updateError")}
+                        </p>
+                    )}
+
+                    {isLoading && visibleNotifications.length === 0 ? (
+                        <p role="status" className={styles.empty}>{t("notifications.loading")}</p>
+                    ) : visibleNotifications.length === 0 ? (
                         <div className={styles.empty}>
                             <span aria-hidden="true">🔕</span>
                             <p>{t("notifications.empty")}</p>
                         </div>
                     ) : (
                         <div className={styles.list}>
-                            {notifications.map((notification) => (
+                            {visibleNotifications.map((notification) => (
                                 <Link
                                     key={notification.id}
                                     to={notification.href ?? "/dashboard"}
@@ -166,7 +309,7 @@ export function NotificationBell() {
                                     </span>
 
                                     <span className={styles.itemBody}>
-                                        <strong>{notification.title}</strong>
+                                        <strong>{t(notification.title)}</strong>
                                         <span>{notification.message}</span>
                                         <small>{notification.createdAt}</small>
                                     </span>

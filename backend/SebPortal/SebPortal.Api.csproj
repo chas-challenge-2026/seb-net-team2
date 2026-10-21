@@ -26,14 +26,13 @@
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.30" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.17.2" />
-		<PackageReference Include="Selenium.WebDriver" Version="4.49.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.4" />
 
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 		<Content Include="..\..\native\libauditsigner.so" Link="libauditsigner.so" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+		<Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" Condition="Exists('..\..\native\libcsvparser.so')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>

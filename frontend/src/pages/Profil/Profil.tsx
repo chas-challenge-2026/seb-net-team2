@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Building2, Mail, ShieldCheck, UserRound } from 'lucide-react'
 
-import { ReminderSettings } from '../../components/ReminderSettings/ReminderSettings'
 import { useAuth } from '../../hooks/useAuth'
 
 import styles from './Profil.module.css'
@@ -9,7 +8,6 @@ import styles from './Profil.module.css'
 export function Profil() {
     const { t } = useTranslation()
     const { user } = useAuth()
-    const canApprove = user?.role === 'Attestant' || user?.role === 'Admin'
 
     return (
         <section className={styles.page} aria-labelledby="profile-title">
@@ -60,8 +58,6 @@ export function Profil() {
                     </dl>
                 </section>
             )}
-
-            {canApprove && <ReminderSettings />}
         </section>
     )
 }

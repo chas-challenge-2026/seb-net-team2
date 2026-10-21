@@ -1,4 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { useModalFocus } from "../../hooks/useModalFocus";
 import type { ReactNode } from "react";
 
 import styles from "./Modal.module.css";
@@ -18,6 +20,10 @@ export default function Modal({
     footer,
     onClose,
 }: ModalProps) {
+    const { t } = useTranslation();
+    const titleId = useId();
+    const modalRef = useRef<HTMLDivElement>(null);
+    useModalFocus(isOpen, modalRef);
     useEffect(() => {
         if (!isOpen) return;
 
@@ -47,10 +53,13 @@ export default function Modal({
             onMouseDown={onClose}
         >
             <div
+                ref={modalRef}
+                tabIndex={-1}
                 className={styles.modal}
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby="modal-title"
+                aria-labelledby={title ? titleId : undefined}
+                aria-label={title ? undefined : t("a11y.dialog")}
                 onMouseDown={(event) =>
                     event.stopPropagation()
                 }
@@ -58,7 +67,7 @@ export default function Modal({
                 <div className={styles.header}>
                     {title && (
                         <h2
-                            id="modal-title"
+                            id={titleId}
                             className={styles.title}
                         >
                             {title}
@@ -69,7 +78,7 @@ export default function Modal({
                         type="button"
                         className={styles.closeButton}
                         onClick={onClose}
-                        aria-label="Close modal"
+                        aria-label={t("common.close")}
                     >
                         ×
                     </button>

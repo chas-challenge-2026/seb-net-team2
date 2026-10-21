@@ -1,4 +1,116 @@
 {
+    "errors": {"connection":"Unable to connect to the server. Check your connection and try again.","request":"Request failed. Please try again.","configuration":"The server address is not configured.","exchangeConnection":"Unable to connect to the exchange rate service.","exchangeFetch":"Unable to fetch the exchange rate.","exchangeMismatch":"The exchange rate does not match the requested currencies."},
+    "a11y": {"notFound":"Page not found","notFoundDescription":"Check the address or return to the home page.","home":"Go to home page","register":"Register","customerType":"Customer type","login":"Log in","skip":"Skip to main content","main":"Main content","dialog":"Dialog","language":"Language","mortgage":"Mortgage"},
+    "information": {
+        "navigation": "Information and policies",
+        "about": {
+            "title": "About and contact",
+            "intro": "Manage company accounts, payments and approvals in one portal.",
+            "sections": {
+                "purpose": {
+                    "title": "A clear overview",
+                    "body": "The portal brings account balances, payment instructions and approvals together. Role-based access and a shared audit log help your company follow its payment workflows."
+                },
+                "features": {
+                    "title": "Portal features",
+                    "body": "View company accounts, create payment instructions and follow approvals and the audit log. Your Admin, Initiator or Attestant role determines which features are available. The dashboard can display approximate balances in SEK, EUR and USD."
+                },
+                "contact": {
+                    "title": "Questions and contact",
+                    "body": "Contact your company portal administrator with questions about access, permissions or recorded data. If you do not have their contact details, ask the person who gave you access to the portal."
+                }
+            }
+        },
+        "privacy": {
+            "title": "Privacy and personal data",
+            "intro": "Learn what data the portal handles, how it is used and where to direct your questions.",
+            "source": "Read about your rights at the Swedish Authority for Privacy Protection",
+            "sections": {
+                "data": {
+                    "title": "What data is handled?",
+                    "body": "Users: name, email address, role and company membership. Passwords are stored as hashes.\nAccounts and payments: account name, IBAN, balance, currency, amount, reference, status, creator and timestamps.\nApprovals and logs: assigned approver, decisions, comments, events and timestamps. Notifications may include messages, read status and recipient addresses for email delivery."
+                },
+                "purpose": {
+                    "title": "Why is data used?",
+                    "body": "Data supports authentication, permissions, company accounts, payment workflows, approvals and reminders. Audit records show who performed an action and when. Names, email addresses and history that can identify a person are part of personal data processing."
+                },
+                "sharing": {
+                    "title": "Access and external services",
+                    "body": "Portal access is controlled by company membership and role. The hosting administrator may also have access to the database, logs and email environment. Email uses the SMTP service configured for that environment.\nExchange rates are requested directly from Frankfurter by your browser. The request contains the currency pair, not account balances, IBANs or the portal's authentication token. Like other web requests, it exposes technical connection information such as your IP address to the service."
+                },
+                "retention": {
+                    "title": "Storage and history",
+                    "body": "Records are stored in the portal database. Audit logs can retain snapshots of earlier values after the original record changes. General automatic deletion and fixed retention periods have not yet been defined. Clearing browser data does not delete database records. Contact your portal administrator with questions about stored data."
+                },
+                "rights": {
+                    "title": "Questions about your data",
+                    "body": "Depending on the processing and applicable exceptions, you may have rights to information, access, rectification, erasure, restriction, objection and data portability. Contact your company portal administrator for help reaching the responsible contact. You can also lodge a complaint with the Swedish Authority for Privacy Protection. There is no dedicated self-service feature for rights requests."
+                },
+                "responsibility": {
+                    "title": "Responsibility and legal basis",
+                    "body": "Details of the data controller, formal contact channel and legal basis have not yet been published. These need to be established before the portal is used to process real personal data."
+                }
+            }
+        },
+        "terms": {
+            "title": "Terms of use",
+            "intro": "These terms describe use of the portal, your responsibilities and the limitations of the service.",
+            "sections": {
+                "demo": {
+                    "title": "Scope of the service",
+                    "body": "The portal manages account information, payment instructions and approvals. The current version is not connected to bank payment networks and does not provide deposits or loans."
+                },
+                "responsibility": {
+                    "title": "Your responsibilities",
+                    "body": "Use only accounts you have been given access to. Do not share passwords or authentication tokens or attempt to access another company's data. Do not enter sensitive personal data or secrets in references, comments or uploaded files."
+                },
+                "payments": {
+                    "title": "Payments and approvals",
+                    "body": "Check amounts, currencies and recipients before creating or approving a payment instruction. A completed status means the portal's internal workflow has finished. It does not confirm a transfer through a bank."
+                },
+                "rates": {
+                    "title": "Approximate currency conversions",
+                    "body": "Converted dashboard balances are display values based on Frankfurter reference rates. The rate date is shown when available. These are not binding exchange quotes or financial advice and do not change original amounts, account currencies or payments."
+                },
+                "availability": {
+                    "title": "Availability and changes",
+                    "body": "The service is developed continuously and features may change. Availability and preservation of history are not guaranteed. Contact your company portal administrator if you experience problems."
+                }
+            }
+        },
+        "storage": {
+            "title": "Cookies and local storage",
+            "intro": "The portal uses browser storage for authentication and some choices. Here is what is stored and how you can remove it.",
+            "source": "Read more about cookies and storage at the Swedish Post and Telecom Authority (PTS)",
+            "sections": {
+                "overview": {
+                    "title": "Storage in your browser",
+                    "body": "The portal uses session storage and local storage for the features described here. These do not use their own cookies. No advertising or visitor analytics tools have been added. Browser storage differs from cookies, but storing information on a user's device may still be covered by rules on such storage."
+                },
+                "session": {
+                    "title": "Authentication and reminders",
+                    "body": "sessionStorage holds auth_token for authenticated API requests and overdueReminderDismissed to remember whether an approval reminder was dismissed. These belong to the tab's browser session. The authentication token is also removed on logout. Depending on the browser's session restoration, session data may be restored when tabs are reopened."
+                },
+                "language": {
+                    "title": "Language choice",
+                    "body": "Your language choice is saved in the browser's local storage and restored when the page reloads. Swedish is used if no language has been selected. Your choice remains until the website's storage is cleared."
+                },
+                "currency": {
+                    "title": "Currency choice and rates",
+                    "body": "The selected display currency and fetched rates are held in application memory. Your choice is preserved during navigation but resets to SEK on page reload. The currency choice is not saved in localStorage or the database."
+                },
+                "control": {
+                    "title": "How to clear storage",
+                    "body": "Clear site data through your browser settings or developer tools. This may log you out and remove saved choices. Blocking browser storage may prevent authentication and other features from working. Clearing it does not delete accounts, payments or logs in the portal database."
+                }
+            }
+        }
+    },
+    "footer": {
+        "socialMedia": "SEB on social media",
+        "socialLink": "SEB on {{name}} (opens in a new tab)",
+        "description": "Accounts, payments and approvals in one place. Find information about the service, privacy and terms of use here."
+    },
     "common": {
         "loading": "Loading...",
         "cancel": "Cancel",
@@ -17,16 +129,20 @@
         "goToDashboard": "Go to dashboard"
     },
     "login": {
+        "welcome": "Welcome to SEB",
+        "description": "Log in with your email address and password to manage your account or your company's finances.",
         "invalidCredentials": "Incorrect email or password. Check both and try again.",
-        "unavailable": "We could not log you in. Check your email and password and try again. If the problem continues, try again later.",
-        "connectionFailed": "Could not connect to the server. Check your connection and try again.",
+        "unavailable": "You cannot log in right now. Try again in a little while.",
+        "connectionFailed": "Could not connect to the server. Check your internet connection and try again.",
+        "emailRequired": "Enter the email address you use to log in.",
+        "passwordRequired": "Enter your password to log in.",
         "private": "Private",
         "company": "Company",
         "email": "Email",
         "password": "Password",
         "login": "Log in",
         "missingCredentials": "Enter both email and password.",
-        "generic": "Something went wrong."
+        "generic": "Could not log you in. Try again."
     },
     "session": {
         "sessionExpired": "Your session has expired. Please log in again."
@@ -54,6 +170,18 @@
         "approvalsWithOverdue": "{{pending}} pending, {{overdue}} overdue"
     },
     "dashboard": {
+        "currency": {
+            "originalBalance": "Account balance",
+            "converted": "Approximate value in {{currency}}",
+            "copy": "Copy",
+            "copyIban": "Copy IBAN for {{account}}",
+            "copied": "IBAN copied.",
+            "copyFailed": "Could not copy. Select and copy the IBAN manually.",
+            "select": "Display currency",
+            "loading": "Loading exchange rates...",
+            "unavailable": "Converted balance unavailable.",
+            "rateDate": "Rate date:"
+        },
         "welcome": "Welcome, {{user}}",
         "greeting": "Good morning, {{user}}",
         "createPayment": "Create payment",
@@ -178,6 +306,7 @@
     "approvalInbox": {
         "title": "Approval inbox",
         "description": "Payments awaiting your decision.",
+        "handledDescription": "Payments you have already handled.",
         "loading": "Loading approvals...",
         "pendingCount_one": "{{count}} pending",
         "pendingCount_other": "{{count}} pending",
@@ -193,23 +322,24 @@
             "approved": "{{reference}} ({{amount}}) was approved.",
             "rejected": "{{reference}} ({{amount}}) was rejected.",
             "alreadyHandled": "This payment has already been handled. The list has been updated.",
-            "showHandled": "Show in Handled →"
+            "showHandled": "Show in Handled"
         },
         "sort": {
             "label": "Sort by",
             "newest": "Newest first",
             "oldest": "Oldest first",
             "amountHigh": "Amount: high to low",
-            "amountLow": "Amount: low to high"
+            "amountLow": "Amount: low to high",
+            "announcement": "List sorted: {{order}}."
         },
         "card": {
             "waitingDays_one": "Waiting {{count}} day",
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
-            "submitted": "Submitted",
             "toIban": "To IBAN",
-            "stepAndPayment": "Approval step {{step}} · Payment #{{id}}",
+            "approvalStep": "Approval step {{step}}",
+            "dualApprovalShort": "Dual approval",
             "waitingToday": "Submitted today",
             "dualApproval": "Dual approval – this payment requires two attestants",
             "recipientBank": "Recipient bank",
@@ -229,19 +359,20 @@
             "placeholder": "Add a comment",
             "rejectReasonLabel": "Reason for rejection",
             "required": "(required)",
-            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters."
+            "rejectReasonHint": "The initiator will see your reason. At least {{min}} characters.",
+            "characterCount": "{{count}} of {{max}} characters"
         },
         "actions": {
             "reject": "Reject",
             "approve": "Approve",
             "processing": "Processing...",
-            "rejectPayment": "Reject payment {{id}}",
-            "approvePayment": "Approve payment {{id}}"
+            "rejectPayment": "Reject payment with reference {{reference}}, {{amount}}",
+            "approvePayment": "Approve payment with reference {{reference}}, {{amount}}"
         },
         "empty": {
             "title": "No pending approvals",
-            "description": "There are no payments waiting for your approval.",
-            "showHandled": "Show handled payments →"
+            "description": "You're all caught up. New payments will appear here when they're sent for approval.",
+            "showHandled": "Show handled payments"
         },
         "modal": {
             "approveTitle": "Approve payment?",
@@ -254,8 +385,10 @@
         "checks": {
             "title": "Check before deciding",
             "ibanInvalid": "IBAN is invalid – check the account number with the initiator",
-            "duplicate": "Possible duplicate: same recipient and amount as payment {{payments}}",
+            "duplicate_one": "Possible duplicate: same recipient and amount as the payment with reference {{payments}}",
+            "duplicate_other": "Possible duplicate: same recipient and amount as the payments with references {{payments}}",
             "highAmount": "High amount – check extra carefully",
+            "sameAccount": "The recipient account is the same as the source account – check that this is intended",
             "foreignRecipient": "Foreign recipient ({{country}}) – check that it matches the invoice"
         },
         "tabs": {
@@ -286,9 +419,9 @@
             "maxAmount": "Max amount",
             "clear": "Clear filters",
             "count": "Showing {{visible}} of {{total}}",
-            "approvedOn": "Approved {{date}}",
-            "rejectedOn": "Rejected {{date}}",
-            "step": "Approval step",
+            "approvedOn": "Approved <time>{{date}}</time>",
+            "rejectedOn": "Rejected <time>{{date}}</time>",
+            "unknownDate": "Unknown date",
             "reason": "Reason",
             "sessionEmpty": "Payments you approve or reject now will be shown here.",
             "moreFilters": "Filter",
@@ -359,7 +492,7 @@
         },
         "table": {
             "caption": "Audit log events",
-            "timestamp": "Timestamp",
+            "timestamp": "Time",
             "user": "User",
             "event": "Event",
             "entity": "Entity",
@@ -381,8 +514,8 @@
         },
         "actions": {
             "CREATE_PAYMENT": "Payment created",
-            "APPROVE_STEP": "Approval step approved",
-            "REJECT_STEP": "Approval step rejected",
+            "APPROVE_STEP": "Approved",
+            "REJECT_STEP": "Rejected",
             "EXECUTE_PAYMENT": "Payment executed",
             "REJECT_PAYMENT": "Payment rejected",
             "CREATE_USER": "User created",
@@ -392,8 +525,20 @@
             "UPDATE_APPROVAL_LIMIT": "Approval limit updated",
             "DELETE_APPROVAL_LIMIT": "Approval limit deleted"
         },
+        "export": {
+            "button": "Export CSV",
+            "exporting": "Exporting…",
+            "done_one": "{{count}} event exported.",
+            "done_other": "{{count}} events exported.",
+            "error": "Could not export the log. Try again."
+        },
+        "summary": {
+            "payment": "{{amount}} to {{iban}}",
+            "refund": "{{amount}} returned to the account"
+        },
         "entityTypes": {
             "payment": "Payment #{{id}}",
+            "paymentReference": "Payment {{reference}}",
             "user": "User #{{id}}",
             "approvalLimit": "Approval limit #{{id}}"
         },
@@ -570,12 +715,19 @@
     },
     "notifications": {
         "title": "Notifications",
+        "approvalTitle": "Approval needed",
+        "paymentStatusTitle": "Payment update",
+        "newApprovalMessage": "A new payment is waiting for your approval: {{reference}}",
         "buttonLabel_one": "Notifications, {{count}} unread",
         "buttonLabel_other": "Notifications, {{count}} unread",
         "unreadCount_one": "{{count}} unread",
         "unreadCount_other": "{{count}} unread",
         "markAllAsRead": "Mark all as read",
-        "empty": "You have no notifications."
+        "empty": "You have no notifications.",
+        "loading": "Loading notifications...",
+        "loadError": "Notifications could not be loaded. Try again later.",
+        "approvalWatchError": "New approvals could not be checked. Retrying...",
+        "updateError": "A notification could not be marked as read."
     },
     "overdueReminder": {
         "title": "Reminder: approvals waiting",
@@ -584,25 +736,8 @@
         "goToInbox": "Go to approval inbox",
         "dismiss": "Dismiss reminder"
     },
-    "reminderSettings": {
-        "title": "Approval reminders",
-        "description": "Get an email when payments are waiting for your approval, so they don't get stuck.",
-        "emailEnabled": "Send me an email when a payment has waited too long for my approval",
-        "recipient": "Reminders are sent to",
-        "remindAfter": "Email me after",
-        "dayCount_one": "{{count}} day",
-        "dayCount_other": "{{count}} days",
-        "success": "Reminder settings saved.",
-        "saving": "Saving...",
-        "save": "Save settings",
-        "loading": "Loading settings...",
-        "errors": {
-            "save": "Unable to save reminder settings.",
-            "load": "Unable to load reminder settings."
-        },
-        "inAppNote": "Reminders in the app are always shown after {{days}} days."
-    },
     "saveInvest": {
+        "examples": {"emergencyFund":"Emergency fund","longTermSavings":"Long-term savings","holidaySavings":"Holiday savings","newHome":"New home","summerHoliday":"Summer holiday"},
         "eyebrow": "SAVINGS & INVESTMENTS",
         "title": "Save and invest",
         "description": "Build your financial future with simple, flexible options.",

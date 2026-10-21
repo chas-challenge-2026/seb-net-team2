@@ -1,5 +1,6 @@
+import { RequiredMark } from "../../../components/FormValidation/RequiredField";
 import { updateUserSchema } from "../../../schemas/userSchema";
-import { useFormValidation } from "../../../components/FormValidation/useFormValidation";
+import { useFormValidation, type ValidationErrors } from "../../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "@tanstack/react-router";
@@ -59,14 +60,14 @@ function EditUserForm({ user }: EditUserFormProps) {
     function handleUpdateUser(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const result = updateUserSchema.safeParse({ name: name.trim(), email: email.trim(), ...(password && { password }), role });
-        const fieldErrors: Record<string, string> = {};
+        const fieldErrors: ValidationErrors = {};
         if (!result.success) {
             for (const issue of result.error.issues) {
                 const field = String(issue.path[0]);
-                const label = t(`users.form.${field}`);
+                const fieldKey = `users.form.${field}`;
                 fieldErrors[field] = issue.code === "too_big"
-                    ? t("validation.maxLength", { field: label, max: issue.maximum })
-                    : field === "email" ? t("validation.email") : t("validation.required", { field: label });
+                    ? { key: "validation.maxLength", fieldKey, values: { max: Number(issue.maximum) } }
+                    : field === "email" ? { key: "validation.email" } : { key: "validation.required", fieldKey };
             }
         }
         if (!validation.validate(event.currentTarget, fieldErrors) || !result.success) return;
@@ -97,10 +98,13 @@ function EditUserForm({ user }: EditUserFormProps) {
                     <div className={styles.formGroup}>
                         <label htmlFor="name" className={styles.label}>
                             {t("users.form.name")}
+
+                            <RequiredMark />
                         </label>
 
                         <input
                             id="name"
+                            autoComplete="name"
                             placeholder={t("validation.nameExample")}
                             {...validation.fieldProps("name")}
                             name="name"
@@ -117,10 +121,13 @@ function EditUserForm({ user }: EditUserFormProps) {
                     <div className={styles.formGroup}>
                         <label htmlFor="email" className={styles.label}>
                             {t("users.form.email")}
+
+                            <RequiredMark />
                         </label>
 
                         <input
                             id="email"
+                            autoComplete="email"
                             placeholder={t("validation.emailExample")}
                             {...validation.fieldProps("email")}
                             name="email"
@@ -155,6 +162,8 @@ function EditUserForm({ user }: EditUserFormProps) {
                     <div className={styles.formGroup}>
                         <label htmlFor="role" className={styles.label}>
                             {t("users.form.role")}
+
+                            <RequiredMark />
                         </label>
 
                         <select
@@ -164,7 +173,7 @@ function EditUserForm({ user }: EditUserFormProps) {
                             className={styles.select}
                             value={role}
                             disabled={updateMutation.isPending}
-                            onChange={(event) => setRole(event.target.value as UserRole)}
+                            onChange={(event) => setRole(event.target.value as UserRole)} required
                         >
                             <option value="User">{t("users.roles.User")}</option>
                             <option value="Initiator">{t("users.roles.Initiator")}</option>

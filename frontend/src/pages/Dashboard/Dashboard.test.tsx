@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render as renderComponent, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/jest-globals";
 import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals";
 
@@ -6,6 +6,12 @@ import { Dashboard } from "./Dashboard";
 import { useAccounts } from "../../hooks/useAccounts";
 import { usePayments } from "../../hooks/usePayments";
 import { useAuth } from "../../hooks/useAuth";
+import { useExchangeRates } from "../../hooks/useExchangeRates";
+import { CurrencyProvider } from "../../context/CurrencyProvider";
+
+function render(component: React.ReactNode) {
+    return renderComponent(<CurrencyProvider>{component}</CurrencyProvider>);
+}
 
 jest.mock("@tanstack/react-router", () => ({
     Link: ({ children, to, ...props }: React.PropsWithChildren<{ to: string }>) => (
@@ -42,10 +48,12 @@ jest.mock("react-i18next", () => ({
 jest.mock("../../hooks/useAccounts", () => ({ useAccounts: jest.fn() }));
 jest.mock("../../hooks/usePayments", () => ({ usePayments: jest.fn() }));
 jest.mock("../../hooks/useAuth", () => ({ useAuth: jest.fn() }));
+jest.mock("../../hooks/useExchangeRates", () => ({ useExchangeRates: jest.fn() }));
 
 const mockedUseAccounts = jest.mocked(useAccounts);
 const mockedUsePayments = jest.mocked(usePayments);
 const mockedUseAuth = jest.mocked(useAuth);
+const mockedUseExchangeRates = jest.mocked(useExchangeRates);
 
 const accounts = [
     {
@@ -65,6 +73,7 @@ const accounts = [
 ];
 
 function setDefaultHookValues() {
+    mockedUseExchangeRates.mockReturnValue([]);
     mockedUseAccounts.mockReturnValue({
         data: accounts,
         isLoading: false,
@@ -78,6 +87,7 @@ function setDefaultHookValues() {
         user: {
             name: "Lisa Persson",
             tenantName: "Malmö Bygg AB",
+            role: "Initiator",
         },
     } as unknown as ReturnType<typeof useAuth>);
 }
@@ -93,11 +103,11 @@ describe("Dashboard account information", () => {
         render(<Dashboard />);
 
         expect(screen.getByText("Operating account")).toBeInTheDocument();
-        expect(screen.getByText(`1,250,000.50 SEK`)).toBeInTheDocument();
+        expect(screen.getByText(`1,250,000.50`)).toBeInTheDocument();
         expect(screen.getByText("SE4550000000058398257466")).toBeInTheDocument();
 
         expect(screen.getByText("Payroll account")).toBeInTheDocument();
-        expect(screen.getByText(`890,000.00 SEK`)).toBeInTheDocument();
+        expect(screen.getByText(`890,000.00`)).toBeInTheDocument();
         expect(screen.getByText("SE4550000000058398257467")).toBeInTheDocument();
     });
 
@@ -168,5 +178,93 @@ describe("Dashboard account information", () => {
         render(<Dashboard />);
 
         expect(screen.queryByRole("link", { name: "Create payment" })).not.toBeInTheDocument();
+    });
+
+    it("hides recent payments for roles that cannot create payments", () => {
+        mockedUseAuth.mockReturnValue({
+            user: {
+                name: "Johan Berg",
+                tenantName: "Malmö Bygg AB",
+                role: "Attestant",
+            },
+        } as unknown as ReturnType<typeof useAuth>);
+
+        render(<Dashboard />);
+
+        expect(screen.queryByText("Recent payments")).not.toBeInTheDocument();
+        expect(screen.getByText("Operating account")).toBeInTheDocument();
+    });
+
+    it("changes the display currency while preserving company account balances", () => {
+        render(<Dashboard />);
+        const select = screen.getByRole("button", { name: /^dashboard\.currency\.select:/ });
+        expect(select).toHaveTextContent("SEK");
+        expect(screen.queryByText("dashboard.currency.converted")).not.toBeInTheDocument();
+        expect(screen.queryByText("dashboard.currency.sameCurrency")).not.toBeInTheDocument();
+        fireEvent.click(select);
+        fireEvent.click(screen.getByRole("button", { name: "\u20AC EUR" }));
+        expect(mockedUseExchangeRates).toHaveBeenLastCalledWith(["SEK", "SEK"], "EUR");
+        expect(screen.getByText("Operating account")).toBeInTheDocument();
+        expect(screen.getByText("1,250,000.50")).toBeInTheDocument();
+        expect(accounts[0].currency).toBe("SEK");
+        fireEvent.click(select);
+        fireEvent.click(screen.getByRole("button", { name: "$ USD" }));
+        expect(mockedUseExchangeRates).toHaveBeenLastCalledWith(["SEK", "SEK"], "USD");
+        fireEvent.click(select);
+        fireEvent.click(screen.getByRole("button", { name: "SEK" }));
+        expect(mockedUseExchangeRates).toHaveBeenLastCalledWith(["SEK", "SEK"], "SEK");
+    });
+
+    it("keeps the selected currency when the dashboard is unmounted and opened again", () => {
+        const page = (showDashboard: boolean) => (
+            <CurrencyProvider>
+                {showDashboard ? <Dashboard /> : <p>Another page</p>}
+            </CurrencyProvider>
+        );
+        const view = renderComponent(page(true));
+        fireEvent.click(screen.getByRole("button", { name: /^dashboard\.currency\.select:/ }));
+        fireEvent.click(screen.getByRole("button", { name: "\u20AC EUR" }));
+        view.rerender(page(false));
+        expect(screen.queryByRole("button", { name: /^dashboard\.currency\.select:/ })).not.toBeInTheDocument();
+        view.rerender(page(true));
+        expect(screen.getByRole("button", { name: /^dashboard\.currency\.select:/ })).toHaveTextContent("\u20AC EUR");
+        expect(mockedUseExchangeRates).toHaveBeenLastCalledWith(["SEK", "SEK"], "EUR");
+    });
+
+    it("shows an approximate value only for accounts in a different currency", () => {
+        mockedUseAccounts.mockReturnValue({
+            data: [accounts[0], { ...accounts[1], balance: 1000, currency: "EUR" }],
+            isLoading: false, isError: false,
+        } as unknown as ReturnType<typeof useAccounts>);
+        mockedUseExchangeRates.mockReturnValue([{
+            data: { base: "EUR", quote: "SEK", rate: 11, date: "2026-10-12" },
+            isPending: false, isError: false,
+        }] as unknown as ReturnType<typeof useExchangeRates>);
+
+        render(<Dashboard />);
+
+        expect(mockedUseExchangeRates).toHaveBeenCalledWith(["SEK", "EUR"], "SEK");
+        expect(screen.getByText("€ 1,000.00")).toBeInTheDocument();
+        expect(screen.getByText("≈ 11,000.00")).toBeInTheDocument();
+        expect(screen.queryByText("dashboard.currency.total")).not.toBeInTheDocument();
+        expect(screen.getAllByText("dashboard.currency.converted")).toHaveLength(1);
+        expect(document.querySelector('time[datetime="2026-10-12"]')).not.toBeNull();
+    });
+
+    it.each([true, false])("keeps the original balance when a rate is pending=%s", (isPending) => {
+        mockedUseAccounts.mockReturnValue({
+            data: [{ ...accounts[0], balance: 1000, currency: "EUR" }],
+            isLoading: false, isError: false,
+        } as unknown as ReturnType<typeof useAccounts>);
+        mockedUseExchangeRates.mockReturnValue([{
+            data: undefined, isPending, isError: !isPending, refetch: jest.fn(),
+        }] as unknown as ReturnType<typeof useExchangeRates>);
+
+        render(<Dashboard />);
+
+        expect(screen.getByText("€ 1,000.00")).toBeInTheDocument();
+        expect(screen.queryByText("0.00 SEK")).not.toBeInTheDocument();
+        expect(screen.getAllByText(isPending ? "dashboard.currency.loading" : "dashboard.currency.unavailable").length).toBeGreaterThan(0);
+
     });
 });

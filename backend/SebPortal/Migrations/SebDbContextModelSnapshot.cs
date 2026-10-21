@@ -157,6 +157,7 @@ namespace SebPortal.Api.Migrations
                     b.Property<Guid>("PublicId")
                         .HasColumnType("uuid")
                         .HasColumnName("public_id");
+
                     b.Property<int>("ReminderCount")
                         .HasColumnType("integer")
                         .HasColumnName("reminder_count");
@@ -286,6 +287,8 @@ namespace SebPortal.Api.Migrations
                         .HasColumnName("status_code");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
 
                     b.HasIndex("Key")
                         .IsUnique();
@@ -490,6 +493,8 @@ namespace SebPortal.Api.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExpiresAt");
 
                     b.HasIndex("TokenHash")
                         .IsUnique();
