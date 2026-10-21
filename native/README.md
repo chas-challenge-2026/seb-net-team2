@@ -116,30 +116,42 @@ Varje loggrad:
 ### API
 
 ```c
-int audit_append(
-    const char *log_path,
-    const char *secret_key,
-    int user_id,
-    const char *action,
-    int entity_id,
-    const char *description);
+int audit_initialize(const char *log_path, const char *secret_key,
+                     int user_id, const char *action, int entity_id,
+                     const char *description);
 
-int audit_verify(
-    const char *log_path,
-    const char *secret_key);
+int audit_append(const char *log_path, const char *secret_key,
+                 int user_id, const char *action, int entity_id,
+                 const char *description);
+
+int audit_append_with_hash(const char *log_path, const char *secret_key,
+                           int user_id, const char *action, int entity_id,
+                           const char *description, char *out_hash,
+                           size_t out_hash_size);
+
+int audit_verify(const char *log_path, const char *secret_key);
 ```
 
-`audit_append()` returnerar `0` vid lyckad skrivning och `-1` vid fel.
+`audit_initialize()` skapar en ny audit-loggkedja och skriver inte över en befintlig fil.
 
-`audit_verify()` returnerar `-1` om loggen är giltig, annars radnumret för den första felaktiga posten.
+`audit_append()` och `audit_append_with_hash()` returnerar `0` vid lyckad skrivning och `-1` vid fel.
+`audit_append_with_hash()` returnerar även HMAC-hashen via `out_hash`. Bufferten måste vara minst 65 byte.
+
+`audit_verify()` returnerar `-1` om loggen är giltig, `-2` vid filöppnings- eller läsfel, `1` om loggen är tom, annars radnumret för den första felaktiga posten.
 
 ### Säkerhet och testning
 
 - Secret key lagras inte i källkoden.
 - Testmiljön använder `AUDIT_SIGNING_KEY`.
-- Loggen skrivs med `O_APPEND | O_SYNC`.
+- Nya loggar skapas exklusivt. Befintliga loggar uppdateras med append-läge och synkroniserad skrivning.
 - HMAC-SHA256 och SHA256-hashkedja används för integritet.
 - Testa med `make audit-test`.
+
+### Begränsningar och avgränsningar
+
+- Native Audit ansvarar för att skriva och verifiera den kryptografiskt skyddade loggen.
+- Presentation av Audit-händelser i applikationen hanteras av systemets övriga lager.
+- `audit_verify()` verifierar loggens integritet men ansvarar inte för hur verifieringsresultatet presenteras i applikationen.
 
 ---
 
@@ -148,7 +160,8 @@ int audit_verify(
 ```bash
 cd native/
 make all   # kompilerar alla tre .so-filer
-make test  # kör enhetstester (kräver check.h eller cmocka)
+make test  # kör enhetstester (kräver CMocka)
+make test-audit
 ```
 
 Makefile (ska skapas i v2):
