@@ -20,6 +20,39 @@ namespace SebPortal.Api.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<AuditEntries>> GetPendingNativeEntriesAsync(int batchSize)
+        {
+            return await _context.AuditEntries
+                .Where(e => e.NativeWrittenAt == null)
+                .OrderBy(e => e.Id)
+                .Take(batchSize)
+                .ToListAsync();
+        }
+
+        public async Task<List<AuditEntries>> GetNativeWrittenEntriesAsync(
+    int batchSize,
+    int afterId = 0)
+{
+    return await _context.AuditEntries
+        .AsNoTracking()
+        .Where(e => e.NativeWrittenAt != null && e.Id > afterId)
+        .OrderBy(e => e.Id)
+        .Take(batchSize)
+        .ToListAsync();
+}
+
+        public async Task MarkNativeWrittenAsync(int id, string nativeHash)
+        {
+            var entry = await _context.AuditEntries.FindAsync(id);
+            if (entry == null)
+                return;
+
+            entry.NativeHash = nativeHash;
+            entry.NativeWrittenAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+        }
+
         // True if the user has performed any audited action, which means they can't be deleted.
         public Task<bool> HasEntriesForUserAsync(int userId, int tenantId)
         {

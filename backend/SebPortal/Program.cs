@@ -108,6 +108,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 builder.Services.AddSingleton<INotificationQueue, NotificationQueue>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
+builder.Services.AddHostedService<AuditNativeBackgroundService>();
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();

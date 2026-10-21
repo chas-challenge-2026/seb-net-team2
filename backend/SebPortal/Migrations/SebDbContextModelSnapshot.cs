@@ -221,6 +221,14 @@ namespace SebPortal.Api.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("entity_type");
 
+                    b.Property<string>("NativeHash")
+                        .HasColumnType("text")
+                        .HasColumnName("native_hash");
+
+                    b.Property<DateTime?>("NativeWrittenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("native_written_at");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("integer")
                         .HasColumnName("tenant_id");

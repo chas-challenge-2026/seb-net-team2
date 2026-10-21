@@ -41,6 +41,10 @@ services:
       ASPNETCORE_URLS: "http://+:8081"
       ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION}
       Jwt__Secret: ${JWT_SECRET}
+      Audit__LogPath: ${AUDIT_LOG_PATH}
+      Audit__SigningKey: ${AUDIT_SIGNING_KEY}
+    volumes:
+      - auditlogs:/app/audit
     depends_on:
       db:
         condition: service_healthy
@@ -48,3 +52,4 @@ services:
 
 volumes:
   pgdata:
+  auditlogs:
