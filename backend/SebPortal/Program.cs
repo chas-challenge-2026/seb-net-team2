@@ -44,7 +44,6 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header,
         BearerFormat = "JWT"
     });
-builder.Services.AddDistributedMemoryCache();
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -184,8 +183,6 @@ app.UseExceptionHandler();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseSession();
-app.UseAuthorization();
 
 app.UseAuthentication();
 app.UseAuthorization();

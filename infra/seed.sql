@@ -25,14 +25,6 @@ TRUNCATE TABLE
     tenants
 RESTART IDENTITY CASCADE;
 
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    tenant_id INT REFERENCES tenants(id),
-    name VARCHAR(100),
-    email VARCHAR(100) UNIQUE,
-    password_md5 VARCHAR(32),
-    role VARCHAR(20) -- 'initiator', 'attestant', 'admin'
-);
 
 -- Tenants
 INSERT INTO tenants (name) VALUES
@@ -41,19 +33,6 @@ INSERT INTO tenants (name) VALUES
 ('Stockholm IT Konsult AB'),  -- 3
 ('Umeå Livs AB');             -- 4
 
-CREATE TABLE payments (
-    id SERIAL PRIMARY KEY,
-    tenant_id INT REFERENCES tenants(id),
-    from_account_id INT REFERENCES accounts(id),
-    to_iban VARCHAR(34),
-    amount DECIMAL(15,2),
-    currency VARCHAR(3) DEFAULT 'SEK',
-    reference VARCHAR(100),
-    status VARCHAR(30) DEFAULT 'pending_approval', -- 'pending_approval', 'completed', 'rejected'
-    created_by INT REFERENCES users(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    executed_at TIMESTAMP
-);
 
 -- Users (password = "password123")
 INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES
@@ -81,10 +60,6 @@ INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES
 (4, 'Jonas Öberg',     'jonas@umealivs.se',     '$2a$11$hOqvHCMuYOxr63.Qpp7aNuPxtyuTC9YsYyI6toHHtknVqCD0ny2Ym', 'Initiator'),  -- 15
 (4, 'Sofia Karlsson',  'sofia@umealivs.se',     '$2a$11$kRo6tkP8ZqqDdZIGjQlT3uqWbW/uIO6riIo7AjvC.CqiIhjdTApCO', 'Attestant');  -- 16
 
-INSERT INTO accounts (tenant_id, account_name, iban, balance, currency) VALUES
-(1, 'Driftkonto',   'SE4550000000058398257466', 2500000.00, 'SEK'),
-(1, 'Lönekonto',    'SE4550000000058398257467',  890000.00, 'SEK'),
-(1, 'Projektkonto', 'SE4550000000058398257468',  450000.00, 'SEK');
 
 -- Accounts
 INSERT INTO accounts
@@ -207,8 +182,6 @@ VALUES
 (4, 15, 'CREATE_PAYMENT', 'payment', 20, 'Skapade betalning 22000 SEK till SE9712000000077788890003',  NOW() - INTERVAL '12 days'),
 (4, 16, 'APPROVE_STEP',   'payment', 20, 'Steg 1 för betalning 20 godkändes',                          NOW() - INTERVAL '11 days');
 
-INSERT INTO approval_steps (payment_id, attestant_id, step_number, status) VALUES
-(2, 2, 1, 'pending');
 
 -- Approval limits
 INSERT INTO "approvalLimit"
