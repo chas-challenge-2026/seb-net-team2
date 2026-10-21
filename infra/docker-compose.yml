@@ -37,6 +37,7 @@ services:
       - "8081"
     volumes:
       - ./seed.sql:/seed/seed.sql:ro
+      - auditlogs:/app/audit
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8081/healthz || exit 1"]
       interval: 10s
@@ -50,9 +51,8 @@ services:
       Jwt__Secret: ${JWT_SECRET}
       Audit__LogPath: ${AUDIT_LOG_PATH}
       Audit__SigningKey: ${AUDIT_SIGNING_KEY}
-    volumes:
-      - auditlogs:/app/audit
-      Seed__Path: "/seed/seed.sql"
+      Seed__Path: "/seed/seed.sql" 
+      
     depends_on:
       db:
         condition: service_healthy
