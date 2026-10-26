@@ -120,21 +120,38 @@ Affärsregler i koden
 - Ett enda nej räcker för att stoppa betalningen. Om ett steg nekas avslås hela betalningen, och pengarna förs tillbaka till kontot.
 - Betalningen genomförs först när alla steg är godkända.
 - En Admin kan besluta i stället för den tilldelade attestanten, men aldrig på sin egen betalning.
-- Stegen behöver inte godkännas i ordning. Steg 2 kan godkännas före steg 1. Jag hittar ingen kontroll av ordningen i koden. Det är inte nödvändigtvis fel, men om ni beskriver flödet som "steg 1, sedan steg 2" stämmer det inte.
--
 
 # Arkitektur
 
 System översikt
 
+```mermaid
 flowchart LR
+    subgraph Klient
+        FE["⚛️ React-frontend"]
+    end
 
-- FE[React-frontend] -->|REST + JWT| API[ASP.NET Core Web API]
-- API --> DB[(PostgreSQL)]
-- API -->|P/Invoke| NAT[C-moduler<br/>CSV / IBAN / audit]
-- API --> BG[Bakgrundstjänster<br/>notifieringar, påminnelser]
-- BG --> DB
-- BG --> MAIL[E-post]
+    subgraph Backend["Backend (.NET)"]
+        API["🌐 ASP.NET Core Web API"]
+        BG["⏱️ Bakgrundstjänster<br/><small>notifieringar, påminnelser</small>"]
+        NAT["⚙️ C-moduler<br/><small>CSV · IBAN · audit</small>"]
+    end
+
+    subgraph Data
+        DB[("🐘 PostgreSQL")]
+    end
+
+    subgraph Externt
+        MAIL["✉️ E-post"]
+    end
+
+    FE -- "REST + JWT" --> API
+    API --> DB
+    API -. "P/Invoke" .-> NAT
+    API --> BG
+    BG --> DB
+    BG --> MAIL
+```
 
 Kärnan i flödet är **Controller → Service → Repository → DbContext → Databas**.
 
