@@ -114,12 +114,10 @@ De andra företagen har andra gränser, t.ex. 25 000 och 100 000 för tenant 2. 
 
 Affärsregler i koden
 
-- Saldot dras direkt när betalningen skapas, även om den väntar på attest. Det går inte att betala mer än det som finns på kontot.
-- Ingen kan attestera sin egen betalning, inte ens en Admin.
-- Vid dubbelattest måste attestanterna vara olika personer. Finns det för få attestanter i företaget kan betalningen inte skapas.
-- Ett enda nej räcker för att stoppa betalningen. Om ett steg nekas avslås hela betalningen, och pengarna förs tillbaka till kontot.
-- Betalningen genomförs först när alla steg är godkända.
-- En Admin kan besluta i stället för den tilldelade attestanten, men aldrig på sin egen betalning.
+- initiator skapar en betalning → beloppet dras direkt från kontot (reserveras) och betalningen sparas som pending_approval.
+-  En regelmotor (ApprovalLimit, konfigurerbar per tenant — inte hårdkodad) avgör hur många godkännanden som krävs baserat på beloppet. En Admin sätter reglerna för dessa, exempelvis en betalning under 10 000kr genomförs direkt utan attestant, medans en betalning på 100 000kr + kräver 2 attestanters godkännanden. Admin sätter reglerna för sin egna Tenant.
+- Atteststeg (ApprovalStep) skapas, ett per krävt godkännande, och tilldelas en attestant var — vi valde round-robin över tenantens attestanter så att belastningen sprids, snarare än att lämna stegen otilldelade och låta "vem som helst" plocka dem.
+- Attestanterna godkänner eller nekar sina tilldelade steg. När samtliga steg är godkända markeras betalningen som `completed`. Om ett steg nekas avbryts hela flödet och det reserverade beloppet återförs automatiskt till kontot.
 
 # Arkitektur
 
