@@ -74,16 +74,18 @@
     "login": {
         "welcome": "Välkommen till SEB",
         "description": "Logga in med din e-postadress och ditt lösenord för att hantera ditt konto eller företagets ekonomi.",
-        "invalidCredentials": "Fel e-postadress eller lösenord. Kontrollera båda och försök igen.",
-        "unavailable": "Det gick inte att logga in. Kontrollera din e-postadress och ditt lösenord och försök igen. Om problemet kvarstår, försök senare.",
-        "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.",
+        "invalidCredentials": "E-postadressen eller lösenordet stämmer inte. Kontrollera båda och försök igen.",
+        "unavailable": "Det går inte att logga in just nu. Försök igen om en stund.",
+        "connectionFailed": "Kunde inte ansluta till servern. Kontrollera din internetanslutning och försök igen.",
+        "emailRequired": "Ange e-postadressen som du använder för att logga in.",
+        "passwordRequired": "Ange ditt lösenord för att logga in.",
         "private": "Privat",
         "company": "Bolag",
         "email": "E-post",
         "password": "Lösenord",
         "login": "Logga in",
         "missingCredentials": "Ange både e-post och lösenord.",
-        "generic": "Något gick fel."
+        "generic": "Det gick inte att logga in. Försök igen."
     },
     "session": {
         "sessionExpired": "Din session har gått ut. Logga in igen."

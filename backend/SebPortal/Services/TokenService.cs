@@ -32,9 +32,7 @@ namespace SebPortal.Api.Services
                 {
                     new Claim("UserId", user.Id.ToString()),
                     new Claim(ClaimTypes.Role, user.Role),
-                    new Claim("TenantId", user.TenantId.ToString()),
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.Email, user.Email)
+                    new Claim("TenantId", user.TenantId.ToString())
                 }),
 
                 Expires = DateTime.UtcNow.AddMinutes(15),

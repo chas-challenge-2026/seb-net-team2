@@ -22,14 +22,12 @@ var jwtAudience = builder.Configuration["Jwt:Audience"]
     ?? throw new InvalidOperationException("JWT audience is missing.");
 
 
-builder
-    .Services.AddControllers();
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IdempotencyFilter>();
 
 // Swagger / OpenAPI for .NET 8 with JWT
-builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     var currentDirectory = AppContext.BaseDirectory;
@@ -111,6 +109,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
 builder.Services.AddSingleton<INotificationQueue, NotificationQueue>();
 builder.Services.AddHostedService<NotificationBackgroundService>();
+builder.Services.AddHostedService<AuditNativeBackgroundService>();
 builder.Services.AddScoped<INotificationProcessor, NotificationProcessor>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -119,6 +118,7 @@ builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
 builder.Services.AddScoped<IReminderService, ReminderService>();
 builder.Services.AddHostedService<ReminderBackgroundService>();
+builder.Services.AddHostedService<ExpireDateCleanupService>();
 
 // Global error handling middleware
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -126,6 +126,8 @@ builder.Services.AddProblemDetails();
 
 builder.Services.Configure<ReminderOptions>(builder.Configuration.GetSection("Reminder"));
 
+// healthcheck for app 
+builder.Services.AddHealthChecks();
 
 builder.Services.AddDbContext<SebDbContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -176,12 +178,6 @@ else
     app.UseCors("ProductionPolicy");
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-}
-
 // NOTE: HTTPS redirection disabled for Docker — terminates at reverse proxy
 // app.UseHttpsRedirection();
 app.UseExceptionHandler();
@@ -192,6 +188,8 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/healthz");
+
 // Unknown API routes should return 404 rather than the React page.
 app.MapFallback("/api/{**path}", () => Results.NotFound());
 app.MapFallbackToFile("index.html");

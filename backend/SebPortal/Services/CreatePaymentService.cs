@@ -150,17 +150,29 @@ namespace SebPortal.Api.Services
             return payment;
         }
 
-        private Task NotifyPaymentCreatedAsync(Payment payment)
+        private async Task NotifyPaymentCreatedAsync(Payment payment)
         {
+            // Email the first attestant after commit. Payments under the limit have no step.
+            var firstApprovalStep = await _context.ApprovalSteps
+                .Include(s => s.Attestant)
+                .Where(s => s.PaymentId == payment.Id && s.StepNumber == 1)
+                .FirstOrDefaultAsync();
+
+            if (firstApprovalStep?.Attestant == null)
+            {
+                return;
+            }
+
             var notificationDTO = new NotificationMessageDTO
             {
                 TenantId = payment.TenantId,
-                RecipientEmail = "attestant@seb.se", //change later
-                Subject = "Attest krävs",
-                Message = "En ny betalning har skapats och väntar på din attestering."
+                Channel = NotificationChannel.Email,
+                RecipientEmail = firstApprovalStep.Attestant.Email,
+                Subject = $"Attest krävs för betalning {payment.Reference}",
+                Message = $"Hej {firstApprovalStep.Attestant.Name},\n\nEn ny betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har skapats och väntar på din attestering.\n\nMvh,\nSEB Företagsbetalningar"
             };
 
-            return _notificationService.SendNotificationMessageAsync(notificationDTO);
+            await _notificationService.SendNotificationMessageAsync(notificationDTO);
         }
 
         // Writes CREATE_PAYMENT (and EXECUTE_PAYMENT if no approval was required) inside the caller's transaction.

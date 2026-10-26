@@ -37,12 +37,22 @@ services:
       - "8081"
     volumes:
       - ./seed.sql:/seed/seed.sql:ro
+      - auditlogs:/app/audit
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: "http://+:8081"
       ConnectionStrings__DefaultConnection: ${DEFAULT_CONNECTION}
       Jwt__Secret: ${JWT_SECRET}
-      Seed__Path: "/seed/seed.sql"
+      Audit__LogPath: ${AUDIT_LOG_PATH}
+      Audit__SigningKey: ${AUDIT_SIGNING_KEY}
+      Seed__Path: "/seed/seed.sql" 
+      
     depends_on:
       db:
         condition: service_healthy
@@ -50,3 +60,4 @@ services:
 
 volumes:
   pgdata:
+  auditlogs:

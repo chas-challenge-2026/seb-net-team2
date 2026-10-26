@@ -132,15 +132,17 @@
         "welcome": "Welcome to SEB",
         "description": "Log in with your email address and password to manage your account or your company's finances.",
         "invalidCredentials": "Incorrect email or password. Check both and try again.",
-        "unavailable": "We could not log you in. Check your email and password and try again. If the problem continues, try again later.",
-        "connectionFailed": "Could not connect to the server. Check your connection and try again.",
+        "unavailable": "You cannot log in right now. Try again in a little while.",
+        "connectionFailed": "Could not connect to the server. Check your internet connection and try again.",
+        "emailRequired": "Enter the email address you use to log in.",
+        "passwordRequired": "Enter your password to log in.",
         "private": "Private",
         "company": "Company",
         "email": "Email",
         "password": "Password",
         "login": "Log in",
         "missingCredentials": "Enter both email and password.",
-        "generic": "Something went wrong."
+        "generic": "Could not log you in. Try again."
     },
     "session": {
         "sessionExpired": "Your session has expired. Please log in again."

@@ -640,6 +640,43 @@ namespace SebPortal.Tests
             Assert.Equal("Test2", userList[1].Name);
             Assert.Equal("test2@example.com", userList[1].Email);
         }
+
+        [Fact]
+        public async Task CreateUserAsync_ShouldSaveUserWithBcryptPasswordHash()
+        {
+            // Arrange
+            var dto = new CreateUserDTO
+            {
+                TenantId = TestTenantId,
+                Name = "Bcrypt Test",
+                Email = "bcrypt@example.com",
+                Password = "SecurePassword123",
+                Role = "User"
+            };
+
+            string? capturedHash = null;
+
+            _userRepositoryMock.Setup(r => r.GetUserByEmailAsync(dto.Email, TestTenantId))
+                .ReturnsAsync((User?)null);
+
+            _userRepositoryMock.Setup(r => r.CreateUserAsync(It.IsAny<User>()))
+                .Callback<User>(u =>
+                {
+                    capturedHash = u.PasswordHash;
+                    u.Id = 15;
+                })
+                .ReturnsAsync((User u) => u);
+
+            // Act
+            await _userService.CreateUserAsync(dto, ActingAdminId, TestTenantId);
+
+            // Assert
+            Assert.NotNull(capturedHash);
+            // Bcrypt-hashar börjar alltid med $2a$, $2b$ eller $2y$
+            Assert.StartsWith("$2", capturedHash);
+            // Säkerställ att det inte sparades i klartext
+            Assert.NotEqual(dto.Password, capturedHash);
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { useFormValidation } from "../../components/FormValidation/useFormValidation";
-import { FieldError, ErrorSummary } from "../../components/FormValidation/FormErrors";
+import { FieldError } from "../../components/FormValidation/FormErrors";
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
@@ -21,7 +21,10 @@ export default function LoginForm() {
     const [error, setError] = useState("");
 
     const { t } = useTranslation();
-    const validation = useFormValidation();
+    const validation = useFormValidation({
+        "login-email": { key: "login.emailRequired" },
+        "login-password": { key: "login.passwordRequired" },
+    });
     const { login, isLoggingIn } = useAuth();
     const navigate = useNavigate();
 
@@ -54,7 +57,6 @@ export default function LoginForm() {
 
     return (
         <form noValidate onChange={(event) => validation.clear((event.target as HTMLInputElement).id)} onSubmit={handleSubmit} className={styles.form}>
-            <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
             <div className={styles.inputGrid}>
                 <div className={styles.formGroup}>
                     <label htmlFor="login-email" className={styles.label}>
