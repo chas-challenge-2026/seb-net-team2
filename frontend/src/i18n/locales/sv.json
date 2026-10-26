@@ -65,7 +65,6 @@
         "dashboard": "Översikt",
         "newPayment": "Ny betalning",
         "saveInvest": "Spara & investera",
-        "batchPayments": "Batchbetalningar",
         "auditLog": "Granskningslogg",
         "profile": "Profil",
         "logout": "Logga ut",
@@ -100,7 +99,6 @@
         "dashboard": "Översikt",
         "payments": "Betalningar",
         "newPayment": "Ny betalning",
-        "batchUpload": "Batchuppladdning",
         "savings": "Sparande",
         "approvals": "Attestering",
         "approvalInbox": "Attestkorg",
@@ -155,6 +153,11 @@
         "eyebrow": "BETALNINGAR",
         "title": "Skapa en ny betalning",
         "description": "Skicka en säker betalning från ditt företagskonto.",
+        "modes": {
+            "label": "Betalningstyp",
+            "single": "Enskild betalning",
+            "batch": "Batchuppladdning"
+        },
         "steps": {
             "label": "Betalningsflöde",
             "details": "Uppgifter",
@@ -374,10 +377,7 @@
         }
     },
     "batch": {
-        "eyebrow": "BETALNINGAR",
-        "title": "Batchuppladdning",
         "description": "Ladda upp flera betalningar samtidigt via en CSV-fil.",
-        "mockMode": "Mockläge",
         "file": {
             "title": "CSV-fil",
             "description": "Välj en fil och ladda sedan upp och behandla den.",

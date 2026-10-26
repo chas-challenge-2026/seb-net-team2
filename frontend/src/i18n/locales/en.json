@@ -122,7 +122,6 @@
         "dashboard": "Dashboard",
         "newPayment": "New payment",
         "saveInvest": "Save & invest",
-        "batchPayments": "Batch payments",
         "auditLog": "Audit log",
         "profile": "Profile",
         "logout": "Log out",
@@ -157,7 +156,6 @@
         "dashboard": "Dashboard",
         "payments": "Payments",
         "newPayment": "New payment",
-        "batchUpload": "Batch upload",
         "savings": "Savings",
         "approvals": "Approvals",
         "approvalInbox": "Approval inbox",
@@ -212,6 +210,11 @@
         "eyebrow": "PAYMENTS",
         "title": "Create a new payment",
         "description": "Send a secure payment from your company account.",
+        "modes": {
+            "label": "Payment type",
+            "single": "Single payment",
+            "batch": "Batch upload"
+        },
         "steps": {
             "label": "Payment progress",
             "details": "Details",
@@ -431,10 +434,7 @@
         }
     },
     "batch": {
-        "eyebrow": "PAYMENTS",
-        "title": "Batch upload",
         "description": "Upload multiple payments at once via a CSV file.",
-        "mockMode": "Mock mode",
         "file": {
             "title": "CSV file",
             "description": "Choose a file, then upload and process it.",

@@ -66,6 +66,10 @@ jest.mock("react-i18next", () => ({
                 "payment.result.sourceAccount": "From account",
                 "payment.result.submittedAt": "Submitted",
                 "payment.result.paymentId": "Payment ID",
+                "payment.modes.label": "Payment type",
+                "payment.modes.single": "Single payment",
+                "payment.modes.batch": "Batch upload",
+                "batch.file.label": "CSV file",
             };
 
             return (translations[key] ?? key).replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(options?.[name] ?? ""));
@@ -282,5 +286,48 @@ describe("New payment flow", () => {
         );
         expect(screen.getByText("Approval required")).toBeInTheDocument();
         expect(screen.queryByText("Payment ID")).not.toBeInTheDocument();
+    });
+
+    it("switches between single payment and batch upload with tabs", () => {
+        render(<NyBetalning />);
+
+        const singleTab = screen.getByRole("tab", { name: /Single payment/ });
+        const batchTab = screen.getByRole("tab", { name: /Batch upload/ });
+
+        expect(singleTab).toHaveAttribute("aria-selected", "true");
+        expect(screen.getByPlaceholderText("Company or person")).toBeVisible();
+        expect(screen.getByLabelText(/CSV file/)).not.toBeVisible();
+
+        fireEvent.click(batchTab);
+
+        expect(batchTab).toHaveAttribute("aria-selected", "true");
+        expect(screen.getByLabelText(/CSV file/)).toBeVisible();
+        expect(screen.getByPlaceholderText("Company or person")).not.toBeVisible();
+    });
+
+    it("moves between the tabs with the arrow keys", () => {
+        render(<NyBetalning />);
+
+        const singleTab = screen.getByRole("tab", { name: /Single payment/ });
+        const batchTab = screen.getByRole("tab", { name: /Batch upload/ });
+
+        fireEvent.keyDown(singleTab, { key: "ArrowRight" });
+
+        expect(batchTab).toHaveAttribute("aria-selected", "true");
+        expect(document.activeElement).toBe(batchTab);
+
+        fireEvent.keyDown(batchTab, { key: "ArrowLeft" });
+
+        expect(singleTab).toHaveAttribute("aria-selected", "true");
+    });
+
+    it("keeps the entered payment details when switching to batch upload and back", () => {
+        render(<NyBetalning />);
+        enterValidPaymentDetails();
+
+        fireEvent.click(screen.getByRole("tab", { name: /Batch upload/ }));
+        fireEvent.click(screen.getByRole("tab", { name: /Single payment/ }));
+
+        expect(screen.getByPlaceholderText("Company or person")).toHaveValue("Northwind Supplies");
     });
 });

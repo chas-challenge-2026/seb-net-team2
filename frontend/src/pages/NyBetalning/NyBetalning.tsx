@@ -20,6 +20,9 @@ import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
 import { createPayment } from "../../services/accountService";
 import { isValidIban, paymentSchema, type CreatedPayment, type PaymentForm } from "../../schemas/paymentSchema";
+import { BatchUpload } from "./BatchUpload";
+import { PaymentModeTabs } from "./PaymentModeTabs";
+import { MODE_IDS, type PaymentMode } from "./paymentModeIds";
 
 import styles from "./NyBetalning.module.css";
 
@@ -44,6 +47,7 @@ export function NyBetalning() {
     const [error, setError] = useState<string | null>(null);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [idempotencyKey, setIdempotencyKey] = useState<string | null>(null);
+    const [mode, setMode] = useState<PaymentMode>("single");
     const formRef = useRef<HTMLFormElement>(null);
     const reviewHeadingRef = useRef<HTMLHeadingElement | null>(null);
     const reviewDialogRef = useRef<HTMLElement>(null);
@@ -275,6 +279,15 @@ export function NyBetalning() {
                 </div>
             </header>
 
+            <PaymentModeTabs activeMode={mode} onChange={setMode} />
+
+            <div
+                role="tabpanel"
+                id={MODE_IDS.single.panel}
+                aria-labelledby={MODE_IDS.single.tab}
+                className={styles.modePanel}
+                hidden={mode !== "single"}
+            >
             <ol className={styles.steps} aria-label={t("payment.steps.label")}>
                 {paymentSteps.map((step, index) => (
                     <li
@@ -623,6 +636,17 @@ export function NyBetalning() {
                     </section>
                 </div>
             )}
+            </div>
+
+            <div
+                role="tabpanel"
+                id={MODE_IDS.batch.panel}
+                aria-labelledby={MODE_IDS.batch.tab}
+                className={styles.modePanel}
+                hidden={mode !== "batch"}
+            >
+                <BatchUpload />
+            </div>
         </div>
     );
 }
