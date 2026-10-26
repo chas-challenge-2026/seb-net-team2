@@ -212,32 +212,6 @@ Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
 
 ### 🔄 Betalningens flöde
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor I as Initiator
-    participant API as Web API
-    participant RM as Regelmotor<br/>(ApprovalLimit)
-    actor A as Attestant(er)
-
-    I->>API: Skapa betalning
-    API->>API: Reservera belopp på kontot
-    API->>RM: Hur många godkännanden krävs?
-    RM-->>API: 0..n steg (per tenant)
-    alt Inga steg krävs
-        API-->>I: completed ✅
-    else Attest krävs
-        API->>A: Skapa ApprovalSteps (round-robin)
-        A->>API: Godkänn / neka
-        alt Alla steg godkända
-            API-->>I: completed ✅
-        else Något steg nekas
-            API->>API: Återför reserverat belopp
-            API-->>I: Avbruten ❌
-        end
-    end
-```
-
 1. **Initiatorn skapar en betalning** → beloppet reserveras direkt från kontot och betalningen sparas som `pending_approval`.
 2. **En regelmotor avgör antalet godkännanden** utifrån beloppet. Reglerna (`ApprovalLimit`) är konfigurerbara per tenant – inte hårdkodade – och sätts av tenantens admin.
 
