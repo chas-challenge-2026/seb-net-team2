@@ -61,7 +61,7 @@ namespace SebPortal.Csv
             try
             {
                 if (rc != 0)
-                    throw new InvalidDataException($"{rc}");
+                    throw new InvalidDataException(ErrorCodeToString((ErrorCode)rc));
 
                 int n = (int)csv.dataLength;
                 if (n < 8 || n % 4 != 0)

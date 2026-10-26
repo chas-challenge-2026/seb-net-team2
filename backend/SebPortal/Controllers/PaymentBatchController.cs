@@ -6,6 +6,7 @@ using SebPortal.Api.Dtos;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Csv;
+using SebPortal.Models;
 
 namespace SebPortal.Api.Controllers
 {
@@ -45,59 +46,57 @@ namespace SebPortal.Api.Controllers
             }
             catch (InvalidDataException ex)
             {
-                return BadRequest(NativeCsv.ErrorCodeToString(((NativeCsv.ErrorCode)int.Parse(ex.Message))));
+                return BadRequest(ex.Message);
             }
 
             int userId = GetCurrentUserId();
             int tenantId = GetUserTenantId();
-            var created = new List<CreatePaymentResponseDTO>();
-            var accountIds = new List<Guid>();
 
-            // Pre payment loop to check if all accounts exist
+            // Resolve accounts before any write. A missing account returns 400 with nothing saved.
+            var dtos = new List<CreatePaymentDTO>(rows.Count);
             for (int i = 0; i < rows.Count; i++)
             {
                 var row = rows[i];
                 var account = await _accountRepository.GetAccountByIdAsync(row.FromAccountId, tenantId);
 
                 if (account == null)
-                    return BadRequest($"Row {i+1}, Account {row.FromAccountId} does NOT exist");
+                    return BadRequest($"Row {i + 1}, Account {row.FromAccountId} does NOT exist");
 
-
-                // Cache so we dont to get them again.
-                accountIds.Add(account.PublicId);
+                dtos.Add(new CreatePaymentDTO
+                {
+                    FromAccountId = account.PublicId,
+                    ToIban = row.ToIban,
+                    Amount = row.Amount,
+                    Currency = "SEK",
+                    Reference = row.Reference,
+                });
             }
 
-
-            for (int i = 0; i < rows.Count; i++)
+            IReadOnlyList<Payment> payments;
+            try
             {
-                var row = rows[i];
-                try
-                {
-                    var payment = await _createPaymentService.CreatePaymentAsync(new CreatePaymentDTO
-                    {
-                        FromAccountId = accountIds[i],
-                        ToIban = row.ToIban,
-                        Amount = row.Amount,
-                        Currency = "SEK",
-                        Reference = row.Reference,
-                    }, userId, tenantId);
+                payments = await _createPaymentService.CreatePaymentsAsync(dtos, userId, tenantId);
+            }
+            catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+            {
+                return BadRequest(ex.Message);
+            }
 
-                    created.Add(new CreatePaymentResponseDTO
-                    {
-                        Id = payment.PublicId,
-                        FromAccountId = accountIds[i],
-                        ToIban = payment.ToIban,
-                        Amount = payment.Amount,
-                        Currency = payment.Currency,
-                        Reference = payment.Reference,
-                        Status = payment.Status,
-                        CreatedAt = payment.CreatedAt,
-                    });
-                }
-                catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+            var created = new List<CreatePaymentResponseDTO>(payments.Count);
+            for (int i = 0; i < payments.Count; i++)
+            {
+                var payment = payments[i];
+                created.Add(new CreatePaymentResponseDTO
                 {
-                    return BadRequest($"Row {i + 1}: {ex.Message}");
-                }
+                    Id = payment.PublicId,
+                    FromAccountId = dtos[i].FromAccountId,
+                    ToIban = payment.ToIban,
+                    Amount = payment.Amount,
+                    Currency = payment.Currency,
+                    Reference = payment.Reference,
+                    Status = payment.Status,
+                    CreatedAt = payment.CreatedAt,
+                });
             }
 
             return StatusCode(StatusCodes.Status200OK, created);
