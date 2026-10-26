@@ -105,40 +105,264 @@ Felsvar uppstår på tre ställen:
 
 # Betalningsflöde och affärsregler
 
-Varje tenant har egna gränser.
+# 🏗️ Arkitektur & designbeslut
 
-Exempel
-| Belopp | Krav |
-|-----------|-------------------------------------------|
-| Under 50 000kr | Genomförs direkt, ingen attest |
-| 50 000 - 199 999kr | 1 attestant |
-| 200 000kr och mer | 2 attestanter |
+> En genomgång av de viktigaste tekniska besluten i projektet – **vad** vi byggt och framför allt **varför**.
 
-De andra företagen har andra gränser, t.ex. 25 000 och 100 000 för tenant 2. En Admin kan ändra gränserna för sitt eget företag.
+## 📑 Innehåll
 
-Affärsregler i koden
+1. [Arkitektur och teknikval](#1-arkitektur-och-teknikval)
+2. [Databasen](#2-databasen)
+3. [Roller, flöde och säkerhet (Approval flow)](#3-roller-flöde-och-säkerhet-approval-flow)
+4. [Säkerhet, konfiguration och kodstruktur](#4-säkerhet-konfiguration-och-kodstruktur)
+5. [Atomicitet, concurrency, transaktionalitet och testbarhet](#5-atomicitet-concurrency-transaktionalitet-och-testbarhet)
 
-- Saldot dras direkt när betalningen skapas, även om den väntar på attest. Det går inte att betala mer än det som finns på kontot.
-- Ingen kan attestera sin egen betalning, inte ens en Admin.
-- Vid dubbelattest måste attestanterna vara olika personer. Finns det för få attestanter i företaget kan betalningen inte skapas.
-- Ett enda nej räcker för att stoppa betalningen. Om ett steg nekas avslås hela betalningen, och pengarna förs tillbaka till kontot.
-- Betalningen genomförs först när alla steg är godkända.
-- En Admin kan besluta i stället för den tilldelade attestanten, men aldrig på sin egen betalning.
-- Stegen behöver inte godkännas i ordning. Steg 2 kan godkännas före steg 1. Jag hittar ingen kontroll av ordningen i koden. Det är inte nödvändigtvis fel, men om ni beskriver flödet som "steg 1, sedan steg 2" stämmer det inte.
--
+---
+
+## 1. Arkitektur och teknikval
+
+### Från Razor Pages till ASP.NET Core Web API
+
+> **💡 Varför?**
+> För att modernisera projektet och skapa en frikopplad struktur där frontend och backend kan utvecklas, driftsättas och testas oberoende av varandra.
+
+```mermaid
+flowchart LR
+    REQ(["HTTP-anrop"]) --> MW
+    subgraph API["ASP.NET Core Web API"]
+        direction LR
+        MW["🛡️ Middleware<br/><small>global felhantering</small>"] --> C["🎯 Controllers<br/><small>HTTP + claims</small>"]
+        C -- DTO --> S["🧠 Services<br/><small>affärslogik & validering</small>"]
+        S --> R["🗄️ Repository<br/><small>EF Core</small>"]
+    end
+    R --> DB[("🐘 PostgreSQL")]
+
+    classDef layer fill:#512bd422,stroke:#512bd4,stroke-width:2px
+    classDef data fill:#33679122,stroke:#336791,stroke-width:2px
+    class MW,C,S,R layer
+    class DB data
+```
+
+| Lager | Ansvar |
+|---|---|
+| **Controllers** | Hanterar inkommande HTTP-anrop och claim-extraktion |
+| **DTO** | Säkerställer att endast nödvändig data skickas in och ut ur systemet |
+| **Services** | Innehåller all affärslogik och komplex validering |
+| **Repository** | Hanterar databasinteraktioner via Entity Framework Core |
+| **Middleware** | Tillhandahåller global felhantering |
+
+> **🧱 Lagerdelning**
+> Koden följer en strikt lagerdelad modell för att undvika cirkulära beroenden, isolera affärslogiken och göra koden fullt testbar.
+
+---
+
+## 2. Databasen
+
+Databasen består huvudsakligen av följande entiteter:
+
+| | | | |
+|---|---|---|---|
+| `Accounts` | `ApprovalLimits` | `ApprovalSteps` | `AuditEntries` |
+| `IdempotencyKey` | `Payment` | `Tenant` | `Users` |
+
+Alla entiteter fyller en egen viktig funktion i helheten – men **kärnan** i det hela är `Payment`.
+
+> **💡 Varför `Payment`?**
+> `Payment` pekar på nästan alla andra entiteter på något sätt. Det är navet som konton, användare, tenants, attester och revisionsloggar kretsar kring.
+
+### Entiteten `Payment`
+
+| Fält | Beskrivning | Exempel |
+|---|---|---|
+| `PaymentId` | Betalningens egna ID | – |
+| `TenantId` | Vilken tenant skaparen tillhör | – |
+| `FromAccount` | Kontot pengarna dras från | – |
+| `ToIban` | Mottagarkonto (i praktiken *ToAccount*, angivet som IBAN) | `SE45 5000 …` |
+| `Amount` | Belopp | `25000` |
+| `Currency` | Valuta | `SEK` |
+| `Reference` | Referens till mottagaren | `Faktura 1234` |
+| `Status` | Betalningens status | `pending` · `pending_approval` · `completed` |
+| `CreatedByUserId` | Vem som skapade betalningen | – |
+| `CreatedAt` | Tidpunkt då betalningen skapades | – |
+
+```mermaid
+erDiagram
+    Tenant ||--o{ Users : har
+    Tenant ||--o{ ApprovalLimits : konfigurerar
+    Tenant ||--o{ Payment : äger
+    Accounts ||--o{ Payment : "FromAccount"
+    Users ||--o{ Payment : "CreatedBy"
+    Payment ||--o{ ApprovalSteps : kräver
+    Users ||--o{ ApprovalSteps : "tilldelad attestant"
+    Payment ||--o{ AuditEntries : loggas
+```
+
+Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
+
+---
+
+## 3. Roller, flöde och säkerhet (Approval flow)
+
+### 👥 Rollfördelning
+
+| Roll | Får | Får inte |
+|---|---|---|
+| **Initiator** | Skapa betalningar | Godkänna betalningar |
+| **Attestant** | Godkänna / neka betalningar | Skapa betalningar |
+| **Admin** | Sätta beloppsregler för sin egen tenant | Påverka andra tenants |
+
+> **💡 Varför?**
+> Rollerna är kopplade till användaren och styr vem som får göra vad. En initiator får aldrig godkänna en betalning – **inte ens sin egen** om personen av misstag också skulle ha attestantrollen. Det är spärrat separat (self-approval-spärr).
+
+### 🔄 Betalningens flöde
+
+1. **Initiatorn skapar en betalning** → beloppet reserveras direkt från kontot och betalningen sparas som `pending_approval`.
+2. **En regelmotor avgör antalet godkännanden** utifrån beloppet. Reglerna (`ApprovalLimit`) är konfigurerbara per tenant – inte hårdkodade – och sätts av tenantens admin.
+
+   | Exempelregel | Krav |
+   |---|---|
+   | Under 10 000 kr | Genomförs direkt, ingen attest |
+   | 100 000 kr och uppåt | 2 attestanters godkännande |
+
+3. **Atteststeg skapas** (`ApprovalStep`) – ett per krävt godkännande – och tilldelas en attestant var. Vi valde **round-robin** över tenantens attestanter så att belastningen sprids, i stället för att lämna stegen otilldelade och låta "vem som helst" plocka dem.
+4. **Attestanterna beslutar.** När samtliga steg är godkända markeras betalningen som `completed`. Nekas ett steg avbryts hela flödet och det reserverade beloppet **återförs automatiskt** till kontot.
+
+### ✅ Valideringsregler vid beslut
+
+Innan ett beslut tillåts kontrolleras att:
+
+- [x] steget hör till rätt betalning
+- [x] betalningen fortfarande väntar på attest
+- [x] steget inte redan är beslutat
+- [x] beslutsfattaren **inte** själv skapade betalningen (self-approval-spärr)
+- [x] beslutsfattaren faktiskt är den **tilldelade** attestanten för steget
+
+> **💡 Varför?**
+> Samma attestant kan inte godkänna två gånger på samma betalning – dels för att varje steg bara får ett beslut, dels för att stegen tilldelas per attestant.
+
+---
+
+## 4. Säkerhet, konfiguration och kodstruktur
+
+### 🔐 Miljöoberoende konfiguration
+
+> **💡 Varför?**
+> För att förhindra att känsliga uppgifter och anslutningssträngar läcker ut i versionshistoriken hanteras konfigurationen dynamiskt via `builder.Configuration`:
+>
+> | Miljö | Källa |
+> |---|---|
+> | Lokalt | User Secrets |
+> | Docker | Miljövariabler |
+
+### 🎫 Serverstyrd säkerhet & JWT
+
+> **💡 Varför?**
+> `TenantId` och spårbarhetsfält som `LastModifiedBy` extraheras direkt från den inloggade användarens JWT-token **på serversidan**, vilket förhindrar att klienter manipulerar data.
+> Vid användarhantering används **BCrypt** för lösenordshashning, och känslig information exkluderas från DTO-svaren.
+
+### 🏢 Obligatorisk multi-tenant-isolering i `AuditEntries`
+
+> **💡 Varför?**
+> `AuditEntries` har en obligatorisk `TenantId`-koppling (med tillhörande migrationer och kontextuppdateringar) så att händelse- och revisionsloggning är strikt isolerad per organisation.
+
+### 🛡️ Tenant-validering för admin (IDOR-skydd)
+
+> **💡 Varför?**
+> Strikta kontroller i controllers och servicelager verifierar att en inloggad administratörs `TenantId` (från JWT) matchar målresursen. Det förhindrar obehörig åtkomst eller manipulation mellan olika tenants.
+
+### 🪶 Tunna controllers
+
+> **💡 Varför?**
+> Controllers hålls medvetet tunna och ansvarar enbart för HTTP-anrop och claim-hantering. All komplex validering och affärslogik ligger i servicelagret.
+
+---
+
+## 5. Atomicitet, concurrency, transaktionalitet och testbarhet
+
+### ⚡ Optimistisk concurrency via villkorade uppdateringar
+
+> **💡 Varför?**
+> Kravet var att implementera optimistic concurrency (`RowVersion`). Vi undersökte var det behövdes och kom fram till att våra faktiska skrivvägar redan skyddas på ett mer specifikt sätt: varje statusändring skrivs som en **villkorad databasuppdatering**.
+
+```sql
+-- Attestbeslut / betalningens slutstatus
+UPDATE ... SET Status = @nyStatus WHERE Id = @id AND Status = 'pending';
+
+-- Kontosaldo
+UPDATE Accounts SET Balance = Balance - @belopp WHERE Id = @id AND Balance >= @belopp;
+```
+
+Databasen serialiserar själv samtidiga försök – **bara ett kan lyckas per rad**, övriga påverkar noll rader och avvisas i koden.
+
+| | `RowVersion` | Villkorad `UPDATE` |
+|---|---|---|
+| Skyddar mot samtidiga ändringar | ✅ | ✅ |
+| Kräver inläsning av posten först | Ja | Nej |
+| Antal databasanrop | Läs + skriv | En skrivning |
+
+Båda är i grunden en *"har något ändrats sedan jag läste det?"*-kontroll – men den villkorade varianten är billigare.
+
+### 🔒 Atomära databastransaktioner
+
+> **💡 Varför?**
+> Hela beslutsflödet körs i **en och samma transaktion** – antingen går allt igenom eller inget. En attest kan därför aldrig lämna systemet i ett mellanläge.
+
+```mermaid
+flowchart LR
+    subgraph TX["🔒 En databastransaktion"]
+        direction LR
+        A["Uppdatera<br/>ApprovalStep"] --> B["Sätt betalningens<br/>slutstatus"] --> C["Ev. återföring<br/>av saldo"] --> D["Skriv<br/>AuditEntry"]
+    end
+    TX -->|allt lyckas| OK(["COMMIT ✅"])
+    TX -->|något fallerar| RB(["ROLLBACK ↩️"])
+
+    classDef ok fill:#22c55e22,stroke:#22c55e,stroke-width:2px
+    classDef fail fill:#ef444422,stroke:#ef4444,stroke-width:2px
+    class OK ok
+    class RB fail
+```
+
+### 📬 Polly-retry-policy för e-postutskick
+
+> **💡 Varför?**
+> För hög tillförlitlighet i kringliggande processer används en Polly-retry-policy (**3 försök**) för e-postutskick, med automatisk fallback till tabellen `notificationLogs` vid permanenta fel.
+
+### 🧪 Standardiserad rollhantering och enhetstester
+
+> **💡 Varför?**
+> Rollhanteringen är standardiserad med `RoleClaimType = "Role"` och `UserRoles`-konstanter. Det kvalitetssäkras med enhetstester i **Moq**, bland annat för `UserService` och `ApprovalLimitService`.
 
 # Arkitektur
 
 System översikt
 
+```mermaid
 flowchart LR
+    subgraph Klient
+        FE["⚛️ React-frontend"]
+    end
 
-- FE[React-frontend] -->|REST + JWT| API[ASP.NET Core Web API]
-- API --> DB[(PostgreSQL)]
-- API -->|P/Invoke| NAT[C-moduler<br/>CSV / IBAN / audit]
-- API --> BG[Bakgrundstjänster<br/>notifieringar, påminnelser]
-- BG --> DB
-- BG --> MAIL[E-post]
+    subgraph Backend["Backend (.NET)"]
+        API["🌐 ASP.NET Core Web API"]
+        BG["⏱️ Bakgrundstjänster<br/><small>notifieringar, påminnelser</small>"]
+        NAT["⚙️ C-moduler<br/><small>CSV · IBAN · audit</small>"]
+    end
+
+    subgraph Data
+        DB[("🐘 PostgreSQL")]
+    end
+
+    subgraph Externt
+        MAIL["✉️ E-post"]
+    end
+
+    FE -- "REST + JWT" --> API
+    API --> DB
+    API -. "P/Invoke" .-> NAT
+    API --> BG
+    BG --> DB
+    BG --> MAIL
+```
 
 Kärnan i flödet är **Controller → Service → Repository → DbContext → Databas**.
 
