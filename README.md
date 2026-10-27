@@ -42,6 +42,10 @@ REST-API med separat React-frontend.
 Krav: Docker Desktop (Windows/Mac) eller Docker Engine (Linux). På Windows behöver Docker Desktop WSL2, se vanliga fel nedan.
 
 ```bash
+git clone <repo-url>
+cd ChasChallenge
+git checkout 3-seb
+
 cd infra
 docker compose up --build
 ```

@@ -5,7 +5,6 @@ import {
   ChevronLeft,
   ClipboardCheck,
   CreditCard,
-  FileUp,
   House,
   Landmark,
   LayoutDashboard,
@@ -213,23 +212,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 <span className={styles["nav-item-label"]}>
                   {t("sidebar.newPayment")}
-                </span>
-              </Link>
-
-              <Link
-                to="/batch"
-                activeOptions={{ exact: true }}
-                className={styles["nav-item"]}
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
-                title={collapsed ? t("sidebar.batchUpload") : undefined}
-              >
-                <FileUp size={20} strokeWidth={2} aria-hidden="true" />
-
-                <span className={styles["nav-item-label"]}>
-                  {t("sidebar.batchUpload")}
                 </span>
               </Link>
             </div>

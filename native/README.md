@@ -116,20 +116,19 @@ Varje loggrad:
 ### API
 
 ```c
-int audit_initialize(const char *log_path, const char *secret_key,
-                     int user_id, const char *action, int entity_id,
-                     const char *description);
+// Lägg till en loggrad. Hämtar föregående hash från log_path automatiskt.
+// Returnerar 0 vid lyckat skrivande, -1 vid fel.
+int audit_append(
+    const char *log_path,
+    const char *secret_key,
+    int user_id,
+    const char *action,
+    int entity_id,
+    const char *description);
 
-int audit_append(const char *log_path, const char *secret_key,
-                 int user_id, const char *action, int entity_id,
-                 const char *description);
-
-int audit_append_with_hash(const char *log_path, const char *secret_key,
-                           int user_id, const char *action, int entity_id,
-                           const char *description, char *out_hash,
-                           size_t out_hash_size);
-
-int audit_verify(const char *log_path, const char *secret_key);
+int audit_verify(
+    const char *log_path,
+    const char *secret_key);
 ```
 
 `audit_initialize()` skapar en ny audit-loggkedja och skriver inte över en befintlig fil.

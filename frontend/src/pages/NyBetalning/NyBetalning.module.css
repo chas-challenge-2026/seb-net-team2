@@ -34,6 +34,50 @@
     color: #68756e;
 }
 
+.modeTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    margin: 0 0 1.25rem;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.modeTab {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: -1px;
+    padding: 10px 16px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: none;
+    color: var(--color-text-soft);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+.modeTab:hover {
+    color: var(--color-text);
+}
+
+.modeTabActive {
+    border-bottom-color: var(--seb-green-dark-2);
+    color: var(--color-text);
+}
+
+.modeTab:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 2px;
+}
+
+.modePanel:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+}
+
 .steps {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

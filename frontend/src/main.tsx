@@ -12,7 +12,6 @@ import { NyBetalning } from './pages/NyBetalning/NyBetalning'
 import { SaveInvest } from './pages/SaveInvest/SaveInvest'
 import { Mortgage } from './pages/Mortgage/Mortgage'
 import { Attestkorg } from './pages/Attestkorg/Attestkorg'
-import { Batch } from './pages/Batch/Batch'
 import { Granskningslogg } from './pages/Granskningslogg/Granskningslogg'
 import { Profil } from './pages/Profil/Profil'
 import { Logout } from './pages/Logout/Logout';
@@ -46,7 +45,6 @@ const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/
 const sparaInvesteraRoute = createRoute({ getParentRoute: () => rootRoute, path: '/spara-investera', component: () => <ProtectedRoute><SaveInvest /></ProtectedRoute> })
 const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
 const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <RoleProtectedRoute allowedRoles={["Attestant", "Admin"]}><Attestkorg /></RoleProtectedRoute> })
-const batchRoute = createRoute({ getParentRoute: () => rootRoute, path: '/batch', component: () => <RoleProtectedRoute allowedRoles={["Initiator"]}><Batch /></RoleProtectedRoute> })
 const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><Granskningslogg /></RoleProtectedRoute> })
 const profilRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profil', component: () => <ProtectedRoute><Profil /></ProtectedRoute> })
 const loggaUtRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logout', component: () => <ProtectedRoute><Logout /></ProtectedRoute> })
@@ -86,7 +84,6 @@ const routeTree = rootRoute.addChildren([
   sparaInvesteraRoute,
   mortgageRoute,
   attestkorgRoute,
-  batchRoute,
   granskningsloggRoute,
   profilRoute,
   loggaUtRoute,

@@ -9,7 +9,6 @@ import {
     CircleCheck,
     CircleX,
     Download,
-    FileSpreadsheet,
     RotateCcw,
     TriangleAlert,
     Upload,
@@ -19,7 +18,7 @@ import { useAccounts } from "../../hooks/useAccounts";
 import Card from "../../components/Card/Card";
 import Button from "../../components/Button/Button";
 
-import styles from "./Batch.module.css";
+import styles from "./BatchUpload.module.css";
 
 const MAX_FILE_SIZE_BYTES = 1024 * 1024;
 const IBAN_PATTERN = /^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/;
@@ -109,7 +108,7 @@ function parseBatchRows(dataLines: string[], validAccountIds: string[]): BatchRo
     });
 }
 
-export function Batch() {
+export function BatchUpload() {
     const { t, i18n } = useTranslation();
     const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts();
 
@@ -243,22 +242,8 @@ export function Batch() {
     const failed = results ? results.length - succeeded : 0;
 
     return (
-        <div className={styles.page}>
-            <header className={styles.header}>
-                <div>
-                    <span className={styles.eyebrow}>{t("batch.eyebrow")}</span>
-                    <div className={styles.titleRow}>
-                        <FileSpreadsheet size={28} strokeWidth={2} aria-hidden="true" />
-                        <h1>{t("batch.title")}</h1>
-                    </div>
-                    <p>{t("batch.description")}</p>
-                </div>
-
-                <div className={styles.headerBadge}>
-                    <span className={styles.statusDot} />
-                    {t("batch.mockMode")}
-                </div>
-            </header>
+        <div className={styles.batch}>
+            <p className={styles.intro}>{t("batch.description")}</p>
 
             <div className={styles.layout}>
                 <Card>
