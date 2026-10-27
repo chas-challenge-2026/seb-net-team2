@@ -34,86 +34,11 @@ namespace SebPortal.Api.Services
 
             try
             {
-                var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
-
-                if (user == null)
-                {
-                    throw new UnauthorizedAccessException("User not found or unauthorized.");
-                }
-
-                if (createPaymentDTO.Amount <= 0)
-                {
-                    throw new ArgumentException("Amount must be greater than zero.");
-                }
-
-                var fromAccount = await _context.Accounts
-                    .FirstOrDefaultAsync(a => a.PublicId == createPaymentDTO.FromAccountId && a.TenantId == user.TenantId);
-
-                if (fromAccount == null)
-                {
-                    throw new InvalidOperationException("Account not found or insufficient balance.");
-                }
-
-                // Check if the account exists and has sufficient balance, and update the balance atomically
-                var affectedRows = await _context.Accounts
-                    .Where(a =>
-                        a.Id == fromAccount.Id &&
-                        a.TenantId == user.TenantId &&
-                        a.Balance >= createPaymentDTO.Amount)
-                    .ExecuteUpdateAsync(setters => setters
-                        .SetProperty(
-                            a => a.Balance,
-                            a => a.Balance - createPaymentDTO.Amount));
-
-                if (affectedRows == 0)
-                {
-                    throw new InvalidOperationException("Account not found or insufficient balance.");
-                }
-
-                var payment = new Payment
-                {
-                    TenantId = user.TenantId,
-                    FromAccountId = fromAccount.Id,
-                    FromAccount = fromAccount,
-                    ToIban = createPaymentDTO.ToIban,
-                    Amount = createPaymentDTO.Amount,
-                    Currency = createPaymentDTO.Currency,
-                    Reference = createPaymentDTO.Reference,
-                    Status = "pending_approval",
-                    CreatedByUserId = userId,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
-
-                _context.Payments.Add(payment);
-
-                await _context.SaveChangesAsync();
-
-                await LogPaymentCreatedAsync(payment, userId);
+                var payment = await AddPaymentAsync(createPaymentDTO, userId, tenantId);
 
                 await transaction.CommitAsync();
 
-                //Get first approvalstep to send email to right attestant
-                var firstApprovalStep = await _context.ApprovalSteps
-                    .Include(s => s.Attestant)
-                    .Where(s => s.PaymentId == payment.Id && s.StepNumber == 1)
-                    .FirstOrDefaultAsync();
-
-                if (firstApprovalStep != null)
-                {
-
-                    var notificationDTO = new NotificationMessageDTO
-                    {
-                        TenantId = user.TenantId,
-                        Channel = NotificationChannel.Email,
-                        RecipientEmail = firstApprovalStep.Attestant.Email, 
-                        Subject = $"Attest krävs för betalning {payment.Reference}",
-                        Message = $"Hej {firstApprovalStep.Attestant.Name},\n\nEn ny betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har skapats och väntar på din attestering.\n\nMvh,\nSEB Företagsbetalningar"
-                    };
-
-                    await _notificationService.SendNotificationMessageAsync(notificationDTO);
-                }
+                await NotifyPaymentCreatedAsync(payment);
 
                 return payment;
             }
@@ -122,6 +47,132 @@ namespace SebPortal.Api.Services
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+
+        public async Task<IReadOnlyList<Payment>> CreatePaymentsAsync(IReadOnlyList<CreatePaymentDTO> payments, int userId, int tenantId)
+        {
+            // One transaction for the whole batch. A later row failure rolls back earlier rows.
+            // Notifications are sent only after commit, so a failed batch never notifies.
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            var created = new List<Payment>(payments.Count);
+
+            try
+            {
+                for (int i = 0; i < payments.Count; i++)
+                {
+                    try
+                    {
+                        created.Add(await AddPaymentAsync(payments[i], userId, tenantId));
+                    }
+                    catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+                    {
+                        throw new InvalidOperationException($"Row {i + 1}: {ex.Message}", ex);
+                    }
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+
+            foreach (var payment in created)
+            {
+                await NotifyPaymentCreatedAsync(payment);
+            }
+
+            return created;
+        }
+
+        // Writes one payment on the caller's transaction. Does not commit or notify.
+        private async Task<Payment> AddPaymentAsync(CreatePaymentDTO createPaymentDTO, int userId, int tenantId)
+        {
+            var user = await _userRepository.GetUserByIdAsync(userId, tenantId);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("User not found or unauthorized.");
+            }
+
+            if (createPaymentDTO.Amount <= 0)
+            {
+                throw new ArgumentException("Amount must be greater than zero.");
+            }
+
+            var fromAccount = await _context.Accounts
+                .FirstOrDefaultAsync(a => a.PublicId == createPaymentDTO.FromAccountId && a.TenantId == user.TenantId);
+
+            if (fromAccount == null)
+            {
+                throw new InvalidOperationException("Account not found or insufficient balance.");
+            }
+
+            // Check if the account exists and has sufficient balance, and update the balance atomically
+            var affectedRows = await _context.Accounts
+                .Where(a =>
+                    a.Id == fromAccount.Id &&
+                    a.TenantId == user.TenantId &&
+                    a.Balance >= createPaymentDTO.Amount)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(
+                        a => a.Balance,
+                        a => a.Balance - createPaymentDTO.Amount));
+
+            if (affectedRows == 0)
+            {
+                throw new InvalidOperationException("Account not found or insufficient balance.");
+            }
+
+            var payment = new Payment
+            {
+                TenantId = user.TenantId,
+                FromAccountId = fromAccount.Id,
+                FromAccount = fromAccount,
+                ToIban = createPaymentDTO.ToIban,
+                Amount = createPaymentDTO.Amount,
+                Currency = createPaymentDTO.Currency,
+                Reference = createPaymentDTO.Reference,
+                Status = "pending_approval",
+                CreatedByUserId = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _approvalEngineService.ProcessPaymentApprovalAsync(payment);
+
+            _context.Payments.Add(payment);
+
+            await _context.SaveChangesAsync();
+
+            await LogPaymentCreatedAsync(payment, userId);
+
+            return payment;
+        }
+
+        private async Task NotifyPaymentCreatedAsync(Payment payment)
+        {
+            // Email the first attestant after commit. Payments under the limit have no step.
+            var firstApprovalStep = await _context.ApprovalSteps
+                .Include(s => s.Attestant)
+                .Where(s => s.PaymentId == payment.Id && s.StepNumber == 1)
+                .FirstOrDefaultAsync();
+
+            if (firstApprovalStep?.Attestant == null)
+            {
+                return;
+            }
+
+            var notificationDTO = new NotificationMessageDTO
+            {
+                TenantId = payment.TenantId,
+                Channel = NotificationChannel.Email,
+                RecipientEmail = firstApprovalStep.Attestant.Email,
+                Subject = $"Attest krävs för betalning {payment.Reference}",
+                Message = $"Hej {firstApprovalStep.Attestant.Name},\n\nEn ny betalning med referens '{payment.Reference}' på {payment.Amount:N2} {payment.Currency} har skapats och väntar på din attestering.\n\nMvh,\nSEB Företagsbetalningar"
+            };
+
+            await _notificationService.SendNotificationMessageAsync(notificationDTO);
         }
 
         // Writes CREATE_PAYMENT (and EXECUTE_PAYMENT if no approval was required) inside the caller's transaction.

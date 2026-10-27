@@ -26,4 +26,8 @@
     <ProjectReference Include="..\SebPortal\SebPortal.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" Condition="Exists('..\..\native\libcsvparser.so')" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
