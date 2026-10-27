@@ -105,6 +105,22 @@ describe("Approval inbox with keyboard and screen reader", () => {
             .not.toBeInTheDocument();
     });
 
+    it("shows a compact card and opens the details on request", () => {
+        renderInbox();
+
+        // Enough to recognise the payment without opening it.
+        expect(screen.getByText(/^Skickad av Lisa Persson · Till SEB$/)).toBeInTheDocument();
+        expect(screen.queryByText("Till IBAN")).not.toBeInTheDocument();
+
+        const toggle = screen.getByRole("button", { name: "Visa detaljer för Faktura #1043" });
+        expect(toggle).toHaveAttribute("aria-expanded", "false");
+        fireEvent.click(toggle);
+
+        expect(toggle).toHaveAttribute("aria-expanded", "true");
+        expect(toggle).toHaveAccessibleName("Dölj detaljer för Faktura #1043");
+        expect(screen.getByText("Till IBAN")).toBeInTheDocument();
+    });
+
     it("warns when the recipient is the same account the money is taken from", () => {
         mockedUsePaymentSourceAccount.mockReturnValue({
             account: { id: "12", name: "Lönekonto", iban: "SE08 5000 0000 0549 1000 0004", balance: 0, currency: "SEK" },

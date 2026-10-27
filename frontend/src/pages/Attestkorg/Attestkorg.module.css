@@ -27,28 +27,23 @@
 
     gap: var(--spacing-lg);
 
-    padding-bottom:
-        var(--spacing-lg);
-
     margin-bottom:
         var(--spacing-xl);
-
-    border-bottom:
-        1px solid var(--color-border);
 }
 
 .header>div {
     min-width: 0;
 }
 
+/* Same heading as the admin pages: 2rem, no divider underneath. */
 .header h1 {
     margin: 0;
 
     color:
         var(--color-text);
 
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 600;
     line-height: 1.2;
 
     overflow-wrap: anywhere;
@@ -57,32 +52,10 @@
 
 .intro {
     margin:
-        12px 0 0;
+        var(--spacing-xs) 0 0;
 
     color:
         var(--color-text-soft);
-
-    font-size:
-        var(--font-size-lg);
-}
-
-.count {
-    flex-shrink: 0;
-
-    padding:
-        8px 12px;
-
-    border:
-        1px solid var(--color-text);
-
-    border-radius:
-        var(--radius-pill);
-
-    color:
-        var(--color-text);
-
-    font-size: var(--font-size-md);
-    font-weight: 500;
 }
 
 
@@ -291,12 +264,22 @@
 
 /* Approval list */
 
+/* One panel with rows divided by lines, like the admin user list. */
 .list {
     display: grid;
 
     min-width: 0;
 
-    gap: 20px;
+    border:
+        1px solid var(--color-border-light);
+
+    border-radius:
+        var(--radius-md);
+
+    background-color:
+        var(--color-surface);
+
+    overflow: hidden;
 }
 
 .card {
@@ -309,44 +292,20 @@
     padding:
         var(--spacing-lg) var(--spacing-lg) 20px;
 
-    border:
-        1px solid var(--color-border);
-
-    border-left:
-        4px solid #e3a008;
-
-    border-radius:
-        var(--radius-md);
-
-    background-color:
-        var(--color-surface);
-
-    box-shadow:
-        0 2px 8px rgb(0 30 80 / 5%);
+    border-bottom:
+        1px solid var(--color-border-light);
 
     transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
+        background-color 0.15s ease;
+}
+
+.card:last-child {
+    border-bottom: 0;
 }
 
 .card:hover {
-    border-color:
-        var(--color-border-light);
-
-    border-left-color:
-        #e3a008;
-
-    box-shadow:
-        0 6px 18px rgb(0 30 80 / 10%);
-
-    transform:
-        translateY(-1px);
-}
-
-.card.cardOverdue,
-.card.cardOverdue:hover {
-    border-left-color: var(--color-error);
+    background-color:
+        var(--color-hover-light);
 }
 
 .overdue {
@@ -372,21 +331,10 @@
 }
 
 .dualApproval {
-    margin: 8px 0 0;
-    color: var(--color-primary);
+    margin: 0;
+    color: var(--seb-green-dark-2);
     font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
-.overdueBanner {
-    margin-bottom: 1.25rem;
-    padding: 12px 16px;
-    border: 1px solid var(--color-error);
-    border-left-width: 4px;
-    border-radius: var(--radius-md);
-    color: var(--color-error);
-    font-size: var(--font-size-md);
-    background: #fef3f2;
+    font-weight: 600;
 }
 
 
@@ -416,20 +364,6 @@
         var(--font-size-sm);
 
     font-weight: 500;
-}
-
-.paymentId::before {
-    width: 7px;
-    height: 7px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background-color:
-        #e3a008;
-
-    content: "";
 }
 
 .card h2 {
@@ -475,7 +409,7 @@
         18px 0 0;
 
     border-top:
-        1px solid var(--color-border);
+        1px solid var(--color-border-light);
 }
 
 .details div {
@@ -618,7 +552,7 @@
         var(--spacing-sm) var(--spacing-md);
 
     border:
-        1px solid var(--color-text);
+        1px solid var(--color-border);
 
     border-radius:
         var(--radius-sm);
@@ -630,7 +564,7 @@
     font-size:
         var(--font-size-md);
 
-    font-weight: 500;
+    font-weight: 600;
 
     transition:
         background-color 0.2s ease,
@@ -881,13 +815,6 @@
         display: block;
     }
 
-    .count {
-        display: inline-block;
-
-        margin-top:
-            var(--spacing-lg);
-    }
-
     .cardHeader {
         display: block;
     }
@@ -1018,20 +945,9 @@
 }
 
 .feedbackMessage svg,
-.overdueBanner > svg,
 .actions button svg,
 .modalActions button svg {
     flex-shrink: 0;
-}
-
-.overdueBanner {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-}
-
-.overdueBanner > svg {
-    margin-top: 2px;
 }
 
 .actions button,
@@ -1135,7 +1051,7 @@
     border-bottom: 1px solid var(--color-border-light);
 }
 
-/* Tabs on the left, "Sort by" on the right, sharing the tabs' bottom line */
+/* Tabs on the left, "Sort by" on the right, in a green toolbar like the admin user list */
 .tabsRow {
     display: flex;
     flex-wrap: wrap;
@@ -1143,7 +1059,39 @@
     justify-content: space-between;
     gap: var(--spacing-sm) var(--spacing-md);
     margin: 0 0 var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border-light);
+    padding: var(--spacing-sm) var(--spacing-lg) 0;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background-color: var(--color-300);
+}
+
+.tabsRow .filterField label {
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+/* Same size and border as the search field in the admin user list. */
+.tabsRow .filterField select {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border-color: var(--color-border);
+}
+
+/* The total on the toolbar's right, like the user count in the admin user list. */
+.toolbarSide {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing-sm) var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+}
+
+.pendingTotal {
+    margin: 0;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+    white-space: nowrap;
 }
 
 .tabsRow .tabs {
@@ -1151,14 +1099,16 @@
     border-bottom: 0;
 }
 
-.sortField {
-    padding-bottom: var(--spacing-sm);
+
+/* Baseline, so "Sort by" lines up with the text inside the select, not with its box. */
+.toolbarSide .filterField {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
 }
 
-.sortField .filterField {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+.toolbarSide .filterField label {
+    line-height: 1.2;
 }
 
 .tab {
@@ -1253,19 +1203,25 @@
     font-weight: 700;
 }
 
+/* Same panel with rows as the pending list. */
 .historyList {
     display: grid;
-    gap: 12px;
     margin: 0;
     padding: 0;
     list-style: none;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    overflow: hidden;
 }
 
 .historyItem {
     padding: var(--spacing-md) var(--spacing-lg);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.historyItem:last-child {
+    border-bottom: 0;
 }
 
 .historyItemHeader {
@@ -1467,3 +1423,87 @@
     border-color: var(--color-text);
 }
 
+
+
+/* Compact card: reference, amount and buttons on one row; IBAN, account and time behind "Show details". */
+
+.card {
+    padding: var(--spacing-md) var(--spacing-lg);
+}
+
+.card .paymentId {
+    margin-bottom: var(--spacing-xs);
+}
+
+.cardMeta {
+    margin: 6px 0 0;
+
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-sm);
+}
+
+.cardSide {
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+}
+
+.cardSide .actions {
+    flex-wrap: wrap;
+
+    padding-top: 0;
+}
+
+.actions .detailsToggle {
+    min-width: 0;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    border-color: transparent;
+
+    background-color: transparent;
+    color: var(--color-text);
+
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.actions .detailsToggle:hover {
+    background-color: var(--color-hover-light);
+}
+
+.detailsToggle svg {
+    transition: transform 0.2s ease;
+}
+
+.card .details {
+    margin: var(--spacing-md) 0 var(--spacing-xs);
+}
+
+/* The list already draws the panel border. */
+.list > .emptyState {
+    border: 0;
+    border-radius: 0;
+}
+
+@media (max-width: 640px) {
+    .cardHeader {
+        flex-direction: column;
+    }
+
+    .cardSide {
+        width: 100%;
+
+        align-items: stretch;
+    }
+
+    .cardSide .actions {
+        justify-content: flex-start;
+    }
+}

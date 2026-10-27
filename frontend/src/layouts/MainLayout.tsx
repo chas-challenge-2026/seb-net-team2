@@ -17,6 +17,8 @@ export function MainLayout() {
     const { t } = useTranslation();
     const { isAuthenticated, user } = useAuth();
     const isAdmin = isAuthenticated && user?.role === "Admin";
+    const isAttestant = isAuthenticated && user?.role === "Attestant";
+    const usesWorkspace = isAdmin || isAttestant;
     const [collapsed, setCollapsed] = useState(false);
 
     function handleToggleCollapsed() {
@@ -33,8 +35,8 @@ export function MainLayout() {
             <NavigationBar />
 
             <div className={layout.page}>
-                <div className={`${layout.body} ${isAuthenticated && !isAdmin ? layout.authenticated : ""} ${collapsed ? layout.collapsed : ""}`}>
-                    {isAuthenticated && !isAdmin && (
+                <div className={`${layout.body} ${isAuthenticated && !usesWorkspace ? layout.authenticated : ""} ${collapsed ? layout.collapsed : ""}`}>
+                    {isAuthenticated && !usesWorkspace && (
                         <div className={layout.sidebarRail}>
                             <Sidebar
                                 collapsed={collapsed}
@@ -48,8 +50,8 @@ export function MainLayout() {
                     aria-label={t("a11y.main")}
                     className={layout.main}
                 >
-                    {isAdmin ? (
-                        <AdminWorkspace organization={user.tenantName}>
+                    {usesWorkspace ? (
+                        <AdminWorkspace organization={user?.tenantName} variant={isAdmin ? "admin" : "attestant"}>
                             <Outlet />
                         </AdminWorkspace>
                     ) : (

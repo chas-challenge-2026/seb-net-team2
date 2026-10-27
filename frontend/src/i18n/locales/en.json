@@ -313,10 +313,8 @@
         "loading": "Loading approvals...",
         "pendingCount_one": "{{count}} pending",
         "pendingCount_other": "{{count}} pending",
+        "pendingTotal": "Total {{total}}",
         "dismissMessage": "Dismiss message",
-        "overdueBanner_one": "1 payment has been waiting more than {{days}} days.",
-        "overdueBanner_other": "{{count}} payments have been waiting more than {{days}} days.",
-        "overdueFirst": "They are shown first in the list below.",
         "errors": {
             "load": "Unable to load approvals.",
             "decision": "Unable to process the approval decision."
@@ -340,6 +338,11 @@
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
+            "to": "To",
+            "showDetails": "Show details",
+            "hideDetails": "Hide details",
+            "showDetailsFor": "Show details for {{reference}}",
+            "hideDetailsFor": "Hide details for {{reference}}",
             "toIban": "To IBAN",
             "approvalStep": "Approval step {{step}}",
             "dualApprovalShort": "Dual approval",

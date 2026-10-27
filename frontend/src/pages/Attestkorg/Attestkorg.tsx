@@ -7,10 +7,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
     ArrowRight,
+    ChevronDown,
     CircleCheck,
     CircleX,
     ClipboardCheck,
-    Clock3,
     Info,
 } from "lucide-react";
 
@@ -18,7 +18,7 @@ import { APPROVALS_QUERY_KEY, useApprovals } from "../../hooks/useApprovals";
 import { decideApproval } from "../../services/approvalService";
 import type { PendingApprovalStep } from "../../schemas/pendingApprovalSchema";
 import { AppError } from "../../errors/AppError";
-import { OVERDUE_AFTER_DAYS, daysWaiting, isOverdue } from "../../utils/approvalReminders";
+import { daysWaiting, isOverdue } from "../../utils/approvalReminders";
 import { formatIban, recipientBank } from "../../utils/paymentChecks";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -112,6 +112,8 @@ export function Attestkorg() {
     // Empty until the user changes the order, so nothing is announced when the page loads.
     const [sortAnnouncement, setSortAnnouncement] = useState("");
     const [comments, setComments] = useState<Record<string, string>>({});
+    // Cards start compact; the attestant opens the details (IBAN, account, time) when needed.
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
@@ -132,8 +134,6 @@ export function Attestkorg() {
     const sortedApprovals = sortApprovals(approvals, pendingSort).sort(
         (a, b) => Number(isOverdue(b)) - Number(isOverdue(a))
     );
-
-    const overdueCount = approvals.filter(isOverdue).length;
 
     // Summed per currency, since payments in different currencies can't be added together.
     const totalsByCurrency = approvals.reduce<Record<string, number>>((totals, approval) => {
@@ -169,6 +169,14 @@ export function Attestkorg() {
     function showHandledTab() {
         setActiveTab("handled");
         requestAnimationFrame(() => document.getElementById(TAB_IDS.handled.tab)?.focus());
+    }
+
+    function toggleDetails(stepId: string) {
+        setExpandedIds((current) => {
+            const updated = new Set(current);
+            if (!updated.delete(stepId)) updated.add(stepId);
+            return updated;
+        });
     }
 
     function updateComment(stepId: string, comment: string) {
@@ -355,14 +363,6 @@ export function Attestkorg() {
                             : "approvalInbox.description")}
                     </p>
                 </div>
-
-                {/* The tabs already show the counts, so the badge is only kept where it adds the total amount. */}
-                {activeTab === "pending" && approvals.length > 0 && (
-                    <span className={styles.count} role="status" aria-live="polite">
-                        {t("approvalInbox.pendingCount", { count: approvals.length })}
-                        {` · ${pendingTotal}`}
-                    </span>
-                )}
             </header>
 
             {actionFeedback && (
@@ -421,7 +421,12 @@ export function Attestkorg() {
                 />
 
                 {activeTab === "pending" && approvals.length > 0 && (
-                    <div className={styles.sortField}>
+                    <div className={styles.toolbarSide}>
+                        {/* The tabs already show the count, so only the total amount is added. */}
+                        <p className={styles.pendingTotal} role="status" aria-live="polite">
+                            {t("approvalInbox.pendingTotal", { total: pendingTotal })}
+                        </p>
+
                         <div className={styles.filterField}>
                             <label htmlFor="pending-sort">
                                 {t("approvalInbox.sort.label")}
@@ -465,26 +470,12 @@ export function Attestkorg() {
                 tabIndex={0}
                 className={styles.tabPanel}
             >
-            {overdueCount > 0 && (
-                <div className={styles.overdueBanner} role="status">
-                    <Clock3 size={18} aria-hidden="true" />
-                    <span>
-                        <strong>
-                            {t("approvalInbox.overdueBanner", {
-                                count: overdueCount,
-                                days: OVERDUE_AFTER_DAYS,
-                            })}
-                        </strong>{" "}
-                        {t("approvalInbox.overdueFirst")}
-                    </span>
-                </div>
-            )}
-
+            {/* No overdue banner: overdue payments are sorted first and their badge turns red. */}
             <div className={styles.list}>
                 {sortedApprovals.length > 0 ? (
                     sortedApprovals.map((approval) => (
                         <article
-                            className={`${styles.card} ${isOverdue(approval) ? styles.cardOverdue : ""}`}
+                            className={styles.card}
                             key={approval.stepId}
                             aria-labelledby={`payment-${approval.paymentId}`}
                         >
@@ -526,12 +517,81 @@ export function Attestkorg() {
 
                                         <DueBadge approval={approval} />
                                     </div>
+
+                                    {/* Who sent it and where the money goes: enough to recognise the payment
+                                        without opening the details. */}
+                                    <p className={styles.cardMeta}>
+                                        {t("approvalInbox.card.submittedBy")} {approval.createdByUserName}
+                                        {" · "}
+                                        {t("approvalInbox.card.to")}{" "}
+                                        {approval.recipientName
+                                            ?? recipientBank(approval.toIban)
+                                            ?? formatIban(approval.toIban)}
+                                    </p>
                                 </div>
 
-                                <strong>{formatAmount(approval, locale)}</strong>
+                                <div className={styles.cardSide}>
+                                    <strong>{formatAmount(approval, locale)}</strong>
+
+                                    <div className={styles.actions}>
+                                        <button
+                                            type="button"
+                                            className={styles.detailsToggle}
+                                            aria-expanded={expandedIds.has(approval.stepId)}
+                                            aria-controls={`details-${approval.stepId}`}
+                                            onClick={() => toggleDetails(approval.stepId)}
+                                            aria-label={t(expandedIds.has(approval.stepId)
+                                                ? "approvalInbox.card.hideDetailsFor"
+                                                : "approvalInbox.card.showDetailsFor", {
+                                                reference: approval.reference,
+                                            })}
+                                        >
+                                            {t(expandedIds.has(approval.stepId)
+                                                ? "approvalInbox.card.hideDetails"
+                                                : "approvalInbox.card.showDetails")}
+                                            <ChevronDown
+                                                size={16}
+                                                aria-hidden="true"
+                                                className={expandedIds.has(approval.stepId) ? styles.chevronOpen : undefined}
+                                            />
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className={styles.reject}
+                                            disabled={decisionMutation.isPending}
+                                            onClick={(event) => openConfirm(approval, "reject", event)}
+                                            aria-label={t("approvalInbox.actions.rejectPayment", {
+                                                reference: approval.reference,
+                                                amount: formatAmount(approval, locale),
+                                            })}
+                                        >
+                                            <CircleX size={17} aria-hidden="true" />
+                                            {t("approvalInbox.actions.reject")}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className={styles.approve}
+                                            disabled={decisionMutation.isPending}
+                                            onClick={(event) => openConfirm(approval, "approve", event)}
+                                            aria-label={t("approvalInbox.actions.approvePayment", {
+                                                reference: approval.reference,
+                                                amount: formatAmount(approval, locale),
+                                            })}
+                                        >
+                                            <CircleCheck size={17} aria-hidden="true" />
+                                            {t("approvalInbox.actions.approve")}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <dl className={styles.details}>
+                            {/* Always visible: a warning must not hide behind a click. */}
+                            <PaymentChecks approval={approval} allPending={approvals} />
+
+                            {expandedIds.has(approval.stepId) && (
+                            <dl id={`details-${approval.stepId}`} className={styles.details}>
                                 <RecipientAndDueRows approval={approval} />
 
                                 {/* Grouped in pairs: where the money goes and where it comes from,
@@ -557,38 +617,7 @@ export function Attestkorg() {
                                     </dd>
                                 </div>
                             </dl>
-
-                            <PaymentChecks approval={approval} allPending={approvals} />
-
-                            <div className={styles.actions}>
-                                <button
-                                    type="button"
-                                    className={styles.reject}
-                                    disabled={decisionMutation.isPending}
-                                    onClick={(event) => openConfirm(approval, "reject", event)}
-                                    aria-label={t("approvalInbox.actions.rejectPayment", {
-                                        reference: approval.reference,
-                                        amount: formatAmount(approval, locale),
-                                    })}
-                                >
-                                    <CircleX size={17} aria-hidden="true" />
-                                    {t("approvalInbox.actions.reject")}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={styles.approve}
-                                    disabled={decisionMutation.isPending}
-                                    onClick={(event) => openConfirm(approval, "approve", event)}
-                                    aria-label={t("approvalInbox.actions.approvePayment", {
-                                        reference: approval.reference,
-                                        amount: formatAmount(approval, locale),
-                                    })}
-                                >
-                                    <CircleCheck size={17} aria-hidden="true" />
-                                    {t("approvalInbox.actions.approve")}
-                                </button>
-                            </div>
+                            )}
                         </article>
                     ))
                 ) : (

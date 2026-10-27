@@ -256,10 +256,8 @@
         "loading": "Laddar attesteringar...",
         "pendingCount_one": "{{count}} väntande",
         "pendingCount_other": "{{count}} väntande",
+        "pendingTotal": "Totalt {{total}}",
         "dismissMessage": "Stäng meddelande",
-        "overdueBanner_one": "1 betalning har väntat längre än {{days}} dagar.",
-        "overdueBanner_other": "{{count}} betalningar har väntat längre än {{days}} dagar.",
-        "overdueFirst": "De visas först i listan nedan.",
         "errors": {
             "load": "Det gick inte att ladda attesteringarna.",
             "decision": "Det gick inte att behandla attestbeslutet."
@@ -283,6 +281,11 @@
             "waitingDays_other": "Väntat {{count}} dagar",
             "reference": "Referens",
             "submittedBy": "Skickad av",
+            "to": "Till",
+            "showDetails": "Visa detaljer",
+            "hideDetails": "Dölj detaljer",
+            "showDetailsFor": "Visa detaljer för {{reference}}",
+            "hideDetailsFor": "Dölj detaljer för {{reference}}",
             "toIban": "Till IBAN",
             "approvalStep": "Atteststeg {{step}}",
             "dualApprovalShort": "Dubbelattest",
