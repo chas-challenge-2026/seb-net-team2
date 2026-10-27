@@ -11,10 +11,12 @@ import { Footer } from "../components/Footer/Footer";
 import { useAuth } from "../hooks/useAuth";
 
 import layout from "./MainLayout.module.css";
+import { AdminWorkspace } from "./AdminWorkspace";
 
 export function MainLayout() {
     const { t } = useTranslation();
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
+    const isAdmin = isAuthenticated && user?.role === "Admin";
     const [collapsed, setCollapsed] = useState(false);
 
     function handleToggleCollapsed() {
@@ -31,8 +33,8 @@ export function MainLayout() {
             <NavigationBar />
 
             <div className={layout.page}>
-                <div className={`${layout.body} ${isAuthenticated ? layout.authenticated : ""} ${collapsed ? layout.collapsed : ""}`}>
-                    {isAuthenticated && (
+                <div className={`${layout.body} ${isAuthenticated && !isAdmin ? layout.authenticated : ""} ${collapsed ? layout.collapsed : ""}`}>
+                    {isAuthenticated && !isAdmin && (
                         <div className={layout.sidebarRail}>
                             <Sidebar
                                 collapsed={collapsed}
@@ -46,7 +48,13 @@ export function MainLayout() {
                     aria-label={t("a11y.main")}
                     className={layout.main}
                 >
-                    <Outlet />
+                    {isAdmin ? (
+                        <AdminWorkspace organization={user.tenantName}>
+                            <Outlet />
+                        </AdminWorkspace>
+                    ) : (
+                        <Outlet />
+                    )}
                 </main>
                 </div>
                 <Footer />
