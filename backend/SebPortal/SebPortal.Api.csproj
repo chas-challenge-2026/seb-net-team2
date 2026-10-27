@@ -32,8 +32,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-        <Content Include="..\..\native\libauditsigner.so" Link="libauditsigner.so" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Condition="Exists('..\..\native\libauditsigner.so')" />
-        <Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" Condition="Exists('..\..\native\libcsvparser.so')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+		<InternalsVisibleTo Include="SebPortal.Tests" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="..\..\native\libauditsigner.so" Link="libauditsigner.so" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+		<Content Include="..\..\native\libcsvparser.so" Link="libcsvparser.so" Condition="Exists('..\..\native\libcsvparser.so')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>
