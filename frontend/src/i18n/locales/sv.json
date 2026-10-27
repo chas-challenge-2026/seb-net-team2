@@ -377,7 +377,6 @@
         "eyebrow": "BETALNINGAR",
         "title": "Batchuppladdning",
         "description": "Ladda upp flera betalningar samtidigt via en CSV-fil.",
-        "mockMode": "Mockläge",
         "file": {
             "title": "CSV-fil",
             "description": "Välj en fil och ladda sedan upp och behandla den.",
@@ -391,12 +390,14 @@
         "format": {
             "title": "CSV-format",
             "description": "Filen måste innehålla följande kolumner:",
-            "warning": "Obs: kommatecken inuti ett fält stöds inte. Undvik referenser som innehåller kommatecken.",
+            "exampleLabel": "Exempel på CSV-fil",
+            "accounts": "Ange IBAN för ett av dina konton i kolumnen from_account_id:",
+            "warning": "Obs: fält som innehåller kommatecken ska omges av citattecken, till exempel \"Malmö Bygg, faktura 99\".",
             "download": "Ladda ner example-batch.csv"
         },
         "result": {
             "title": "Resultat",
-            "processed": "{{succeeded}} av {{total}} betalningar behandlades.",
+            "processed": "{{succeeded}} av {{total}} betalningar skapades.",
             "failed_one": "{{count}} rad misslyckades — se nedan.",
             "failed_other": "{{count}} rader misslyckades — se nedan."
         },
@@ -406,17 +407,19 @@
             "amount": "Belopp",
             "reference": "Referens",
             "status": "Status",
-            "success": "Godkänd"
+            "success": "Skapad"
         },
         "errors": {
             "csvOnly": "Endast .csv-filer stöds.",
             "fileTooLarge": "Filen är större än 1 MB.",
             "chooseFile": "Välj först en CSV-fil.",
             "accountsLoading": "Kontoinformationen laddas fortfarande — försök igen om en stund.",
+            "accountsFailed": "Det gick inte att ladda dina konton. Ladda om sidan och försök igen.",
+            "createFailed": "Betalningen kunde inte skapas: {{message}}",
             "header": "CSV-rubriken måste vara exakt: {{header}}",
             "empty": "CSV-filen är tom eller innehåller inga datarader.",
-            "columns": "Förväntade 4 kolumner men fick {{count}}. Kommatecken inuti ett fält stöds inte.",
-            "unknownAccount": "Okänt from_account_id '{{id}}'",
+            "columns": "Förväntade 4 kolumner men fick {{count}}. Fält som innehåller kommatecken ska omges av citattecken.",
+            "unknownAccount": "Okänt konto '{{id}}'. Ange IBAN för ett av dina konton.",
             "invalidIban": "Ogiltigt IBAN '{{iban}}'",
             "invalidAmount": "Ogiltigt belopp '{{amount}}'"
         }
