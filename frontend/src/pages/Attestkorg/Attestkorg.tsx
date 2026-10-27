@@ -28,6 +28,7 @@ import { DueBadge, RecipientAndDueRows } from "./PaymentDueInfo";
 import { ApprovalTabs } from "./ApprovalTabs";
 import { TAB_IDS, type ApprovalTab } from "./approvalTabIds";
 import { HandledApprovals } from "./HandledApprovals";
+import { ApprovalListSkeleton } from "./ApprovalListSkeleton";
 import {
     APPROVAL_HISTORY_QUERY_KEY,
     isHistoryUnavailable,
@@ -330,9 +331,7 @@ export function Attestkorg() {
     if (isPending) {
         return (
             <section className={styles.inbox}>
-                <div className={styles.loadingState} role="status">
-                    {t("approvalInbox.loading")}
-                </div>
+                <ApprovalListSkeleton label={t("approvalInbox.loading")} />
             </section>
         );
     }
@@ -411,6 +410,8 @@ export function Attestkorg() {
                 </div>
             )}
 
+            {/* Tabs and list share one panel, with the tabs as its green header, like the admin user list. */}
+            <div className={styles.panel}>
             {/* Sorting sits on the tab row, so the first payment starts higher up. */}
             <div className={styles.tabsRow}>
                 <ApprovalTabs
@@ -480,24 +481,9 @@ export function Attestkorg() {
                             aria-labelledby={`payment-${approval.paymentId}`}
                         >
                             <div className={styles.cardHeader}>
-                                <div>
-                                    <p className={styles.paymentId}>
-                                        {/* No payment id: it is a UUID that means nothing to the attestant,
-                                            who recognises the payment by its reference and amount. */}
-                                        {t("approvalInbox.card.approvalStep", {
-                                            step: approval.stepNumber,
-                                        })}
-                                        {approval.stepNumber > 1 && (
-                                            <>
-                                                {" · "}
-                                                <span className={styles.dualApproval}>
-                                                    {t("approvalInbox.card.dualApprovalShort")}
-                                                </span>
-                                            </>
-                                        )}
-                                    </p>
-
-                                    {/* Reference and waiting time on one line, so the card header stays short. */}
+                                <div className={styles.cardInfo}>
+                                    {/* Two lines of text: the reference, then who, where, which step and how long.
+                                        A badge only when something needs attention (overdue, due soon). */}
                                     <div className={styles.titleLine}>
                                         {/* Labelled, because a reference like "1050" says nothing on its own. */}
                                         <h2 id={`payment-${approval.paymentId}`}>
@@ -507,55 +493,87 @@ export function Attestkorg() {
                                             {approval.reference}
                                         </h2>
 
-                                        <p className={isOverdue(approval) ? styles.overdue : styles.waiting}>
-                                            {daysWaiting(approval) === 0
-                                                ? t("approvalInbox.card.waitingToday")
-                                                : t("approvalInbox.card.waitingDays", {
+                                        {isOverdue(approval) && (
+                                            <p className={styles.overdue}>
+                                                {t("approvalInbox.card.waitingDays", {
                                                     count: daysWaiting(approval),
                                                 })}
-                                        </p>
+                                            </p>
+                                        )}
 
                                         <DueBadge approval={approval} />
                                     </div>
 
-                                    {/* Who sent it and where the money goes: enough to recognise the payment
-                                        without opening the details. */}
+                                    {/* No payment id: it is a UUID that means nothing to the attestant,
+                                        who recognises the payment by its reference and amount. */}
                                     <p className={styles.cardMeta}>
-                                        {t("approvalInbox.card.submittedBy")} {approval.createdByUserName}
+                                        <span>
+                                            {t("approvalInbox.card.submittedBy")} {approval.createdByUserName}
+                                            {" · "}
+                                            {t("approvalInbox.card.to")}{" "}
+                                            {approval.recipientName
+                                                ?? recipientBank(approval.toIban)
+                                                ?? formatIban(approval.toIban)}
+                                        </span>
                                         {" · "}
-                                        {t("approvalInbox.card.to")}{" "}
-                                        {approval.recipientName
-                                            ?? recipientBank(approval.toIban)
-                                            ?? formatIban(approval.toIban)}
+                                        <span>
+                                            {t("approvalInbox.card.approvalStep", {
+                                                step: approval.stepNumber,
+                                            })}
+                                        </span>
+                                        {approval.stepNumber > 1 && (
+                                            <>
+                                                {" · "}
+                                                <span className={styles.dualApproval}>
+                                                    {t("approvalInbox.card.dualApprovalShort")}
+                                                </span>
+                                            </>
+                                        )}
+                                        {!isOverdue(approval) && (
+                                            <>
+                                                {" · "}
+                                                <span>
+                                                    {daysWaiting(approval) === 0
+                                                        ? t("approvalInbox.card.waitingToday")
+                                                        : t("approvalInbox.card.waitingDays", {
+                                                            count: daysWaiting(approval),
+                                                        })}
+                                                </span>
+                                            </>
+                                        )}
                                     </p>
+
+                                    {/* Always visible: a warning must not hide behind a click. */}
+                                    <PaymentChecks approval={approval} allPending={approvals} />
+
+                                    {/* On the left with the information, so the right side holds only the decision. */}
+                                    <button
+                                        type="button"
+                                        className={styles.detailsToggle}
+                                        aria-expanded={expandedIds.has(approval.stepId)}
+                                        aria-controls={`details-${approval.stepId}`}
+                                        onClick={() => toggleDetails(approval.stepId)}
+                                        aria-label={t(expandedIds.has(approval.stepId)
+                                            ? "approvalInbox.card.hideDetailsFor"
+                                            : "approvalInbox.card.showDetailsFor", {
+                                            reference: approval.reference,
+                                        })}
+                                    >
+                                        {t(expandedIds.has(approval.stepId)
+                                            ? "approvalInbox.card.hideDetails"
+                                            : "approvalInbox.card.showDetails")}
+                                        <ChevronDown
+                                            size={16}
+                                            aria-hidden="true"
+                                            className={expandedIds.has(approval.stepId) ? styles.chevronOpen : undefined}
+                                        />
+                                    </button>
                                 </div>
 
                                 <div className={styles.cardSide}>
                                     <strong>{formatAmount(approval, locale)}</strong>
 
                                     <div className={styles.actions}>
-                                        <button
-                                            type="button"
-                                            className={styles.detailsToggle}
-                                            aria-expanded={expandedIds.has(approval.stepId)}
-                                            aria-controls={`details-${approval.stepId}`}
-                                            onClick={() => toggleDetails(approval.stepId)}
-                                            aria-label={t(expandedIds.has(approval.stepId)
-                                                ? "approvalInbox.card.hideDetailsFor"
-                                                : "approvalInbox.card.showDetailsFor", {
-                                                reference: approval.reference,
-                                            })}
-                                        >
-                                            {t(expandedIds.has(approval.stepId)
-                                                ? "approvalInbox.card.hideDetails"
-                                                : "approvalInbox.card.showDetails")}
-                                            <ChevronDown
-                                                size={16}
-                                                aria-hidden="true"
-                                                className={expandedIds.has(approval.stepId) ? styles.chevronOpen : undefined}
-                                            />
-                                        </button>
-
                                         <button
                                             type="button"
                                             className={styles.reject}
@@ -587,9 +605,6 @@ export function Attestkorg() {
                                 </div>
                             </div>
 
-                            {/* Always visible: a warning must not hide behind a click. */}
-                            <PaymentChecks approval={approval} allPending={approvals} />
-
                             {expandedIds.has(approval.stepId) && (
                             <dl id={`details-${approval.stepId}`} className={styles.details}>
                                 <RecipientAndDueRows approval={approval} />
@@ -606,11 +621,10 @@ export function Attestkorg() {
 
                                 <PaymentSourceAccount paymentId={approval.paymentId} />
 
+                                {/* Only the time: who sent it is already on the row above. */}
                                 <div>
-                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
+                                    <dt>{t("approvalInbox.card.submittedAt")}</dt>
                                     <dd>
-                                        {approval.createdByUserName}
-                                        {" · "}
                                         <time dateTime={approval.paymentCreatedAt}>
                                             {formatDate(approval.paymentCreatedAt, locale)}
                                         </time>
@@ -643,6 +657,7 @@ export function Attestkorg() {
             </div>
             </div>
             )}
+            </div>
 
             {confirmAction && (
                 <div className={styles.modalOverlay} onClick={closeConfirm}>

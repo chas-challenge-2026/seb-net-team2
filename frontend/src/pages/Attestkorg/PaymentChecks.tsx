@@ -46,7 +46,8 @@ export function PaymentChecks({ approval, allPending }: PaymentChecksProps) {
             className={styles.checks}
             aria-label={t("approvalInbox.checks.title")}
         >
-            <p className={styles.checksTitle}>{t("approvalInbox.checks.title")}</p>
+            {/* Read out by screen readers; on screen the warning icon and colour say enough. */}
+            <p className="visually-hidden">{t("approvalInbox.checks.title")}</p>
 
             <ul className={styles.checksList}>
                 {!checks.ibanValid && (

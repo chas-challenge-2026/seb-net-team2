@@ -108,15 +108,16 @@
         var(--color-error);
 }
 
+/* Neutral grey instead of blue: the admin pages use only green, grey and red. */
 .feedbackInfo {
     border-color:
-        var(--color-primary);
+        var(--color-border);
 
     background-color:
-        #eef6fb;
+        var(--color-hover-light);
 
     color:
-        var(--color-primary);
+        var(--color-text);
 }
 
 .feedback:focus-visible {
@@ -184,17 +185,6 @@
 }
 
 
-/* Loading */
-
-.loadingState {
-    padding:
-        52px var(--spacing-lg);
-
-    color:
-        var(--color-text-soft);
-
-    text-align: center;
-}
 
 
 /* Toolbar */
@@ -294,18 +284,10 @@
 
     border-bottom:
         1px solid var(--color-border-light);
-
-    transition:
-        background-color 0.15s ease;
 }
 
 .card:last-child {
     border-bottom: 0;
-}
-
-.card:hover {
-    background-color:
-        var(--color-hover-light);
 }
 
 .overdue {
@@ -319,22 +301,18 @@
     font-weight: 500;
 }
 
-.waiting {
-    display: inline-block;
-    margin: 8px 0 0;
-    padding: 2px 10px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-pill);
-    color: var(--color-text-soft);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
 .dualApproval {
     margin: 0;
     color: var(--seb-green-dark-2);
     font-size: var(--font-size-sm);
     font-weight: 600;
+}
+
+/* Plain text in the row's second line: it is information, not a warning. */
+.cardMeta .dualApproval {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
 }
 
 
@@ -348,24 +326,6 @@
     gap: 20px;
 }
 
-.paymentId {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 7px;
-
-    margin:
-        0 0 var(--spacing-sm);
-
-    color:
-        var(--placeholder-grey);
-
-    font-size:
-        var(--font-size-sm);
-
-    font-weight: 500;
-}
-
 .card h2 {
     margin: 0;
 
@@ -373,7 +333,7 @@
         var(--color-text);
 
     font-size: var(--font-size-lg);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .cardHeader strong {
@@ -391,12 +351,13 @@
 
 /* Payment details */
 
+/* As many columns as fit (three on a laptop), so the details take one row instead of two. */
 .details {
     display: grid;
 
     grid-template-columns:
-        repeat(2,
-            minmax(0, 1fr));
+        repeat(auto-fit,
+            minmax(200px, 1fr));
 
     gap:
         var(--spacing-lg) var(--spacing-xl);
@@ -404,12 +365,20 @@
     margin:
         22px 0 20px;
 
-    /* Only a line above: below it come the checks box or the buttons, which separate themselves. */
+    /* A tinted block instead of a line above, so it reads as part of this payment
+       and the only lines in the list are the ones between payments. */
     padding:
-        18px 0 0;
+        var(--spacing-md) var(--spacing-lg);
 
-    border-top:
-        1px solid var(--color-border-light);
+    border-radius:
+        var(--radius-sm);
+
+    /* Neutral grey, not green: green is kept for navigation and actions. */
+    background-color:
+        #f7f8f9;
+
+    box-shadow:
+        inset 0 0 0 1px var(--color-border-lighter);
 }
 
 .details div {
@@ -454,14 +423,15 @@
         var(--spacing-md);
 }
 
+/* Bold dark label, like the form labels on the admin pages. */
 .commentField label {
     color:
-        var(--placeholder-grey);
+        var(--color-text);
 
     font-size:
-        var(--font-size-sm);
+        var(--font-size-md);
 
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .commentField textarea {
@@ -623,18 +593,19 @@
 
 /* Empty state */
 
+/* Like the empty state in the admin user list: a plain panel, grey icon, centred text. */
 .emptyState {
     padding:
-        52px var(--spacing-lg);
+        var(--spacing-xl);
 
     border:
-        1px dashed #a9cf9c;
+        1px solid var(--color-border-light);
 
     border-radius:
         var(--radius-md);
 
     background-color:
-        #f7fbf5;
+        var(--color-surface);
 
     text-align: center;
 }
@@ -643,10 +614,10 @@
     margin: 0;
 
     color:
-        var(--seb-green-dark-2);
+        var(--color-text);
 
     font-size: var(--font-size-xl);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .emptyState p {
@@ -654,7 +625,7 @@
         var(--spacing-sm) 0 0;
 
     color:
-        var(--placeholder-grey);
+        var(--color-text-soft);
 }
 
 
@@ -673,8 +644,9 @@
 
     padding: 20px;
 
+    /* Same backdrop as the shared Modal used on the admin pages. */
     background-color:
-        rgb(0 30 80 / 45%);
+        rgba(0, 0, 0, 0.4);
 }
 
 .modal {
@@ -686,14 +658,17 @@
     padding:
         var(--spacing-lg);
 
+    border:
+        1px solid var(--color-border);
+
     border-radius:
-        var(--radius-md);
+        var(--radius-lg);
 
     background-color:
         var(--color-surface);
 
     box-shadow:
-        0 12px 32px rgb(0 30 80 / 20%);
+        0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .modal h2 {
@@ -706,7 +681,7 @@
     font-size:
         var(--font-size-xl);
 
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .modal p {
@@ -739,8 +714,22 @@
     border-radius:
         var(--radius-sm);
 
+    /* Same light grey block as the details on the list. */
     background-color:
-        var(--color-hover-light);
+        #f7f8f9;
+
+    box-shadow:
+        inset 0 0 0 1px var(--color-border-lighter);
+}
+
+/* The warning sits between the details and the comment: space on both sides. */
+.modal .checks {
+    margin: 0 0 var(--spacing-lg);
+}
+
+.modalContext .dualApproval {
+    color: inherit;
+    font-weight: inherit;
 }
 
 .modalDetails dt {
@@ -961,27 +950,16 @@
 .emptyState > svg {
     display: block;
     margin: 0 auto var(--spacing-sm);
-    color: var(--seb-green-dark-2);
+    color: var(--color-text-soft);
 }
 
 
 /* Decision support checks on each card */
 
-/* Styled as a warning (light amber with a stripe), not as neutral grey,
-   so it reads as "check this" and the amber text has enough contrast. */
+/* Warnings as amber lines with an icon under the card's text, not as a box of their own:
+   the row stays light, and icon plus colour still say "check this". */
 .checks {
-    margin: 0 0 var(--spacing-md);
-    padding: 12px var(--spacing-md);
-    border-left: 4px solid #e3a008;
-    border-radius: var(--radius-sm);
-    background-color: #fff8e6;
-}
-
-.checksTitle {
-    margin: 0 0 var(--spacing-sm);
-    color: var(--color-text);
-    font-size: var(--font-size-sm);
-    font-weight: 700;
+    margin: var(--spacing-sm) 0 0;
 }
 
 .checksList {
@@ -1184,6 +1162,33 @@
     outline-offset: 2px;
 }
 
+/* History filters in the admin style: the same 42px fields and bold labels as the
+   search in the admin user list. No green background, since the tabs above already have one. */
+
+.tabPanel .toolbar {
+    align-items: flex-end;
+}
+
+.tabPanel .toolbar label,
+.tabPanel .toolbar legend {
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.tabPanel .toolbar input,
+.tabPanel .toolbar select {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border-color: var(--color-border);
+}
+
+.tabPanel .toolbar .filterToggle,
+.tabPanel .toolbar .resetFilters {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+}
+
 /* History list */
 
 .historyCount {
@@ -1200,7 +1205,7 @@
 .historyMonth {
     margin: 0 0 var(--spacing-sm);
     font-size: var(--font-size-md);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 /* Same panel with rows as the pending list. */
@@ -1427,20 +1432,22 @@
 
 /* Compact card: reference, amount and buttons on one row; IBAN, account and time behind "Show details". */
 
+/* The same space above and below, so each payment reads as one block between the lines. */
 .card {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-lg);
 }
 
-.card .paymentId {
-    margin-bottom: var(--spacing-xs);
+.cardInfo {
+    min-width: 0;
 }
 
+/* 14px like the e-mail line in the admin user list: small text is hard to read. */
 .cardMeta {
-    margin: 6px 0 0;
+    margin: 4px 0 0;
 
     color: var(--color-text-soft);
 
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-md);
 }
 
 .cardSide {
@@ -1458,24 +1465,35 @@
     padding-top: 0;
 }
 
-.actions .detailsToggle {
-    min-width: 0;
-
+/* A link-style button under the information, not one of the decision buttons. */
+.detailsToggle {
     display: inline-flex;
     align-items: center;
     gap: 4px;
 
-    border-color: transparent;
+    min-height: 32px;
+    margin-top: var(--spacing-xs);
+    padding: 0;
 
-    background-color: transparent;
-    color: var(--color-text);
+    border: 0;
+    background: none;
+    color: var(--seb-green-dark-2);
 
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.detailsToggle:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
 }
 
-.actions .detailsToggle:hover {
-    background-color: var(--color-hover-light);
+.detailsToggle:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
 }
 
 .detailsToggle svg {
@@ -1483,7 +1501,98 @@
 }
 
 .card .details {
-    margin: var(--spacing-md) 0 var(--spacing-xs);
+    margin: var(--spacing-sm) 0 0;
+}
+
+/* Loading skeleton: same row layout as the compact cards. */
+.skeletonRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    padding: var(--spacing-md) var(--spacing-lg);
+
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.skeletonRow:last-child {
+    border-bottom: 0;
+}
+
+.skeletonInfo,
+.skeletonSide {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.skeletonSide {
+    align-items: flex-end;
+}
+
+/* One panel for tabs and content, like the admin user list: the green toolbar is the panel's
+   header, not a box of its own, and the lists inside lose their own borders. */
+.panel {
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    overflow: hidden;
+}
+
+.panel .tabsRow {
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-border-light);
+    border-radius: 0;
+}
+
+.panel .list,
+.panel .historyList,
+.panel .emptyState {
+    border: 0;
+    border-radius: 0;
+}
+
+/* Inside the panel the outline would be clipped, so it is drawn inwards. */
+.panel .tabPanel:focus-visible {
+    outline-offset: -3px;
+    border-radius: 0;
+}
+
+.panel .tabPanel > .error {
+    margin: var(--spacing-md) var(--spacing-lg);
+}
+
+/* Handled tab: filters and month headings as full-width strips in the panel. */
+.panel .tabPanel > .toolbar {
+    margin: 0;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.panel .historyCount {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-lg) 0;
+}
+
+.panel .historyGroups {
+    gap: 0;
+}
+
+.panel .historyMonth {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-light);
+    background-color: var(--color-50);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+}
+
+.panel .historyGroups > section + section .historyMonth {
+    border-top: 1px solid var(--color-border-light);
 }
 
 /* The list already draws the panel border. */

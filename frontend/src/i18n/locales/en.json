@@ -338,6 +338,7 @@
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
+            "submittedAt": "Submitted",
             "to": "To",
             "showDetails": "Show details",
             "hideDetails": "Hide details",

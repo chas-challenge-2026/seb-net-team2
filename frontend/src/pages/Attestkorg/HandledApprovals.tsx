@@ -16,6 +16,7 @@ import { useSessionDecisions } from "../../hooks/useSessionDecisions";
 import { historyEntryDate, type DecidedApproval } from "../../schemas/approvalHistorySchema";
 import { formatIban, recipientBank } from "../../utils/paymentChecks";
 
+import { ApprovalListSkeleton } from "./ApprovalListSkeleton";
 import styles from "./Attestkorg.module.css";
 
 type StatusFilter = "all" | "approved" | "rejected";
@@ -144,9 +145,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     if (isPending) {
         return (
             <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
-                <div className={styles.loadingState} role="status">
-                    {t("approvalInbox.history.loading")}
-                </div>
+                <ApprovalListSkeleton label={t("approvalInbox.history.loading")} />
             </div>
         );
     }
