@@ -127,6 +127,15 @@
     }
 }
 
+/* The attestant has two pages, side by side at every width. */
+.navigation.twoSections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.navigation.twoSections > :last-child {
+    grid-column: auto;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .navLink {
         transition: none;

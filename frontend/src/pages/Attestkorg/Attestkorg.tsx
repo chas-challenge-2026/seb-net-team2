@@ -7,10 +7,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
     ArrowRight,
+    ChevronDown,
     CircleCheck,
     CircleX,
     ClipboardCheck,
-    Clock3,
     Info,
 } from "lucide-react";
 
@@ -18,7 +18,7 @@ import { APPROVALS_QUERY_KEY, useApprovals } from "../../hooks/useApprovals";
 import { decideApproval } from "../../services/approvalService";
 import type { PendingApprovalStep } from "../../schemas/pendingApprovalSchema";
 import { AppError } from "../../errors/AppError";
-import { OVERDUE_AFTER_DAYS, daysWaiting, isOverdue } from "../../utils/approvalReminders";
+import { daysWaiting, isOverdue } from "../../utils/approvalReminders";
 import { formatIban, recipientBank } from "../../utils/paymentChecks";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -28,6 +28,9 @@ import { DueBadge, RecipientAndDueRows } from "./PaymentDueInfo";
 import { ApprovalTabs } from "./ApprovalTabs";
 import { TAB_IDS, type ApprovalTab } from "./approvalTabIds";
 import { HandledApprovals } from "./HandledApprovals";
+import { ApprovalListSkeleton } from "./ApprovalListSkeleton";
+import { BulkApproveDialog, type BulkApproveResult } from "./BulkApproveDialog";
+import { formatAmount, formatTotals } from "./approvalFormat";
 import {
     APPROVAL_HISTORY_QUERY_KEY,
     isHistoryUnavailable,
@@ -57,20 +60,6 @@ type ActionFeedback = {
     type: "approved" | "rejected" | "info";
     message: string;
 };
-
-function formatAmount(approval: PendingApprovalStep, locale: string): string {
-    return `${approval.amount.toLocaleString(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })} ${approval.currency}`;
-}
-
-function formatDate(date: string, locale: string): string {
-    return new Date(date).toLocaleString(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-    });
-}
 
 function sortApprovals(approvals: PendingApprovalStep[], sortOption: SortOption): PendingApprovalStep[] {
     return [...approvals].sort((a, b) => {
@@ -112,8 +101,14 @@ export function Attestkorg() {
     // Empty until the user changes the order, so nothing is announced when the page loads.
     const [sortAnnouncement, setSortAnnouncement] = useState("");
     const [comments, setComments] = useState<Record<string, string>>({});
+    // Cards start compact; the attestant opens the details (IBAN, account, time) when needed.
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
+    // Payments ticked for "Approve selected". Steps that leave the list drop out on their own,
+    // because only the ticked steps that are still pending are used.
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+    const [bulkOpen, setBulkOpen] = useState(false);
 
     const cancelButtonRef = useRef<HTMLButtonElement>(null);
     const [reasonError, setReasonError] = useState(false);
@@ -133,22 +128,17 @@ export function Attestkorg() {
         (a, b) => Number(isOverdue(b)) - Number(isOverdue(a))
     );
 
-    const overdueCount = approvals.filter(isOverdue).length;
+    const pendingTotal = formatTotals(approvals, locale);
 
-    // Summed per currency, since payments in different currencies can't be added together.
-    const totalsByCurrency = approvals.reduce<Record<string, number>>((totals, approval) => {
-        totals[approval.currency] = (totals[approval.currency] ?? 0) + approval.amount;
-        return totals;
-    }, {});
+    const selectedApprovals = sortedApprovals.filter((approval) => selectedIds.has(approval.stepId));
+    const allSelected = sortedApprovals.length > 0 && selectedApprovals.length === sortedApprovals.length;
+    const someSelected = selectedApprovals.length > 0 && !allSelected;
+    const selectAllRef = useRef<HTMLInputElement>(null);
 
-    const pendingTotal = Object.entries(totalsByCurrency)
-        .map(([currency, amount]) =>
-            `${amount.toLocaleString(locale, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            })} ${currency}`
-        )
-        .join(" + ");
+    // "Some selected" has no HTML attribute, only the indeterminate property.
+    useEffect(() => {
+        if (selectAllRef.current) selectAllRef.current.indeterminate = someSelected;
+    }, [someSelected]);
 
     const confirmComment = confirmAction
         ? (comments[confirmAction.approval.stepId] ?? "").trim()
@@ -169,6 +159,96 @@ export function Attestkorg() {
     function showHandledTab() {
         setActiveTab("handled");
         requestAnimationFrame(() => document.getElementById(TAB_IDS.handled.tab)?.focus());
+    }
+
+    // How long the payment has waited, with the date, so neither has to be looked up:
+    // "Sent today 09:12", "Waiting 2 days (26 Oct)", or only "Sent 25 Oct" when the red
+    // "Waiting 3 days" badge already says how long.
+    function sentLabel(approval: PendingApprovalStep): string {
+        const sent = new Date(approval.paymentCreatedAt);
+        const date = sent.toLocaleDateString(locale, { day: "numeric", month: "short" });
+        const time = sent.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+        const days = daysWaiting(approval);
+
+        if (isOverdue(approval)) return t("approvalInbox.card.sentOn", { date });
+        // Under 24 hours, but possibly yesterday evening: "today" only on the same date.
+        if (days === 0) {
+            return sent.toDateString() === new Date().toDateString()
+                ? `${t("approvalInbox.card.waitingToday")} ${time}`
+                : t("approvalInbox.card.sentOn", { date: `${date} ${time}` });
+        }
+        return `${t("approvalInbox.card.waitingDays", { count: days })} (${date})`;
+    }
+
+    function toggleDetails(stepId: string) {
+        setExpandedIds((current) => {
+            const updated = new Set(current);
+            if (!updated.delete(stepId)) updated.add(stepId);
+            return updated;
+        });
+    }
+
+    function toggleSelected(stepId: string) {
+        setSelectedIds((current) => {
+            const updated = new Set(current);
+            if (!updated.delete(stepId)) updated.add(stepId);
+            return updated;
+        });
+    }
+
+    function toggleSelectAll() {
+        setSelectedIds(allSelected
+            ? new Set()
+            : new Set(sortedApprovals.map((approval) => approval.stepId)));
+    }
+
+    async function handleBulkDone({ approved, failed, comment }: BulkApproveResult) {
+        const decidedAt = new Date().toISOString();
+
+        // Shown in the "Handled" tab until the backend provides the real history.
+        for (const approval of approved) {
+            addSessionDecision(queryClient, user?.id, {
+                stepId: approval.stepId,
+                stepNumber: approval.stepNumber,
+                paymentId: approval.paymentId,
+                reference: approval.reference,
+                amount: approval.amount,
+                currency: approval.currency,
+                toIban: approval.toIban,
+                recipientName: approval.recipientName,
+                createdByUserName: approval.createdByUserName,
+                decision: "approved",
+                comment: comment || null,
+                decidedAt,
+            });
+        }
+
+        const failedMessage = failed.length > 0
+            ? t("approvalInbox.bulk.failed", {
+                references: failed.map((approval) => approval.reference).join(", "),
+            })
+            : "";
+
+        setActionFeedback(approved.length > 0
+            ? {
+                type: "approved",
+                message: [
+                    t("approvalInbox.bulk.approved", {
+                        count: approved.length,
+                        total: formatTotals(approved, locale),
+                    }),
+                    failedMessage,
+                ].filter(Boolean).join(" "),
+            }
+            : { type: "info", message: failedMessage });
+
+        setSelectedIds(new Set());
+        setBulkOpen(false);
+
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: APPROVALS_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: APPROVAL_HISTORY_QUERY_KEY }),
+        ]);
     }
 
     function updateComment(stepId: string, comment: string) {
@@ -322,9 +402,7 @@ export function Attestkorg() {
     if (isPending) {
         return (
             <section className={styles.inbox}>
-                <div className={styles.loadingState} role="status">
-                    {t("approvalInbox.loading")}
-                </div>
+                <ApprovalListSkeleton label={t("approvalInbox.loading")} />
             </section>
         );
     }
@@ -355,14 +433,6 @@ export function Attestkorg() {
                             : "approvalInbox.description")}
                     </p>
                 </div>
-
-                {/* The tabs already show the counts, so the badge is only kept where it adds the total amount. */}
-                {activeTab === "pending" && approvals.length > 0 && (
-                    <span className={styles.count} role="status" aria-live="polite">
-                        {t("approvalInbox.pendingCount", { count: approvals.length })}
-                        {` · ${pendingTotal}`}
-                    </span>
-                )}
             </header>
 
             {actionFeedback && (
@@ -411,6 +481,8 @@ export function Attestkorg() {
                 </div>
             )}
 
+            {/* Tabs and list share one panel, with the tabs as its green header, like the admin user list. */}
+            <div className={styles.panel}>
             {/* Sorting sits on the tab row, so the first payment starts higher up. */}
             <div className={styles.tabsRow}>
                 <ApprovalTabs
@@ -421,7 +493,12 @@ export function Attestkorg() {
                 />
 
                 {activeTab === "pending" && approvals.length > 0 && (
-                    <div className={styles.sortField}>
+                    <div className={styles.toolbarSide}>
+                        {/* The tabs already show the count, so only the total amount is added. */}
+                        <p className={styles.pendingTotal} role="status" aria-live="polite">
+                            {t("approvalInbox.pendingTotal", { total: pendingTotal })}
+                        </p>
+
                         <div className={styles.filterField}>
                             <label htmlFor="pending-sort">
                                 {t("approvalInbox.sort.label")}
@@ -465,48 +542,69 @@ export function Attestkorg() {
                 tabIndex={0}
                 className={styles.tabPanel}
             >
-            {overdueCount > 0 && (
-                <div className={styles.overdueBanner} role="status">
-                    <Clock3 size={18} aria-hidden="true" />
-                    <span>
-                        <strong>
-                            {t("approvalInbox.overdueBanner", {
-                                count: overdueCount,
-                                days: OVERDUE_AFTER_DAYS,
-                            })}
-                        </strong>{" "}
-                        {t("approvalInbox.overdueFirst")}
-                    </span>
+            {/* Select several payments and approve them in one go. Only with two or more,
+                since "select all" of one payment is the same as its own Approve button. */}
+            {sortedApprovals.length > 1 && (
+                <div className={styles.bulkBar}>
+                    <label className={styles.selectAll}>
+                        <input
+                            ref={selectAllRef}
+                            type="checkbox"
+                            className={styles.selectBox}
+                            checked={allSelected}
+                            onChange={toggleSelectAll}
+                            disabled={decisionMutation.isPending}
+                        />
+                        {t("approvalInbox.bulk.selectAll")}
+                    </label>
+
+                    {selectedApprovals.length > 0 && (
+                        <>
+                            <p className={styles.bulkSummary} role="status">
+                                {t("approvalInbox.bulk.summary", {
+                                    count: selectedApprovals.length,
+                                    total: formatTotals(selectedApprovals, locale),
+                                })}
+                            </p>
+
+                            <button
+                                type="button"
+                                className={styles.approve}
+                                disabled={decisionMutation.isPending}
+                                onClick={() => setBulkOpen(true)}
+                            >
+                                <CircleCheck size={17} aria-hidden="true" />
+                                {t("approvalInbox.bulk.approveSelected", { count: selectedApprovals.length })}
+                            </button>
+                        </>
+                    )}
                 </div>
             )}
 
+            {/* No overdue banner: overdue payments are sorted first and their badge turns red. */}
             <div className={styles.list}>
                 {sortedApprovals.length > 0 ? (
                     sortedApprovals.map((approval) => (
                         <article
-                            className={`${styles.card} ${isOverdue(approval) ? styles.cardOverdue : ""}`}
+                            className={styles.card}
                             key={approval.stepId}
                             aria-labelledby={`payment-${approval.paymentId}`}
                         >
                             <div className={styles.cardHeader}>
-                                <div>
-                                    <p className={styles.paymentId}>
-                                        {/* No payment id: it is a UUID that means nothing to the attestant,
-                                            who recognises the payment by its reference and amount. */}
-                                        {t("approvalInbox.card.approvalStep", {
-                                            step: approval.stepNumber,
-                                        })}
-                                        {approval.stepNumber > 1 && (
-                                            <>
-                                                {" · "}
-                                                <span className={styles.dualApproval}>
-                                                    {t("approvalInbox.card.dualApprovalShort")}
-                                                </span>
-                                            </>
-                                        )}
-                                    </p>
+                                {sortedApprovals.length > 1 && (
+                                    <input
+                                        type="checkbox"
+                                        className={styles.selectBox}
+                                        checked={selectedIds.has(approval.stepId)}
+                                        onChange={() => toggleSelected(approval.stepId)}
+                                        disabled={decisionMutation.isPending}
+                                        aria-label={t("approvalInbox.bulk.select", { reference: approval.reference })}
+                                    />
+                                )}
 
-                                    {/* Reference and waiting time on one line, so the card header stays short. */}
+                                <div className={styles.cardInfo}>
+                                    {/* Two lines of text: the reference, then who, where, which step and how long.
+                                        A badge only when something needs attention (overdue, due soon). */}
                                     <div className={styles.titleLine}>
                                         {/* Labelled, because a reference like "1050" says nothing on its own. */}
                                         <h2 id={`payment-${approval.paymentId}`}>
@@ -516,26 +614,109 @@ export function Attestkorg() {
                                             {approval.reference}
                                         </h2>
 
-                                        <p className={isOverdue(approval) ? styles.overdue : styles.waiting}>
-                                            {daysWaiting(approval) === 0
-                                                ? t("approvalInbox.card.waitingToday")
-                                                : t("approvalInbox.card.waitingDays", {
+                                        {isOverdue(approval) && (
+                                            <p className={styles.overdue}>
+                                                {t("approvalInbox.card.waitingDays", {
                                                     count: daysWaiting(approval),
                                                 })}
-                                        </p>
+                                            </p>
+                                        )}
 
                                         <DueBadge approval={approval} />
                                     </div>
+
+                                    {/* No payment id: it is a UUID that means nothing to the attestant,
+                                        who recognises the payment by its reference and amount. */}
+                                    <p className={styles.cardMeta}>
+                                        {/* No recipient here: the IBAN and bank are in the details, once. */}
+                                        <span>
+                                            {t("approvalInbox.card.submittedBy")} {approval.createdByUserName}
+                                        </span>
+                                        {" · "}
+                                        <span>
+                                            {t("approvalInbox.card.approvalStep", {
+                                                step: approval.stepNumber,
+                                            })}
+                                        </span>
+                                        {/* No "Dual approval" after it: step 2 already says so. */}
+                                        {" · "}
+                                        <time dateTime={approval.paymentCreatedAt}>
+                                            {sentLabel(approval)}
+                                        </time>
+                                    </p>
+
+                                    {/* Always visible: a warning must not hide behind a click. */}
+                                    <PaymentChecks approval={approval} allPending={approvals} />
+
+                                    {/* On the left with the information, so the right side holds only the decision. */}
+                                    <button
+                                        type="button"
+                                        className={styles.detailsToggle}
+                                        aria-expanded={expandedIds.has(approval.stepId)}
+                                        aria-controls={`details-${approval.stepId}`}
+                                        onClick={() => toggleDetails(approval.stepId)}
+                                        aria-label={t(expandedIds.has(approval.stepId)
+                                            ? "approvalInbox.card.hideDetailsFor"
+                                            : "approvalInbox.card.showDetailsFor", {
+                                            reference: approval.reference,
+                                        })}
+                                    >
+                                        {t(expandedIds.has(approval.stepId)
+                                            ? "approvalInbox.card.hideDetails"
+                                            : "approvalInbox.card.showDetails")}
+                                        <ChevronDown
+                                            size={16}
+                                            aria-hidden="true"
+                                            className={expandedIds.has(approval.stepId) ? styles.chevronOpen : undefined}
+                                        />
+                                    </button>
                                 </div>
 
-                                <strong>{formatAmount(approval, locale)}</strong>
+                                <div className={styles.cardSide}>
+                                    <strong>{formatAmount(approval, locale)}</strong>
+
+                                    {/* Hidden while payments are ticked, so "Approve selected" is the only
+                                        approve button on screen; they come back when the selection is cleared. */}
+                                    {selectedApprovals.length === 0 && (
+                                    <div className={styles.actions}>
+                                        <button
+                                            type="button"
+                                            className={styles.reject}
+                                            disabled={decisionMutation.isPending}
+                                            onClick={(event) => openConfirm(approval, "reject", event)}
+                                            aria-label={t("approvalInbox.actions.rejectPayment", {
+                                                reference: approval.reference,
+                                                amount: formatAmount(approval, locale),
+                                            })}
+                                        >
+                                            <CircleX size={17} aria-hidden="true" />
+                                            {t("approvalInbox.actions.reject")}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className={styles.approve}
+                                            disabled={decisionMutation.isPending}
+                                            onClick={(event) => openConfirm(approval, "approve", event)}
+                                            aria-label={t("approvalInbox.actions.approvePayment", {
+                                                reference: approval.reference,
+                                                amount: formatAmount(approval, locale),
+                                            })}
+                                        >
+                                            <CircleCheck size={17} aria-hidden="true" />
+                                            {t("approvalInbox.actions.approve")}
+                                        </button>
+                                    </div>
+                                    )}
+                                </div>
                             </div>
 
-                            <dl className={styles.details}>
+                            {expandedIds.has(approval.stepId) && (
+                            <dl id={`details-${approval.stepId}`} className={styles.details}>
                                 <RecipientAndDueRows approval={approval} />
 
-                                {/* Grouped in pairs: where the money goes and where it comes from,
-                                    then who submitted it and when. */}
+                                {/* Where the money goes and where it comes from. Who sent it and when
+                                    is already on the row above ("Sent today" / "Waiting 2 days"). */}
                                 <div>
                                     <dt>{t("approvalInbox.card.toIban")}</dt>
                                     <dd>
@@ -545,50 +726,8 @@ export function Attestkorg() {
                                 </div>
 
                                 <PaymentSourceAccount paymentId={approval.paymentId} />
-
-                                <div>
-                                    <dt>{t("approvalInbox.card.submittedBy")}</dt>
-                                    <dd>
-                                        {approval.createdByUserName}
-                                        {" · "}
-                                        <time dateTime={approval.paymentCreatedAt}>
-                                            {formatDate(approval.paymentCreatedAt, locale)}
-                                        </time>
-                                    </dd>
-                                </div>
                             </dl>
-
-                            <PaymentChecks approval={approval} allPending={approvals} />
-
-                            <div className={styles.actions}>
-                                <button
-                                    type="button"
-                                    className={styles.reject}
-                                    disabled={decisionMutation.isPending}
-                                    onClick={(event) => openConfirm(approval, "reject", event)}
-                                    aria-label={t("approvalInbox.actions.rejectPayment", {
-                                        reference: approval.reference,
-                                        amount: formatAmount(approval, locale),
-                                    })}
-                                >
-                                    <CircleX size={17} aria-hidden="true" />
-                                    {t("approvalInbox.actions.reject")}
-                                </button>
-
-                                <button
-                                    type="button"
-                                    className={styles.approve}
-                                    disabled={decisionMutation.isPending}
-                                    onClick={(event) => openConfirm(approval, "approve", event)}
-                                    aria-label={t("approvalInbox.actions.approvePayment", {
-                                        reference: approval.reference,
-                                        amount: formatAmount(approval, locale),
-                                    })}
-                                >
-                                    <CircleCheck size={17} aria-hidden="true" />
-                                    {t("approvalInbox.actions.approve")}
-                                </button>
-                            </div>
+                            )}
                         </article>
                     ))
                 ) : (
@@ -614,6 +753,7 @@ export function Attestkorg() {
             </div>
             </div>
             )}
+            </div>
 
             {confirmAction && (
                 <div className={styles.modalOverlay} onClick={closeConfirm}>
@@ -647,12 +787,7 @@ export function Attestkorg() {
                                     })}
                                 </span>
                             )}
-
-                            {confirmAction.approval.stepNumber > 1 && (
-                                <span className={styles.dualApproval}>
-                                    {t("approvalInbox.card.dualApproval")}
-                                </span>
-                            )}
+                            {/* No "Dual approval" line: "Approval step 2" already says so. */}
                         </div>
 
                         <dl className={styles.modalDetails}>
@@ -796,6 +931,16 @@ export function Attestkorg() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {bulkOpen && selectedApprovals.length > 0 && (
+                <BulkApproveDialog
+                    approvals={selectedApprovals}
+                    allPending={approvals}
+                    locale={locale}
+                    onClose={() => setBulkOpen(false)}
+                    onDone={handleBulkDone}
+                />
             )}
         </section>
     );

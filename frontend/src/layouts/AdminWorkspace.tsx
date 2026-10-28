@@ -7,7 +7,7 @@ import { useApprovals } from "../hooks/useApprovals";
 import { countOverdue } from "../utils/approvalReminders";
 import styles from "./AdminWorkspace.module.css";
 
-const sections = [
+const adminSections = [
     { to: "/admin", label: "admin.navigation.overview", icon: House },
     { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
     { to: "/admin/users", label: "admin.navigation.users", icon: Users },
@@ -15,9 +15,16 @@ const sections = [
     { to: "/granskningslogg", label: "sidebar.auditLog", icon: ClipboardList },
 ] as const;
 
-export function AdminWorkspace({ children, organization }: {
+// The attestant uses the same workspace with only their two pages.
+const attestantSections = [
+    { to: "/dashboard", label: "sidebar.dashboard", icon: House },
+    { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
+] as const;
+
+export function AdminWorkspace({ children, organization, variant = "admin" }: {
     children: ReactNode;
     organization?: string;
+    variant?: "admin" | "attestant";
 }) {
     const { t } = useTranslation();
     const pathname = useRouterState({ select: (state) => state.location.pathname });
@@ -27,6 +34,7 @@ export function AdminWorkspace({ children, organization }: {
     const badgeLabel = overdue > 0
         ? t("sidebar.approvalsWithOverdue", { pending, overdue })
         : t("sidebar.approvalsPending", { pending });
+    const sections = variant === "attestant" ? attestantSections : adminSections;
 
     return (
         <div className={styles.workspace}>
@@ -39,7 +47,10 @@ export function AdminWorkspace({ children, organization }: {
             </div>
 
             <div className={styles.surface}>
-                <nav className={styles.navigation} aria-label={t("sidebar.navigationLinks")}>
+                <nav
+                    className={`${styles.navigation} ${variant === "attestant" ? styles.twoSections : ""}`}
+                    aria-label={t("sidebar.navigationLinks")}
+                >
                     {sections.map(({ to, label, icon: Icon }) => {
                         const active = pathname.replace(/\/$/, "") === to
                             || (to !== "/admin" && pathname.startsWith(`${to}/`));

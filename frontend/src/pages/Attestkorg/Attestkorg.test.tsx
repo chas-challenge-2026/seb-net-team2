@@ -105,6 +105,33 @@ describe("Approval inbox with keyboard and screen reader", () => {
             .not.toBeInTheDocument();
     });
 
+    it("shows a compact card and opens the details on request", () => {
+        renderInbox();
+
+        // Enough to recognise the payment without opening it.
+        expect(screen.getByText(/^Skickad av Lisa Persson$/)).toBeInTheDocument();
+        expect(screen.queryByText("Till IBAN")).not.toBeInTheDocument();
+
+        const toggle = screen.getByRole("button", { name: "Visa detaljer för Faktura #1043" });
+        expect(toggle).toHaveAttribute("aria-expanded", "false");
+        fireEvent.click(toggle);
+
+        expect(toggle).toHaveAttribute("aria-expanded", "true");
+        expect(toggle).toHaveAccessibleName("Dölj detaljer för Faktura #1043");
+        expect(screen.getByText("Till IBAN")).toBeInTheDocument();
+    });
+
+    it("shows how long a payment has waited together with the date it was sent", () => {
+        const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 - 60 * 1000);
+        setHooks({ pending: [{ ...pendingPayment, paymentCreatedAt: twoDaysAgo.toISOString() }] });
+        renderInbox();
+
+        const date = twoDaysAgo.toLocaleDateString("sv-SE", { day: "numeric", month: "short" });
+        const sent = screen.getByText(`Väntat 2 dagar (${date})`);
+        expect(sent.tagName).toBe("TIME");
+        expect(sent).toHaveAttribute("dateTime", twoDaysAgo.toISOString());
+    });
+
     it("warns when the recipient is the same account the money is taken from", () => {
         mockedUsePaymentSourceAccount.mockReturnValue({
             account: { id: "12", name: "Lönekonto", iban: "SE08 5000 0000 0549 1000 0004", balance: 0, currency: "SEK" },
@@ -377,5 +404,96 @@ describe("Approving and rejecting payments", () => {
 
         fireEvent.change(screen.getByLabelText("Sortera efter"), { target: { value: "date-desc" } });
         expect(order()).toEqual(["Försenad", "Ny", "Igår"]);
+    });
+});
+
+describe("Approving several payments at once", () => {
+    const secondPayment: PendingApprovalStep = {
+        ...pendingPayment,
+        stepId: "9a14e45f-ceea-4a7b-9c3e-2a1b5c6d7e90",
+        paymentId: "4f2a9c1e-7b4d-4e8a-9c21-5d6f0a1b2c3e",
+        amount: 25000,
+        reference: "Faktura #1044",
+    };
+
+    beforeEach(() => setHooks({ pending: [pendingPayment, secondPayment] }));
+
+    it("has no checkboxes when there is only one payment", () => {
+        setHooks({ pending: [pendingPayment] });
+        renderInbox();
+
+        expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    });
+
+    it("selects all payments and shows how many and how much", () => {
+        renderInbox();
+
+        fireEvent.click(screen.getByRole("checkbox", { name: "Markera alla" }));
+
+        expect(screen.getByRole("checkbox", { name: "Markera Faktura #1043" })).toBeChecked();
+        expect(screen.getByRole("checkbox", { name: "Markera Faktura #1044" })).toBeChecked();
+        expect(screen.getByText(/^2 betalningar markerade · 100\s000,00 SEK$/)).toBeInTheDocument();
+    });
+
+    it("hides the row buttons while payments are ticked, so there is one approve button", () => {
+        renderInbox();
+        const rowApproveButtons = () => screen.queryAllByRole("button", { name: /^Godkänn betalning med referens/ });
+
+        expect(rowApproveButtons()).toHaveLength(2);
+
+        const checkbox = screen.getByRole("checkbox", { name: "Markera Faktura #1043" });
+        fireEvent.click(checkbox);
+        expect(rowApproveButtons()).toHaveLength(0);
+
+        fireEvent.click(checkbox);
+        expect(rowApproveButtons()).toHaveLength(2);
+    });
+
+    it("approves the selected payments one after another with the same comment", async () => {
+        mockedDecideApproval.mockResolvedValue(undefined as never);
+        renderInbox();
+
+        fireEvent.click(screen.getByRole("checkbox", { name: "Markera Faktura #1043" }));
+        fireEvent.click(screen.getByRole("checkbox", { name: "Markera Faktura #1044" }));
+        fireEvent.click(screen.getByRole("button", { name: "Godkänn markerade (2)" }));
+
+        const dialog = screen.getByRole("dialog", { name: "Godkänn 2 betalningar?" });
+        fireEvent.change(within(dialog).getByLabelText(/^Kommentar/), { target: { value: " Kontrollerad " } });
+        fireEvent.click(within(dialog).getByRole("button", { name: "Godkänn alla 2" }));
+
+        await waitFor(() => expect(mockedDecideApproval).toHaveBeenCalledTimes(2));
+        expect(mockedDecideApproval.mock.calls.map(([decision]) => decision)).toEqual([
+            { stepId: pendingPayment.stepId, decision: "approved", comment: "Kontrollerad" },
+            { stepId: secondPayment.stepId, decision: "approved", comment: "Kontrollerad" },
+        ]);
+        expect(await screen.findByText(/^2 betalningar godkändes \(100\s000,00 SEK\)\.$/)).toBeInTheDocument();
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("keeps going when one payment fails and names it at the end", async () => {
+        mockedDecideApproval
+            .mockRejectedValueOnce(new AppError("Conflict", 409) as never)
+            .mockResolvedValueOnce(undefined as never);
+        renderInbox();
+
+        fireEvent.click(screen.getByRole("checkbox", { name: "Markera alla" }));
+        fireEvent.click(screen.getByRole("button", { name: "Godkänn markerade (2)" }));
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Godkänn alla 2" }));
+
+        await waitFor(() => expect(mockedDecideApproval).toHaveBeenCalledTimes(2));
+        expect(await screen.findByText(
+            /^1 betalning godkändes \(25\s000,00 SEK\)\. Kunde inte godkännas: Faktura #1043\.$/
+        )).toBeInTheDocument();
+    });
+
+    it("sends nothing when the attestant cancels", () => {
+        renderInbox();
+
+        fireEvent.click(screen.getByRole("checkbox", { name: "Markera alla" }));
+        fireEvent.click(screen.getByRole("button", { name: "Godkänn markerade (2)" }));
+        fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Avbryt" }));
+
+        expect(mockedDecideApproval).not.toHaveBeenCalled();
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 });

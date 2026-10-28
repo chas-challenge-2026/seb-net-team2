@@ -27,28 +27,23 @@
 
     gap: var(--spacing-lg);
 
-    padding-bottom:
-        var(--spacing-lg);
-
     margin-bottom:
         var(--spacing-xl);
-
-    border-bottom:
-        1px solid var(--color-border);
 }
 
 .header>div {
     min-width: 0;
 }
 
+/* Same heading as the admin pages: 2rem, no divider underneath. */
 .header h1 {
     margin: 0;
 
     color:
         var(--color-text);
 
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 600;
     line-height: 1.2;
 
     overflow-wrap: anywhere;
@@ -57,32 +52,10 @@
 
 .intro {
     margin:
-        12px 0 0;
+        var(--spacing-xs) 0 0;
 
     color:
         var(--color-text-soft);
-
-    font-size:
-        var(--font-size-lg);
-}
-
-.count {
-    flex-shrink: 0;
-
-    padding:
-        8px 12px;
-
-    border:
-        1px solid var(--color-text);
-
-    border-radius:
-        var(--radius-pill);
-
-    color:
-        var(--color-text);
-
-    font-size: var(--font-size-md);
-    font-weight: 500;
 }
 
 
@@ -135,15 +108,16 @@
         var(--color-error);
 }
 
+/* Neutral grey instead of blue: the admin pages use only green, grey and red. */
 .feedbackInfo {
     border-color:
-        var(--color-primary);
+        var(--color-border);
 
     background-color:
-        #eef6fb;
+        var(--color-hover-light);
 
     color:
-        var(--color-primary);
+        var(--color-text);
 }
 
 .feedback:focus-visible {
@@ -211,17 +185,6 @@
 }
 
 
-/* Loading */
-
-.loadingState {
-    padding:
-        52px var(--spacing-lg);
-
-    color:
-        var(--color-text-soft);
-
-    text-align: center;
-}
 
 
 /* Toolbar */
@@ -291,12 +254,22 @@
 
 /* Approval list */
 
+/* One panel with rows divided by lines, like the admin user list. */
 .list {
     display: grid;
 
     min-width: 0;
 
-    gap: 20px;
+    border:
+        1px solid var(--color-border-light);
+
+    border-radius:
+        var(--radius-md);
+
+    background-color:
+        var(--color-surface);
+
+    overflow: hidden;
 }
 
 .card {
@@ -309,44 +282,12 @@
     padding:
         var(--spacing-lg) var(--spacing-lg) 20px;
 
-    border:
-        1px solid var(--color-border);
-
-    border-left:
-        4px solid #e3a008;
-
-    border-radius:
-        var(--radius-md);
-
-    background-color:
-        var(--color-surface);
-
-    box-shadow:
-        0 2px 8px rgb(0 30 80 / 5%);
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        transform 0.2s ease;
+    border-bottom:
+        1px solid var(--color-border-light);
 }
 
-.card:hover {
-    border-color:
-        var(--color-border-light);
-
-    border-left-color:
-        #e3a008;
-
-    box-shadow:
-        0 6px 18px rgb(0 30 80 / 10%);
-
-    transform:
-        translateY(-1px);
-}
-
-.card.cardOverdue,
-.card.cardOverdue:hover {
-    border-left-color: var(--color-error);
+.card:last-child {
+    border-bottom: 0;
 }
 
 .overdue {
@@ -360,33 +301,11 @@
     font-weight: 500;
 }
 
-.waiting {
-    display: inline-block;
-    margin: 8px 0 0;
-    padding: 2px 10px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-pill);
-    color: var(--color-text-soft);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
 .dualApproval {
-    margin: 8px 0 0;
-    color: var(--color-primary);
+    margin: 0;
+    color: var(--seb-green-dark-2);
     font-size: var(--font-size-sm);
-    font-weight: 500;
-}
-
-.overdueBanner {
-    margin-bottom: 1.25rem;
-    padding: 12px 16px;
-    border: 1px solid var(--color-error);
-    border-left-width: 4px;
-    border-radius: var(--radius-md);
-    color: var(--color-error);
-    font-size: var(--font-size-md);
-    background: #fef3f2;
+    font-weight: 600;
 }
 
 
@@ -400,38 +319,6 @@
     gap: 20px;
 }
 
-.paymentId {
-    display: inline-flex;
-    align-items: center;
-
-    gap: 7px;
-
-    margin:
-        0 0 var(--spacing-sm);
-
-    color:
-        var(--placeholder-grey);
-
-    font-size:
-        var(--font-size-sm);
-
-    font-weight: 500;
-}
-
-.paymentId::before {
-    width: 7px;
-    height: 7px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background-color:
-        #e3a008;
-
-    content: "";
-}
-
 .card h2 {
     margin: 0;
 
@@ -439,7 +326,7 @@
         var(--color-text);
 
     font-size: var(--font-size-lg);
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .cardHeader strong {
@@ -457,12 +344,13 @@
 
 /* Payment details */
 
+/* As many columns as fit (three on a laptop), so the details take one row instead of two. */
 .details {
     display: grid;
 
     grid-template-columns:
-        repeat(2,
-            minmax(0, 1fr));
+        repeat(auto-fit,
+            minmax(200px, 1fr));
 
     gap:
         var(--spacing-lg) var(--spacing-xl);
@@ -470,12 +358,20 @@
     margin:
         22px 0 20px;
 
-    /* Only a line above: below it come the checks box or the buttons, which separate themselves. */
+    /* A tinted block instead of a line above, so it reads as part of this payment
+       and the only lines in the list are the ones between payments. */
     padding:
-        18px 0 0;
+        var(--spacing-md) var(--spacing-lg);
 
-    border-top:
-        1px solid var(--color-border);
+    border-radius:
+        var(--radius-sm);
+
+    /* Neutral grey, not green: green is kept for navigation and actions. */
+    background-color:
+        #f7f8f9;
+
+    box-shadow:
+        inset 0 0 0 1px var(--color-border-lighter);
 }
 
 .details div {
@@ -520,14 +416,15 @@
         var(--spacing-md);
 }
 
+/* Bold dark label, like the form labels on the admin pages. */
 .commentField label {
     color:
-        var(--placeholder-grey);
+        var(--color-text);
 
     font-size:
-        var(--font-size-sm);
+        var(--font-size-md);
 
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .commentField textarea {
@@ -618,7 +515,7 @@
         var(--spacing-sm) var(--spacing-md);
 
     border:
-        1px solid var(--color-text);
+        1px solid var(--color-border);
 
     border-radius:
         var(--radius-sm);
@@ -630,7 +527,7 @@
     font-size:
         var(--font-size-md);
 
-    font-weight: 500;
+    font-weight: 600;
 
     transition:
         background-color 0.2s ease,
@@ -689,18 +586,19 @@
 
 /* Empty state */
 
+/* Like the empty state in the admin user list: a plain panel, grey icon, centred text. */
 .emptyState {
     padding:
-        52px var(--spacing-lg);
+        var(--spacing-xl);
 
     border:
-        1px dashed #a9cf9c;
+        1px solid var(--color-border-light);
 
     border-radius:
         var(--radius-md);
 
     background-color:
-        #f7fbf5;
+        var(--color-surface);
 
     text-align: center;
 }
@@ -709,10 +607,10 @@
     margin: 0;
 
     color:
-        var(--seb-green-dark-2);
+        var(--color-text);
 
     font-size: var(--font-size-xl);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .emptyState p {
@@ -720,7 +618,7 @@
         var(--spacing-sm) 0 0;
 
     color:
-        var(--placeholder-grey);
+        var(--color-text-soft);
 }
 
 
@@ -739,8 +637,9 @@
 
     padding: 20px;
 
+    /* Same backdrop as the shared Modal used on the admin pages. */
     background-color:
-        rgb(0 30 80 / 45%);
+        rgba(0, 0, 0, 0.4);
 }
 
 .modal {
@@ -752,14 +651,17 @@
     padding:
         var(--spacing-lg);
 
+    border:
+        1px solid var(--color-border);
+
     border-radius:
-        var(--radius-md);
+        var(--radius-lg);
 
     background-color:
         var(--color-surface);
 
     box-shadow:
-        0 12px 32px rgb(0 30 80 / 20%);
+        0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
 .modal h2 {
@@ -772,7 +674,7 @@
     font-size:
         var(--font-size-xl);
 
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .modal p {
@@ -805,9 +707,19 @@
     border-radius:
         var(--radius-sm);
 
+    /* Same light grey block as the details on the list. */
     background-color:
-        var(--color-hover-light);
+        #f7f8f9;
+
+    box-shadow:
+        inset 0 0 0 1px var(--color-border-lighter);
 }
+
+/* The warning sits between the details and the comment: space on both sides. */
+.modal .checks {
+    margin: 0 0 var(--spacing-lg);
+}
+
 
 .modalDetails dt {
     margin-bottom:
@@ -879,24 +791,6 @@
 
     .header {
         display: block;
-    }
-
-    .count {
-        display: inline-block;
-
-        margin-top:
-            var(--spacing-lg);
-    }
-
-    .cardHeader {
-        display: block;
-    }
-
-    .cardHeader strong {
-        display: block;
-
-        margin-top:
-            14px;
     }
 }
 
@@ -1018,20 +912,9 @@
 }
 
 .feedbackMessage svg,
-.overdueBanner > svg,
 .actions button svg,
 .modalActions button svg {
     flex-shrink: 0;
-}
-
-.overdueBanner {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-sm);
-}
-
-.overdueBanner > svg {
-    margin-top: 2px;
 }
 
 .actions button,
@@ -1045,27 +928,16 @@
 .emptyState > svg {
     display: block;
     margin: 0 auto var(--spacing-sm);
-    color: var(--seb-green-dark-2);
+    color: var(--color-text-soft);
 }
 
 
 /* Decision support checks on each card */
 
-/* Styled as a warning (light amber with a stripe), not as neutral grey,
-   so it reads as "check this" and the amber text has enough contrast. */
+/* Warnings as amber lines with an icon under the card's text, not as a box of their own:
+   the row stays light, and icon plus colour still say "check this". */
 .checks {
-    margin: 0 0 var(--spacing-md);
-    padding: 12px var(--spacing-md);
-    border-left: 4px solid #e3a008;
-    border-radius: var(--radius-sm);
-    background-color: #fff8e6;
-}
-
-.checksTitle {
-    margin: 0 0 var(--spacing-sm);
-    color: var(--color-text);
-    font-size: var(--font-size-sm);
-    font-weight: 700;
+    margin: var(--spacing-sm) 0 0;
 }
 
 .checksList {
@@ -1110,10 +982,6 @@
     font-size: var(--font-size-md);
 }
 
-.modalContext .dualApproval {
-    margin: 0;
-}
-
 /* "Förfaller i morgon": due soon, but not yet as urgent as today or past due */
 .dueSoon {
     display: inline-block;
@@ -1135,7 +1003,7 @@
     border-bottom: 1px solid var(--color-border-light);
 }
 
-/* Tabs on the left, "Sort by" on the right, sharing the tabs' bottom line */
+/* Tabs on the left, "Sort by" on the right, in a green toolbar like the admin user list */
 .tabsRow {
     display: flex;
     flex-wrap: wrap;
@@ -1143,7 +1011,39 @@
     justify-content: space-between;
     gap: var(--spacing-sm) var(--spacing-md);
     margin: 0 0 var(--spacing-lg);
-    border-bottom: 1px solid var(--color-border-light);
+    padding: var(--spacing-sm) var(--spacing-lg) 0;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background-color: var(--color-300);
+}
+
+.tabsRow .filterField label {
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+/* Same size and border as the search field in the admin user list. */
+.tabsRow .filterField select {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border-color: var(--color-border);
+}
+
+/* The total on the toolbar's right, like the user count in the admin user list. */
+.toolbarSide {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing-sm) var(--spacing-lg);
+    padding-bottom: var(--spacing-sm);
+}
+
+.pendingTotal {
+    margin: 0;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+    white-space: nowrap;
 }
 
 .tabsRow .tabs {
@@ -1151,14 +1051,16 @@
     border-bottom: 0;
 }
 
-.sortField {
-    padding-bottom: var(--spacing-sm);
+
+/* Baseline, so "Sort by" lines up with the text inside the select, not with its box. */
+.toolbarSide .filterField {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
 }
 
-.sortField .filterField {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
+.toolbarSide .filterField label {
+    line-height: 1.2;
 }
 
 .tab {
@@ -1178,9 +1080,11 @@
     color: var(--color-text);
 }
 
+/* Underline and bold, like the active section in the admin navigation: not colour alone. */
 .tabActive {
     border-bottom-color: var(--seb-green-dark-2);
     color: var(--color-text);
+    font-weight: 600;
 }
 
 .tabPanel:focus-visible {
@@ -1234,6 +1138,33 @@
     outline-offset: 2px;
 }
 
+/* History filters in the admin style: the same 42px fields and bold labels as the
+   search in the admin user list. No green background, since the tabs above already have one. */
+
+.tabPanel .toolbar {
+    align-items: flex-end;
+}
+
+.tabPanel .toolbar label,
+.tabPanel .toolbar legend {
+    color: var(--color-text);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.tabPanel .toolbar input,
+.tabPanel .toolbar select {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+    border-color: var(--color-border);
+}
+
+.tabPanel .toolbar .filterToggle,
+.tabPanel .toolbar .resetFilters {
+    height: 42px;
+    padding: 0 var(--spacing-md);
+}
+
 /* History list */
 
 .historyCount {
@@ -1250,22 +1181,28 @@
 .historyMonth {
     margin: 0 0 var(--spacing-sm);
     font-size: var(--font-size-md);
-    font-weight: 700;
+    font-weight: 600;
 }
 
+/* Same panel with rows as the pending list. */
 .historyList {
     display: grid;
-    gap: 12px;
     margin: 0;
     padding: 0;
     list-style: none;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    overflow: hidden;
 }
 
 .historyItem {
     padding: var(--spacing-md) var(--spacing-lg);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.historyItem:last-child {
+    border-bottom: 0;
 }
 
 .historyItemHeader {
@@ -1467,3 +1404,413 @@
     border-color: var(--color-text);
 }
 
+
+
+/* Compact card: reference, amount and buttons on one row; IBAN, account and time behind "Show details". */
+
+/* The same space above and below, so each payment reads as one block between the lines. */
+.card {
+    padding: var(--spacing-lg);
+}
+
+.cardInfo {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Bulk approval: a checkbox per row and a bar above the list. */
+
+.selectBox {
+    flex-shrink: 0;
+
+    width: 18px;
+    height: 18px;
+    margin: 3px 0 0;
+
+    accent-color: var(--seb-green-dark-1);
+    cursor: pointer;
+}
+
+.selectBox:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 2px;
+}
+
+.bulkBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm) var(--spacing-lg);
+
+    min-height: 56px;
+    padding: var(--spacing-sm) var(--spacing-lg);
+
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.selectAll {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-md);
+
+    margin: 0;
+
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.selectAll .selectBox {
+    margin: 0;
+}
+
+.bulkSummary {
+    margin: 0 0 0 auto;
+
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+}
+
+.bulkBar .approve {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    min-height: 40px;
+    padding: var(--spacing-sm) var(--spacing-md);
+
+    border: 1px solid var(--seb-green-dark-1);
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.bulkBar .approve:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.bulkBar .approve:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 3px;
+}
+
+/* The bulk dialog: the payments as a short list with the total at the bottom. */
+
+.bulkList {
+    display: grid;
+
+    max-height: 240px;
+    margin: 0 0 var(--spacing-md);
+    padding: 0;
+
+    overflow-y: auto;
+
+    border: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-sm);
+    background-color: #f7f8f9;
+
+    list-style: none;
+}
+
+.bulkList li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    padding: var(--spacing-sm) var(--spacing-md);
+
+    border-bottom: 1px solid var(--color-border-lighter);
+
+    font-size: var(--font-size-md);
+}
+
+.bulkList li:last-child {
+    border-bottom: 0;
+}
+
+.bulkReference {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.bulkWarning,
+.bulkWarningNote {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    color: #8a5a00;
+    font-weight: 500;
+}
+
+.bulkWarning {
+    font-size: var(--font-size-sm);
+}
+
+/* ".modal p" would otherwise make it grey and large. */
+.modal .bulkWarningNote {
+    color: #8a5a00;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+
+    margin: 0 0 var(--spacing-lg);
+
+    font-size: var(--font-size-md);
+}
+
+.modal .bulkWarningNote svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.bulkList .bulkTotal {
+    font-weight: 600;
+}
+
+/* 14px like the e-mail line in the admin user list: small text is hard to read. */
+.cardMeta {
+    margin: 4px 0 0;
+
+    color: var(--color-text-soft);
+
+    font-size: var(--font-size-md);
+}
+
+.cardSide {
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--spacing-sm);
+}
+
+.cardSide .actions {
+    flex-wrap: wrap;
+
+    padding-top: 0;
+}
+
+/* A link-style button under the information, not one of the decision buttons. */
+.detailsToggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    min-height: 32px;
+    margin-top: var(--spacing-xs);
+    padding: 0;
+
+    border: 0;
+    background: none;
+    color: var(--seb-green-dark-2);
+
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.detailsToggle:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.detailsToggle:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.detailsToggle svg {
+    transition: transform 0.2s ease;
+}
+
+.card .details {
+    margin: var(--spacing-sm) 0 0;
+}
+
+/* Loading skeleton: same row layout as the compact cards. */
+.skeletonRow {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    padding: var(--spacing-md) var(--spacing-lg);
+
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.skeletonRow:last-child {
+    border-bottom: 0;
+}
+
+.skeletonInfo,
+.skeletonSide {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.skeletonSide {
+    align-items: flex-end;
+}
+
+/* One panel for tabs and content, like the admin user list: the green toolbar is the panel's
+   header, not a box of its own, and the lists inside lose their own borders. */
+.panel {
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    overflow: hidden;
+}
+
+.panel .tabsRow {
+    margin: 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-border-light);
+    border-radius: 0;
+}
+
+.panel .list,
+.panel .historyList,
+.panel .emptyState {
+    border: 0;
+    border-radius: 0;
+}
+
+/* Inside the panel the outline would be clipped, so it is drawn inwards. */
+.panel .tabPanel:focus-visible {
+    outline-offset: -3px;
+    border-radius: 0;
+}
+
+.panel .tabPanel > .error {
+    margin: var(--spacing-md) var(--spacing-lg);
+}
+
+/* Handled tab: filters and month headings as full-width strips in the panel. */
+.panel .tabPanel > .toolbar {
+    margin: 0;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.panel .historyCount {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-lg) 0;
+}
+
+.panel .historyGroups {
+    gap: 0;
+}
+
+.panel .historyMonth {
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border-light);
+    background-color: var(--color-50);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+}
+
+.panel .historyGroups > section + section .historyMonth {
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* The list already draws the panel border. */
+.list > .emptyState {
+    border: 0;
+    border-radius: 0;
+}
+
+/* Responsive: on tablets and phones the amount and buttons move under the payment's text,
+   and the checkbox stays on the left of the whole row instead of taking a line of its own. */
+
+@media (max-width: 768px) {
+    .cardHeader {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .cardHeader:has(> .selectBox) {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .cardHeader:has(> .selectBox) > .selectBox {
+        grid-row: 1 / span 2;
+    }
+
+    .cardHeader:has(> .selectBox) > .cardInfo,
+    .cardHeader:has(> .selectBox) > .cardSide {
+        grid-column: 2;
+    }
+
+    .cardSide {
+        align-items: flex-start;
+    }
+
+    .cardSide .actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Less padding, so the text gets the width on a small screen. */
+    .card {
+        padding: var(--spacing-md);
+    }
+
+    .panel .tabsRow,
+    .bulkBar {
+        padding-right: var(--spacing-md);
+        padding-left: var(--spacing-md);
+    }
+
+    .card .details {
+        padding: var(--spacing-md);
+    }
+
+    /* Total and sorting on their own line under the tabs. */
+    .toolbarSide {
+        flex-basis: 100%;
+    }
+
+    .toolbarSide .filterField {
+        flex: 1;
+    }
+
+    .cardSide {
+        width: 100%;
+
+        align-items: stretch;
+    }
+
+    /* Summary and button under "Select all", the button full width and easy to tap. */
+    .bulkSummary {
+        flex-basis: 100%;
+        margin: 0;
+    }
+
+    .bulkBar .approve {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+    }
+}
