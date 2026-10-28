@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../i18n/translateSystemText";
 import type { TFunction } from "i18next";
 
 import { fetchAuditLog, type AuditLogFilters } from "../../services/auditService";
@@ -70,7 +71,7 @@ export function auditCsvRows(
                     id: entry.entityId,
                     defaultValue: `${entry.entityType} #${entry.entityId}`,
                 }),
-            [summary ?? entry.description, stepText].filter(Boolean).join(" · "),
+            [summary ?? translateSystemText(entry.description, t), stepText].filter(Boolean).join(" · "),
             comment ?? "",
         ];
     });

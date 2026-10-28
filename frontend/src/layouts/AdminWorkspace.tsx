@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ClipboardCheck, ClipboardList, House, LogOut, ShieldCheck, Users } from "lucide-react";
+import { ClipboardCheck, ClipboardList, House, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,8 +10,6 @@ import styles from "./AdminWorkspace.module.css";
 const adminSections = [
     { to: "/admin", label: "admin.navigation.overview", icon: House },
     { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
-    { to: "/admin/users", label: "admin.navigation.users", icon: Users },
-    { to: "/admin/approval-limits", label: "admin.navigation.approvalLimits", icon: ShieldCheck },
     { to: "/granskningslogg", label: "sidebar.auditLog", icon: ClipboardList },
 ] as const;
 
@@ -53,7 +51,7 @@ export function AdminWorkspace({ children, organization, variant = "admin" }: {
                 >
                     {sections.map(({ to, label, icon: Icon }) => {
                         const active = pathname.replace(/\/$/, "") === to
-                            || (to !== "/admin" && pathname.startsWith(`${to}/`));
+                            || pathname.startsWith(`${to}/`);
 
                         return (
                             <Link

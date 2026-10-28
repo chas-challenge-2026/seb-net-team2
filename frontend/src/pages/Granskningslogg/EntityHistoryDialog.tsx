@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../i18n/translateSystemText";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -101,7 +102,7 @@ export function EntityHistoryDialog({ entity, onClose }: EntityHistoryDialogProp
                                     </time>
 
                                     {summary !== "" && (
-                                        <p className={styles.timelineDescription}>{summary ?? event.description}</p>
+                                        <p className={styles.timelineDescription}>{summary ?? translateSystemText(event.description, t)}</p>
                                     )}
 
                                     {step !== null && totalSteps !== null && (

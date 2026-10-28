@@ -1,5 +1,25 @@
 {
-    "errors": {"connection":"Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.","request":"Begäran misslyckades. Försök igen.","configuration":"Serveradressen är inte konfigurerad.","exchangeConnection":"Kunde inte ansluta till valutatjänsten.","exchangeFetch":"Kunde inte hämta växelkursen.","exchangeMismatch":"Växelkursen motsvarar inte de valda valutorna."},
+    "errors": {"connection":"Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.","request":"Begäran misslyckades. Försök igen.","configuration":"Serveradressen är inte konfigurerad.","exchangeConnection":"Kunde inte ansluta till valutatjänsten.","exchangeFetch":"Kunde inte hämta växelkursen.","exchangeMismatch":"Växelkursen motsvarar inte de valda valutorna.",
+        "api": {
+            "emailExists": "En användare med denna e-postadress finns redan.",
+            "deleteSelf": "Du kan inte ta bort ditt eget konto.",
+            "userHasHistory": "Användaren har historik i granskningsloggen och kan inte tas bort.",
+            "approvalMinimum": "Minst en attestant krävs.",
+            "credentials": "Ogiltig e-postadress eller lösenord.",
+            "unauthorized": "Du saknar behörighet. Logga in igen.",
+            "positiveAmount": "Beloppet måste vara större än noll.",
+            "accountOrBalance": "Kontot hittades inte eller har otillräckligt saldo.",
+            "stepNotFound": "Atteststeget hittades inte.",
+            "decision": "Beslutet måste vara approved eller rejected.",
+            "stepPayment": "Steget tillhör inte denna betalning.",
+            "paymentHandled": "Betalningen väntar inte längre på attest.",
+            "stepHandled": "Det här atteststeget är redan beslutat.",
+            "accountNotFound": "Kontot hittades inte eller är inte tillgängligt för ditt företag.",
+            "limitExists": "Det finns redan en attestgräns för {{amount}}.",
+            "limitNotFound": "Attestgränsen hittades inte.",
+            "userNotFound": "Användaren hittades inte.",
+            "limitOrder": "Gränsen {{lowerAmount}} kräver {{lowerCount}} attestanter, medan den högre gränsen {{higherAmount}} kräver {{higherCount}}. Lägre belopp måste kräva färre attestanter."
+        }},
     "a11y": {"notFound":"Sidan kunde inte hittas","notFoundDescription":"Kontrollera adressen eller gå tillbaka till startsidan.","home":"Till startsidan","register":"Registrera dig","customerType":"Kundtyp","login":"Logga in","skip":"Hoppa till huvudinnehållet","main":"Huvudinnehåll","dialog":"Dialog","language":"Språk","mortgage":"Bolån"},
     "information": {
         "navigation": "Information och policyer",
@@ -55,6 +75,9 @@
         "description": "Konton, betalningar och attestering samlade på ett ställe. Här hittar du information om tjänsten, integritet och användningsvillkor."
     },
     "common": {
+        "backToUsers": "Tillbaka till användare",
+        "backToUserDetails": "Tillbaka till användaruppgifter",
+        "backToApprovalLimits": "Tillbaka till attestgränser",
         "loading": "Laddar...",
         "cancel": "Avbryt",
         "clear": "Rensa",
@@ -500,7 +523,12 @@
         },
         "summary": {
             "payment": "{{amount}} till {{iban}}",
-            "refund": "{{amount}} återfördes till kontot"
+            "refund": "{{amount}} återfördes till kontot",
+            "limit_one": "Gräns {{amount}} · {{count}} attestant",
+            "limit_other": "Gräns {{amount}} · {{count}} attestanter",
+            "user": "{{name}} ({{email}}) · {{role}}",
+            "userChanges": "{{name}}: {{fields}}",
+            "noChanges": "inga ändringar"
         },
         "entityTypes": {
             "payment": "Betalning #{{id}}",
@@ -516,6 +544,12 @@
             "error": "Det gick inte att ladda historiken.",
             "empty": "Inga händelser hittades.",
             "by": "av {{user}}"
+        },
+        "fields": {
+            "name": "namn",
+            "email": "e-post",
+            "role": "roll",
+            "password": "lösenord"
         }
     },
     "approvalLimits": {
@@ -536,7 +570,11 @@
             },
             "errors": {
                 "load": "Det gick inte att ladda attestgränserna."
-            }
+            },
+            "requires_one": "Kräver {{count}} attestant",
+            "requires_other": "Kräver {{count}} attestanter",
+            "requiresDual_one": "Kräver {{count}} attestant (dubbelattest)",
+            "requiresDual_other": "Kräver {{count}} attestanter (dubbelattest)"
         },
         "form": {
             "title": "Attestregel",
@@ -693,7 +731,13 @@
         "loading": "Laddar notiser...",
         "loadError": "Notiserna kunde inte hämtas. Försök igen senare.",
         "approvalWatchError": "Nya attesteringar kunde inte kontrolleras. Försöker igen...",
-        "updateError": "En notis kunde inte markeras som läst."
+        "updateError": "En notis kunde inte markeras som läst.",
+        "approved": "Din betalning med referens '{{reference}}' har godkänts.",
+        "rejected": "Din betalning med referens '{{reference}}' har avslagits.",
+        "approvedWithAmount": "Din betalning med referens '{{reference}}' på {{amount}} har godkänts.",
+        "rejectedWithAmount": "Din betalning med referens '{{reference}}' på {{amount}} har avslagits.",
+        "reminder": "Betalning '{{reference}}' ({{amount}}) väntar på din attest.",
+        "approvalWaiting": "Du har en betalning att attestera."
     },
     "overdueReminder": {
         "title": "Påminnelse: väntande attester",

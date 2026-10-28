@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../i18n/translateSystemText";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -271,7 +272,7 @@ export function Granskningslogg() {
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    {summary ?? entry.description}
+                                                    {summary ?? translateSystemText(entry.description, t)}
 
                                                     {step !== null && totalSteps !== null && (
                                                         // The main line for decisions, a detail under other events.

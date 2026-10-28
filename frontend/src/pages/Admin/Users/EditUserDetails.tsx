@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../../i18n/translateSystemText";
 import { RequiredMark } from "../../../components/FormValidation/RequiredField";
 import { updateUserSchema } from "../../../schemas/userSchema";
 import { useFormValidation, type ValidationErrors } from "../../../components/FormValidation/useFormValidation";
@@ -19,7 +20,7 @@ import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
 import styles from "./EditUserDetails.module.css";
 
 function getErrorMessage(error: unknown, fallback: string) {
-    if (error instanceof AppError) return error.detail ?? error.message;
+    if (error instanceof AppError) return translateSystemText(error.detail ?? error.message);
     return fallback;
 }
 
@@ -76,6 +77,16 @@ function EditUserForm({ user }: EditUserFormProps) {
 
     return (
         <div className={styles.layout}>
+            <div className={styles.breadcrumb}>
+                <Link
+                    to="/admin/users/$userId"
+                    params={{ userId: user.id }}
+                    className={styles.backLink}
+                >
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    {t("common.backToUserDetails")}
+                </Link>
+            </div>
             <header className={styles.pageHeader}>
                 <div className={styles.titleRow}>
                     <Pencil size={27} strokeWidth={2} aria-hidden="true" />

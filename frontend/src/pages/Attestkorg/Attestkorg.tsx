@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../i18n/translateSystemText";
 import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { focusField } from "../../components/FormValidation/useFormValidation";
 import { useModalFocus } from "../../hooks/useModalFocus";
@@ -77,7 +78,7 @@ function sortApprovals(approvals: PendingApprovalStep[], sortOption: SortOption)
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof AppError) return error.detail ?? error.message;
+    if (error instanceof AppError) return translateSystemText(error.detail ?? error.message);
     return fallback;
 }
 
@@ -412,7 +413,7 @@ export function Attestkorg() {
             <section className={styles.inbox}>
                 <div className={styles.error} role="alert">
                     {error instanceof AppError
-                        ? error.detail ?? error.message
+                        ? translateSystemText(error.detail ?? error.message, t)
                         : t("approvalInbox.errors.load")}
                 </div>
             </section>

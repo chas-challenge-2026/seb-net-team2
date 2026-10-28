@@ -1,8 +1,9 @@
+import { translateSystemText } from "../../../i18n/translateSystemText";
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Building2, Mail, Pencil, ShieldCheck, Trash2, TriangleAlert, UserRound } from "lucide-react";
+import { Building2, Mail, Pencil, ShieldCheck, Trash2, TriangleAlert, UserRound, ArrowLeft } from "lucide-react";
 
 import Button from "../../../components/Button/Button";
 import LoadingWheel from "../../../components/LoadingState/LoadingWheel";
@@ -65,7 +66,7 @@ function UserDetailsSkeleton() {
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
-    if (error instanceof AppError) return error.detail ?? error.message;
+    if (error instanceof AppError) return translateSystemText(error.detail ?? error.message);
     return fallback;
 }
 
@@ -127,6 +128,12 @@ export default function UserDetails() {
 
     return (
         <div className={styles.layout}>
+            <div className={styles.breadcrumb}>
+                <Link to="/admin/users" className={styles.backLink}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    {t("admin.dashboard.viewUsers")}
+                </Link>
+            </div>
             <header className={styles.pageHeader}>
                 <div className={styles.titleRow}>
                     <UserRound size={28} strokeWidth={2} aria-hidden="true" />
