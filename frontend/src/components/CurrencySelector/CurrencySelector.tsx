@@ -31,7 +31,7 @@ export function CurrencySelector() {
                 onClick={() => setIsOpen(previous => !previous)}>
                 <Coins size={18} className={styles.coin} aria-hidden="true" />
                 <span>{currencyLabel(primaryCurrency)}</span>
-                <ChevronDown size={16} className={`${dropdown.chevron} ${styles.chevron}`} aria-hidden="true" />
+                <ChevronDown data-disclosure-chevron size={16} className={`${dropdown.chevron} ${styles.chevron}`} aria-hidden="true" />
             </button>
             {isOpen && (
                 <div className={dropdown.menu}>

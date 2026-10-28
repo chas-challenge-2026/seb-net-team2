@@ -31,7 +31,6 @@ import EditUserDetails from './pages/Admin/Users/EditUserDetails'
 import ApprovalLimits from './pages/Admin/ApprovalLimits/ApprovalLimits'
 import CreateApprovalLimit from './pages/Admin/ApprovalLimits/CreateApprovalLimit'
 import EditApprovalLimit from './pages/Admin/ApprovalLimits/EditApprovalLimit'
-import AdminDashboard from './pages/Admin/AdminDashboard/AdminDashboard';
 import { InformationPage } from './pages/Information/InformationPage';
 import { NotFoundPage } from './pages/Information/NotFoundPage';
 
@@ -43,7 +42,7 @@ const overviewRoute = createRoute({ getParentRoute: () => rootRoute, path: '/das
 const nyBetalningRoute = createRoute({ getParentRoute: () => rootRoute, path: '/ny-betalning', component: () => <RoleProtectedRoute allowedRoles={["Initiator"]}><NyBetalning /></RoleProtectedRoute> })
 const mortgageRoute = createRoute({ getParentRoute: () => rootRoute, path: '/bolan', component: () => <ProtectedRoute><Mortgage /></ProtectedRoute> })
 const attestkorgRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attestkorg', component: () => <RoleProtectedRoute allowedRoles={["Attestant", "Admin"]}><Attestkorg /></RoleProtectedRoute> })
-const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><Granskningslogg /></RoleProtectedRoute> })
+const granskningsloggRoute = createRoute({ getParentRoute: () => rootRoute, path: '/granskningslogg', component: () => <RoleProtectedRoute allowedRoles={["Admin", "Attestant"]}><Granskningslogg /></RoleProtectedRoute> })
 const profilRoute = createRoute({ getParentRoute: () => rootRoute, path: '/profil', component: () => <ProtectedRoute><Profil /></ProtectedRoute> })
 const loggaUtRoute = createRoute({ getParentRoute: () => rootRoute, path: '/logout', component: () => <ProtectedRoute><Logout /></ProtectedRoute> })
 const registerRoute = createRoute({ getParentRoute: () => rootRoute, path: "/register", component: () => <Register /> })
@@ -54,7 +53,7 @@ const storageRoute = createRoute({ getParentRoute: () => rootRoute, path: "/loka
 
 // ADMIN ROUTES
 const adminRoute = createRoute({ getParentRoute: () => rootRoute, path: "/admin", component: () => <RoleProtectedRoute allowedRoles={["Admin"]}><AdminLayout /></RoleProtectedRoute> })
-const adminDashboardRoute = createRoute({ getParentRoute: () => adminRoute, path: "/", component: AdminDashboard });
+const adminDashboardRoute = createRoute({ getParentRoute: () => adminRoute, path: "/", component: Dashboard });
 const createUserRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users/create", component: CreateUser })
 const usersRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users", component: Users })
 const userDetailRoute = createRoute({ getParentRoute: () => adminRoute, path: "/users/$userId", component: UserDetails })

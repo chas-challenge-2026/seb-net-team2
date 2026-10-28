@@ -152,7 +152,7 @@ export function PaymentsTable({ payments, accounts, locale }: PaymentsTableProps
                                                         amount: formatAmount(payment),
                                                     })}
                                                 >
-                                                    <ChevronDown size={18} aria-hidden="true" />
+                                                    <ChevronDown data-disclosure-chevron size={18} aria-hidden="true" />
                                                 </button>
                                             </td>
                                         </tr>

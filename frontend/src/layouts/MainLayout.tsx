@@ -54,6 +54,7 @@ export function MainLayout() {
                     {usesWorkspace ? (
                         <AdminWorkspace
                             organization={user?.tenantName}
+                            user={user ?? undefined}
                             variant={isAdmin ? "admin" : isAttestant ? "attestant" : "initiator"}
                         >
                             <Outlet />

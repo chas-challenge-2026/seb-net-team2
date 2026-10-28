@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
+    ArrowLeft,
     Banknote,
     ChevronRight,
     Clock3,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { getApprovalLimits } from "../../../services/approvalLimitsService";
+import { translateSystemText } from "../../../i18n/translateSystemText";
 import Skeleton from "../../../components/LoadingState/Skeleton";
 
 import styles from "./ApprovalLimits.module.css";
@@ -66,6 +68,12 @@ export default function ApprovalLimits() {
 
     return (
         <div className={styles.layout}>
+            <div className={styles.breadcrumb}>
+                <Link to="/admin" className={styles.backLink}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    {t("admin.navigation.overview")}
+                </Link>
+            </div>
             <header className={styles.pageHeader}>
                 <div>
                     <div className={styles.titleRow}>
@@ -150,7 +158,7 @@ export default function ApprovalLimits() {
                                         </div>
 
                                         <span className={styles.description}>
-                                            {limit.description}
+                                            {translateSystemText(limit.description, t)}
                                         </span>
                                     </div>
 

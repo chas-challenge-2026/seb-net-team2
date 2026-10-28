@@ -7,6 +7,7 @@
 
 .topline {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-md);
@@ -18,11 +19,12 @@
     margin-left: auto;
 }
 
-.logout {
-    display: inline-flex;
+.accountActions {
+    display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    min-height: 40px;
+    gap: var(--spacing-lg);
+    margin-left: auto;
+    min-width: 0;
 }
 
 .surface {
@@ -35,7 +37,7 @@
 
 .navigation {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-xs);
     padding: var(--spacing-sm);
     border-bottom: 1px solid var(--color-border-light);
@@ -79,11 +81,22 @@
     min-width: 24px;
     min-height: 24px;
     padding: 0 var(--spacing-xs);
+    border: 1px solid currentColor;
     border-radius: var(--radius-pill);
     background: var(--color-300);
     color: var(--seb-green-dark-2);
     font-size: var(--font-size-sm);
     font-weight: 700;
+}
+
+.count[data-severity="warning"] {
+    background: #fff8e6;
+    color: #8a5a00;
+}
+
+.count[data-severity="urgent"] {
+    background: #fff5f5;
+    color: var(--color-error);
 }
 
 .routeContent {
@@ -92,7 +105,7 @@
 }
 
 /* The workspace supplies the outer width and spacing for existing route pages. */
-.surface .routeContent > :first-child {
+.surface .routeContent> :first-child {
     width: 100%;
     min-width: 0;
     max-width: none;
@@ -101,8 +114,7 @@
     overflow: visible;
 }
 
-.navLink:focus-visible,
-.logout:focus-visible {
+.navLink:focus-visible {
     outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
 }
@@ -131,12 +143,12 @@
     }
 }
 
-/* The attestant has two pages, side by side at every width. */
+/* The initiator has two pages, side by side at every width. */
 .navigation.twoSections {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.navigation.twoSections > :last-child {
+.navigation.twoSections> :last-child {
     grid-column: auto;
 }
 

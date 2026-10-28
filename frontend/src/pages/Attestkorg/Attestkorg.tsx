@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../i18n/translateSystemText";
 import { RequiredMark } from "../../components/FormValidation/RequiredField";
 import { focusField } from "../../components/FormValidation/useFormValidation";
 import { useModalFocus } from "../../hooks/useModalFocus";
@@ -77,7 +78,7 @@ function sortApprovals(approvals: PendingApprovalStep[], sortOption: SortOption)
 }
 
 function getErrorMessage(error: unknown, fallback: string): string {
-    if (error instanceof AppError) return error.detail ?? error.message;
+    if (error instanceof AppError) return translateSystemText(error.detail ?? error.message);
     return fallback;
 }
 
@@ -128,7 +129,9 @@ export function Attestkorg() {
         (a, b) => Number(isOverdue(b)) - Number(isOverdue(a))
     );
 
-    const pendingTotal = formatTotals(approvals, locale);
+    // Count all steps, but include each payment's amount only once.
+    const pendingPayments = [...new Map(approvals.map((approval) => [approval.paymentId, approval])).values()];
+    const pendingTotal = formatTotals(pendingPayments, locale);
 
     const selectedApprovals = sortedApprovals.filter((approval) => selectedIds.has(approval.stepId));
     const allSelected = sortedApprovals.length > 0 && selectedApprovals.length === sortedApprovals.length;
@@ -412,7 +415,7 @@ export function Attestkorg() {
             <section className={styles.inbox}>
                 <div className={styles.error} role="alert">
                     {error instanceof AppError
-                        ? error.detail ?? error.message
+                        ? translateSystemText(error.detail ?? error.message, t)
                         : t("approvalInbox.errors.load")}
                 </div>
             </section>
@@ -433,6 +436,11 @@ export function Attestkorg() {
                             : "approvalInbox.description")}
                     </p>
                 </div>
+                {activeTab === "pending" && approvals.length > 0 && (
+                    <p className={styles.summaryPill} role="status" aria-live="polite">
+                        {t("approvalInbox.pendingSummary", { count: approvals.length, total: pendingTotal })}
+                    </p>
+                )}
             </header>
 
             {actionFeedback && (
@@ -481,9 +489,7 @@ export function Attestkorg() {
                 </div>
             )}
 
-            {/* Tabs and list share one panel, with the tabs as its green header, like the admin user list. */}
-            <div className={styles.panel}>
-            {/* Sorting sits on the tab row, so the first payment starts higher up. */}
+            {/* Tabs and sorting sit above the payment panel. */}
             <div className={styles.tabsRow}>
                 <ApprovalTabs
                     activeTab={activeTab}
@@ -494,11 +500,6 @@ export function Attestkorg() {
 
                 {activeTab === "pending" && approvals.length > 0 && (
                     <div className={styles.toolbarSide}>
-                        {/* The tabs already show the count, so only the total amount is added. */}
-                        <p className={styles.pendingTotal} role="status" aria-live="polite">
-                            {t("approvalInbox.pendingTotal", { total: pendingTotal })}
-                        </p>
-
                         <div className={styles.filterField}>
                             <label htmlFor="pending-sort">
                                 {t("approvalInbox.sort.label")}
@@ -527,6 +528,7 @@ export function Attestkorg() {
                 )}
             </div>
 
+            <div className={styles.panel}>
             {activeTab === "handled" ? (
                 <HandledApprovals
                     id={TAB_IDS.handled.panel}
@@ -665,9 +667,9 @@ export function Attestkorg() {
                                             ? "approvalInbox.card.hideDetails"
                                             : "approvalInbox.card.showDetails")}
                                         <ChevronDown
+                                            data-disclosure-chevron
                                             size={16}
                                             aria-hidden="true"
-                                            className={expandedIds.has(approval.stepId) ? styles.chevronOpen : undefined}
                                         />
                                     </button>
                                 </div>

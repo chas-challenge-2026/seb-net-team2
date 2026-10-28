@@ -31,7 +31,7 @@ export default function LanguageSelector() {
                 onClick={() => setIsOpen(previous => !previous)}>
                 <span className={currentLanguage.flagClass} aria-hidden="true" />
                 <span>{currentLanguage.label}</span>
-                <ChevronDown className={styles.chevron} size={16} aria-hidden="true" />
+                <ChevronDown data-disclosure-chevron className={styles.chevron} size={16} aria-hidden="true" />
             </button>
             {isOpen && (
                 <div className={styles.menu}>

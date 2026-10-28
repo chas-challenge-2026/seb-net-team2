@@ -239,6 +239,9 @@
 
 .sidebar-footer {
   padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
 
 .logout-btn,
@@ -500,4 +503,8 @@
 
     overflow-x: hidden;
   }
+}
+
+.sidebar.collapsed .sidebar-footer {
+    flex-direction: column;
 }

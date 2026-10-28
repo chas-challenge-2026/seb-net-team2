@@ -199,9 +199,9 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         <SlidersHorizontal size={16} aria-hidden="true" />
                         {t("approvalInbox.history.moreFilters")}
                         <ChevronDown
+                            data-disclosure-chevron
                             size={16}
                             aria-hidden="true"
-                            className={filtersOpen ? styles.chevronOpen : undefined}
                         />
                     </button>
 
@@ -402,7 +402,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                     ))}
                 </div>
             ) : (
-                <div className={styles.emptyState}>
+                <div className={`${styles.emptyState} ${history.length === 0 ? styles.handledEmpty : ""}`}>
                     <History size={32} aria-hidden="true" />
                     <h2>
                         {history.length === 0

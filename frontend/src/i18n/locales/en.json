@@ -1,5 +1,25 @@
 {
-    "errors": {"connection":"Unable to connect to the server. Check your connection and try again.","request":"Request failed. Please try again.","configuration":"The server address is not configured.","exchangeConnection":"Unable to connect to the exchange rate service.","exchangeFetch":"Unable to fetch the exchange rate.","exchangeMismatch":"The exchange rate does not match the requested currencies."},
+    "errors": {"connection":"Unable to connect to the server. Check your connection and try again.","request":"Request failed. Please try again.","configuration":"The server address is not configured.","exchangeConnection":"Unable to connect to the exchange rate service.","exchangeFetch":"Unable to fetch the exchange rate.","exchangeMismatch":"The exchange rate does not match the requested currencies.",
+        "api": {
+            "emailExists": "A user with this email address already exists.",
+            "deleteSelf": "You cannot delete your own account.",
+            "userHasHistory": "This user has audit history and cannot be deleted.",
+            "approvalMinimum": "At least one approver is required.",
+            "credentials": "Invalid email address or password.",
+            "unauthorized": "You are not authorised. Please sign in again.",
+            "positiveAmount": "The amount must be greater than zero.",
+            "accountOrBalance": "The account was not found or has insufficient funds.",
+            "stepNotFound": "The approval step was not found.",
+            "decision": "The decision must be approved or rejected.",
+            "stepPayment": "The step does not belong to this payment.",
+            "paymentHandled": "The payment is no longer awaiting approval.",
+            "stepHandled": "This approval step has already been decided.",
+            "accountNotFound": "The account was not found or is not available to your company.",
+            "limitExists": "An approval limit already exists for {{amount}}.",
+            "limitNotFound": "The approval limit was not found.",
+            "userNotFound": "The user was not found.",
+            "limitOrder": "The limit {{lowerAmount}} requires {{lowerCount}} approvers, while the higher limit {{higherAmount}} requires {{higherCount}}. Lower amounts must require fewer approvers."
+        }},
     "a11y": {"notFound":"Page not found","notFoundDescription":"Check the address or return to the home page.","home":"Go to home page","register":"Register","customerType":"Customer type","login":"Log in","skip":"Skip to main content","main":"Main content","dialog":"Dialog","language":"Language","mortgage":"Mortgage"},
     "information": {
         "navigation": "Information and policies",
@@ -112,6 +132,9 @@
         "description": "Accounts, payments and approvals in one place. Find information about the service, privacy and terms of use here."
     },
     "common": {
+        "backToUsers": "Back to users",
+        "backToUserDetails": "Back to user details",
+        "backToApprovalLimits": "Back to approval limits",
         "loading": "Loading...",
         "cancel": "Cancel",
         "clear": "Clear",
@@ -163,6 +186,7 @@
         "myProfile": "My profile",
         "logout": "Log out",
         "approvalsPending": "{{pending}} pending",
+        "approvalsNeedAttention": "{{pending}} pending, at least one approval needs attention soon",
         "approvalsWithOverdue": "{{pending}} pending, {{overdue}} overdue"
     },
     "dashboard": {
@@ -325,6 +349,8 @@
         "pendingCount_one": "{{count}} pending",
         "pendingCount_other": "{{count}} pending",
         "pendingTotal": "Total {{total}}",
+        "pendingSummary_one": "{{count}} pending approval · {{total}}",
+        "pendingSummary_other": "{{count}} pending approvals · {{total}}",
         "dismissMessage": "Dismiss message",
         "errors": {
             "load": "Unable to load approvals.",
@@ -568,7 +594,12 @@
         },
         "summary": {
             "payment": "{{amount}} to {{iban}}",
-            "refund": "{{amount}} returned to the account"
+            "refund": "{{amount}} returned to the account",
+            "limit_one": "Limit {{amount}} · {{count}} approver",
+            "limit_other": "Limit {{amount}} · {{count}} approvers",
+            "user": "{{name}} ({{email}}) · {{role}}",
+            "userChanges": "{{name}}: {{fields}}",
+            "noChanges": "no changes"
         },
         "entityTypes": {
             "payment": "Payment #{{id}}",
@@ -584,6 +615,12 @@
             "error": "Could not load the history.",
             "empty": "No events found.",
             "by": "by {{user}}"
+        },
+        "fields": {
+            "name": "name",
+            "email": "email",
+            "role": "role",
+            "password": "password"
         }
     },
     "approvalLimits": {
@@ -604,7 +641,11 @@
             },
             "errors": {
                 "load": "Unable to load approval limits."
-            }
+            },
+            "requires_one": "Requires {{count}} approver",
+            "requires_other": "Requires {{count}} approvers",
+            "requiresDual_one": "Requires {{count}} approver (dual approval)",
+            "requiresDual_other": "Requires {{count}} approvers (dual approval)"
         },
         "form": {
             "title": "Approval rule",
@@ -761,7 +802,13 @@
         "loading": "Loading notifications...",
         "loadError": "Notifications could not be loaded. Try again later.",
         "approvalWatchError": "New approvals could not be checked. Retrying...",
-        "updateError": "A notification could not be marked as read."
+        "updateError": "A notification could not be marked as read.",
+        "approved": "Your payment with reference '{{reference}}' has been approved.",
+        "rejected": "Your payment with reference '{{reference}}' has been rejected.",
+        "approvedWithAmount": "Your payment with reference '{{reference}}' for {{amount}} has been approved.",
+        "rejectedWithAmount": "Your payment with reference '{{reference}}' for {{amount}} has been rejected.",
+        "reminder": "Payment '{{reference}}' ({{amount}}) is waiting for your approval.",
+        "approvalWaiting": "You have a payment awaiting approval."
     },
     "overdueReminder": {
         "title": "Reminder: approvals waiting",
