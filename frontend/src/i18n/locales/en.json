@@ -348,6 +348,8 @@
         "pendingCount_one": "{{count}} pending",
         "pendingCount_other": "{{count}} pending",
         "pendingTotal": "Total {{total}}",
+        "pendingSummary_one": "{{count}} pending approval · {{total}}",
+        "pendingSummary_other": "{{count}} pending approvals · {{total}}",
         "dismissMessage": "Dismiss message",
         "errors": {
             "load": "Unable to load approvals.",

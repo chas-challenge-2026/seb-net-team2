@@ -36,8 +36,7 @@ export function Dashboard() {
     const balances = calculateAccountBalances(displayedAccounts, rates, primaryCurrency);
     const loadingRates = rateQueries.some((query) => query.isPending);
 
-    // Only initiators may create payments (the backend rejects other roles).
-    const canCreatePayments = user?.role === "Initiator";
+    const canCreatePayments = user?.role === "Initiator" || user?.role === "Admin";
 
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();

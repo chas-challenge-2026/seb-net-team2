@@ -58,21 +58,35 @@
         var(--color-text-soft);
 }
 
+.summaryPill {
+    display: inline-flex;
+    flex-shrink: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
 
 /* Feedback */
 
 .feedback {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
 
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm) var(--spacing-md);
 
     margin-bottom:
         var(--spacing-lg);
 
     padding:
-        12px var(--spacing-md);
+        var(--spacing-md);
 
     border:
         1px solid;
@@ -166,7 +180,7 @@
         var(--spacing-lg);
 
     padding:
-        12px var(--spacing-md);
+        var(--spacing-md);
 
     border:
         1px solid var(--color-error);
@@ -205,6 +219,8 @@
 
     gap:
         var(--spacing-xs);
+
+    min-width: 0;
 }
 
 .filterField label {
@@ -221,7 +237,7 @@
     min-width: 180px;
 
     padding:
-        8px 10px;
+        var(--spacing-sm) var(--spacing-md);
 
     border:
         1px solid var(--color-control-border);
@@ -280,7 +296,7 @@
     min-width: 0;
 
     padding:
-        var(--spacing-lg) var(--spacing-lg) 20px;
+        var(--spacing-lg);
 
     border-bottom:
         1px solid var(--color-border-light);
@@ -316,7 +332,7 @@
     align-items: flex-start;
     justify-content: space-between;
 
-    gap: 20px;
+    gap: var(--spacing-lg);
 }
 
 .card h2 {
@@ -353,15 +369,15 @@
             minmax(200px, 1fr));
 
     gap:
-        var(--spacing-lg) var(--spacing-xl);
+        var(--spacing-md) var(--spacing-lg);
 
     margin:
-        22px 0 20px;
+        var(--spacing-md) 0 0;
 
     /* A tinted block instead of a line above, so it reads as part of this payment
        and the only lines in the list are the ones between payments. */
     padding:
-        var(--spacing-md) var(--spacing-lg);
+        var(--spacing-md);
 
     border-radius:
         var(--radius-sm);
@@ -410,7 +426,7 @@
 .commentField {
     display: grid;
 
-    gap: 6px;
+    gap: var(--spacing-sm);
 
     margin-bottom:
         var(--spacing-md);
@@ -432,7 +448,7 @@
     min-height: 64px;
 
     padding:
-        10px 12px;
+        var(--spacing-sm) var(--spacing-md);
 
     border:
         1px solid var(--color-control-border);
@@ -500,7 +516,7 @@
     display: flex;
     justify-content: flex-end;
 
-    gap: 10px;
+    gap: var(--spacing-sm);
 
     padding-top:
         var(--spacing-xs);
@@ -551,17 +567,21 @@
     opacity: 0.6;
 }
 
-.reject {
+.actions button.reject,
+.modalActions button.reject {
+    border-color: var(--color-error);
+
     background-color:
         var(--color-surface);
 
     color:
-        var(--color-text);
+        var(--color-error);
 }
 
-.reject:hover:not(:disabled):not([aria-disabled="true"]) {
+.actions button.reject:hover:not(:disabled):not([aria-disabled="true"]),
+.modalActions button.reject:hover:not(:disabled):not([aria-disabled="true"]) {
     background-color:
-        var(--color-hover-light);
+        #fff5f5;
 }
 
 .approve {
@@ -635,7 +655,7 @@
     align-items: center;
     justify-content: center;
 
-    padding: 20px;
+    padding: var(--spacing-md);
 
     /* Same backdrop as the shared Modal used on the admin pages. */
     background-color:
@@ -645,7 +665,7 @@
 .modal {
     width: 100%;
     max-width: 480px;
-    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 2 * var(--spacing-md));
     overflow-y: auto;
 
     padding:
@@ -666,7 +686,7 @@
 
 .modal h2 {
     margin:
-        0 0 12px;
+        0 0 var(--spacing-sm);
 
     color:
         var(--color-text);
@@ -679,7 +699,7 @@
 
 .modal p {
     margin:
-        0 0 var(--spacing-lg);
+        0 0 var(--spacing-md);
 
     color:
         var(--color-text-soft);
@@ -699,7 +719,7 @@
         var(--spacing-md) var(--spacing-lg);
 
     margin:
-        0 0 var(--spacing-lg);
+        0 0 var(--spacing-md);
 
     padding:
         var(--spacing-md);
@@ -717,7 +737,7 @@
 
 /* The warning sits between the details and the comment: space on both sides. */
 .modal .checks {
-    margin: 0 0 var(--spacing-lg);
+    margin: 0 0 var(--spacing-md);
 }
 
 
@@ -756,7 +776,7 @@
     display: flex;
     justify-content: flex-end;
 
-    gap: 10px;
+    gap: var(--spacing-sm);
 }
 
 .modalCancel {
@@ -783,14 +803,14 @@
         margin: 0;
 
         padding-right:
-            20px;
+            var(--spacing-md);
 
         padding-left:
-            20px;
+            var(--spacing-md);
     }
 
     .header {
-        display: block;
+        flex-wrap: wrap;
     }
 }
 
@@ -813,11 +833,6 @@
         min-width: 0;
     }
 
-    .card {
-        padding:
-            20px var(--spacing-md) var(--spacing-md);
-    }
-
     .cardHeader strong {
         font-size:
             var(--font-size-lg);
@@ -828,7 +843,7 @@
             1fr;
 
         gap:
-            12px;
+            var(--spacing-md);
     }
 
     .actions {
@@ -853,23 +868,15 @@
 @media (max-width: 480px) {
     .inbox {
         padding-right:
-            12px;
+            var(--spacing-md);
 
         padding-left:
-            12px;
+            var(--spacing-md);
     }
 
     .header h1 {
         font-size:
             var(--font-size-xl);
-    }
-
-    .card {
-        padding-right:
-            14px;
-
-        padding-left:
-            14px;
     }
 
     .actions {
@@ -879,7 +886,7 @@
 
     .modal {
         padding:
-            20px;
+            var(--spacing-md);
     }
 
     .modalActions {
@@ -893,6 +900,7 @@
         min-height: 44px;
     }
 }
+
 /* Icons */
 .titleRow {
     display: flex;
@@ -907,6 +915,8 @@
 
 .feedbackMessage {
     display: inline-flex;
+    flex: 1 1 220px;
+    min-width: 0;
     align-items: center;
     gap: var(--spacing-sm);
 }
@@ -925,7 +935,7 @@
     gap: var(--spacing-sm);
 }
 
-.emptyState > svg {
+.emptyState>svg {
     display: block;
     margin: 0 auto var(--spacing-sm);
     color: var(--color-text-soft);
@@ -942,7 +952,7 @@
 
 .checksList {
     display: grid;
-    gap: 6px;
+    gap: var(--spacing-sm);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -976,7 +986,7 @@
 /* "Du attesterar som … · Atteststeg 2" in the confirmation dialog */
 .modalContext {
     display: grid;
-    gap: 2px;
+    gap: var(--spacing-xs);
     margin: 0 0 var(--spacing-md);
     color: var(--color-text-soft);
     font-size: var(--font-size-md);
@@ -1003,18 +1013,17 @@
     border-bottom: 1px solid var(--color-border-light);
 }
 
-/* Tabs on the left, "Sort by" on the right, in a green toolbar like the admin user list */
+/* Tabs on the left and sorting on the right, above the payment panel. */
 .tabsRow {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
     gap: var(--spacing-sm) var(--spacing-md);
-    margin: 0 0 var(--spacing-lg);
-    padding: var(--spacing-sm) var(--spacing-lg) 0;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    background-color: var(--color-300);
+    margin: 0 0 var(--spacing-md);
+    padding: 0;
+    border-bottom: 1px solid var(--color-border-light);
+    background-color: transparent;
 }
 
 .tabsRow .filterField label {
@@ -1035,7 +1044,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: var(--spacing-sm) var(--spacing-lg);
+    gap: var(--spacing-sm) var(--spacing-md);
     padding-bottom: var(--spacing-sm);
 }
 
@@ -1057,6 +1066,7 @@
     display: flex;
     align-items: baseline;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
 .toolbarSide .filterField label {
@@ -1065,7 +1075,7 @@
 
 .tab {
     margin-bottom: -1px;
-    padding: 10px 16px;
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 0;
     border-bottom: 3px solid transparent;
     background: none;
@@ -1074,6 +1084,7 @@
     font: inherit;
     font-size: var(--font-size-md);
     font-weight: 500;
+    min-height: 44px;
 }
 
 .tab:hover {
@@ -1102,7 +1113,7 @@
 
 .filterField input {
     min-width: 150px;
-    padding: 8px 10px;
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--color-control-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
@@ -1123,7 +1134,7 @@
     align-self: flex-end;
     gap: var(--spacing-xs);
     height: 38px;
-    padding: 0 12px;
+    padding: 0 var(--spacing-md);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
@@ -1197,7 +1208,7 @@
 }
 
 .historyItem {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-lg);
     border-bottom: 1px solid var(--color-border-light);
 }
 
@@ -1217,10 +1228,10 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--spacing-xs) 12px;
+    gap: var(--spacing-xs) var(--spacing-md);
 }
 
-.titleLine > p {
+.titleLine>p {
     margin: 0;
 }
 
@@ -1246,7 +1257,7 @@
 .decisionHandled {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--spacing-sm);
     margin: 0;
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -1274,6 +1285,7 @@
 .historyDetails dt {
     color: var(--placeholder-grey);
     font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xs);
 }
 
 .historyDetails dd {
@@ -1285,7 +1297,7 @@
 
 .historyComment {
     margin: var(--spacing-sm) 0 0;
-    padding-left: 10px;
+    padding-left: var(--spacing-sm);
     border-left: 3px solid var(--color-border);
     color: var(--color-text);
     font-size: var(--font-size-md);
@@ -1341,7 +1353,7 @@
     align-self: flex-end;
     gap: var(--spacing-xs);
     height: 38px;
-    padding: 0 12px;
+    padding: 0 var(--spacing-md);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     background: var(--color-surface);
@@ -1389,13 +1401,14 @@
 
 .amountInputs input {
     width: 110px;
-    padding: 8px 10px;
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--color-control-border);
     border-radius: var(--radius-sm);
     color: var(--color-text);
     font: inherit;
     font-size: var(--font-size-md);
     background: var(--color-surface);
+    min-width: 0;
 }
 
 .amountInputs input:focus-visible {
@@ -1409,9 +1422,6 @@
 /* Compact card: reference, amount and buttons on one row; IBAN, account and time behind "Show details". */
 
 /* The same space above and below, so each payment reads as one block between the lines. */
-.card {
-    padding: var(--spacing-lg);
-}
 
 .cardInfo {
     flex: 1;
@@ -1565,7 +1575,7 @@
     align-items: flex-start;
     gap: var(--spacing-sm);
 
-    margin: 0 0 var(--spacing-lg);
+    margin: 0 0 var(--spacing-md);
 
     font-size: var(--font-size-md);
 }
@@ -1590,15 +1600,17 @@
 
 .cardSide {
     flex-shrink: 0;
+    align-self: stretch;
 
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
 }
 
 .cardSide .actions {
     flex-wrap: wrap;
+    margin-top: auto;
 
     padding-top: 0;
 }
@@ -1607,10 +1619,10 @@
 .detailsToggle {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: var(--spacing-sm);
 
-    min-height: 32px;
-    margin-top: var(--spacing-xs);
+    min-height: 40px;
+    margin-top: var(--spacing-sm);
     padding: 0;
 
     border: 0;
@@ -1638,10 +1650,6 @@
     transition: transform 0.2s ease;
 }
 
-.card .details {
-    margin: var(--spacing-sm) 0 0;
-}
-
 /* Loading skeleton: same row layout as the compact cards. */
 .skeletonRow {
     display: flex;
@@ -1649,7 +1657,7 @@
     justify-content: space-between;
     gap: var(--spacing-md);
 
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-lg);
 
     border-bottom: 1px solid var(--color-border-light);
 }
@@ -1671,20 +1679,12 @@
     align-items: flex-end;
 }
 
-/* One panel for tabs and content, like the admin user list: the green toolbar is the panel's
-   header, not a box of its own, and the lists inside lose their own borders. */
+/* One panel for the selected tab's content. */
 .panel {
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
     background-color: var(--color-surface);
     overflow: hidden;
-}
-
-.panel .tabsRow {
-    margin: 0;
-    border: 0;
-    border-bottom: 1px solid var(--color-border-light);
-    border-radius: 0;
 }
 
 .panel .list,
@@ -1694,18 +1694,32 @@
     border-radius: 0;
 }
 
+.panel:has(.handledEmpty) {
+    border: 0;
+}
+
+.panel .handledEmpty {
+    border: 1px dashed var(--seb-green-dark-2);
+    border-radius: var(--radius-md);
+    background-color: var(--color-50);
+}
+
+.handledEmpty > svg {
+    color: var(--seb-green-dark-2);
+}
+
 /* Inside the panel the outline would be clipped, so it is drawn inwards. */
 .panel .tabPanel:focus-visible {
     outline-offset: -3px;
     border-radius: 0;
 }
 
-.panel .tabPanel > .error {
+.panel .tabPanel>.error {
     margin: var(--spacing-md) var(--spacing-lg);
 }
 
 /* Handled tab: filters and month headings as full-width strips in the panel. */
-.panel .tabPanel > .toolbar {
+.panel .tabPanel>.toolbar {
     margin: 0;
     padding: var(--spacing-md) var(--spacing-lg);
     border-bottom: 1px solid var(--color-border-light);
@@ -1729,12 +1743,12 @@
     font-size: var(--font-size-sm);
 }
 
-.panel .historyGroups > section + section .historyMonth {
+.panel .historyGroups>section+section .historyMonth {
     border-top: 1px solid var(--color-border-light);
 }
 
 /* The list already draws the panel border. */
-.list > .emptyState {
+.list>.emptyState {
     border: 0;
     border-radius: 0;
 }
@@ -1753,12 +1767,12 @@
         grid-template-columns: auto minmax(0, 1fr);
     }
 
-    .cardHeader:has(> .selectBox) > .selectBox {
+    .cardHeader:has(> .selectBox)>.selectBox {
         grid-row: 1 / span 2;
     }
 
-    .cardHeader:has(> .selectBox) > .cardInfo,
-    .cardHeader:has(> .selectBox) > .cardSide {
+    .cardHeader:has(> .selectBox)>.cardInfo,
+    .cardHeader:has(> .selectBox)>.cardSide {
         grid-column: 2;
     }
 
@@ -1772,12 +1786,14 @@
 }
 
 @media (max-width: 640px) {
+
     /* Less padding, so the text gets the width on a small screen. */
-    .card {
+    .card,
+    .historyItem,
+    .skeletonRow {
         padding: var(--spacing-md);
     }
 
-    .panel .tabsRow,
     .bulkBar {
         padding-right: var(--spacing-md);
         padding-left: var(--spacing-md);
@@ -1812,5 +1828,31 @@
         width: 100%;
         min-height: 44px;
         justify-content: center;
+    }
+}
+
+/* Keep comment hints compact instead of inheriting the dialog paragraph spacing. */
+
+.modal .commentHint,
+.modal .commentCount {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+.toolbarSide .filterField select {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 640px) {
+
+    .panel .tabPanel>.toolbar,
+    .panel .historyCount,
+    .panel .historyMonth {
+        padding-inline: var(--spacing-md);
+    }
+
+    .panel .tabPanel>.error {
+        margin-inline: var(--spacing-md);
     }
 }

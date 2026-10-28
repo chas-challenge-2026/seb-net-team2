@@ -21,7 +21,7 @@ namespace SebPortal.Api.Controllers
         }
 
         /// <summary>
-        /// Creates a new payment for the authenticated initiator.
+        /// Creates a new payment for the authenticated initiator or admin.
         /// </summary>
         /// <param name="dto">The payment creation details.</param>
         /// <param name="idempotencyKey">The idempotency key header to prevent duplicate requests.</param>
@@ -30,7 +30,7 @@ namespace SebPortal.Api.Controllers
         /// <response code="400">Invalid input data or insufficient balance.</response>
         /// <response code="401">Unauthorized if the user ID claim is missing.</response>
         [HttpPost]
-        [Authorize(Roles = UserRoles.Initiator)]
+        [Authorize(Roles = UserRoles.Initiator + "," + UserRoles.Admin)]
         [ServiceFilter(typeof(IdempotencyFilter))]
         public async Task<IActionResult> CreatePayment([FromBody] CreatePaymentDTO dto, [FromHeader(Name = "X-Idempotency-Key")] string idempotencyKey)
         {

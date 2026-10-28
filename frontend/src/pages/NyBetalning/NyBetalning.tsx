@@ -6,7 +6,6 @@ import {
     ArrowRight,
     CircleCheck,
     ClipboardCheck,
-    CreditCard,
     RotateCcw,
     TriangleAlert,
 } from "lucide-react";
@@ -270,9 +269,7 @@ export function NyBetalning() {
         <div className={styles.page}>
             <header className={styles.header}>
                 <div>
-                    <span className={styles.eyebrow}>{t("payment.eyebrow")}</span>
                     <div className={styles.titleRow}>
-                        <CreditCard size={28} strokeWidth={2} aria-hidden="true" />
                         <h1>{t("payment.title")}</h1>
                     </div>
                     <p>{t("payment.description")}</p>
@@ -288,354 +285,354 @@ export function NyBetalning() {
                 className={styles.modePanel}
                 hidden={mode !== "single"}
             >
-            <ol className={styles.steps} aria-label={t("payment.steps.label")}>
-                {paymentSteps.map((step, index) => (
-                    <li
-                        key={step}
-                        className={`${styles.step} ${index < currentStep ? styles.stepComplete : ""} ${index === currentStep ? styles.stepCurrent : ""}`}
-                        aria-current={index === currentStep ? "step" : undefined}
-                    >
-                        <span className={styles.stepNumber} aria-hidden="true">
-                            {index < currentStep ? "✓" : index + 1}
-                        </span>
-                        <span>{step}</span>
-                    </li>
-                ))}
-            </ol>
+                <ol className={styles.steps} aria-label={t("payment.steps.label")}>
+                    {paymentSteps.map((step, index) => (
+                        <li
+                            key={step}
+                            className={`${styles.step} ${index < currentStep ? styles.stepComplete : ""} ${index === currentStep ? styles.stepCurrent : ""}`}
+                            aria-current={index === currentStep ? "step" : undefined}
+                        >
+                            <span className={styles.stepNumber} aria-hidden="true">
+                                {index < currentStep ? "✓" : index + 1}
+                            </span>
+                            <span>{step}</span>
+                        </li>
+                    ))}
+                </ol>
 
-            {createdPayment ? (
-                <Card className={styles.resultCard}>
-                    <span className={styles.eyebrow}>{t("payment.result.eyebrow")}</span>
-                    <div className={`${styles.resultBanner} ${resultTone}`}>
-                        <span className={styles.resultIcon} aria-hidden="true">
-                            {resultStatus === "completed" ? <CircleCheck size={24} /> : <TriangleAlert size={24} />}
-                        </span>
-                        <div>
-                            <h2 ref={resultHeadingRef} tabIndex={-1}>{resultTitle}</h2>
-                            <p role="status" aria-live="polite">{resultMessage}</p>
-                        </div>
-                    </div>
-
-                    <div className={styles.resultAmount}>
-                        <span>{t("payment.fields.amount")}</span>
-                        <strong>{createdPayment.amount.toLocaleString(locale, { minimumFractionDigits: 2 })} {createdPayment.currency}</strong>
-                    </div>
-
-                    <dl className={styles.resultDetails}>
-                        <div>
-                            <dt>{t("payment.result.status")}</dt>
-                            <dd>{resultStatusLabel}</dd>
-                        </div>
-                        {resultSourceAccount && (
+                {createdPayment ? (
+                    <Card className={styles.resultCard}>
+                        <span className={styles.eyebrow}>{t("payment.result.eyebrow")}</span>
+                        <div className={`${styles.resultBanner} ${resultTone}`}>
+                            <span className={styles.resultIcon} aria-hidden="true">
+                                {resultStatus === "completed" ? <CircleCheck size={24} /> : <TriangleAlert size={24} />}
+                            </span>
                             <div>
-                                <dt>{t("payment.result.sourceAccount")}</dt>
-                                <dd>{resultSourceAccount.name}</dd>
-                            </div>
-                        )}
-                        <div>
-                            <dt>{t("payment.fields.iban")}</dt>
-                            <dd>{createdPayment.toIban}</dd>
-                        </div>
-                        {createdPayment.reference && (
-                            <div>
-                                <dt>{t("payment.fields.reference")}</dt>
-                                <dd>{createdPayment.reference}</dd>
-                            </div>
-                        )}
-                        <div>
-                            <dt>{t("payment.result.submittedAt")}</dt>
-                            <dd>{createdAtLabel}</dd>
-                        </div>
-                    </dl>
-
-                    <Button type="button" variant="primary" size="medium" onClick={startNewPayment}>
-                        {t("payment.actions.newPayment")}
-                    </Button>
-                </Card>
-            ) : (
-            <div className={styles.layout}>
-                <Card className={styles.formCard}>
-                    <form
-                        ref={formRef}
-                        noValidate
-                        onSubmit={handleSubmit}
-                        onChange={(event) => validation.clear((event.target as HTMLElement).id)}
-                    >
-                        <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
-                        <div className={styles.sectionHeading}>
-                            <div className={styles.number}>01</div>
-
-                            <div>
-                                <h2>{t("payment.details.title")}</h2>
-                                <p>{t("payment.details.description")}</p>
+                                <h2 ref={resultHeadingRef} tabIndex={-1}>{resultTitle}</h2>
+                                <p role="status" aria-live="polite">{resultMessage}</p>
                             </div>
                         </div>
 
-                        <div className={styles.formFields}>
-                        <label className={styles.accountField} htmlFor="fromAccountId">
-                            {t("payment.fields.fromAccount")}
+                        <div className={styles.resultAmount}>
+                            <span>{t("payment.fields.amount")}</span>
+                            <strong>{createdPayment.amount.toLocaleString(locale, { minimumFractionDigits: 2 })} {createdPayment.currency}</strong>
+                        </div>
 
-                            <RequiredMark />
-                            <select
-                                id="fromAccountId"
-                                name="fromAccountId"
-                                value={selectedAccount?.id ?? ""}
-                                {...validation.fieldProps("fromAccountId", accountsError || isLoadingAccounts ? "source-account-status" : undefined)}
-                                disabled={isLoadingAccounts || accountsError || isSubmitting}
-                                onChange={(event) => updateField("fromAccountId", event.target.value)} required
+                        <dl className={styles.resultDetails}>
+                            <div>
+                                <dt>{t("payment.result.status")}</dt>
+                                <dd>{resultStatusLabel}</dd>
+                            </div>
+                            {resultSourceAccount && (
+                                <div>
+                                    <dt>{t("payment.result.sourceAccount")}</dt>
+                                    <dd>{resultSourceAccount.name}</dd>
+                                </div>
+                            )}
+                            <div>
+                                <dt>{t("payment.fields.iban")}</dt>
+                                <dd>{createdPayment.toIban}</dd>
+                            </div>
+                            {createdPayment.reference && (
+                                <div>
+                                    <dt>{t("payment.fields.reference")}</dt>
+                                    <dd>{createdPayment.reference}</dd>
+                                </div>
+                            )}
+                            <div>
+                                <dt>{t("payment.result.submittedAt")}</dt>
+                                <dd>{createdAtLabel}</dd>
+                            </div>
+                        </dl>
+
+                        <Button type="button" variant="primary" size="medium" onClick={startNewPayment}>
+                            {t("payment.actions.newPayment")}
+                        </Button>
+                    </Card>
+                ) : (
+                    <div className={styles.layout}>
+                        <Card className={styles.formCard}>
+                            <form
+                                ref={formRef}
+                                noValidate
+                                onSubmit={handleSubmit}
+                                onChange={(event) => validation.clear((event.target as HTMLElement).id)}
                             >
-                                {accounts.length === 0 && (
-                                    <option value="">
-                                        {isLoadingAccounts
-                                            ? t("payment.loadingAccounts")
-                                            : t(accountsError ? "payment.errors.loadAccounts" : "payment.errors.noAccounts")}
-                                    </option>
+                                <ErrorSummary errors={validation.errors} attempt={validation.attempt} />
+                                <div className={styles.sectionHeading}>
+                                    <div className={styles.number}>01</div>
+
+                                    <div>
+                                        <h2>{t("payment.details.title")}</h2>
+                                        <p>{t("payment.details.description")}</p>
+                                    </div>
+                                </div>
+
+                                <div className={styles.formFields}>
+                                    <label className={styles.accountField} htmlFor="fromAccountId">
+                                        {t("payment.fields.fromAccount")}
+
+                                        <RequiredMark />
+                                        <select
+                                            id="fromAccountId"
+                                            name="fromAccountId"
+                                            value={selectedAccount?.id ?? ""}
+                                            {...validation.fieldProps("fromAccountId", accountsError || isLoadingAccounts ? "source-account-status" : undefined)}
+                                            disabled={isLoadingAccounts || accountsError || isSubmitting}
+                                            onChange={(event) => updateField("fromAccountId", event.target.value)} required
+                                        >
+                                            {accounts.length === 0 && (
+                                                <option value="">
+                                                    {isLoadingAccounts
+                                                        ? t("payment.loadingAccounts")
+                                                        : t(accountsError ? "payment.errors.loadAccounts" : "payment.errors.noAccounts")}
+                                                </option>
+                                            )}
+
+                                            {accounts.map((account) => (
+                                                <option key={account.id} value={account.id}>
+                                                    {account.name} · {account.balance.toLocaleString(locale)} {account.currency}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {(accountsError || isLoadingAccounts) && (
+                                            <span id="source-account-status" role={accountsError ? "alert" : "status"}>
+                                                {t(accountsError ? "payment.errors.loadAccounts" : "payment.loadingAccounts")}
+                                            </span>
+                                        )}
+
+                                        {accountsError && (
+                                            <p className={styles.fieldError}>{t("payment.errors.loadAccounts")}</p>
+                                        )}
+                                        <FieldError id="fromAccountId" errors={validation.errors} />
+                                    </label>
+
+                                    <label className={styles.recipientField} htmlFor="recipient">
+                                        {t("payment.fields.recipient")}
+
+                                        <RequiredMark />
+                                        <input
+                                            id="recipient"
+                                            name="recipient"
+                                            required
+                                            value={form.recipient}
+                                            placeholder={t("payment.placeholders.recipient")}
+                                            {...validation.fieldProps("recipient")}
+                                            onChange={(event) => updateField("recipient", event.target.value)}
+                                        />
+                                        <FieldError id="recipient" errors={validation.errors} />
+                                    </label>
+
+                                    <label className={styles.ibanField} htmlFor="iban">
+                                        {t("payment.fields.iban")}
+
+                                        <RequiredMark />
+                                        <input
+                                            id="iban"
+                                            name="iban"
+                                            required
+                                            value={form.iban}
+                                            placeholder="SE00 0000 0000 0000 0000 0000"
+                                            {...validation.fieldProps("iban", "iban-hint")}
+                                            aria-invalid={Boolean(validation.errors.iban) || (hasIbanInput && !ibanIsValid)}
+                                            aria-describedby={[
+                                                validation.errors.iban ? "iban-error" : undefined,
+                                                hasIbanInput ? "iban-validation" : undefined,
+                                                "iban-hint",
+                                            ].filter(Boolean).join(" ")}
+                                            onChange={(event) => updateField("iban", event.target.value)}
+                                        />
+                                        {hasIbanInput && (
+                                            <p
+                                                className={`${styles.ibanValidation} ${ibanIsValid ? styles.ibanValid : styles.ibanInvalid}`}
+                                                id="iban-validation"
+                                                role="status"
+                                                aria-live="polite"
+                                            >
+                                                <span aria-hidden="true">{ibanIsValid ? "✓" : "!"}</span>
+                                                {t(ibanIsValid ? "payment.iban.valid" : "payment.iban.invalid")}
+                                            </p>
+                                        )}
+                                        <FieldError id="iban" errors={validation.errors} />
+                                        <p id="iban-hint" className={styles.ibanHint}>{t("payment.iban.accountNotChecked")}</p>
+                                    </label>
+
+                                    <label className={styles.amountField} htmlFor="amount">
+                                        {t("payment.fields.amount")}
+
+                                        <RequiredMark />
+                                        <div className={styles.amountInput}>
+                                            <input
+                                                id="amount"
+                                                name="amount"
+                                                required
+                                                min="1"
+                                                step="0.01"
+                                                type="number"
+                                                value={form.amount}
+                                                placeholder="0.00"
+                                                {...validation.fieldProps("amount")}
+                                                onChange={(event) => updateField("amount", event.target.value)}
+                                            />
+                                            <span>SEK</span>
+                                        </div>
+                                        <FieldError id="amount" errors={validation.errors} />
+                                    </label>
+
+                                    <label className={styles.referenceField} htmlFor="reference">
+                                        {t("payment.fields.reference")}
+                                        <input
+                                            id="reference"
+                                            name="reference"
+                                            value={form.reference}
+                                            placeholder={t("payment.placeholders.reference")}
+                                            {...validation.fieldProps("reference")}
+                                            onChange={(event) => updateField("reference", event.target.value)}
+                                        />
+                                        <FieldError id="reference" errors={validation.errors} />
+                                    </label>
+
+                                    <label className={styles.messageField} htmlFor="message">
+                                        {t("payment.fields.message")}{" "}
+                                        <span className={styles.optional}>{t("payment.optional")}</span>
+
+                                        <textarea
+                                            id="message"
+                                            name="message"
+                                            rows={2}
+                                            value={form.message}
+                                            placeholder={t("payment.placeholders.message")}
+                                            {...validation.fieldProps("message")}
+                                            onChange={(event) => updateField("message", event.target.value)}
+                                        />
+                                        <FieldError id="message" errors={validation.errors} />
+                                    </label>
+                                </div>
+
+                                {error && (
+                                    <div className={styles.error} role="alert">
+                                        <TriangleAlert size={18} aria-hidden="true" />
+                                        <span>{error}</span>
+                                    </div>
                                 )}
 
-                                {accounts.map((account) => (
-                                    <option key={account.id} value={account.id}>
-                                        {account.name} · {account.balance.toLocaleString(locale)} {account.currency}
-                                    </option>
-                                ))}
-                            </select>
-                            {(accountsError || isLoadingAccounts) && (
-                                <span id="source-account-status" role={accountsError ? "alert" : "status"}>
-                                    {t(accountsError ? "payment.errors.loadAccounts" : "payment.loadingAccounts")}
-                                </span>
-                            )}
+                                <div className={styles.actions}>
+                                    <Button type="button" variant="ghost" size="medium" onClick={clearForm}>
+                                        <span className={styles.buttonContent}>
+                                            <RotateCcw size={17} aria-hidden="true" />
+                                            {t("payment.actions.clear")}
+                                        </span>
+                                    </Button>
 
-                            {accountsError && (
-                                <p className={styles.fieldError}>{t("payment.errors.loadAccounts")}</p>
-                            )}
-                            <FieldError id="fromAccountId" errors={validation.errors} />
-                        </label>
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        size="medium"
+                                        disabled={isSubmitting || isLoadingAccounts || accountsError || accounts.length === 0}
+                                    >
+                                        <span className={styles.buttonContent}>
+                                            {t("payment.actions.continueToReview")}
+                                            <ArrowRight size={17} aria-hidden="true" />
+                                        </span>
+                                    </Button>
+                                </div>
+                            </form>
+                        </Card>
+                    </div>
+                )}
 
-                        <label className={styles.recipientField} htmlFor="recipient">
-                            {t("payment.fields.recipient")}
+                {isReviewOpen && (
+                    <div
+                        className={styles.modalBackdrop}
+                        role="presentation"
+                        onMouseDown={(event) => {
+                            if (event.target === event.currentTarget) {
+                                closeReview();
+                            }
+                        }}
+                    >
+                        <section
+                            className={styles.reviewModal}
+                            ref={reviewDialogRef}
+                            id="review-payment-dialog"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="review-payment-title"
+                            aria-describedby="review-payment-description"
+                        >
+                            <p className={styles.eyebrow}>{t("payment.review.eyebrow")}</p>
+                            <div className={styles.reviewTitle}>
+                                <ClipboardCheck size={22} strokeWidth={2} aria-hidden="true" />
+                                <h2 id="review-payment-title" ref={reviewHeadingRef} tabIndex={-1}>
+                                    {t("payment.review.title")}
+                                </h2>
+                            </div>
+                            <p id="review-payment-description" className={styles.reviewIntro}>
+                                {t("payment.review.description")}
+                            </p>
 
-                            <RequiredMark />
-                            <input
-                                id="recipient"
-                                name="recipient"
-                                required
-                                value={form.recipient}
-                                placeholder={t("payment.placeholders.recipient")}
-                                {...validation.fieldProps("recipient")}
-                                onChange={(event) => updateField("recipient", event.target.value)}
-                            />
-                            <FieldError id="recipient" errors={validation.errors} />
-                        </label>
+                            <div className={styles.reviewDetails}>
+                                <div>
+                                    <span>{t("payment.fields.recipient")}</span>
+                                    <strong>{form.recipient}</strong>
+                                </div>
 
-                        <label className={styles.ibanField} htmlFor="iban">
-                            {t("payment.fields.iban")}
+                                <div>
+                                    <span>{t("payment.fields.iban")}</span>
+                                    <strong>{form.iban}</strong>
+                                </div>
 
-                            <RequiredMark />
-                            <input
-                                id="iban"
-                                name="iban"
-                                required
-                                value={form.iban}
-                                placeholder="SE00 0000 0000 0000 0000 0000"
-                                {...validation.fieldProps("iban", "iban-hint")}
-                                aria-invalid={Boolean(validation.errors.iban) || (hasIbanInput && !ibanIsValid)}
-                                aria-describedby={[
-                                    validation.errors.iban ? "iban-error" : undefined,
-                                    hasIbanInput ? "iban-validation" : undefined,
-                                    "iban-hint",
-                                ].filter(Boolean).join(" ")}
-                                onChange={(event) => updateField("iban", event.target.value)}
-                            />
-                            {hasIbanInput && (
-                                <p
-                                    className={`${styles.ibanValidation} ${ibanIsValid ? styles.ibanValid : styles.ibanInvalid}`}
-                                    id="iban-validation"
-                                    role="status"
-                                    aria-live="polite"
+                                <div>
+                                    <span>{t("payment.fields.amount")}</span>
+                                    <strong>
+                                        {amount.toLocaleString(locale, { minimumFractionDigits: 2 })} SEK
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>{t("payment.fields.fromAccount")}</span>
+                                    <strong>{selectedAccount?.name}</strong>
+                                </div>
+
+                                <div>
+                                    <span>{t("payment.fields.reference")}</span>
+                                    <strong>{form.reference || t("payment.summary.notSpecified")}</strong>
+                                </div>
+                            </div>
+
+                            <div className={styles.modalActions}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="medium"
+                                    onClick={closeReview}
                                 >
-                                    <span aria-hidden="true">{ibanIsValid ? "✓" : "!"}</span>
-                                    {t(ibanIsValid ? "payment.iban.valid" : "payment.iban.invalid")}
-                                </p>
-                            )}
-                            <FieldError id="iban" errors={validation.errors} />
-                            <p id="iban-hint" className={styles.ibanHint}>{t("payment.iban.accountNotChecked")}</p>
-                        </label>
-
-                        <label className={styles.amountField} htmlFor="amount">
-                            {t("payment.fields.amount")}
-
-                            <RequiredMark />
-                            <div className={styles.amountInput}>
-                                <input
-                                    id="amount"
-                                    name="amount"
-                                    required
-                                    min="1"
-                                    step="0.01"
-                                    type="number"
-                                    value={form.amount}
-                                    placeholder="0.00"
-                                    {...validation.fieldProps("amount")}
-                                    onChange={(event) => updateField("amount", event.target.value)}
-                                />
-                                <span>SEK</span>
-                            </div>
-                            <FieldError id="amount" errors={validation.errors} />
-                        </label>
-
-                        <label className={styles.referenceField} htmlFor="reference">
-                            {t("payment.fields.reference")}
-                            <input
-                                id="reference"
-                                name="reference"
-                                value={form.reference}
-                                placeholder={t("payment.placeholders.reference")}
-                                {...validation.fieldProps("reference")}
-                                onChange={(event) => updateField("reference", event.target.value)}
-                            />
-                            <FieldError id="reference" errors={validation.errors} />
-                        </label>
-
-                        <label className={styles.messageField} htmlFor="message">
-                            {t("payment.fields.message")}{" "}
-                            <span className={styles.optional}>{t("payment.optional")}</span>
-
-                            <textarea
-                                id="message"
-                                name="message"
-                                rows={2}
-                                value={form.message}
-                                placeholder={t("payment.placeholders.message")}
-                                {...validation.fieldProps("message")}
-                                onChange={(event) => updateField("message", event.target.value)}
-                            />
-                            <FieldError id="message" errors={validation.errors} />
-                        </label>
-                        </div>
-
-                        {error && (
-                            <div className={styles.error} role="alert">
-                                <TriangleAlert size={18} aria-hidden="true" />
-                                <span>{error}</span>
-                            </div>
-                        )}
-
-                        <div className={styles.actions}>
-                            <Button type="button" variant="ghost" size="medium" onClick={clearForm}>
-                                <span className={styles.buttonContent}>
-                                    <RotateCcw size={17} aria-hidden="true" />
-                                    {t("payment.actions.clear")}
-                                </span>
-                            </Button>
-
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                size="medium"
-                                disabled={isSubmitting || isLoadingAccounts || accountsError || accounts.length === 0}
-                            >
-                                <span className={styles.buttonContent}>
-                                    {t("payment.actions.continueToReview")}
-                                    <ArrowRight size={17} aria-hidden="true" />
-                                </span>
-                            </Button>
-                        </div>
-                    </form>
-                </Card>
-            </div>
-            )}
-
-            {isReviewOpen && (
-                <div
-                    className={styles.modalBackdrop}
-                    role="presentation"
-                    onMouseDown={(event) => {
-                        if (event.target === event.currentTarget) {
-                            closeReview();
-                        }
-                    }}
-                >
-                    <section
-                        className={styles.reviewModal}
-                        ref={reviewDialogRef}
-                        id="review-payment-dialog"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="review-payment-title"
-                        aria-describedby="review-payment-description"
-                    >
-                        <p className={styles.eyebrow}>{t("payment.review.eyebrow")}</p>
-                        <div className={styles.reviewTitle}>
-                            <ClipboardCheck size={22} strokeWidth={2} aria-hidden="true" />
-                            <h2 id="review-payment-title" ref={reviewHeadingRef} tabIndex={-1}>
-                                {t("payment.review.title")}
-                            </h2>
-                        </div>
-                        <p id="review-payment-description" className={styles.reviewIntro}>
-                            {t("payment.review.description")}
-                        </p>
-
-                        <div className={styles.reviewDetails}>
-                            <div>
-                                <span>{t("payment.fields.recipient")}</span>
-                                <strong>{form.recipient}</strong>
-                            </div>
-
-                            <div>
-                                <span>{t("payment.fields.iban")}</span>
-                                <strong>{form.iban}</strong>
-                            </div>
-
-                            <div>
-                                <span>{t("payment.fields.amount")}</span>
-                                <strong>
-                                    {amount.toLocaleString(locale, { minimumFractionDigits: 2 })} SEK
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>{t("payment.fields.fromAccount")}</span>
-                                <strong>{selectedAccount?.name}</strong>
-                            </div>
-
-                            <div>
-                                <span>{t("payment.fields.reference")}</span>
-                                <strong>{form.reference || t("payment.summary.notSpecified")}</strong>
-                            </div>
-                        </div>
-
-                        <div className={styles.modalActions}>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="medium"
-                                onClick={closeReview}
-                            >
-                                <span className={styles.buttonContent}>
-                                    <ArrowLeft size={17} aria-hidden="true" />
-                                    {t("payment.actions.goBack")}
-                                </span>
-                            </Button>
-
-                            <Button
-                                type="button"
-                                variant="primary"
-                                size="medium"
-                                onClick={confirmPayment}
-                                disabled={isSubmitting}
-                            >
-                                {isSubmitting ? (
-                                    t("payment.actions.creating")
-                                ) : (
                                     <span className={styles.buttonContent}>
-                                        <CircleCheck size={17} aria-hidden="true" />
-                                        {t("payment.actions.confirm")}
+                                        <ArrowLeft size={17} aria-hidden="true" />
+                                        {t("payment.actions.goBack")}
                                     </span>
-                                )}
-                            </Button>
-                        </div>
-                    </section>
-                </div>
-            )}
+                                </Button>
+
+                                <Button
+                                    type="button"
+                                    variant="primary"
+                                    size="medium"
+                                    onClick={confirmPayment}
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        t("payment.actions.creating")
+                                    ) : (
+                                        <span className={styles.buttonContent}>
+                                            <CircleCheck size={17} aria-hidden="true" />
+                                            {t("payment.actions.confirm")}
+                                        </span>
+                                    )}
+                                </Button>
+                            </div>
+                        </section>
+                    </div>
+                )}
             </div>
 
             <div

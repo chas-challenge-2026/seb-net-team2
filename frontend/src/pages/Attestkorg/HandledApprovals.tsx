@@ -402,7 +402,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                     ))}
                 </div>
             ) : (
-                <div className={styles.emptyState}>
+                <div className={`${styles.emptyState} ${history.length === 0 ? styles.handledEmpty : ""}`}>
                     <History size={32} aria-hidden="true" />
                     <h2>
                         {history.length === 0

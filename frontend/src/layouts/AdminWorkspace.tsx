@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ClipboardCheck, ClipboardList, CreditCard, House, LogOut } from "lucide-react";
+import { ClipboardCheck, ClipboardList, CreditCard, House, LogOut, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,9 +8,11 @@ import { countOverdue } from "../utils/approvalReminders";
 import styles from "./AdminWorkspace.module.css";
 
 const adminSections = [
-    { to: "/admin", label: "admin.navigation.overview", icon: House },
+    { to: "/dashboard", label: "admin.navigation.overview", icon: House },
+    { to: "/ny-betalning", label: "sidebar.newPayment", icon: CreditCard },
     { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
     { to: "/granskningslogg", label: "sidebar.auditLog", icon: ClipboardList },
+    { to: "/admin/users", label: "sidebar.admin", icon: ShieldCheck },
 ] as const;
 
 // The attestant uses the same workspace with only their two pages.
@@ -61,8 +63,9 @@ export function AdminWorkspace({ children, organization, variant = "admin" }: {
                     aria-label={t("sidebar.navigationLinks")}
                 >
                     {sections.map(({ to, label, icon: Icon }) => {
-                        const active = pathname.replace(/\/$/, "") === to
-                            || pathname.startsWith(`${to}/`);
+                        const active = to === "/admin/users"
+                            ? pathname.startsWith("/admin/")
+                            : pathname.replace(/\/$/, "") === to || pathname.startsWith(`${to}/`);
 
                         return (
                             <Link

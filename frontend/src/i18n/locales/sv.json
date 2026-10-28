@@ -291,6 +291,8 @@
         "pendingCount_one": "{{count}} väntande",
         "pendingCount_other": "{{count}} väntande",
         "pendingTotal": "Totalt {{total}}",
+        "pendingSummary_one": "{{count}} väntande attest · {{total}}",
+        "pendingSummary_other": "{{count}} väntande attester · {{total}}",
         "dismissMessage": "Stäng meddelande",
         "errors": {
             "load": "Det gick inte att ladda attesteringarna.",
