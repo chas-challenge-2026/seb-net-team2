@@ -199,9 +199,9 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         <SlidersHorizontal size={16} aria-hidden="true" />
                         {t("approvalInbox.history.moreFilters")}
                         <ChevronDown
+                            data-disclosure-chevron
                             size={16}
                             aria-hidden="true"
-                            className={filtersOpen ? styles.chevronOpen : undefined}
                         />
                     </button>
 

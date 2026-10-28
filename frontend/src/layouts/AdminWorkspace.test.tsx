@@ -30,7 +30,7 @@ describe("AdminWorkspace", () => {
         render(<AdminWorkspace variant="initiator"><p>Content</p></AdminWorkspace>);
 
         const links = screen.getAllByRole("link").map((link) => link.getAttribute("href"));
-        expect(links).toEqual(["/logout", "/dashboard", "/ny-betalning"]);
+        expect(links).toEqual(["/dashboard", "/ny-betalning"]);
         expect(screen.getByRole("link", { name: "sidebar.newPayment" })).toHaveAttribute("aria-current", "page");
         expect(screen.getByRole("link", { name: "sidebar.dashboard" })).not.toHaveAttribute("aria-current");
     });

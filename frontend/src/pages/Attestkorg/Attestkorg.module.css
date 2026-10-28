@@ -1369,14 +1369,6 @@
     outline-offset: 2px;
 }
 
-.filterToggle svg {
-    transition: transform 0.2s ease;
-}
-
-.chevronOpen {
-    transform: rotate(180deg);
-}
-
 .amountRange {
     display: grid;
     gap: 4px;
@@ -1644,10 +1636,6 @@
     outline: 3px solid var(--seb-green-dark-2);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
-}
-
-.detailsToggle svg {
-    transition: transform 0.2s ease;
 }
 
 /* Loading skeleton: same row layout as the compact cards. */

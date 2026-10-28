@@ -7,7 +7,6 @@ import {
   CreditCard,
   House,
   LayoutDashboard,
-  LogOut,
   Menu,
   ScrollText,
   ShieldCheck,
@@ -20,6 +19,7 @@ import { useApprovals } from "../hooks/useApprovals";
 import { countOverdue } from "../utils/approvalReminders";
 
 import styles from "./Sidebar.module.css";
+import { ProfileMenu } from "./ProfileMenu/ProfileMenu";
 
 export interface SidebarProps {
   onLogout?: () => void;
@@ -311,34 +311,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         <div className={styles["sidebar-footer"]}>
-          {onLogout ? (
-            <button
-              type="button"
-              className={styles["logout-btn"]}
-              onClick={onLogout}
-              title={collapsed ? t("sidebar.logout") : undefined}
-              aria-label={t("sidebar.logout")}
-            >
-              <LogOut size={20} strokeWidth={2} aria-hidden="true" />
-
-              <span className={styles["nav-item-label"]}>
-                {t("sidebar.logout")}
-              </span>
-            </button>
-          ) : (
-            <Link
-              to="/logout"
-              className={styles["logout-link"]}
-              onClick={handleMobileNavClick}
-              title={collapsed ? t("sidebar.logout") : undefined}
-            >
-              <LogOut size={20} strokeWidth={2} aria-hidden="true" />
-
-              <span className={styles["nav-item-label"]}>
-                {t("sidebar.logout")}
-              </span>
-            </Link>
-          )}
+          <ProfileMenu
+            user={user ?? undefined}
+            compact={collapsed}
+            above
+            onNavigate={handleMobileNavClick}
+            onLogout={onLogout}
+          />
         </div>
       </aside>
     </>

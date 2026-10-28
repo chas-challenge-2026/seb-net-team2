@@ -41,57 +41,6 @@
     gap: var(--spacing-md);
 }
 
-.navbar__user {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-
-    padding: 0.4rem 0.65rem;
-
-    color: var(--color-text);
-    text-decoration: none;
-
-    border-radius: var(--radius-sm);
-
-    transition: background-color 0.2s ease;
-}
-
-.navbar__user:hover {
-    background-color: var(--color-hover-light);
-}
-
-.navbar__user:focus-visible {
-    outline: 3px solid var(--seb-green-dark-2);
-    outline-offset: 2px;
-}
-
-.navbar__user svg {
-    flex-shrink: 0;
-
-    color: var(--color-text-soft);
-}
-
-.navbar__userText {
-    display: flex;
-    flex-direction: column;
-}
-
-.navbar__userName {
-    color: var(--color-text);
-
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    line-height: 1.2;
-}
-
-.navbar__userRole {
-    color: var(--color-text-soft);
-
-    font-size: var(--font-size-sm);
-    font-weight: 400;
-    line-height: 1.2;
-}
-
 @media (max-width: 768px) {
     .navbar {
         height: auto;
@@ -99,10 +48,6 @@
         flex-wrap: wrap;
         gap: 0.5rem;
         padding: 0.5rem 1rem 0.5rem 4.5rem;
-    }
-
-    .navbar__userText {
-        display: none;
     }
 
     .navbar__actions {

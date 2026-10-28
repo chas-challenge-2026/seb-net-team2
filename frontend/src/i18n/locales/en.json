@@ -186,6 +186,7 @@
         "myProfile": "My profile",
         "logout": "Log out",
         "approvalsPending": "{{pending}} pending",
+        "approvalsNeedAttention": "{{pending}} pending, at least one approval needs attention soon",
         "approvalsWithOverdue": "{{pending}} pending, {{overdue}} overdue"
     },
     "dashboard": {

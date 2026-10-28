@@ -116,14 +116,6 @@
     color: var(--color-text);
 }
 
-.toggle svg {
-    transition: transform 150ms ease;
-}
-
-.toggle[aria-expanded="true"] svg {
-    transform: rotate(180deg);
-}
-
 .status {
     display: inline-flex;
     align-items: center;

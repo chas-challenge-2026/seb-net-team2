@@ -29,7 +29,7 @@ namespace SebPortal.Api.Controllers
         /// <returns>The created payments.</returns>
         /// <response code="400">File missing, empty, not a valid CSV, or a row could not be created.</response>
         [HttpPost]
-        [Authorize(Roles = UserRoles.Initiator + "," + UserRoles.Admin)]
+        [Authorize(Roles = UserRoles.Initiator)]
         [RequestSizeLimit(1_048_576)]
         public async Task<IActionResult> Upload(IFormFile file, CancellationToken ct)
         {

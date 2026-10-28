@@ -667,9 +667,9 @@ export function Attestkorg() {
                                             ? "approvalInbox.card.hideDetails"
                                             : "approvalInbox.card.showDetails")}
                                         <ChevronDown
+                                            data-disclosure-chevron
                                             size={16}
                                             aria-hidden="true"
-                                            className={expandedIds.has(approval.stepId) ? styles.chevronOpen : undefined}
                                         />
                                     </button>
                                 </div>

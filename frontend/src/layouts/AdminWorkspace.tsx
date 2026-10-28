@@ -1,24 +1,25 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ClipboardCheck, ClipboardList, CreditCard, House, LogOut, ShieldCheck } from "lucide-react";
+import { ClipboardCheck, ClipboardList, CreditCard, House } from "lucide-react";
 import type { ReactNode } from "react";
+import type { AuthUser } from "../schemas/userSchema";
 import { useTranslation } from "react-i18next";
 
 import { useApprovals } from "../hooks/useApprovals";
-import { countOverdue } from "../utils/approvalReminders";
+import { daysWaiting, dueStatus, isOverdue, OVERDUE_AFTER_DAYS } from "../utils/approvalReminders";
+import { ProfileMenu } from "../components/ProfileMenu/ProfileMenu";
 import styles from "./AdminWorkspace.module.css";
 
 const adminSections = [
-    { to: "/dashboard", label: "admin.navigation.overview", icon: House },
-    { to: "/ny-betalning", label: "sidebar.newPayment", icon: CreditCard },
+    { to: "/admin", label: "admin.navigation.overview", icon: House },
     { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
     { to: "/granskningslogg", label: "sidebar.auditLog", icon: ClipboardList },
-    { to: "/admin/users", label: "sidebar.admin", icon: ShieldCheck },
 ] as const;
 
-// The attestant uses the same workspace with only their two pages.
+// The attestant uses the same workspace with overview, approvals and the audit log.
 const attestantSections = [
     { to: "/dashboard", label: "sidebar.dashboard", icon: House },
     { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
+    { to: "/granskningslogg", label: "sidebar.auditLog", icon: ClipboardList },
 ] as const;
 
 const initiatorSections = [
@@ -32,40 +33,46 @@ const sectionsByVariant = {
     initiator: initiatorSections,
 } as const;
 
-export function AdminWorkspace({ children, organization, variant = "admin" }: {
+export function AdminWorkspace({ children, organization, user, variant = "admin" }: {
     children: ReactNode;
     organization?: string;
+    user?: Pick<AuthUser, "name" | "role">;
     variant?: "admin" | "attestant" | "initiator";
 }) {
     const { t } = useTranslation();
     const pathname = useRouterState({ select: (state) => state.location.pathname });
     const { data: approvals } = useApprovals(variant !== "initiator");
     const pending = approvals?.length ?? 0;
-    const overdue = countOverdue(approvals);
+    const overdue = (approvals ?? []).filter((approval) =>
+        isOverdue(approval) || dueStatus(approval) === "pastDue"
+    ).length;
+    const needsAttention = (approvals ?? []).some((approval) =>
+        daysWaiting(approval) >= OVERDUE_AFTER_DAYS
+        || ["today", "tomorrow"].includes(dueStatus(approval) ?? "")
+    );
+    const severity = overdue > 0 ? "urgent" : needsAttention ? "warning" : "normal";
     const badgeLabel = overdue > 0
         ? t("sidebar.approvalsWithOverdue", { pending, overdue })
-        : t("sidebar.approvalsPending", { pending });
+        : t(needsAttention ? "sidebar.approvalsNeedAttention" : "sidebar.approvalsPending", { pending });
     const sections = sectionsByVariant[variant];
 
     return (
         <div className={styles.workspace}>
             <div className={styles.topline}>
                 {variant !== "initiator" && <span>{organization || t("sidebar.admin")}</span>}
-                <Link to="/logout" className={styles.logout}>
-                    <LogOut size={16} aria-hidden="true" />
-                    {t("sidebar.logout")}
-                </Link>
+                <div className={styles.accountActions}>
+                    <ProfileMenu user={user} />
+                </div>
             </div>
 
             <div className={styles.surface}>
                 <nav
-                    className={`${styles.navigation} ${variant !== "admin" ? styles.twoSections : ""}`}
+                    className={`${styles.navigation} ${variant === "initiator" ? styles.twoSections : ""}`}
                     aria-label={t("sidebar.navigationLinks")}
                 >
                     {sections.map(({ to, label, icon: Icon }) => {
-                        const active = to === "/admin/users"
-                            ? pathname.startsWith("/admin/")
-                            : pathname.replace(/\/$/, "") === to || pathname.startsWith(`${to}/`);
+                        const active = pathname.replace(/\/$/, "") === to
+                            || pathname.startsWith(`${to}/`);
 
                         return (
                             <Link
@@ -77,7 +84,7 @@ export function AdminWorkspace({ children, organization, variant = "admin" }: {
                                 <Icon size={18} aria-hidden="true" />
                                 <span>{t(label)}</span>
                                 {to === "/attestkorg" && pending > 0 && (
-                                    <span className={styles.count} aria-label={badgeLabel} title={badgeLabel}>
+                                    <span className={styles.count} data-severity={severity} aria-label={badgeLabel} title={badgeLabel}>
                                         {pending}
                                     </span>
                                 )}

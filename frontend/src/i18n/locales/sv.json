@@ -129,6 +129,7 @@
         "myProfile": "Min profil",
         "logout": "Logga ut",
         "approvalsPending": "{{pending}} väntande",
+        "approvalsNeedAttention": "{{pending}} väntande, minst en attest behöver hanteras snart",
         "approvalsWithOverdue": "{{pending}} väntande, {{overdue}} försenade"
     },
     "dashboard": {
