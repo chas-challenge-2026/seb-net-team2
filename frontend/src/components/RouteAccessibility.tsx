@@ -7,7 +7,6 @@ function titleKey(path: string) {
     if (path === "/register") return "a11y.register";
     if (path === "/dashboard") return "navigation.dashboard";
     if (path === "/ny-betalning") return "navigation.newPayment";
-    if (path === "/spara-investera") return "saveInvest.title";
     if (path === "/bolan") return "a11y.mortgage";
     if (path === "/profil") return "profilePage.title";
     if (path === "/attestkorg") return "approvalInbox.title";

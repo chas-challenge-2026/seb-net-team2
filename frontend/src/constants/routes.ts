@@ -1,7 +1,6 @@
 import {
     House,
     CreditCard,
-    Landmark,
     ScrollText,
     UserRound,
     LogOut,
@@ -15,7 +14,6 @@ export const navigationLinks: {
 }[] = [
         { to: '/dashboard', labelKey: 'navigation.dashboard', icon: House },
         { to: '/ny-betalning', labelKey: 'navigation.newPayment', icon: CreditCard },
-        { to: '/spara-investera', labelKey: 'navigation.saveInvest', icon: Landmark },
         { to: '/granskningslogg', labelKey: 'navigation.auditLog', icon: ScrollText },
         { to: '/profil', labelKey: 'navigation.profile', icon: UserRound },
         { to: '/logout', labelKey: 'navigation.logout', icon: LogOut },

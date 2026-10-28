@@ -18,7 +18,8 @@ export function MainLayout() {
     const { isAuthenticated, user } = useAuth();
     const isAdmin = isAuthenticated && user?.role === "Admin";
     const isAttestant = isAuthenticated && user?.role === "Attestant";
-    const usesWorkspace = isAdmin || isAttestant;
+    const isInitiator = isAuthenticated && user?.role === "Initiator";
+    const usesWorkspace = isAdmin || isAttestant || isInitiator;
     const [collapsed, setCollapsed] = useState(false);
 
     function handleToggleCollapsed() {
@@ -51,7 +52,10 @@ export function MainLayout() {
                     className={layout.main}
                 >
                     {usesWorkspace ? (
-                        <AdminWorkspace organization={user?.tenantName} variant={isAdmin ? "admin" : "attestant"}>
+                        <AdminWorkspace
+                            organization={user?.tenantName}
+                            variant={isAdmin ? "admin" : isAttestant ? "attestant" : "initiator"}
+                        >
                             <Outlet />
                         </AdminWorkspace>
                     ) : (
