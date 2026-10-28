@@ -803,17 +803,6 @@
     .header {
         display: block;
     }
-
-    .cardHeader {
-        display: block;
-    }
-
-    .cardHeader strong {
-        display: block;
-
-        margin-top:
-            14px;
-    }
 }
 
 
@@ -1106,9 +1095,11 @@
     color: var(--color-text);
 }
 
+/* Underline and bold, like the active section in the admin navigation: not colour alone. */
 .tabActive {
     border-bottom-color: var(--seb-green-dark-2);
     color: var(--color-text);
+    font-weight: 600;
 }
 
 .tabPanel:focus-visible {
@@ -1438,7 +1429,169 @@
 }
 
 .cardInfo {
+    flex: 1;
     min-width: 0;
+}
+
+/* Bulk approval: a checkbox per row and a bar above the list. */
+
+.selectBox {
+    flex-shrink: 0;
+
+    width: 18px;
+    height: 18px;
+    margin: 3px 0 0;
+
+    accent-color: var(--seb-green-dark-1);
+    cursor: pointer;
+}
+
+.selectBox:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 2px;
+}
+
+.bulkBar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm) var(--spacing-lg);
+
+    min-height: 56px;
+    padding: var(--spacing-sm) var(--spacing-lg);
+
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.selectAll {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-md);
+
+    margin: 0;
+
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.selectAll .selectBox {
+    margin: 0;
+}
+
+.bulkSummary {
+    margin: 0 0 0 auto;
+
+    color: var(--color-text-soft);
+    font-size: var(--font-size-md);
+}
+
+.bulkBar .approve {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    min-height: 40px;
+    padding: var(--spacing-sm) var(--spacing-md);
+
+    border: 1px solid var(--seb-green-dark-1);
+    border-radius: var(--radius-sm);
+
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+}
+
+.bulkBar .approve:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.bulkBar .approve:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 3px;
+}
+
+/* The bulk dialog: the payments as a short list with the total at the bottom. */
+
+.bulkList {
+    display: grid;
+
+    max-height: 240px;
+    margin: 0 0 var(--spacing-md);
+    padding: 0;
+
+    overflow-y: auto;
+
+    border: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-sm);
+    background-color: #f7f8f9;
+
+    list-style: none;
+}
+
+.bulkList li {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+
+    padding: var(--spacing-sm) var(--spacing-md);
+
+    border-bottom: 1px solid var(--color-border-lighter);
+
+    font-size: var(--font-size-md);
+}
+
+.bulkList li:last-child {
+    border-bottom: 0;
+}
+
+.bulkReference {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.bulkWarning,
+.bulkWarningNote {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    color: #8a5a00;
+    font-weight: 500;
+}
+
+.bulkWarning {
+    font-size: var(--font-size-sm);
+}
+
+/* ".modal p" would otherwise make it grey and large. */
+.modal .bulkWarningNote {
+    color: #8a5a00;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+
+    margin: 0 0 var(--spacing-lg);
+
+    font-size: var(--font-size-md);
+}
+
+.modal .bulkWarningNote svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.bulkList .bulkTotal {
+    font-weight: 600;
 }
 
 /* 14px like the e-mail line in the admin user list: small text is hard to read. */
@@ -1601,9 +1754,61 @@
     border-radius: 0;
 }
 
-@media (max-width: 640px) {
+/* Responsive: on tablets and phones the amount and buttons move under the payment's text,
+   and the checkbox stays on the left of the whole row instead of taking a line of its own. */
+
+@media (max-width: 768px) {
     .cardHeader {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--spacing-md);
+    }
+
+    .cardHeader:has(> .selectBox) {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .cardHeader:has(> .selectBox) > .selectBox {
+        grid-row: 1 / span 2;
+    }
+
+    .cardHeader:has(> .selectBox) > .cardInfo,
+    .cardHeader:has(> .selectBox) > .cardSide {
+        grid-column: 2;
+    }
+
+    .cardSide {
+        align-items: flex-start;
+    }
+
+    .cardSide .actions {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Less padding, so the text gets the width on a small screen. */
+    .card {
+        padding: var(--spacing-md);
+    }
+
+    .panel .tabsRow,
+    .bulkBar {
+        padding-right: var(--spacing-md);
+        padding-left: var(--spacing-md);
+    }
+
+    .card .details {
+        padding: var(--spacing-md);
+    }
+
+    /* Total and sorting on their own line under the tabs. */
+    .toolbarSide {
+        flex-basis: 100%;
+    }
+
+    .toolbarSide .filterField {
+        flex: 1;
     }
 
     .cardSide {
@@ -1612,7 +1817,15 @@
         align-items: stretch;
     }
 
-    .cardSide .actions {
-        justify-content: flex-start;
+    /* Summary and button under "Select all", the button full width and easy to tap. */
+    .bulkSummary {
+        flex-basis: 100%;
+        margin: 0;
+    }
+
+    .bulkBar .approve {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
     }
 }

@@ -389,6 +389,27 @@
             "amount": "Amount",
             "attestingAs": "You are approving as {{name}} · Approval step {{step}}"
         },
+        "bulk": {
+            "selectAll": "Select all",
+            "select": "Select {{reference}}",
+            "summary_one": "{{count}} payment selected · {{total}}",
+            "summary_other": "{{count}} payments selected · {{total}}",
+            "approveSelected": "Approve selected ({{count}})",
+            "title_one": "Approve {{count}} payment?",
+            "title_other": "Approve {{count}} payments?",
+            "description": "All selected payments are approved with the same comment. The decision cannot be undone.",
+            "listLabel": "Payments to approve",
+            "total": "Total",
+            "hasWarning": "Warning",
+            "warnings_one": "{{count}} of the payments has a warning. Check it before you approve.",
+            "warnings_other": "{{count}} of the payments have warnings. Check them before you approve.",
+            "confirm_one": "Approve",
+            "confirm_other": "Approve all {{count}}",
+            "progress": "Approving {{done}} of {{count}}...",
+            "approved_one": "{{count}} payment was approved ({{total}}).",
+            "approved_other": "{{count}} payments were approved ({{total}}).",
+            "failed": "Could not be approved: {{references}}."
+        },
         "checks": {
             "title": "Check before deciding",
             "ibanInvalid": "IBAN is invalid – check the account number with the initiator",

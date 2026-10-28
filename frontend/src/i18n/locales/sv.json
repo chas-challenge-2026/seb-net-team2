@@ -332,6 +332,27 @@
             "amount": "Belopp",
             "attestingAs": "Du attesterar som {{name}} · Atteststeg {{step}}"
         },
+        "bulk": {
+            "selectAll": "Markera alla",
+            "select": "Markera {{reference}}",
+            "summary_one": "{{count}} betalning markerad · {{total}}",
+            "summary_other": "{{count}} betalningar markerade · {{total}}",
+            "approveSelected": "Godkänn markerade ({{count}})",
+            "title_one": "Godkänn {{count}} betalning?",
+            "title_other": "Godkänn {{count}} betalningar?",
+            "description": "Alla markerade betalningar godkänns med samma kommentar. Beslutet går inte att ångra.",
+            "listLabel": "Betalningar som godkänns",
+            "total": "Totalt",
+            "hasWarning": "Varning",
+            "warnings_one": "{{count}} av betalningarna har en varning. Kontrollera den innan du godkänner.",
+            "warnings_other": "{{count}} av betalningarna har varningar. Kontrollera dem innan du godkänner.",
+            "confirm_one": "Godkänn",
+            "confirm_other": "Godkänn alla {{count}}",
+            "progress": "Godkänner {{done}} av {{count}}...",
+            "approved_one": "{{count}} betalning godkändes ({{total}}).",
+            "approved_other": "{{count}} betalningar godkändes ({{total}}).",
+            "failed": "Kunde inte godkännas: {{references}}."
+        },
         "checks": {
             "title": "Kontrollera innan beslut",
             "ibanInvalid": "IBAN är ogiltigt – kontrollera kontonumret med initiativtagaren",

@@ -29,6 +29,8 @@ import { ApprovalTabs } from "./ApprovalTabs";
 import { TAB_IDS, type ApprovalTab } from "./approvalTabIds";
 import { HandledApprovals } from "./HandledApprovals";
 import { ApprovalListSkeleton } from "./ApprovalListSkeleton";
+import { BulkApproveDialog, type BulkApproveResult } from "./BulkApproveDialog";
+import { formatAmount, formatTotals } from "./approvalFormat";
 import {
     APPROVAL_HISTORY_QUERY_KEY,
     isHistoryUnavailable,
@@ -58,13 +60,6 @@ type ActionFeedback = {
     type: "approved" | "rejected" | "info";
     message: string;
 };
-
-function formatAmount(approval: PendingApprovalStep, locale: string): string {
-    return `${approval.amount.toLocaleString(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })} ${approval.currency}`;
-}
 
 function formatDate(date: string, locale: string): string {
     return new Date(date).toLocaleString(locale, {
@@ -117,6 +112,10 @@ export function Attestkorg() {
     const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
+    // Payments ticked for "Approve selected". Steps that leave the list drop out on their own,
+    // because only the ticked steps that are still pending are used.
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+    const [bulkOpen, setBulkOpen] = useState(false);
 
     const cancelButtonRef = useRef<HTMLButtonElement>(null);
     const [reasonError, setReasonError] = useState(false);
@@ -136,20 +135,17 @@ export function Attestkorg() {
         (a, b) => Number(isOverdue(b)) - Number(isOverdue(a))
     );
 
-    // Summed per currency, since payments in different currencies can't be added together.
-    const totalsByCurrency = approvals.reduce<Record<string, number>>((totals, approval) => {
-        totals[approval.currency] = (totals[approval.currency] ?? 0) + approval.amount;
-        return totals;
-    }, {});
+    const pendingTotal = formatTotals(approvals, locale);
 
-    const pendingTotal = Object.entries(totalsByCurrency)
-        .map(([currency, amount]) =>
-            `${amount.toLocaleString(locale, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            })} ${currency}`
-        )
-        .join(" + ");
+    const selectedApprovals = sortedApprovals.filter((approval) => selectedIds.has(approval.stepId));
+    const allSelected = sortedApprovals.length > 0 && selectedApprovals.length === sortedApprovals.length;
+    const someSelected = selectedApprovals.length > 0 && !allSelected;
+    const selectAllRef = useRef<HTMLInputElement>(null);
+
+    // "Some selected" has no HTML attribute, only the indeterminate property.
+    useEffect(() => {
+        if (selectAllRef.current) selectAllRef.current.indeterminate = someSelected;
+    }, [someSelected]);
 
     const confirmComment = confirmAction
         ? (comments[confirmAction.approval.stepId] ?? "").trim()
@@ -178,6 +174,69 @@ export function Attestkorg() {
             if (!updated.delete(stepId)) updated.add(stepId);
             return updated;
         });
+    }
+
+    function toggleSelected(stepId: string) {
+        setSelectedIds((current) => {
+            const updated = new Set(current);
+            if (!updated.delete(stepId)) updated.add(stepId);
+            return updated;
+        });
+    }
+
+    function toggleSelectAll() {
+        setSelectedIds(allSelected
+            ? new Set()
+            : new Set(sortedApprovals.map((approval) => approval.stepId)));
+    }
+
+    async function handleBulkDone({ approved, failed, comment }: BulkApproveResult) {
+        const decidedAt = new Date().toISOString();
+
+        // Shown in the "Handled" tab until the backend provides the real history.
+        for (const approval of approved) {
+            addSessionDecision(queryClient, user?.id, {
+                stepId: approval.stepId,
+                stepNumber: approval.stepNumber,
+                paymentId: approval.paymentId,
+                reference: approval.reference,
+                amount: approval.amount,
+                currency: approval.currency,
+                toIban: approval.toIban,
+                recipientName: approval.recipientName,
+                createdByUserName: approval.createdByUserName,
+                decision: "approved",
+                comment: comment || null,
+                decidedAt,
+            });
+        }
+
+        const failedMessage = failed.length > 0
+            ? t("approvalInbox.bulk.failed", {
+                references: failed.map((approval) => approval.reference).join(", "),
+            })
+            : "";
+
+        setActionFeedback(approved.length > 0
+            ? {
+                type: "approved",
+                message: [
+                    t("approvalInbox.bulk.approved", {
+                        count: approved.length,
+                        total: formatTotals(approved, locale),
+                    }),
+                    failedMessage,
+                ].filter(Boolean).join(" "),
+            }
+            : { type: "info", message: failedMessage });
+
+        setSelectedIds(new Set());
+        setBulkOpen(false);
+
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: APPROVALS_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: APPROVAL_HISTORY_QUERY_KEY }),
+        ]);
     }
 
     function updateComment(stepId: string, comment: string) {
@@ -471,6 +530,45 @@ export function Attestkorg() {
                 tabIndex={0}
                 className={styles.tabPanel}
             >
+            {/* Select several payments and approve them in one go. Only with two or more,
+                since "select all" of one payment is the same as its own Approve button. */}
+            {sortedApprovals.length > 1 && (
+                <div className={styles.bulkBar}>
+                    <label className={styles.selectAll}>
+                        <input
+                            ref={selectAllRef}
+                            type="checkbox"
+                            className={styles.selectBox}
+                            checked={allSelected}
+                            onChange={toggleSelectAll}
+                            disabled={decisionMutation.isPending}
+                        />
+                        {t("approvalInbox.bulk.selectAll")}
+                    </label>
+
+                    {selectedApprovals.length > 0 && (
+                        <>
+                            <p className={styles.bulkSummary} role="status">
+                                {t("approvalInbox.bulk.summary", {
+                                    count: selectedApprovals.length,
+                                    total: formatTotals(selectedApprovals, locale),
+                                })}
+                            </p>
+
+                            <button
+                                type="button"
+                                className={styles.approve}
+                                disabled={decisionMutation.isPending}
+                                onClick={() => setBulkOpen(true)}
+                            >
+                                <CircleCheck size={17} aria-hidden="true" />
+                                {t("approvalInbox.bulk.approveSelected", { count: selectedApprovals.length })}
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* No overdue banner: overdue payments are sorted first and their badge turns red. */}
             <div className={styles.list}>
                 {sortedApprovals.length > 0 ? (
@@ -481,6 +579,17 @@ export function Attestkorg() {
                             aria-labelledby={`payment-${approval.paymentId}`}
                         >
                             <div className={styles.cardHeader}>
+                                {sortedApprovals.length > 1 && (
+                                    <input
+                                        type="checkbox"
+                                        className={styles.selectBox}
+                                        checked={selectedIds.has(approval.stepId)}
+                                        onChange={() => toggleSelected(approval.stepId)}
+                                        disabled={decisionMutation.isPending}
+                                        aria-label={t("approvalInbox.bulk.select", { reference: approval.reference })}
+                                    />
+                                )}
+
                                 <div className={styles.cardInfo}>
                                     {/* Two lines of text: the reference, then who, where, which step and how long.
                                         A badge only when something needs attention (overdue, due soon). */}
@@ -573,6 +682,9 @@ export function Attestkorg() {
                                 <div className={styles.cardSide}>
                                     <strong>{formatAmount(approval, locale)}</strong>
 
+                                    {/* Hidden while payments are ticked, so "Approve selected" is the only
+                                        approve button on screen; they come back when the selection is cleared. */}
+                                    {selectedApprovals.length === 0 && (
                                     <div className={styles.actions}>
                                         <button
                                             type="button"
@@ -602,6 +714,7 @@ export function Attestkorg() {
                                             {t("approvalInbox.actions.approve")}
                                         </button>
                                     </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -840,6 +953,16 @@ export function Attestkorg() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {bulkOpen && selectedApprovals.length > 0 && (
+                <BulkApproveDialog
+                    approvals={selectedApprovals}
+                    allPending={approvals}
+                    locale={locale}
+                    onClose={() => setBulkOpen(false)}
+                    onDone={handleBulkDone}
+                />
             )}
         </section>
     );
