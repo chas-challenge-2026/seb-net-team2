@@ -40,6 +40,7 @@ namespace SebPortal.Api.Repositories
         public async Task<IEnumerable<ApprovalStep>> GetPendingStepsForAttestantAsync(int paymentId, int attestantId, int tenantId)
         {
             return await _dbContext.ApprovalSteps
+                .Include(s=> s.Attestant)
                 .Where(s => s.PaymentId == paymentId && s.AttestantId == attestantId && s.Status == "pending" && s.Payment.Status == "pending_approval" && s.Payment.TenantId == tenantId)
                 .OrderBy(s => s.StepNumber)
                 .ToListAsync();
@@ -50,6 +51,7 @@ namespace SebPortal.Api.Repositories
             return await _dbContext.ApprovalSteps
                 .Include(s => s.Payment)
                     .ThenInclude(p => p.CreatedByUser)
+                .Include(s => s.Attestant)
                 .Where(s => s.AttestantId == attestantId && s.Status == "pending" && s.Payment.Status == "pending_approval" && s.Payment.TenantId == tenantId)
                 .OrderBy(s => s.Payment.CreatedAt)
                 .ToListAsync();
@@ -60,6 +62,7 @@ namespace SebPortal.Api.Repositories
             return await _dbContext.ApprovalSteps
                 .Include(s => s.Payment)
                     .ThenInclude(p => p.CreatedByUser)
+                .Include(s => s.Attestant)
                 .Where(s => s.Payment.TenantId == tenantId && s.Status == "pending" && s.Payment.Status == "pending_approval")
                 .OrderBy(s => s.Payment.CreatedAt)
                 .ToListAsync();
@@ -70,6 +73,7 @@ namespace SebPortal.Api.Repositories
             return await _dbContext.ApprovalSteps
                 .Include(s => s.Payment)
                     .ThenInclude(p => p.CreatedByUser)
+                .Include(s => s.Attestant)
                 .Where(s => s.Payment.TenantId == tenantId && s.Status == "completed" && s.Payment.Status == "completed")
                 .OrderByDescending(s => s.DecidedAt)
                 .Take(50)
@@ -81,6 +85,7 @@ namespace SebPortal.Api.Repositories
             return await _dbContext.ApprovalSteps
                 .Include(s => s.Payment)
                     .ThenInclude(p => p.CreatedByUser)
+                .Include(s => s.Attestant)
                 .Where(s => s.AttestantId == attestantId && s.Payment.TenantId == tenantId && s.Status != "pending")
                 .OrderByDescending(s => s.DecidedAt)
                 .Take(50)
