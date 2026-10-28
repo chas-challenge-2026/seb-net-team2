@@ -202,54 +202,6 @@
     margin-top: 2.5rem;
 }
 
-.paymentsTable {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.tableScroll {
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-.paymentsTable th {
-    text-align: left;
-    padding: 0.5rem 0.75rem;
-
-    border-bottom: 2px solid var(--color-border-light);
-
-    font-size: 0.85rem;
-    color: var(--color-text-soft);
-}
-
-.paymentsTable td {
-    padding: 0.6rem 0.75rem;
-
-    border-bottom: 1px solid var(--color-border-light);
-
-    font-size: 0.9rem;
-}
-
-.status {
-    display: inline-block;
-
-    padding: 0.2rem 0.6rem;
-    border-radius: 999px;
-
-    font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.status--done {
-    background: #d4edda;
-    color: #155724;
-}
-
-.status--pending {
-    background: #e8e8e8;
-    color: #444;
-}
-
 @media (max-width: 760px) {
     .dashboard {
         padding: 1.5rem 1rem 3rem;

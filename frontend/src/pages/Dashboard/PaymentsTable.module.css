@@ -1,0 +1,202 @@
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-md);
+}
+
+.filter {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    min-height: 40px;
+    padding: 0 var(--spacing-md);
+    border: 1px solid var(--color-border-light);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--color-text-soft);
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.9rem;
+}
+
+.filter:hover {
+    background: var(--color-50);
+    color: var(--color-text);
+}
+
+.filterActive,
+.filterActive:hover {
+    border-color: var(--seb-green-dark-2);
+    background: var(--color-300);
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.filterCount {
+    min-width: 1.5rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 6%);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.filter:focus-visible,
+.toggle:focus-visible {
+    outline: 3px solid var(--seb-green-dark-2);
+    outline-offset: 2px;
+}
+
+.empty {
+    margin: 0;
+    padding: var(--spacing-lg) 0;
+    color: var(--color-text-soft);
+    text-align: center;
+}
+
+.tableScroll {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.paymentsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.paymentsTable th {
+    text-align: left;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 2px solid var(--color-border-light);
+    font-size: 0.85rem;
+    color: var(--color-text-soft);
+}
+
+.paymentsTable td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--color-border-light);
+    font-size: 0.9rem;
+}
+
+.row {
+    cursor: pointer;
+    transition: background-color 150ms ease;
+}
+
+.row:hover,
+.rowExpanded {
+    background: var(--color-50);
+}
+
+.rowExpanded td {
+    border-bottom-color: transparent;
+}
+
+.toggleCell {
+    width: 1%;
+    text-align: right;
+}
+
+.toggle {
+    display: inline-grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--color-text-soft);
+    cursor: pointer;
+}
+
+.toggle:hover {
+    background: var(--color-300);
+    color: var(--color-text);
+}
+
+.toggle svg {
+    transition: transform 150ms ease;
+}
+
+.toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.statusCompleted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.statusPending {
+    background: #fff4d6;
+    color: #754b00;
+}
+
+.statusRejected {
+    background: #fde7e4;
+    color: #8b211a;
+}
+
+.detailsRow td {
+    padding: 0 0.75rem var(--spacing-md);
+    background: var(--color-50);
+}
+
+.statusDescription {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin: 0 0 var(--spacing-md);
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.statusDescription svg {
+    flex-shrink: 0;
+}
+
+.detailsList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md) var(--spacing-lg);
+    margin: 0;
+}
+
+.detailsList div {
+    min-width: 0;
+}
+
+.detailsList dt {
+    margin-bottom: 0.15rem;
+    color: var(--color-text-soft);
+    font-size: 0.8rem;
+}
+
+.detailsList dd {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .row,
+    .toggle svg {
+        transition: none;
+    }
+}

@@ -121,7 +121,6 @@
     "navigation": {
         "dashboard": "Dashboard",
         "newPayment": "New payment",
-        "saveInvest": "Save & invest",
         "auditLog": "Audit log",
         "profile": "Profile",
         "logout": "Log out",
@@ -156,7 +155,6 @@
         "dashboard": "Dashboard",
         "payments": "Payments",
         "newPayment": "New payment",
-        "savings": "Savings",
         "approvals": "Approvals",
         "approvalInbox": "Approval inbox",
         "admin": "Administration",
@@ -198,7 +196,20 @@
             "recipientIban": "Recipient IBAN",
             "reference": "Reference",
             "amount": "Amount",
-            "status": "Status"
+            "status": "Status",
+            "details": "Details",
+            "paymentId": "Payment ID",
+            "empty": "No payments to show.",
+            "toggleDetails": "Details for the payment on {{date}} of {{amount}}"
+        },
+        "filters": {
+            "label": "Filter by status",
+            "all": "All"
+        },
+        "statusDescription": {
+            "completed": "The payment has been completed.",
+            "pending": "The payment is waiting for approval and is completed once it has been approved.",
+            "rejected": "The payment was rejected and the amount has been returned to the account."
         },
         "status": {
             "completed": "Completed",
@@ -758,76 +769,6 @@
         "message_other": "{{count}} payments have been waiting more than {{days}} days for your approval.",
         "goToInbox": "Go to approval inbox",
         "dismiss": "Dismiss reminder"
-    },
-    "saveInvest": {
-        "examples": {"emergencyFund":"Emergency fund","longTermSavings":"Long-term savings","holidaySavings":"Holiday savings","newHome":"New home","summerHoliday":"Summer holiday"},
-        "eyebrow": "SAVINGS & INVESTMENTS",
-        "title": "Save and invest",
-        "description": "Build your financial future with simple, flexible options.",
-        "navigation": "Savings navigation",
-        "dismissMessage": "Dismiss message",
-        "tabs": {
-            "savings": "Savings",
-            "investments": "Investments",
-            "goals": "Savings goals"
-        },
-        "actions": {
-            "openAccount": "Open a savings account",
-            "showLess": "Show less",
-            "viewAll": "View all",
-            "manageAccount": "Manage account",
-            "addGoal": "Add savings goal",
-            "createAccount": "Create account",
-            "createGoal": "Create goal"
-        },
-        "savings": {
-            "totalSaved": "Total saved",
-            "acrossAccounts": "Across your savings accounts",
-            "interestEarned": "Interest earned this year",
-            "accountsTitle": "Your savings accounts",
-            "accountsDescription": "Manage your savings and interest rates.",
-            "interestRate": "interest rate"
-        },
-        "investments": {
-            "overview": "Investment overview",
-            "portfolioValue": "Current portfolio value",
-            "thisYear": "this year",
-            "allocation": "Portfolio allocation",
-            "equities": "Equities",
-            "funds": "Funds",
-            "bonds": "Bonds"
-        },
-        "goals": {
-            "title": "Your savings goals",
-            "description": "Track progress towards the things that matter.",
-            "of": "of",
-            "complete": "{{progress}}% complete"
-        },
-        "modals": {
-            "account": {
-                "eyebrow": "NEW ACCOUNT",
-                "title": "Open a savings account",
-                "description": "Create a mock savings account to see it in your overview.",
-                "name": "Account name",
-                "placeholder": "e.g. Travel fund"
-            },
-            "goal": {
-                "eyebrow": "NEW GOAL",
-                "title": "Add a savings goal",
-                "name": "Goal name",
-                "placeholder": "e.g. New car",
-                "target": "Target amount"
-            },
-            "manage": {
-                "eyebrow": "ACCOUNT",
-                "interestRate": "Interest rate: {{rate}}"
-            }
-        },
-        "messages": {
-            "accountCreated": "Savings account created.",
-            "goalCreated": "Savings goal created.",
-            "accountOpened": "Account details opened."
-        }
     },
     "profilePage": {
         "title": "My profile",
