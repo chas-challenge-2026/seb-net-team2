@@ -6,7 +6,6 @@ import {
   ClipboardCheck,
   CreditCard,
   House,
-  Landmark,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -54,7 +53,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const isAttestant = user?.role === "Attestant";
 
   const canViewApprovals = isAttestant || isAdmin;
-  const canViewSavings = user?.role === "User" || isInitiator;
 
   const { data: approvals } = useApprovals(canViewApprovals);
 
@@ -212,31 +210,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 <span className={styles["nav-item-label"]}>
                   {t("sidebar.newPayment")}
-                </span>
-              </Link>
-            </div>
-          )}
-
-          {canViewSavings && (
-            <div className={styles["nav-section"]}>
-              <span className={styles["section-label"]}>
-                {t("sidebar.savings")}
-              </span>
-
-              <Link
-                to="/spara-investera"
-                activeOptions={{ exact: true }}
-                className={styles["nav-item"]}
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
-                title={collapsed ? t("navigation.saveInvest") : undefined}
-              >
-                <Landmark size={20} strokeWidth={2} aria-hidden="true" />
-
-                <span className={styles["nav-item-label"]}>
-                  {t("navigation.saveInvest")}
                 </span>
               </Link>
             </div>

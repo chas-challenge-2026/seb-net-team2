@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ClipboardCheck, ClipboardList, House, LogOut } from "lucide-react";
+import { ClipboardCheck, ClipboardList, CreditCard, House, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -19,25 +19,36 @@ const attestantSections = [
     { to: "/attestkorg", label: "sidebar.approvalInbox", icon: ClipboardCheck },
 ] as const;
 
+const initiatorSections = [
+    { to: "/dashboard", label: "sidebar.dashboard", icon: House },
+    { to: "/ny-betalning", label: "sidebar.newPayment", icon: CreditCard },
+] as const;
+
+const sectionsByVariant = {
+    admin: adminSections,
+    attestant: attestantSections,
+    initiator: initiatorSections,
+} as const;
+
 export function AdminWorkspace({ children, organization, variant = "admin" }: {
     children: ReactNode;
     organization?: string;
-    variant?: "admin" | "attestant";
+    variant?: "admin" | "attestant" | "initiator";
 }) {
     const { t } = useTranslation();
     const pathname = useRouterState({ select: (state) => state.location.pathname });
-    const { data: approvals } = useApprovals();
+    const { data: approvals } = useApprovals(variant !== "initiator");
     const pending = approvals?.length ?? 0;
     const overdue = countOverdue(approvals);
     const badgeLabel = overdue > 0
         ? t("sidebar.approvalsWithOverdue", { pending, overdue })
         : t("sidebar.approvalsPending", { pending });
-    const sections = variant === "attestant" ? attestantSections : adminSections;
+    const sections = sectionsByVariant[variant];
 
     return (
         <div className={styles.workspace}>
             <div className={styles.topline}>
-                <span>{organization || t("sidebar.admin")}</span>
+                {variant !== "initiator" && <span>{organization || t("sidebar.admin")}</span>}
                 <Link to="/logout" className={styles.logout}>
                     <LogOut size={16} aria-hidden="true" />
                     {t("sidebar.logout")}
@@ -46,7 +57,7 @@ export function AdminWorkspace({ children, organization, variant = "admin" }: {
 
             <div className={styles.surface}>
                 <nav
-                    className={`${styles.navigation} ${variant === "attestant" ? styles.twoSections : ""}`}
+                    className={`${styles.navigation} ${variant !== "admin" ? styles.twoSections : ""}`}
                     aria-label={t("sidebar.navigationLinks")}
                 >
                     {sections.map(({ to, label, icon: Icon }) => {

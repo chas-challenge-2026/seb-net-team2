@@ -14,6 +14,10 @@
     color: var(--color-text-soft);
 }
 
+.topline > :only-child {
+    margin-left: auto;
+}
+
 .logout {
     display: inline-flex;
     align-items: center;

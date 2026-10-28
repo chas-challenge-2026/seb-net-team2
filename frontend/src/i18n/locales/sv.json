@@ -87,7 +87,6 @@
     "navigation": {
         "dashboard": "Översikt",
         "newPayment": "Ny betalning",
-        "saveInvest": "Spara & investera",
         "auditLog": "Granskningslogg",
         "profile": "Profil",
         "logout": "Logga ut",
@@ -122,7 +121,6 @@
         "dashboard": "Översikt",
         "payments": "Betalningar",
         "newPayment": "Ny betalning",
-        "savings": "Sparande",
         "approvals": "Attestering",
         "approvalInbox": "Attestkorg",
         "admin": "Administration",
@@ -164,7 +162,20 @@
             "recipientIban": "Mottagarens IBAN",
             "reference": "Referens",
             "amount": "Belopp",
-            "status": "Status"
+            "status": "Status",
+            "details": "Detaljer",
+            "paymentId": "Betalnings-ID",
+            "empty": "Inga betalningar att visa.",
+            "toggleDetails": "Detaljer för betalningen {{date}} på {{amount}}"
+        },
+        "filters": {
+            "label": "Filtrera på status",
+            "all": "Alla"
+        },
+        "statusDescription": {
+            "completed": "Betalningen är genomförd.",
+            "pending": "Betalningen väntar på attest och genomförs när den har godkänts.",
+            "rejected": "Betalningen avvisades och beloppet har återförts till kontot."
         },
         "status": {
             "completed": "Slutförd",
@@ -745,76 +756,6 @@
         "message_other": "{{count}} betalningar har väntat längre än {{days}} dagar på din attest.",
         "goToInbox": "Gå till attestkorgen",
         "dismiss": "Stäng påminnelsen"
-    },
-    "saveInvest": {
-        "examples": {"emergencyFund":"Buffertsparande","longTermSavings":"Långsiktigt sparande","holidaySavings":"Semestersparande","newHome":"Ny bostad","summerHoliday":"Sommarsemester"},
-        "eyebrow": "SPARANDE & INVESTERINGAR",
-        "title": "Spara och investera",
-        "description": "Bygg din ekonomiska framtid med enkla och flexibla alternativ.",
-        "navigation": "Navigation för sparande",
-        "dismissMessage": "Stäng meddelande",
-        "tabs": {
-            "savings": "Sparande",
-            "investments": "Investeringar",
-            "goals": "Sparmål"
-        },
-        "actions": {
-            "openAccount": "Öppna ett sparkonto",
-            "showLess": "Visa mindre",
-            "viewAll": "Visa alla",
-            "manageAccount": "Hantera konto",
-            "addGoal": "Lägg till sparmål",
-            "createAccount": "Skapa konto",
-            "createGoal": "Skapa mål"
-        },
-        "savings": {
-            "totalSaved": "Totalt sparat",
-            "acrossAccounts": "På dina sparkonton",
-            "interestEarned": "Intjänad ränta i år",
-            "accountsTitle": "Dina sparkonton",
-            "accountsDescription": "Hantera ditt sparande och dina räntor.",
-            "interestRate": "ränta"
-        },
-        "investments": {
-            "overview": "Investeringsöversikt",
-            "portfolioValue": "Nuvarande portföljvärde",
-            "thisYear": "i år",
-            "allocation": "Portföljfördelning",
-            "equities": "Aktier",
-            "funds": "Fonder",
-            "bonds": "Obligationer"
-        },
-        "goals": {
-            "title": "Dina sparmål",
-            "description": "Följ utvecklingen mot det du sparar till.",
-            "of": "av",
-            "complete": "{{progress}}% klart"
-        },
-        "modals": {
-            "account": {
-                "eyebrow": "NYTT KONTO",
-                "title": "Öppna ett sparkonto",
-                "description": "Skapa ett mock-sparkonto för att se det i din översikt.",
-                "name": "Kontonamn",
-                "placeholder": "t.ex. Resekassa"
-            },
-            "goal": {
-                "eyebrow": "NYTT MÅL",
-                "title": "Lägg till ett sparmål",
-                "name": "Namn på mål",
-                "placeholder": "t.ex. Ny bil",
-                "target": "Målbelopp"
-            },
-            "manage": {
-                "eyebrow": "KONTO",
-                "interestRate": "Ränta: {{rate}}"
-            }
-        },
-        "messages": {
-            "accountCreated": "Sparkontot skapades.",
-            "goalCreated": "Sparmålet skapades.",
-            "accountOpened": "Kontouppgifterna öppnades."
-        }
     },
     "profilePage": {
         "title": "Min profil",
