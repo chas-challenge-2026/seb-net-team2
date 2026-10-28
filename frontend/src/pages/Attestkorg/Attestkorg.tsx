@@ -61,13 +61,6 @@ type ActionFeedback = {
     message: string;
 };
 
-function formatDate(date: string, locale: string): string {
-    return new Date(date).toLocaleString(locale, {
-        dateStyle: "medium",
-        timeStyle: "short",
-    });
-}
-
 function sortApprovals(approvals: PendingApprovalStep[], sortOption: SortOption): PendingApprovalStep[] {
     return [...approvals].sort((a, b) => {
         switch (sortOption) {
@@ -166,6 +159,25 @@ export function Attestkorg() {
     function showHandledTab() {
         setActiveTab("handled");
         requestAnimationFrame(() => document.getElementById(TAB_IDS.handled.tab)?.focus());
+    }
+
+    // How long the payment has waited, with the date, so neither has to be looked up:
+    // "Sent today 09:12", "Waiting 2 days (26 Oct)", or only "Sent 25 Oct" when the red
+    // "Waiting 3 days" badge already says how long.
+    function sentLabel(approval: PendingApprovalStep): string {
+        const sent = new Date(approval.paymentCreatedAt);
+        const date = sent.toLocaleDateString(locale, { day: "numeric", month: "short" });
+        const time = sent.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
+        const days = daysWaiting(approval);
+
+        if (isOverdue(approval)) return t("approvalInbox.card.sentOn", { date });
+        // Under 24 hours, but possibly yesterday evening: "today" only on the same date.
+        if (days === 0) {
+            return sent.toDateString() === new Date().toDateString()
+                ? `${t("approvalInbox.card.waitingToday")} ${time}`
+                : t("approvalInbox.card.sentOn", { date: `${date} ${time}` });
+        }
+        return `${t("approvalInbox.card.waitingDays", { count: days })} (${date})`;
     }
 
     function toggleDetails(stepId: string) {
@@ -616,13 +628,9 @@ export function Attestkorg() {
                                     {/* No payment id: it is a UUID that means nothing to the attestant,
                                         who recognises the payment by its reference and amount. */}
                                     <p className={styles.cardMeta}>
+                                        {/* No recipient here: the IBAN and bank are in the details, once. */}
                                         <span>
                                             {t("approvalInbox.card.submittedBy")} {approval.createdByUserName}
-                                            {" · "}
-                                            {t("approvalInbox.card.to")}{" "}
-                                            {approval.recipientName
-                                                ?? recipientBank(approval.toIban)
-                                                ?? formatIban(approval.toIban)}
                                         </span>
                                         {" · "}
                                         <span>
@@ -630,26 +638,11 @@ export function Attestkorg() {
                                                 step: approval.stepNumber,
                                             })}
                                         </span>
-                                        {approval.stepNumber > 1 && (
-                                            <>
-                                                {" · "}
-                                                <span className={styles.dualApproval}>
-                                                    {t("approvalInbox.card.dualApprovalShort")}
-                                                </span>
-                                            </>
-                                        )}
-                                        {!isOverdue(approval) && (
-                                            <>
-                                                {" · "}
-                                                <span>
-                                                    {daysWaiting(approval) === 0
-                                                        ? t("approvalInbox.card.waitingToday")
-                                                        : t("approvalInbox.card.waitingDays", {
-                                                            count: daysWaiting(approval),
-                                                        })}
-                                                </span>
-                                            </>
-                                        )}
+                                        {/* No "Dual approval" after it: step 2 already says so. */}
+                                        {" · "}
+                                        <time dateTime={approval.paymentCreatedAt}>
+                                            {sentLabel(approval)}
+                                        </time>
                                     </p>
 
                                     {/* Always visible: a warning must not hide behind a click. */}
@@ -722,8 +715,8 @@ export function Attestkorg() {
                             <dl id={`details-${approval.stepId}`} className={styles.details}>
                                 <RecipientAndDueRows approval={approval} />
 
-                                {/* Grouped in pairs: where the money goes and where it comes from,
-                                    then who submitted it and when. */}
+                                {/* Where the money goes and where it comes from. Who sent it and when
+                                    is already on the row above ("Sent today" / "Waiting 2 days"). */}
                                 <div>
                                     <dt>{t("approvalInbox.card.toIban")}</dt>
                                     <dd>
@@ -733,16 +726,6 @@ export function Attestkorg() {
                                 </div>
 
                                 <PaymentSourceAccount paymentId={approval.paymentId} />
-
-                                {/* Only the time: who sent it is already on the row above. */}
-                                <div>
-                                    <dt>{t("approvalInbox.card.submittedAt")}</dt>
-                                    <dd>
-                                        <time dateTime={approval.paymentCreatedAt}>
-                                            {formatDate(approval.paymentCreatedAt, locale)}
-                                        </time>
-                                    </dd>
-                                </div>
                             </dl>
                             )}
                         </article>
@@ -804,12 +787,7 @@ export function Attestkorg() {
                                     })}
                                 </span>
                             )}
-
-                            {confirmAction.approval.stepNumber > 1 && (
-                                <span className={styles.dualApproval}>
-                                    {t("approvalInbox.card.dualApproval")}
-                                </span>
-                            )}
+                            {/* No "Dual approval" line: "Approval step 2" already says so. */}
                         </div>
 
                         <dl className={styles.modalDetails}>

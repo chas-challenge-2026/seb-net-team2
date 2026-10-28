@@ -308,13 +308,6 @@
     font-weight: 600;
 }
 
-/* Plain text in the row's second line: it is information, not a warning. */
-.cardMeta .dualApproval {
-    color: inherit;
-    font-size: inherit;
-    font-weight: inherit;
-}
-
 
 /* Card header */
 
@@ -727,10 +720,6 @@
     margin: 0 0 var(--spacing-lg);
 }
 
-.modalContext .dualApproval {
-    color: inherit;
-    font-weight: inherit;
-}
 
 .modalDetails dt {
     margin-bottom:
@@ -991,10 +980,6 @@
     margin: 0 0 var(--spacing-md);
     color: var(--color-text-soft);
     font-size: var(--font-size-md);
-}
-
-.modalContext .dualApproval {
-    margin: 0;
 }
 
 /* "Förfaller i morgon": due soon, but not yet as urgent as today or past due */

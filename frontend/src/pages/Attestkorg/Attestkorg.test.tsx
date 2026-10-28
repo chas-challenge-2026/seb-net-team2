@@ -109,7 +109,7 @@ describe("Approval inbox with keyboard and screen reader", () => {
         renderInbox();
 
         // Enough to recognise the payment without opening it.
-        expect(screen.getByText(/^Skickad av Lisa Persson · Till SEB$/)).toBeInTheDocument();
+        expect(screen.getByText(/^Skickad av Lisa Persson$/)).toBeInTheDocument();
         expect(screen.queryByText("Till IBAN")).not.toBeInTheDocument();
 
         const toggle = screen.getByRole("button", { name: "Visa detaljer för Faktura #1043" });
@@ -119,6 +119,17 @@ describe("Approval inbox with keyboard and screen reader", () => {
         expect(toggle).toHaveAttribute("aria-expanded", "true");
         expect(toggle).toHaveAccessibleName("Dölj detaljer för Faktura #1043");
         expect(screen.getByText("Till IBAN")).toBeInTheDocument();
+    });
+
+    it("shows how long a payment has waited together with the date it was sent", () => {
+        const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 - 60 * 1000);
+        setHooks({ pending: [{ ...pendingPayment, paymentCreatedAt: twoDaysAgo.toISOString() }] });
+        renderInbox();
+
+        const date = twoDaysAgo.toLocaleDateString("sv-SE", { day: "numeric", month: "short" });
+        const sent = screen.getByText(`Väntat 2 dagar (${date})`);
+        expect(sent.tagName).toBe("TIME");
+        expect(sent).toHaveAttribute("dateTime", twoDaysAgo.toISOString());
     });
 
     it("warns when the recipient is the same account the money is taken from", () => {
