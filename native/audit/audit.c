@@ -100,6 +100,40 @@ static int get_last_log_line(
     return 1;
 }
 
+/*
+ * Säkerställer att beskrivningar hålls på en fysisk loggrad.
+ * Den escape-kodade representationen ingår i de data som signeras.
+ */
+static int escape_newlines(const char *input, char *output, size_t output_size)
+{
+    if (input == NULL || output == NULL || output_size == 0)
+        return -1;
+
+    size_t out = 0;
+
+    for (size_t i = 0; input[i] != '\0'; i++)
+    {
+        if (input[i] == '\n' || input[i] == '\r')
+        {
+            if (output_size - out < 3)
+                return -1;
+
+            output[out++] = '\\';
+            output[out++] = input[i] == '\n' ? 'n' : 'r';
+        }
+        else
+        {
+            if (output_size - out < 2)
+                return -1;
+
+            output[out++] = input[i];
+        }
+    }
+
+    output[out] = '\0';
+    return 0;
+}
+
 int audit_initialize(
     const char *log_path,
     const char *secret_key,
@@ -108,7 +142,13 @@ int audit_initialize(
     int entity_id,
     const char *description)
 {
+    char escaped_description[1024];
+
     if (!log_path || !secret_key || !action || !description)
+        return -1;
+
+    if (escape_newlines(description, escaped_description,
+                        sizeof(escaped_description)) != 0)
         return -1;
 
     char timestamp[64], prev_hash[65], log_data[1024];
@@ -120,7 +160,7 @@ int audit_initialize(
 
     int len = snprintf(log_data, sizeof(log_data),
                        "%s|%d|%s|%d|%s|%s",
-                       timestamp, user_id, action, entity_id, description, prev_hash);
+                       timestamp, user_id, action, entity_id, escaped_description, prev_hash);
 
     if (len < 0 || len >= (int)sizeof(log_data))
         return -1;
@@ -159,7 +199,13 @@ static int audit_append_internal(
     char *out_hash,
     size_t out_hash_size)
 {
+    char escaped_description[1024];
+
     if (!log_path || !secret_key || !action || !description)
+        return -1;
+
+    if (escape_newlines(description, escaped_description,
+                        sizeof(escaped_description)) != 0)
         return -1;
 
     if (out_hash && out_hash_size < 65)
@@ -188,7 +234,7 @@ static int audit_append_internal(
 
     int data_len = snprintf(
         log_data, sizeof(log_data), "%s|%d|%s|%d|%s|%s",
-        timestamp, user_id, action, entity_id, description, prev_hash);
+        timestamp, user_id, action, entity_id, escaped_description, prev_hash);
 
     if (data_len < 0 || data_len >= (int)sizeof(log_data))
         return -1;
