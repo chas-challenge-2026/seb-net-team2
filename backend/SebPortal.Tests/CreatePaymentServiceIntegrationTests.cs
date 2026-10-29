@@ -480,7 +480,8 @@ public class CreatePaymentServiceIntegrationTests
         await using var verificationContext = new SebDbContext(options);
         var updatedAccount = await verificationContext.Accounts.SingleAsync(a => a.PublicId == accountPublicId);
         var totalPayments = await verificationContext.Payments.CountAsync();
-
+        var totalAuditEntries = await verificationContext.AuditEntries.CountAsync();
+        Assert.Equal(10, totalAuditEntries);
         Assert.Equal(500m, updatedAccount.Balance);
         Assert.Equal(5, totalPayments);
     }

@@ -13,6 +13,8 @@
         public required string CreatedByUserName { get; set; }
 
         public DateTime PaymentCreatedAt { get; set; }
-    
+        public string AttestantName { get; set; } = string.Empty;
+
+
     }
 }
