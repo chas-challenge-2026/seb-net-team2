@@ -293,7 +293,7 @@ namespace SebPortal.Api.Services
             CreatedByUserId = payment.CreatedByUser.PublicId,
             CreatedByUserName = payment.CreatedByUser.Name,
             PaymentCreatedAt = payment.CreatedAt,
-            AttestantName = step.Attestant.Name
+            AttestantName = step.Attestant?.Name ?? string.Empty
         };
         //gets the 50 most recent approval steps for a tenant, with status completed (approved or rejected), ordered by decidedAt descending
         public async Task<IEnumerable<RecentApprovalStepDTO>> GetRecentApprovalsForTenantAsync(int tenantId)
@@ -311,7 +311,7 @@ namespace SebPortal.Api.Services
                 CreatedByUserId = step.Payment.CreatedByUserId,
                 CreatedByUserName = step.Payment.CreatedByUser.Name,
                 PaymentCreatedAt = step.Payment.CreatedAt,
-                AttestantName = step.Attestant.Name
+                AttestantName = step.Attestant?.Name ?? string.Empty
             });
         }
 
@@ -331,7 +331,7 @@ namespace SebPortal.Api.Services
                 CreatedByUserId = step.Payment.CreatedByUserId,
                 CreatedByUserName = step.Payment.CreatedByUser.Name,
                 PaymentCreatedAt = step.Payment.CreatedAt,
-                AttestantName = step.Attestant.Name
+                AttestantName = step.Attestant?.Name ?? string.Empty
             });
         }
     }
