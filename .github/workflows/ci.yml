@@ -45,7 +45,16 @@ jobs:
     
       - name: Test
         run: dotnet test --configuration Release --no-build --verbosity normal
-    
+
+      - name: Test with Coverage
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+
+      - name: Upload Coverage Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: '**/TestResults/**/*.cobertura.xml'
+
   build-docker:
     name: Build Docker Image
     runs-on: ubuntu-latest
