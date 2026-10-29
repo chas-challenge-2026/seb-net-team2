@@ -358,6 +358,54 @@ static void test_missing_log_file(void **state)
     remove(missing_log);
 }
 
+static void test_description_with_newlines(void **state)
+{
+    (void)state;
+
+    const char *path = "audit_newline_test.log";
+    const char *initial_description = "Rad 1\nRad 2\rRad 3";
+    const char *appended_description = "Append rad 1\nAppend rad 2\rAppend rad 3";
+
+    remove(path);
+
+    assert_int_equal(
+        audit_initialize(path, secret_key, 1,
+                         "NEWLINE_INIT", 101, initial_description),
+        0);
+
+    assert_int_equal(
+        audit_append(path, secret_key, 2,
+                     "NEWLINE_APPEND", 101, appended_description),
+        0);
+
+    assert_int_equal(audit_verify(path, secret_key), -1);
+
+    FILE *file = fopen(path, "r");
+    assert_non_null(file);
+
+    char line[1100];
+    int line_count = 0;
+    int found_initial = 0;
+    int found_appended = 0;
+
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        line_count++;
+
+        if (strstr(line, "Rad 1\\nRad 2\\rRad 3") != NULL)
+            found_initial = 1;
+
+        if (strstr(line, "Append rad 1\\nAppend rad 2\\rAppend rad 3") != NULL)
+            found_appended = 1;
+    }
+
+    assert_int_equal(fclose(file), 0);
+    assert_int_equal(line_count, 2);
+    assert_true(found_initial);
+    assert_true(found_appended);
+    assert_int_equal(remove(path), 0);
+}
+
 int main(void)
 {
     secret_key = getenv("AUDIT_SIGNING_KEY");
@@ -367,6 +415,7 @@ int main(void)
         cmocka_unit_test(test_missing_log_file),
         cmocka_unit_test(test_append_success),
         cmocka_unit_test(test_append_with_hash),
+        cmocka_unit_test(test_description_with_newlines),
         cmocka_unit_test(test_description_too_long),
         cmocka_unit_test(test_existing_empty_log),
         cmocka_unit_test(test_verify_empty_log_fails),
