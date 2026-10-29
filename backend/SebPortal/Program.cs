@@ -10,6 +10,7 @@ using SebPortal.Api.Models;
 using SebPortal.Api.Repositories;
 using SebPortal.Api.Services;
 using SebPortal.Data;
+using Serilog;
 using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,11 @@ var jwtIssuer = builder.Configuration["Jwt:Issuer"]
 var jwtAudience = builder.Configuration["Jwt:Audience"]
     ?? throw new InvalidOperationException("JWT audience is missing.");
 
+builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -147,9 +153,9 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddAuthorization();
 
-
-
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 // Migrera och seeda lokal databas
 {
