@@ -116,3 +116,24 @@ export async function createPayment(
         },
     )
 }
+
+// Sends the whole CSV in one request. The server creates every payment in one transaction, or none of them.
+export async function uploadPaymentBatch(csv: string, fileName: string): Promise<CreatedPayment[]> {
+    const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
+
+    if (!apiUrl) {
+        throw new Error(i18n.t("errors.configuration"))
+    }
+
+    const body = new FormData()
+    body.append('file', new Blob([csv], { type: 'text/csv' }), fileName)
+
+    return apiRequest(
+        `${apiUrl}/api/PaymentBatch`,
+        z.array(createdPaymentSchema),
+        {
+            method: 'POST',
+            body,
+        },
+    )
+}

@@ -495,47 +495,80 @@
     },
     "batch": {
         "description": "Upload multiple payments at once via a CSV file.",
+        "steps": {
+            "file": "Choose file"
+        },
         "file": {
-            "title": "CSV file",
-            "description": "Choose a file, then upload and process it.",
+            "title": "Choose a file",
             "label": "CSV file",
-            "hint": "Max file size: 1 MB. Encoding: UTF-8."
+            "hint": "Max file size: 1 MB. Encoding: UTF-8.",
+            "dropHint": "Drag and drop the file here",
+            "choose": "Choose file",
+            "change": "Change file",
+            "selected": "Selected file: {{name}}",
+            "noFile": "Don't have a file?"
         },
         "actions": {
-            "processing": "Processing...",
-            "upload": "Upload and process"
+            "processing": "Reading the file...",
+            "review": "Review payments",
+            "create_one": "Create {{count}} payment",
+            "create_other": "Create {{count}} payments",
+            "newFile": "Upload a new file",
+            "viewOverview": "View in Overview"
         },
         "format": {
             "title": "CSV format",
-            "description": "The file must have the following columns:",
-            "warning": "Note: commas inside a field are not supported. Avoid references that contain commas.",
-            "download": "Download example-batch.csv"
+            "description": "The file must have these columns, in this order:",
+            "columnHelp": {
+                "account": "The account number, for example 1",
+                "iban": "The recipient's IBAN",
+                "amount": "Amount, for example 5000.00",
+                "reference": "Invoice number, in quotes if it has a comma"
+            },
+            "warning": "All payments in the file are created together. If any row is wrong, no payment is created.",
+            "download": "Download an example file"
+        },
+        "review": {
+            "title": "Review the payments",
+            "summary_one": "{{count}} payment from {{file}}. Check the row before it is created.",
+            "summary_other": "{{count}} payments from {{file}}. Check the rows before they are created.",
+            "total": "Total",
+            "duplicateTitle": "This file seems to have been uploaded already",
+            "duplicateText": "You created payments with exactly the same content {{time}}. Make sure you are not paying twice before you continue."
         },
         "result": {
             "title": "Result",
-            "processed": "{{succeeded}} of {{total}} payments processed.",
-            "failed_one": "{{count}} row failed — see below.",
-            "failed_other": "{{count}} rows failed — see below."
+            "createdTitle_one": "The payment was created",
+            "createdTitle_other": "All {{count}} payments were created",
+            "breakdown": "Completed: {{completed}} · Waiting for approval: {{pending}}",
+            "invalid_one": "No payments were sent. {{count}} row needs fixing — see below.",
+            "invalid_other": "No payments were sent. {{count}} rows need fixing — see below.",
+            "rejected": "No payments were created. The server replied: {{reason}}",
+            "rejectedRow": "No payments were created. Fix the row marked below."
         },
         "table": {
             "row": "Row",
+            "fromAccount": "From account",
+            "accountNumber": "Account {{id}}",
             "toIban": "To IBAN",
             "amount": "Amount",
             "reference": "Reference",
             "status": "Status",
-            "success": "Success"
+            "created": "Created",
+            "notCreated": "Not created"
         },
         "errors": {
             "csvOnly": "Only .csv files are supported.",
             "fileTooLarge": "The file is larger than 1 MB.",
             "chooseFile": "Choose a CSV file first.",
-            "accountsLoading": "Account data is still loading — try again in a moment.",
             "header": "The CSV header must be exactly: {{header}}",
             "empty": "The CSV file is empty or has no data rows.",
-            "columns": "Expected 4 columns, got {{count}}. Commas inside a field are not supported.",
-            "unknownAccount": "Unknown from_account_id '{{id}}'",
+            "columns": "Expected 4 columns, got {{count}}. Put fields that contain commas inside quotes.",
+            "invalidAccount": "from_account_id must be an account number, for example 1 (got '{{id}}')",
+            "unknownAccount": "Account {{id}} does not belong to your company",
             "invalidIban": "Invalid IBAN '{{iban}}'",
-            "invalidAmount": "Invalid amount '{{amount}}'"
+            "invalidAmount": "Invalid amount '{{amount}}'. Use a dot as decimal separator, for example 5000.00",
+            "numericReference": "The reference cannot contain only digits"
         }
     },
     "auditLog": {

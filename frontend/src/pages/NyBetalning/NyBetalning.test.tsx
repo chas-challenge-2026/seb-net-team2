@@ -78,6 +78,7 @@ jest.mock("react-i18next", () => ({
     }),
 }));
 
+jest.mock("@tanstack/react-router", () => ({ Link: () => null }));
 jest.mock("../../hooks/useAccounts", () => ({ useAccounts: jest.fn() }));
 jest.mock("../../hooks/useAuth", () => ({ useAuth: jest.fn() }));
 jest.mock("../../services/accountService", () => ({
