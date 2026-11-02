@@ -390,6 +390,37 @@ gränssnittskomponenter finns i `src/components`, medan `src/hooks` samlar
 via en gemensam funktion som skickar JWT och validerar svar med Zod-scheman från
 `src/schemas`. Translations finns i `src/i18n`.
 
+## 🧪 Testning
+
+Projektet har omfattande testning på flera nivåer:
+
+**Frontend** – Jest + React Testing Library för komponenter och servicefunktioner:
+```bash
+cd frontend && npm test
+```
+
+**Backend** – xUnit + Moq för affärslogik (ApprovalEngine, Idempotency, User, Audit):
+```bash
+cd backend && dotnet test
+```
+
+**Native** – CMocka för C-moduler (IBAN-validering, CSV-parsning, Audit-integritet):
+```bash
+cd native && make test
+```
+
+## Kända brister och begränsningar
+
+**Kända brister:** Inga kritiska brister i v2. V1-problemen är åtgärdade.
+
+**Avgränsningar:** Fokus på kärnflödet – betalningsskapande, attestering och granskning. Inte inkluderat: betalningsutförande mot bankkonto, external gateway-återkoppling, eller avancerad rapportering.
+
+**Förbättringsområden:**
+- End-to-end tester för hela approval-flödet
+- Round-robin-optimering för attesttilldelning per betalning (istället för per steg)
+- Rate limiting på API endpoints
+- Prestandaoptimeringar (cachelagring, frågeoptimering och förebyggande av N+1-problem)
+
 ## Contributors
 - https://github.com/LisaEbbhagen
 - https://github.com/oligerta-braholli
