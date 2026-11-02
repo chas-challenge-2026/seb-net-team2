@@ -147,8 +147,9 @@
     width: 150px;
 }
 
-.formButton:hover {
-    background-color: var(--color-hover-light);
+.formButton:hover:not(:disabled) {
+    background-color: #000;
+    color: #fff;
 }
 
 .formButton:focus-visible {
