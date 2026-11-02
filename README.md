@@ -1,5 +1,13 @@
 <img width="512" height="512" alt="unnamed" src="https://github.com/user-attachments/assets/97027142-af0d-42e9-8d44-4194a38a156d" />
 
+## 📑 Innehåll
+
+1. [Arkitektur och teknikval](#1-arkitektur-och-teknikval)
+2. [Databasen](#2-databasen)
+3. [Roller, flöde och säkerhet (Approval flow)](#3-roller-flöde-och-säkerhet-approval-flow)
+4. [Säkerhet, konfiguration och kodstruktur](#4-säkerhet-konfiguration-och-kodstruktur)
+5. [Atomicitet, concurrency, transaktionalitet och testbarhet](#5-atomicitet-concurrency-transaktionalitet-och-testbarhet)
+
 # SEB Företagsbetalningar
 
 En betalningsportal för SEB:s företagskunder (SME). Företag kan skapa betalningar
@@ -108,14 +116,6 @@ Felsvar uppstår på tre ställen:
 # 🏗️ Arkitektur & designbeslut
 
 > En genomgång av de viktigaste tekniska besluten i projektet – **vad** vi byggt och framför allt **varför**.
-
-## 📑 Innehåll
-
-1. [Arkitektur och teknikval](#1-arkitektur-och-teknikval)
-2. [Databasen](#2-databasen)
-3. [Roller, flöde och säkerhet (Approval flow)](#3-roller-flöde-och-säkerhet-approval-flow)
-4. [Säkerhet, konfiguration och kodstruktur](#4-säkerhet-konfiguration-och-kodstruktur)
-5. [Atomicitet, concurrency, transaktionalitet och testbarhet](#5-atomicitet-concurrency-transaktionalitet-och-testbarhet)
 
 ---
 
