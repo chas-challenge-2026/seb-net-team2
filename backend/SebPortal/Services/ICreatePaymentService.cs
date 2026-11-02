@@ -5,6 +5,7 @@ namespace SebPortal.Api.Services
 {
     public interface ICreatePaymentService
     {
+        Task<IEnumerable<Payment>> GetRecentPaymentsAsync(int userId, int tenantId, bool isAdmin);
         Task<Payment> CreatePaymentAsync(CreatePaymentDTO createPaymentDTO, int userId, int tenantId);
 
         // One transaction for the whole list. A rejected row rolls every payment back

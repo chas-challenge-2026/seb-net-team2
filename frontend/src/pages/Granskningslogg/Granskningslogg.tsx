@@ -2,7 +2,7 @@ import { translateSystemText } from "../../i18n/translateSystemText";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronsDown, Circle, CircleCheck, CircleX, Download, RotateCcw, ScrollText } from "lucide-react";
+import { ChevronsDown, Circle, CircleCheck, CircleX, Download, RotateCcw, ClipboardList } from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import { useAuditLog, usePaymentReferences, type AuditEntityRef } from "../../hooks/useAuditLog";
@@ -124,7 +124,7 @@ export function Granskningslogg() {
         <section className={styles.page} aria-labelledby="audit-log-title">
             <header className={styles.header}>
                 <div className={styles.titleRow}>
-                    <ScrollText size={24} strokeWidth={2} aria-hidden="true" />
+                    <ClipboardList size={24} strokeWidth={2} aria-hidden="true" />
                     <h1 id="audit-log-title">{t("auditLog.title")}</h1>
                 </div>
                 <p className={styles.intro}>{t("auditLog.description")}</p>

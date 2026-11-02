@@ -155,6 +155,7 @@
         "recentPayments": "Senaste betalningar",
         "errors": {
             "generic": "Något gick fel.",
+            "payments": "Det gick inte att hämta senaste betalningar. Försök igen senare.",
             "accounts": "Det gick inte att hämta företagets konton. Försök igen senare."
         },
         "table": {
@@ -318,6 +319,8 @@
             "waitingDays_other": "Väntat {{count}} dagar",
             "reference": "Referens",
             "submittedBy": "Skickad av",
+            "assignedTo": "Tilldelad",
+            "assigneeUnknown": "Uppgift saknas",
             "showDetails": "Visa detaljer",
             "hideDetails": "Dölj detaljer",
             "showDetailsFor": "Visa detaljer för {{reference}}",

@@ -212,6 +212,7 @@
         "recentPayments": "Recent payments",
         "errors": {
             "generic": "Something went wrong.",
+            "payments": "Could not load recent payments. Try again later.",
             "accounts": "Could not load company accounts. Try again later."
         },
         "table": {
@@ -375,6 +376,8 @@
             "waitingDays_other": "Waiting {{count}} days",
             "reference": "Reference",
             "submittedBy": "Submitted by",
+            "assignedTo": "Assigned to",
+            "assigneeUnknown": "Unavailable",
             "showDetails": "Show details",
             "hideDetails": "Hide details",
             "showDetailsFor": "Show details for {{reference}}",
