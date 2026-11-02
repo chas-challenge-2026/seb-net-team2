@@ -10,6 +10,7 @@ export const pendingApprovalStepSchema = z.object({
     reference: z.string(),
     createdByUserId: z.string().uuid(),
     createdByUserName: z.string(),
+    attestantName: z.string().nullish(),
     paymentCreatedAt: z.string(),
     // Not sent by the backend yet. Optional so the inbox keeps working without them,
     // and shows them automatically once the backend adds them to /api/Approval/pending.

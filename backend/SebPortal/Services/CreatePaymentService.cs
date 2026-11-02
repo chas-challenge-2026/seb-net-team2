@@ -249,5 +249,10 @@ namespace SebPortal.Api.Services
         {
             return _paymentRepository.GetPaymentsByUserIdAsync(userId, tenantId);
         }
+
+        public Task<IEnumerable<Payment>> GetRecentPaymentsAsync(int userId, int tenantId, bool isAdmin)
+        {
+            return _paymentRepository.GetRecentPaymentsAsync(tenantId, isAdmin ? null : userId);
+        }
     }
 }

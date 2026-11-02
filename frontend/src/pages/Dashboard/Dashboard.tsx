@@ -18,7 +18,7 @@ import styles from "./Dashboard.module.css";
 export function Dashboard() {
     const { t, i18n } = useTranslation();
     const { data: accounts, isLoading: loadingAccounts, isError: accountsError } = useAccounts();
-    const { data: payments, isLoading: loadingPayments } = usePayments();
+    const { data: payments, isLoading: loadingPayments, isError: paymentsError } = usePayments();
     const { user } = useAuth();
     const { primaryCurrency } = useCurrency();
     const [copyMessage, setCopyMessage] = useState("");
@@ -36,7 +36,7 @@ export function Dashboard() {
     const balances = calculateAccountBalances(displayedAccounts, rates, primaryCurrency);
     const loadingRates = rateQueries.some((query) => query.isPending);
 
-    const canCreatePayments = user?.role === "Initiator";
+    const canViewPayments = ["Initiator", "Admin", "Attestant"].includes(user?.role ?? "");
 
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
@@ -136,9 +136,7 @@ export function Dashboard() {
                 )}
             </section>
 
-            {/* "Recent payments" lists the user's own payments, so it is always empty for roles
-                that cannot create payments. */}
-            {canCreatePayments && (
+            {canViewPayments && (
             <section className={styles.recentPayments}>
                 <h2 className={styles.sectionTitle}>
                     <ReceiptText size={20} strokeWidth={2} aria-hidden="true" />
@@ -148,6 +146,8 @@ export function Dashboard() {
                 <Card>
                     {loadingPayments ? (
                         <p role="status">{t("common.loading")}</p>
+                    ) : paymentsError ? (
+                        <p role="alert">{t("dashboard.errors.payments")}</p>
                     ) : (
                         <PaymentsTable payments={payments ?? []} accounts={accounts ?? []} locale={locale} />
                     )}

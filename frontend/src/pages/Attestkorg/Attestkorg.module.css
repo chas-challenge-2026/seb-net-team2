@@ -1416,8 +1416,17 @@
 /* The same space above and below, so each payment reads as one block between the lines. */
 
 .cardInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
     flex: 1;
     min-width: 0;
+}
+
+.cardInfo > .cardMeta,
+.cardInfo > .detailsToggle {
+    margin-top: 0;
 }
 
 /* Bulk approval: a checkbox per row and a bar above the list. */

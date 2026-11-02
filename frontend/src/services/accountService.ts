@@ -58,7 +58,7 @@ function mapPaymentStatus(status: string): Payment['status'] {
     }
 }
 
-export async function fetchRecentPayments(): Promise<Payment[]> {
+export async function fetchRecentPayments(scope: 'mine' | 'recent' = 'mine'): Promise<Payment[]> {
     const apiUrl = (import.meta.env.VITE_API_URL || window.location.origin)
 
     if (!apiUrl) {
@@ -66,11 +66,12 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
     }
 
     const payments = await apiRequest(
-        `${apiUrl}/api/Payment/mine`,
+        `${apiUrl}/api/Payment/${scope}`,
         z.array(createdPaymentSchema),
     )
 
     return payments
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .map((payment) => ({
             id: String(payment.id),
             date: payment.createdAt.slice(0, 10),
@@ -81,7 +82,6 @@ export async function fetchRecentPayments(): Promise<Payment[]> {
             currency: payment.currency,
             status: mapPaymentStatus(payment.status),
         }))
-        .sort((a, b) => b.date.localeCompare(a.date))
 }
 
 export type CreatePaymentRequest = {

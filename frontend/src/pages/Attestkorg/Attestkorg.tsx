@@ -250,6 +250,7 @@ export function Attestkorg() {
 
         await Promise.all([
             queryClient.invalidateQueries({ queryKey: APPROVALS_QUERY_KEY }),
+            queryClient.invalidateQueries({ queryKey: ["payments"] }),
             queryClient.invalidateQueries({ queryKey: APPROVAL_HISTORY_QUERY_KEY }),
         ]);
     }
@@ -327,6 +328,7 @@ export function Attestkorg() {
 
                     await Promise.all([
                         queryClient.invalidateQueries({ queryKey: APPROVALS_QUERY_KEY }),
+                        queryClient.invalidateQueries({ queryKey: ["payments"] }),
                         // The decision now belongs in the "Handled" tab.
                         queryClient.invalidateQueries({ queryKey: APPROVAL_HISTORY_QUERY_KEY }),
                     ]);
@@ -646,6 +648,12 @@ export function Attestkorg() {
                                             {sentLabel(approval)}
                                         </time>
                                     </p>
+
+                                    {user?.role === "Admin" && (
+                                        <p className={styles.cardMeta}>
+                                            {t("approvalInbox.card.assignedTo")}: {approval.attestantName?.trim() || t("approvalInbox.card.assigneeUnknown")}
+                                        </p>
+                                    )}
 
                                     {/* Always visible: a warning must not hide behind a click. */}
                                     <PaymentChecks approval={approval} allPending={approvals} />
