@@ -78,6 +78,19 @@ namespace SebPortal.Api.Controllers
             return Ok(payments.Select(MapToResponseDto));
         }
 
+        /// <summary>
+        /// Returns the 50 newest payments with their current status. Admins see their
+        /// tenant's payments; attestants see payments assigned to them, including handled steps.
+        /// </summary>
+        [HttpGet("recent")]
+        [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Attestant)]
+        public async Task<IActionResult> GetRecentPayments()
+        {
+            var payments = await _createPaymentService.GetRecentPaymentsAsync(
+                GetCurrentUserId(), GetUserTenantId(), User.IsInRole(UserRoles.Admin));
+            return Ok(payments.Select(MapToResponseDto));
+        }
+
         private static CreatePaymentResponseDTO MapToResponseDto(Payment payment)
         {
             return new CreatePaymentResponseDTO

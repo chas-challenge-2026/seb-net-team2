@@ -4,6 +4,7 @@ namespace SebPortal.Api.Repositories
 {
     public interface IPaymentRepository
     {
+        Task<IEnumerable<Payment>> GetRecentPaymentsAsync(int tenantId, int? attestantId);
         Task<Payment> CreatePaymentAsync(Payment payment);
         Task<Payment?> GetPaymentByIdAsync(int paymentId, int tenantId);
         Task<IEnumerable<Payment>> GetPaymentsByUserIdAsync(int userId, int tenantId);
