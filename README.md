@@ -224,7 +224,7 @@ Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
    | Under 10 000 kr | Genomförs direkt, ingen attest |
    | 100 000 kr och uppåt | 2 attestanters godkännande |
 
-3. **Atteststeg skapas** (`ApprovalStep`) – ett per krävt godkännande – och tilldelas en attestant var. Vi valde **round-robin** över tenantens attestanter så att belastningen sprids, i stället för att lämna stegen otilldelade och låta "vem som helst" plocka dem.
+3. **Atteststeg skapas** (`ApprovalStep`) – ett per krävt godkännande – och tilldelas en attestant var. Attestanter tilldelas deterministiskt enligt en fast ordning från databasen. För betalningar med flera godkännande-steg sprids stegen mellan olika attestanter. Betalningsskaparen exkluderas alltid från tilldelningen.
 4. **Attestanterna beslutar.** När samtliga steg är godkända markeras betalningen som `completed`. Nekas ett steg avbryts hela flödet och det reserverade beloppet **återförs automatiskt** till kontot.
 
 ### ✅ Valideringsregler vid beslut
