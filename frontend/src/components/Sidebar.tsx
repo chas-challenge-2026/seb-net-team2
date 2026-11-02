@@ -8,7 +8,7 @@ import {
   House,
   LayoutDashboard,
   Menu,
-  ScrollText,
+  ClipboardList,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -300,7 +300,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={handleMobileNavClick}
                 title={collapsed ? t("sidebar.auditLog") : undefined}
               >
-                <ScrollText size={20} strokeWidth={2} aria-hidden="true" />
+                <ClipboardList size={20} strokeWidth={2} aria-hidden="true" />
 
                 <span className={styles["nav-item-label"]}>
                   {t("sidebar.auditLog")}

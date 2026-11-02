@@ -347,7 +347,8 @@
 }
 
 .exportButton:hover:not(:disabled) {
-    background: var(--color-hover-light);
+    background: #000;
+    color: #fff;
 }
 
 .exportButton:focus-visible {
