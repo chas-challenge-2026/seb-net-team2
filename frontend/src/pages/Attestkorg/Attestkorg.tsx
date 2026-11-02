@@ -5,6 +5,7 @@ import { useModalFocus } from "../../hooks/useModalFocus";
 import { FieldError } from "../../components/FormValidation/FormErrors";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation, useSearch } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import {
     ArrowRight,
@@ -52,6 +53,14 @@ const SORT_LABEL_KEYS: Record<SortOption, string> = {
     "amount-asc": "approvalInbox.sort.amountLow",
 };
 
+const ALL_ATTESTANTS = "";
+// Option value for steps without an attestant name, so they can still be found.
+const UNKNOWN_ATTESTANT = "__unknown";
+
+function attestantKey(approval: PendingApprovalStep): string {
+    return approval.attestantName?.trim() || UNKNOWN_ATTESTANT;
+}
+
 type ConfirmAction = {
     approval: PendingApprovalStep;
     kind: "approve" | "reject";
@@ -60,6 +69,8 @@ type ConfirmAction = {
 type ActionFeedback = {
     type: "approved" | "rejected" | "info";
     message: string;
+    // Translated when shown, so the text follows a language change made after it appeared.
+    messageKey?: string;
 };
 
 function sortApprovals(approvals: PendingApprovalStep[], sortOption: SortOption): PendingApprovalStep[] {
@@ -97,10 +108,21 @@ export function Attestkorg() {
     const { data: approvals = [], isPending, isError, error } = useApprovals();
     const queryClient = useQueryClient();
 
+    // Set when the attestant comes from a notification: /attestkorg?betalning=<paymentId>.
+    const { betalning: linkedPaymentId } = useSearch({ strict: false }) as { betalning?: string };
+    const notificationClickedAt = useLocation({ select: (location) => location.state.notificationClickedAt });
+    // Each click is handled once, so the 15-second refresh does not pull the attestant back to it,
+    // but clicking the notification again does.
+    const linkKey = linkedPaymentId && `${linkedPaymentId}:${notificationClickedAt ?? ""}`;
+    const [handledLink, setHandledLink] = useState<string>();
+
     // Oldest first: the payments that have waited longest are the most urgent for an attestant.
     const [pendingSort, setPendingSort] = useState<SortOption>("date-asc");
     // Empty until the user changes the order, so nothing is announced when the page loads.
     const [sortAnnouncement, setSortAnnouncement] = useState("");
+    // Admin only: show the payments waiting for one attestant.
+    const [attestantFilter, setAttestantFilter] = useState(ALL_ATTESTANTS);
+    const [attestantAnnouncement, setAttestantAnnouncement] = useState("");
     const [comments, setComments] = useState<Record<string, string>>({});
     // Cards start compact; the attestant opens the details (IBAN, account, time) when needed.
     const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -121,13 +143,36 @@ export function Attestkorg() {
 
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
 
+    // Opened from a notification: show that payment, or explain why it is no longer in the list.
+    // Set during render (not in an effect), as React recommends for state that follows a prop.
+    if (linkKey && !isPending && !isError && handledLink !== linkKey) {
+        setHandledLink(linkKey);
+        setActiveTab("pending");
+        // The linked payment may belong to another attestant than the one filtered on.
+        setAttestantFilter(ALL_ATTESTANTS);
+        if (!approvals.some((approval) => approval.paymentId === linkedPaymentId)) {
+            setActionFeedback({ type: "info", message: "", messageKey: "approvalInbox.feedback.linkedNotPending" });
+        }
+    }
+
     const decisionMutation = useMutation({
         mutationFn: decideApproval,
     });
 
-    const sortedApprovals = sortApprovals(approvals, pendingSort).sort(
-        (a, b) => Number(isOverdue(b)) - Number(isOverdue(a))
-    );
+    // Only admins see every attestant's steps; an attestant's inbox holds only their own.
+    const attestantOptions = user?.role === "Admin"
+        ? [...new Set(approvals.map(attestantKey))].sort((a, b) =>
+            a === UNKNOWN_ATTESTANT ? 1 : b === UNKNOWN_ATTESTANT ? -1 : a.localeCompare(b, "sv"))
+        : [];
+    const showAttestantFilter = attestantOptions.length > 1;
+    // Back to all when the chosen attestant has nothing left, so the list doesn't look empty.
+    const activeAttestant = showAttestantFilter && attestantOptions.includes(attestantFilter)
+        ? attestantFilter
+        : ALL_ATTESTANTS;
+
+    const sortedApprovals = sortApprovals(approvals, pendingSort)
+        .sort((a, b) => Number(isOverdue(b)) - Number(isOverdue(a)))
+        .filter((approval) => activeAttestant === ALL_ATTESTANTS || attestantKey(approval) === activeAttestant);
 
     // Count all steps, but include each payment's amount only once.
     const pendingPayments = [...new Map(approvals.map((approval) => [approval.paymentId, approval])).values()];
@@ -358,6 +403,11 @@ export function Attestkorg() {
         if (actionFeedback) feedbackRef.current?.focus();
     }, [actionFeedback]);
 
+    // Focus the payment from the notification, so the page scrolls to it and screen readers read it.
+    useEffect(() => {
+        if (handledLink) document.querySelector<HTMLElement>("[data-linked-payment]")?.focus();
+    }, [handledLink]);
+
     useEffect(() => {
         if (!confirmAction) return;
 
@@ -466,7 +516,7 @@ export function Attestkorg() {
                         ) : (
                             <Info size={18} aria-hidden="true" />
                         )}
-                        {actionFeedback.message}
+                        {actionFeedback.messageKey ? t(actionFeedback.messageKey) : actionFeedback.message}
                     </span>
 
                     {actionFeedback.type !== "info" && activeTab !== "handled" && (
@@ -526,6 +576,38 @@ export function Attestkorg() {
                         </div>
 
                         <p className="visually-hidden" role="status">{sortAnnouncement}</p>
+
+                        {showAttestantFilter && (
+                            <div className={styles.filterField}>
+                                <label htmlFor="pending-attestant">
+                                    {t("approvalInbox.attestantFilter.label")}
+                                </label>
+
+                                <select
+                                    id="pending-attestant"
+                                    value={activeAttestant}
+                                    onChange={(event) => {
+                                        const attestant = event.target.value;
+                                        setAttestantFilter(attestant);
+                                        setAttestantAnnouncement(t("approvalInbox.attestantFilter.announcement", {
+                                            count: approvals.filter((approval) =>
+                                                attestant === ALL_ATTESTANTS || attestantKey(approval) === attestant).length,
+                                        }));
+                                    }}
+                                >
+                                    <option value={ALL_ATTESTANTS}>{t("approvalInbox.attestantFilter.all")}</option>
+                                    {attestantOptions.map((attestant) => (
+                                        <option key={attestant} value={attestant}>
+                                            {attestant === UNKNOWN_ATTESTANT
+                                                ? t("approvalInbox.card.assigneeUnknown")
+                                                : attestant}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        <p className="visually-hidden" role="status">{attestantAnnouncement}</p>
                     </div>
                 )}
             </div>
@@ -590,9 +672,15 @@ export function Attestkorg() {
                 {sortedApprovals.length > 0 ? (
                     sortedApprovals.map((approval) => (
                         <article
-                            className={styles.card}
+                            className={approval.paymentId === linkedPaymentId
+                                ? `${styles.card} ${styles.cardLinked}`
+                                : styles.card}
                             key={approval.stepId}
                             aria-labelledby={`payment-${approval.paymentId}`}
+                            {...(approval.paymentId === linkedPaymentId && {
+                                "data-linked-payment": true,
+                                tabIndex: -1,
+                            })}
                         >
                             <div className={styles.cardHeader}>
                                 {sortedApprovals.length > 1 && (

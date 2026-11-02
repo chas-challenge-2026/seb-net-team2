@@ -4,6 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, jest } from "@jest/globals
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { Attestkorg } from "./Attestkorg";
+import { useLocation, useSearch } from "@tanstack/react-router";
+
 import { useApprovals } from "../../hooks/useApprovals";
 import { useApprovalHistory } from "../../hooks/useApprovalHistory";
 import { useSessionDecisions } from "../../hooks/useSessionDecisions";
@@ -31,6 +33,7 @@ jest.mock("../../hooks/useAuth", () => ({ useAuth: jest.fn() }));
 jest.mock("../../hooks/usePaymentSourceAccount", () => ({ usePaymentSourceAccount: jest.fn() }));
 jest.mock("../../services/approvalService", () => ({ decideApproval: jest.fn() }));
 jest.mock("../../services/auditService", () => ({ fetchAuditLog: jest.fn(), fetchEntityHistory: jest.fn() }));
+jest.mock("@tanstack/react-router", () => ({ useSearch: jest.fn(), useLocation: jest.fn() }));
 
 const mockedUseApprovals = jest.mocked(useApprovals);
 const mockedUseApprovalHistory = jest.mocked(useApprovalHistory);
@@ -40,6 +43,8 @@ const mockedUsePaymentSourceAccount = jest.mocked(usePaymentSourceAccount);
 const mockedFetchAuditLog = jest.mocked(fetchAuditLog);
 const mockedFetchEntityHistory = jest.mocked(fetchEntityHistory);
 const mockedDecideApproval = jest.mocked(decideApproval);
+const mockedUseSearch = jest.mocked(useSearch);
+const mockedUseLocation = jest.mocked(useLocation);
 
 const pendingPayment: PendingApprovalStep = {
     stepId: "8f14e45f-ceea-4a7b-9c3e-2a1b5c6d7e8f",
@@ -67,6 +72,8 @@ const handledPayment: DecidedApproval = {
 };
 
 function setHooks({ pending = [pendingPayment], handled = [handledPayment] } = {}) {
+    mockedUseSearch.mockReturnValue({} as never);
+    mockedUseLocation.mockReturnValue(undefined as never);
     mockedUseApprovals.mockReturnValue({
         data: pending, isPending: false, isError: false, error: null,
     } as unknown as ReturnType<typeof useApprovals>);
@@ -404,6 +411,100 @@ describe("Approving and rejecting payments", () => {
 
         fireEvent.change(screen.getByLabelText("Sortera efter"), { target: { value: "date-desc" } });
         expect(order()).toEqual(["Försenad", "Ny", "Igår"]);
+    });
+});
+
+describe("Opening a payment from a notification", () => {
+    const otherPayment: PendingApprovalStep = {
+        ...pendingPayment,
+        stepId: "9a14e45f-ceea-4a7b-9c3e-2a1b5c6d7e90",
+        paymentId: "4f2a9c1e-7b4d-4e8a-9c21-5d6f0a1b2c3e",
+        reference: "Faktura #1044",
+    };
+
+    it("moves focus to the linked payment", async () => {
+        setHooks({ pending: [pendingPayment, otherPayment] });
+        mockedUseSearch.mockReturnValue({ betalning: otherPayment.paymentId } as never);
+        renderInbox();
+
+        const card = screen.getByRole("article", { name: "Referens Faktura #1044" });
+        await waitFor(() => expect(card).toHaveFocus());
+        expect(screen.getByRole("article", { name: "Referens Faktura #1043" })).not.toHaveAttribute("data-linked-payment");
+    });
+
+    it("moves focus to the payment again when the same notification is clicked again", async () => {
+        setHooks({ pending: [pendingPayment, otherPayment] });
+        mockedUseSearch.mockReturnValue({ betalning: otherPayment.paymentId } as never);
+        mockedUseLocation.mockReturnValue(1 as never);
+        const { rerender } = renderInbox();
+
+        const card = screen.getByRole("article", { name: "Referens Faktura #1044" });
+        await waitFor(() => expect(card).toHaveFocus());
+
+        // The attestant moves on, then clicks the same notification again.
+        screen.getByRole("button", { name: "Visa detaljer för Faktura #1043" }).focus();
+        mockedUseLocation.mockReturnValue(2 as never);
+        rerender(
+            <QueryClientProvider client={new QueryClient()}>
+                <Attestkorg />
+            </QueryClientProvider>
+        );
+
+        await waitFor(() => expect(card).toHaveFocus());
+    });
+
+    it("explains when the linked payment is no longer waiting", () => {
+        mockedUseSearch.mockReturnValue({ betalning: otherPayment.paymentId } as never);
+        renderInbox();
+
+        expect(screen.getByText("Betalningen från notisen väntar inte längre på din attest. Den kan redan ha hanterats."))
+            .toBeInTheDocument();
+    });
+});
+
+describe("Filtering on attestant", () => {
+    const johansPayment = { ...pendingPayment, attestantName: "Johan Berg" };
+    const sarasPayment: PendingApprovalStep = {
+        ...pendingPayment,
+        stepId: "9a14e45f-ceea-4a7b-9c3e-2a1b5c6d7e90",
+        paymentId: "4f2a9c1e-7b4d-4e8a-9c21-5d6f0a1b2c3e",
+        reference: "Faktura #1044",
+        attestantName: "Sara Ek",
+    };
+
+    function renderAsAdmin(pending: PendingApprovalStep[]) {
+        setHooks({ pending });
+        mockedUseAuth.mockReturnValue({
+            user: { id: "admin", name: "Anna Admin", role: "Admin" },
+        } as unknown as ReturnType<typeof useAuth>);
+        renderInbox();
+    }
+
+    const references = () => screen.getAllByRole("heading", { level: 2, name: /^Referens / })
+        .map((heading) => heading.textContent?.replace("Referens ", ""));
+
+    it("shows only the chosen attestant's payments, and selects only those", () => {
+        renderAsAdmin([johansPayment, sarasPayment]);
+
+        fireEvent.change(screen.getByLabelText("Attestant"), { target: { value: "Sara Ek" } });
+
+        expect(references()).toEqual(["Faktura #1044"]);
+        expect(screen.getByText("Visar 1 betalning.")).toBeInTheDocument();
+        // One payment left, so no "Select all" that could also tick Johan's payment.
+        expect(screen.queryByRole("checkbox", { name: "Markera alla" })).not.toBeInTheDocument();
+
+        fireEvent.change(screen.getByLabelText("Attestant"), { target: { value: "" } });
+        expect(references()).toHaveLength(2);
+    });
+
+    it("is not shown to an attestant or when all payments wait for the same person", () => {
+        setHooks({ pending: [johansPayment, sarasPayment] });
+        renderInbox();
+        expect(screen.queryByLabelText("Attestant")).not.toBeInTheDocument();
+        cleanup();
+
+        renderAsAdmin([johansPayment, { ...sarasPayment, attestantName: "Johan Berg" }]);
+        expect(screen.queryByLabelText("Attestant")).not.toBeInTheDocument();
     });
 });
 

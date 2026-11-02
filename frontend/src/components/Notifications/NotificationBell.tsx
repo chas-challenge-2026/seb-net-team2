@@ -60,6 +60,7 @@ export function NotificationBell() {
                 createdAt: new Date().toISOString(),
                 isRead: false,
                 href: "/attestkorg",
+                paymentId: approval.paymentId,
             }));
 
         if (newNotifications.length > 0) {
@@ -293,6 +294,8 @@ export function NotificationBell() {
                                 <Link
                                     key={notification.id}
                                     to={notification.href ?? "/dashboard"}
+                                    search={notification.paymentId ? { betalning: notification.paymentId } : undefined}
+                                    state={(previous) => ({ ...previous, notificationClickedAt: Date.now() })}
                                     className={`${styles.item} ${!notification.isRead ? styles.unread : ""
                                         }`}
                                     onClick={() => {

@@ -304,6 +304,7 @@
             "approved": "{{reference}} ({{amount}}) godkändes.",
             "rejected": "{{reference}} ({{amount}}) avvisades.",
             "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats.",
+            "linkedNotPending": "Betalningen från notisen väntar inte längre på din attest. Den kan redan ha hanterats.",
             "showHandled": "Visa i Hanterade"
         },
         "sort": {
@@ -313,6 +314,12 @@
             "amountHigh": "Belopp: högst till lägst",
             "amountLow": "Belopp: lägst till högst",
             "announcement": "Listan är sorterad: {{order}}."
+        },
+        "attestantFilter": {
+            "label": "Attestant",
+            "all": "Alla attestanter",
+            "announcement_one": "Visar {{count}} betalning.",
+            "announcement_other": "Visar {{count}} betalningar."
         },
         "card": {
             "waitingDays_one": "Väntat {{count}} dag",

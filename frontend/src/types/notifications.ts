@@ -11,4 +11,13 @@ export type Notification = {
     createdAt: string
     isRead: boolean
     href?: string
+    // Opens the approval inbox at this payment (only for pending approvals).
+    paymentId?: string
+}
+
+declare module '@tanstack/history' {
+    interface HistoryState {
+        // Set on every click, so clicking the same notification again still opens the payment.
+        notificationClickedAt?: number
+    }
 }
