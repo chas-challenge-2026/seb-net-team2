@@ -361,6 +361,7 @@
             "approved": "{{reference}} ({{amount}}) was approved.",
             "rejected": "{{reference}} ({{amount}}) was rejected.",
             "alreadyHandled": "This payment has already been handled. The list has been updated.",
+            "linkedNotPending": "The payment from the notification is no longer waiting for your approval. It may already have been handled.",
             "showHandled": "Show in Handled"
         },
         "sort": {
@@ -370,6 +371,12 @@
             "amountHigh": "Amount: high to low",
             "amountLow": "Amount: low to high",
             "announcement": "List sorted: {{order}}."
+        },
+        "attestantFilter": {
+            "label": "Approver",
+            "all": "All approvers",
+            "announcement_one": "Showing {{count}} payment.",
+            "announcement_other": "Showing {{count}} payments."
         },
         "card": {
             "waitingDays_one": "Waiting {{count}} day",

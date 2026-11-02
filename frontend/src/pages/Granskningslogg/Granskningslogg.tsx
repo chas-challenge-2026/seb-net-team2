@@ -6,7 +6,7 @@ import { ChevronsDown, Circle, CircleCheck, CircleX, Download, RotateCcw, Clipbo
 
 import Card from "../../components/Card/Card";
 import { useAuditLog, usePaymentReferences, type AuditEntityRef } from "../../hooks/useAuditLog";
-import { AUDIT_ACTIONS, type AuditLogFilters } from "../../services/auditService";
+import { AUDIT_ACTIONS, fetchAuditLog, type AuditLogFilters } from "../../services/auditService";
 import { getAllUsers } from "../../services/authService";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -55,7 +55,9 @@ export function Granskningslogg() {
 
     const filters = useMemo<AuditLogFilters>(
         () => ({
+            // Admins pick from the user list (public ids), attestants from the log (numeric ids).
             userPublicId: !isAdmin || userFilter === ALL_USERS ? undefined : userFilter,
+            userId: isAdmin || userFilter === ALL_USERS ? undefined : Number(userFilter),
             action: eventFilter === ALL_EVENTS ? undefined : eventFilter,
             from: dateFrom || undefined,
             to: dateTo || undefined,
@@ -79,9 +81,20 @@ export function Granskningslogg() {
         enabled: isAdmin,
     });
 
+    // Attestants may not list users, so their choices are the people in the latest 200 events.
+    const { data: logUsers = [] } = useQuery({
+        queryKey: ["auditLogUsers"],
+        queryFn: async () => {
+            const page = await fetchAuditLog({}, 1, 200);
+            return [...new Map(page.items.map((entry) => [entry.userId, entry.userName]))]
+                .map(([id, name]) => ({ id: String(id), name }));
+        },
+        enabled: user !== undefined && !isAdmin,
+    });
+
     const sortedUsers = useMemo(
-        () => [...users].sort((a, b) => a.name.localeCompare(b.name)),
-        [users]
+        () => [...(isAdmin ? users : logUsers)].sort((a, b) => a.name.localeCompare(b.name)),
+        [isAdmin, users, logUsers]
     );
 
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
@@ -132,7 +145,7 @@ export function Granskningslogg() {
 
             <Card>
                 <div className={styles.toolbar}>
-                    {isAdmin && <div className={styles.filterField}>
+                    {(isAdmin || sortedUsers.length > 1) && <div className={styles.filterField}>
                         <label htmlFor="audit-user-filter">{t("auditLog.filters.user")}</label>
 
                         <select
