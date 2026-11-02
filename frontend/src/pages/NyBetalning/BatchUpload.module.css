@@ -2,59 +2,90 @@
     display: block;
 }
 
-.intro {
-    margin: 0 0 1.25rem;
-    color: #68756e;
-}
-
-.layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
-    gap: 1.25rem;
-    align-items: start;
-}
-
-.sectionHeading {
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e5ebe6;
-}
-
-.sectionHeading p {
-    margin: 0;
-    color: #68756e;
-}
-
-.sectionHeading h2 {
-    margin: 0 0 0.35rem;
-    color: #163226;
-    font-size: 1.2rem;
-}
-
-.batch label {
+.fieldLabel {
     display: block;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.45rem;
     color: #34483b;
     font-size: 0.82rem;
     font-weight: 750;
 }
 
-.batch input[type='file'] {
-    box-sizing: border-box;
-    width: 100%;
-    margin-top: 0.45rem;
-    padding: 0.7rem 0.9rem;
-    border: 1px solid var(--color-control-border);
-    border-radius: 4px;
+.dropzone {
+    padding: 0.9rem 1rem 0.75rem;
+    margin-bottom: 0.6rem;
+    border: 2px dashed #8aa596;
+    border-radius: var(--radius-sm, 4px);
     background: #fbfdfb;
-    color: #193326;
-    font: inherit;
-    font-size: 0.9rem;
+    color: #34483b;
 }
 
-.batch input[type='file']:focus-visible {
+/* One row, close to the height of the single payment's inputs. */
+.dropzoneLabel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+    cursor: pointer;
+}
+
+.dropzoneLabel .chooseButton {
+    margin-left: auto;
+}
+
+/* The single payment form gives inputs a min-height and padding; the hidden file input must stay 1px. */
+.dropzoneLabel input[type='file'] {
+    min-height: 0;
+    padding: 0;
+}
+
+.dropzoneIcon {
+    color: var(--seb-green-dark-2);
+}
+
+.dropzone:hover,
+.dropzoneActive {
+    border-color: var(--seb-green-dark-1);
+    background: #f2f9f0;
+}
+
+.dropzone:focus-within {
     outline: 3px solid rgb(96 205 24 / 20%);
     border-color: var(--seb-green-dark-1);
+}
+
+.dropzoneError {
+    border-color: var(--color-error);
+}
+
+.dropHint {
+    color: #56635a;
+    font-size: 0.88rem;
+}
+
+.fileName {
+    color: #163226;
+    font-size: 0.9rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.chooseButton {
+    padding: 0.45rem 1rem;
+    border: 1px solid #163226;
+    border-radius: 4px;
+    background: #fff;
+    color: #163226;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.exampleHint {
+    margin: 0.75rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid #e5ebe6;
+    color: #56635a;
+    font-size: 0.82rem;
 }
 
 .hint {
@@ -64,6 +95,9 @@
 }
 
 .errorBanner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
     padding: 0.8rem;
     margin-bottom: 1rem;
     border-left: 4px solid var(--color-error);
@@ -72,34 +106,70 @@
     font-size: 0.85rem;
 }
 
+.errorBanner svg {
+    flex-shrink: 0;
+}
+
 .actions {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 0.75rem;
     padding-top: 0.5rem;
 }
 
-.formatCard p {
-    margin: 0 0 0.75rem;
-    color: #34483b;
-    font-size: 0.85rem;
+.format {
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e5ebe6;
+    border-radius: var(--radius-sm, 4px);
+    background: #f7f9f8;
 }
 
-.formatExample {
-    overflow-x: auto;
-    padding: 0.85rem;
-    margin: 0 0 1rem;
-    border: 1px solid #e5ebe6;
-    border-radius: 4px;
-    background: #fbfdfb;
-    color: #193326;
+.format h3 {
+    margin: 0 0 0.2rem;
+    color: #163226;
+    font-size: 0.95rem;
+}
+
+.format p {
+    margin: 0 0 0.6rem;
+    color: #56635a;
+    font-size: 0.82rem;
+}
+
+.columnList {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem 1.25rem;
+    margin: 0;
+}
+
+/* align-content: start keeps each description right under its column name, even when a neighbour wraps. */
+.columnList div {
+    display: grid;
+    align-content: start;
+    gap: 0.1rem;
+}
+
+.columnList dt code {
+    color: #163226;
     font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-    font-size: 0.78rem;
-    line-height: 1.6;
-    white-space: pre;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.columnList dd {
+    margin: 0;
+    color: #56635a;
+    font-size: 0.8rem;
+    line-height: 1.4;
 }
 
 .warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
     padding: 0.8rem;
     margin-bottom: 1rem;
     border-left: 4px solid #d69e2e;
@@ -109,7 +179,14 @@
     line-height: 1.4;
 }
 
+.warning svg {
+    flex-shrink: 0;
+}
+
 .exampleLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     border: 0;
     padding: 0;
     background: none;
@@ -121,18 +198,77 @@
     cursor: pointer;
 }
 
-.exampleLink:focus-visible {
+.exampleLink:focus-visible,
+.overviewLink:focus-visible {
     outline: 3px solid rgb(96 205 24 / 20%);
     outline-offset: 2px;
+}
+
+.overviewLink {
+    color: var(--seb-green-dark-2);
+    font-size: 0.9rem;
+    font-weight: 700;
 }
 
 .resultsCard {
     margin-top: 1.25rem;
 }
 
-.resultOk {
-    color: #245526;
+.stepCard {
+    padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.stepTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 0.35rem;
+    color: #163226;
+}
+
+.stepTitle h2 {
+    margin: 0;
+    font-size: 1.25rem;
+}
+
+.stepIntro {
+    margin: 0.35rem 0 0;
+    color: #56635a;
     font-size: 0.9rem;
+}
+
+.duplicateWarning {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.9rem 1rem;
+    margin-top: 1rem;
+    border-left: 4px solid #a76a00;
+    border-radius: var(--radius-sm);
+    background: #fff7e8;
+    color: #754b00;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+.duplicateWarning svg {
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+}
+
+.duplicateWarning div {
+    display: grid;
+    gap: 0.2rem;
+}
+
+.stepCard .tableWrapper {
+    margin: 0.5rem 0 1.25rem;
+}
+
+/* Headings only take focus so screen readers start at the new content; they are not controls. */
+.resultsCard h2:focus,
+.stepCard h2:focus {
+    outline: none;
 }
 
 .resultWarning {
@@ -170,15 +306,37 @@
     text-transform: uppercase;
 }
 
-.statusSuccess {
-    color: #245526;
+.table .amountCell {
+    text-align: right;
+}
+
+.statusSuccess,
+.statusPending,
+.statusError {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     font-weight: 700;
 }
 
+.statusSuccess {
+    color: #245526;
+}
+
+.statusPending {
+    color: #7a5a14;
+}
+
 .statusError {
+    align-items: flex-start;
     color: var(--color-error);
-    font-weight: 700;
     white-space: normal;
+}
+
+.statusSuccess svg,
+.statusPending svg,
+.statusError svg {
+    flex-shrink: 0;
 }
 
 .buttonContent {
@@ -189,16 +347,17 @@
 }
 
 @media (max-width: 760px) {
-    .layout {
-        grid-template-columns: minmax(0, 1fr);
+    .columnList {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .actions {
-        flex-direction: column;
-        justify-content: stretch;
+        flex-direction: column-reverse;
+        align-items: stretch;
     }
 
     .actions > * {
         width: 100%;
+        text-align: center;
     }
 }

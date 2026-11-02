@@ -441,47 +441,80 @@
     },
     "batch": {
         "description": "Ladda upp flera betalningar samtidigt via en CSV-fil.",
+        "steps": {
+            "file": "Välj fil"
+        },
         "file": {
-            "title": "CSV-fil",
-            "description": "Välj en fil och ladda sedan upp och behandla den.",
+            "title": "Välj fil",
             "label": "CSV-fil",
-            "hint": "Maximal filstorlek: 1 MB. Kodning: UTF-8."
+            "hint": "Maximal filstorlek: 1 MB. Kodning: UTF-8.",
+            "dropHint": "Dra och släpp filen här",
+            "choose": "Välj fil",
+            "change": "Byt fil",
+            "selected": "Vald fil: {{name}}",
+            "noFile": "Har du ingen fil?"
         },
         "actions": {
-            "processing": "Behandlar...",
-            "upload": "Ladda upp och behandla"
+            "processing": "Läser filen...",
+            "review": "Granska betalningar",
+            "create_one": "Skapa {{count}} betalning",
+            "create_other": "Skapa {{count}} betalningar",
+            "newFile": "Ladda upp en ny fil",
+            "viewOverview": "Visa i Översikt"
         },
         "format": {
             "title": "CSV-format",
-            "description": "Filen måste innehålla följande kolumner:",
-            "warning": "Obs: kommatecken inuti ett fält stöds inte. Undvik referenser som innehåller kommatecken.",
-            "download": "Ladda ner example-batch.csv"
+            "description": "Filen måste ha de här kolumnerna, i den här ordningen:",
+            "columnHelp": {
+                "account": "Kontots nummer, till exempel 1",
+                "iban": "Mottagarens IBAN",
+                "amount": "Belopp, till exempel 5000.00",
+                "reference": "Fakturanummer, inom citattecken vid komma"
+            },
+            "warning": "Alla betalningar i filen skapas tillsammans. Om någon rad är fel skapas ingen betalning.",
+            "download": "Ladda ner en exempelfil"
+        },
+        "review": {
+            "title": "Granska betalningarna",
+            "summary_one": "{{count}} betalning från {{file}}. Kontrollera raden innan den skapas.",
+            "summary_other": "{{count}} betalningar från {{file}}. Kontrollera raderna innan de skapas.",
+            "total": "Totalt",
+            "duplicateTitle": "Den här filen verkar redan vara uppladdad",
+            "duplicateText": "Du skapade betalningar med exakt samma innehåll {{time}}. Kontrollera att du inte betalar två gånger innan du fortsätter."
         },
         "result": {
             "title": "Resultat",
-            "processed": "{{succeeded}} av {{total}} betalningar behandlades.",
-            "failed_one": "{{count}} rad misslyckades — se nedan.",
-            "failed_other": "{{count}} rader misslyckades — se nedan."
+            "createdTitle_one": "Betalningen skapades",
+            "createdTitle_other": "Alla {{count}} betalningar skapades",
+            "breakdown": "Genomförda: {{completed}} · Väntar på attest: {{pending}}",
+            "invalid_one": "Inga betalningar skickades. {{count}} rad behöver rättas — se nedan.",
+            "invalid_other": "Inga betalningar skickades. {{count}} rader behöver rättas — se nedan.",
+            "rejected": "Inga betalningar skapades. Servern svarade: {{reason}}",
+            "rejectedRow": "Inga betalningar skapades. Rätta raden som är markerad nedan."
         },
         "table": {
             "row": "Rad",
+            "fromAccount": "Från konto",
+            "accountNumber": "Konto {{id}}",
             "toIban": "Till IBAN",
             "amount": "Belopp",
             "reference": "Referens",
             "status": "Status",
-            "success": "Godkänd"
+            "created": "Skapad",
+            "notCreated": "Inte skapad"
         },
         "errors": {
             "csvOnly": "Endast .csv-filer stöds.",
             "fileTooLarge": "Filen är större än 1 MB.",
             "chooseFile": "Välj först en CSV-fil.",
-            "accountsLoading": "Kontoinformationen laddas fortfarande — försök igen om en stund.",
             "header": "CSV-rubriken måste vara exakt: {{header}}",
             "empty": "CSV-filen är tom eller innehåller inga datarader.",
-            "columns": "Förväntade 4 kolumner men fick {{count}}. Kommatecken inuti ett fält stöds inte.",
-            "unknownAccount": "Okänt from_account_id '{{id}}'",
+            "columns": "Förväntade 4 kolumner men fick {{count}}. Skriv fält som innehåller kommatecken inom citattecken.",
+            "invalidAccount": "from_account_id måste vara ett kontonummer, till exempel 1 (fick '{{id}}')",
+            "unknownAccount": "Kontot {{id}} finns inte hos ert företag",
             "invalidIban": "Ogiltigt IBAN '{{iban}}'",
-            "invalidAmount": "Ogiltigt belopp '{{amount}}'"
+            "invalidAmount": "Ogiltigt belopp '{{amount}}'. Använd punkt som decimaltecken, till exempel 5000.00",
+            "numericReference": "Referensen kan inte bara innehålla siffror"
         }
     },
     "auditLog": {
