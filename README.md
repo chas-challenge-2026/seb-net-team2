@@ -224,7 +224,7 @@ Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
    | Under 10 000 kr | Genomförs direkt, ingen attest |
    | 100 000 kr och uppåt | 2 attestanters godkännande |
 
-3. **Atteststeg skapas** (`ApprovalStep`) – ett per krävt godkännande – och tilldelas en attestant var. Vi valde **round-robin** över tenantens attestanter så att belastningen sprids, i stället för att lämna stegen otilldelade och låta "vem som helst" plocka dem.
+3. **Atteststeg skapas** (`ApprovalStep`) – ett per krävt godkännande – och tilldelas en attestant var. Attestanter tilldelas deterministiskt enligt en fast ordning från databasen. För betalningar med flera godkännande-steg sprids stegen mellan olika attestanter. Betalningsskaparen exkluderas alltid från tilldelningen.
 4. **Attestanterna beslutar.** När samtliga steg är godkända markeras betalningen som `completed`. Nekas ett steg avbryts hela flödet och det reserverade beloppet **återförs automatiskt** till kontot.
 
 ### ✅ Valideringsregler vid beslut
@@ -389,6 +389,37 @@ gränssnittskomponenter finns i `src/components`, medan `src/hooks` samlar
 återanvändbar data- och statehantering. API-anrop ligger i `src/services` och går
 via en gemensam funktion som skickar JWT och validerar svar med Zod-scheman från
 `src/schemas`. Translations finns i `src/i18n`.
+
+## 🧪 Testning
+
+Projektet har omfattande testning på flera nivåer:
+
+**Frontend** – Jest + React Testing Library för komponenter och servicefunktioner:
+```bash
+cd frontend && npm test
+```
+
+**Backend** – xUnit + Moq för affärslogik (ApprovalEngine, Idempotency, User, Audit):
+```bash
+cd backend && dotnet test
+```
+
+**Native** – CMocka för C-moduler (IBAN-validering, CSV-parsning, Audit-integritet):
+```bash
+cd native && make test
+```
+
+## Kända brister och begränsningar
+
+**Kända brister:** Inga kritiska brister i v2. V1-problemen är åtgärdade.
+
+**Avgränsningar:** Fokus på kärnflödet – betalningsskapande, attestering och granskning. Inte inkluderat: betalningsutförande mot bankkonto, external gateway-återkoppling, eller avancerad rapportering.
+
+**Förbättringsområden:**
+- End-to-end tester för hela approval-flödet
+- Round-robin-optimering för attesttilldelning per betalning (istället för per steg)
+- Rate limiting på API endpoints
+- Prestandaoptimeringar (cachelagring, frågeoptimering och förebyggande av N+1-problem)
 
 ## Contributors
 - https://github.com/LisaEbbhagen
