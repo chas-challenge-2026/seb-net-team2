@@ -7,6 +7,7 @@
 3. [Roller, flöde och säkerhet (Approval flow)](#3-roller-flöde-och-säkerhet-approval-flow)
 4. [Säkerhet, konfiguration och kodstruktur](#4-säkerhet-konfiguration-och-kodstruktur)
 5. [Atomicitet, concurrency, transaktionalitet och testbarhet](#5-atomicitet-concurrency-transaktionalitet-och-testbarhet)
+6. [Beslutslogg](https://github.com/chas-challenge-2026/seb-net-team2/blob/main/beslut.md)
 
 # SEB Företagsbetalningar
 
