@@ -250,14 +250,14 @@
         "result": {
             "eyebrow": "BETALNINGSSTATUS",
             "title": "Betalningen har skickats",
-            "completedTitle": "Betalningen är genomförd",
-            "pendingTitle": "Betalningen väntar på attest",
-            "rejectedTitle": "Betalningen har avvisats",
+            "completedTitle": "Betalningen har skapats",
+            "pendingTitle": "Betalningen har skapats",
+            "rejectedTitle": "Betalningen har skapats",
             "sourceAccount": "Från konto",
             "submittedAt": "Skickad",
             "status": "Status",
             "completed": "Betalningen har genomförts.",
-            "pendingApproval": "Betalningen har skapats och väntar på attest.",
+            "pendingApproval": "Betalningen väntar på attest.",
             "rejected": "Betalningen avvisades.",
             "accepted": "Betalningen har skapats. Se status nedan.",
             "statusValues": {
