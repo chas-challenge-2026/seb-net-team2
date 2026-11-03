@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronRight, Search, UserPlus, Users as UsersIcon } from "lucide-react";
+import { ChevronRight, Search, UserPlus, Users as UsersIcon, ArrowLeft } from "lucide-react";
 
 import { getAllUsers } from "../../../services/authService";
 import Card from "../../../components/Card/Card";
@@ -48,6 +48,12 @@ export default function Users() {
 
     return (
         <div className={styles.layout}>
+            <div className={styles.breadcrumb}>
+                <Link to="/admin" className={styles.backLink}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    {t("admin.navigation.overview")}
+                </Link>
+            </div>
             <header className={styles.pageHeader}>
                 <div className={styles.titleRow}>
                     <UsersIcon size={28} strokeWidth={2} aria-hidden="true" />

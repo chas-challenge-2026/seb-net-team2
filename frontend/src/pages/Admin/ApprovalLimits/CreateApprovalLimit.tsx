@@ -1,3 +1,4 @@
+import { translateSystemText } from "../../../i18n/translateSystemText";
 import { RequiredMark } from "../../../components/FormValidation/RequiredField";
 import { useFormValidation, type ValidationErrors } from "../../../components/FormValidation/useFormValidation";
 import { FieldError, ErrorSummary } from "../../../components/FormValidation/FormErrors";
@@ -22,7 +23,7 @@ import { AppError } from "../../../errors/AppError";
 import styles from "./CreateApprovalLimit.module.css";
 
 function getErrorMessage(error: unknown, fallback: string) {
-    if (error instanceof AppError) return error.detail ?? error.message;
+    if (error instanceof AppError) return translateSystemText(error.detail ?? error.message);
     return fallback;
 }
 
@@ -74,6 +75,12 @@ export default function CreateApprovalLimit() {
 
     return (
         <div className={styles.layout}>
+            <div className={styles.breadcrumb}>
+                <Link to="/admin/approval-limits" className={styles.backLink}>
+                    <ArrowLeft size={16} aria-hidden="true" />
+                    {t("common.backToApprovalLimits")}
+                </Link>
+            </div>
             <header className={styles.pageHeader}>
                 <div className={styles.titleRow}>
                     <ShieldCheck size={26} strokeWidth={2} aria-hidden="true" />

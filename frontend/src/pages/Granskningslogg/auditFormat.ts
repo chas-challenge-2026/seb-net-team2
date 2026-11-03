@@ -73,6 +73,23 @@ const paymentDetailsSchema = z.object({
     refundedAmount: z.number().optional(),
 });
 
+const limitDetailsSchema = z.object({
+    minAmount: z.number(),
+    requiredApprovals: z.number(),
+});
+
+const userDetailsSchema = z.object({
+    name: z.string(),
+    email: z.string(),
+    role: z.enum(["User", "Admin", "Attestant", "Initiator"]),
+});
+
+const updateDetailsSchema = z.object({ after: z.unknown() });
+
+const userChangesSchema = z.object({
+    changedFields: z.array(z.enum(["name", "email", "role", "password"])),
+});
+
 function formatAmount(amount: number, currency: string, locale: string): string {
     return `${amount.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
 }
@@ -83,6 +100,39 @@ function formatAmount(amount: number, currency: string, locale: string): string 
 // null means there are no usable details (other events, older entries): show the backend's description.
 export function describeEntry(action: string, details: unknown, t: TFunction, locale: string): string | null {
     if (action === "APPROVE_STEP" || action === "REJECT_STEP") return "";
+
+    const update = updateDetailsSchema.safeParse(details);
+    const current = update.success ? update.data.after : details;
+
+    if (["CREATE_APPROVAL_LIMIT", "UPDATE_APPROVAL_LIMIT", "DELETE_APPROVAL_LIMIT"].includes(action)) {
+        const limit = limitDetailsSchema.safeParse(current);
+        if (!limit.success) return null;
+
+        return t("auditLog.summary.limit", {
+            amount: limit.data.minAmount.toLocaleString(locale),
+            count: limit.data.requiredApprovals,
+        });
+    }
+
+    if (["CREATE_USER", "UPDATE_USER", "DELETE_USER"].includes(action)) {
+        const user = userDetailsSchema.safeParse(current);
+        if (!user.success) return null;
+
+        const changes = userChangesSchema.safeParse(details);
+        if (action === "UPDATE_USER" && changes.success) {
+            const fields = changes.data.changedFields.map((field) => t(`auditLog.fields.${field}`));
+            return t("auditLog.summary.userChanges", {
+                name: user.data.name,
+                fields: fields.join(", ") || t("auditLog.summary.noChanges"),
+            });
+        }
+
+        return t("auditLog.summary.user", {
+            name: user.data.name,
+            email: user.data.email,
+            role: t(`users.roles.${user.data.role}`),
+        });
+    }
 
     const parsed = paymentDetailsSchema.safeParse(details);
     if (!parsed.success) return null;

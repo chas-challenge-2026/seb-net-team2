@@ -5,13 +5,10 @@ import {
   ChevronLeft,
   ClipboardCheck,
   CreditCard,
-  FileUp,
   House,
-  Landmark,
   LayoutDashboard,
-  LogOut,
   Menu,
-  ScrollText,
+  ClipboardList,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -22,6 +19,7 @@ import { useApprovals } from "../hooks/useApprovals";
 import { countOverdue } from "../utils/approvalReminders";
 
 import styles from "./Sidebar.module.css";
+import { ProfileMenu } from "./ProfileMenu/ProfileMenu";
 
 export interface SidebarProps {
   onLogout?: () => void;
@@ -55,7 +53,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const isAttestant = user?.role === "Attestant";
 
   const canViewApprovals = isAttestant || isAdmin;
-  const canViewSavings = user?.role === "User" || isInitiator;
 
   const { data: approvals } = useApprovals(canViewApprovals);
 
@@ -215,48 +212,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {t("sidebar.newPayment")}
                 </span>
               </Link>
-
-              <Link
-                to="/batch"
-                activeOptions={{ exact: true }}
-                className={styles["nav-item"]}
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
-                title={collapsed ? t("sidebar.batchUpload") : undefined}
-              >
-                <FileUp size={20} strokeWidth={2} aria-hidden="true" />
-
-                <span className={styles["nav-item-label"]}>
-                  {t("sidebar.batchUpload")}
-                </span>
-              </Link>
-            </div>
-          )}
-
-          {canViewSavings && (
-            <div className={styles["nav-section"]}>
-              <span className={styles["section-label"]}>
-                {t("sidebar.savings")}
-              </span>
-
-              <Link
-                to="/spara-investera"
-                activeOptions={{ exact: true }}
-                className={styles["nav-item"]}
-                activeProps={{
-                  className: `${styles["nav-item"]} ${styles.active}`,
-                }}
-                onClick={handleMobileNavClick}
-                title={collapsed ? t("navigation.saveInvest") : undefined}
-              >
-                <Landmark size={20} strokeWidth={2} aria-hidden="true" />
-
-                <span className={styles["nav-item-label"]}>
-                  {t("navigation.saveInvest")}
-                </span>
-              </Link>
             </div>
           )}
 
@@ -345,7 +300,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={handleMobileNavClick}
                 title={collapsed ? t("sidebar.auditLog") : undefined}
               >
-                <ScrollText size={20} strokeWidth={2} aria-hidden="true" />
+                <ClipboardList size={20} strokeWidth={2} aria-hidden="true" />
 
                 <span className={styles["nav-item-label"]}>
                   {t("sidebar.auditLog")}
@@ -356,34 +311,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </nav>
 
         <div className={styles["sidebar-footer"]}>
-          {onLogout ? (
-            <button
-              type="button"
-              className={styles["logout-btn"]}
-              onClick={onLogout}
-              title={collapsed ? t("sidebar.logout") : undefined}
-              aria-label={t("sidebar.logout")}
-            >
-              <LogOut size={20} strokeWidth={2} aria-hidden="true" />
-
-              <span className={styles["nav-item-label"]}>
-                {t("sidebar.logout")}
-              </span>
-            </button>
-          ) : (
-            <Link
-              to="/logout"
-              className={styles["logout-link"]}
-              onClick={handleMobileNavClick}
-              title={collapsed ? t("sidebar.logout") : undefined}
-            >
-              <LogOut size={20} strokeWidth={2} aria-hidden="true" />
-
-              <span className={styles["nav-item-label"]}>
-                {t("sidebar.logout")}
-              </span>
-            </Link>
-          )}
+          <ProfileMenu
+            user={user ?? undefined}
+            compact={collapsed}
+            above
+            onNavigate={handleMobileNavClick}
+            onLogout={onLogout}
+          />
         </div>
       </aside>
     </>

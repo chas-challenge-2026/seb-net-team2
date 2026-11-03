@@ -18,9 +18,11 @@ namespace SebPortal.Api.Middleware
             var (status, title) = exception switch
             {
                 NotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
+                InvalidDataException => (StatusCodes.Status400BadRequest, "Invalid data format"),
                 ValidationException => (StatusCodes.Status400BadRequest, "Validation failed"),
                 UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "Forbidden"),
-                BusinessRuleException => (400, "Business rule violated"),
+                BusinessRuleException => (StatusCodes.Status400BadRequest, "Business rule violated"),
+                ArgumentException or InvalidOperationException => (StatusCodes.Status400BadRequest, "Invalid request"),
                 ServiceUnavailableException => (StatusCodes.Status503ServiceUnavailable, "Service unavailable"),
                 DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "The payment was modified by someone else. Reload and try again."), // rowversion conflict
                 _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred")

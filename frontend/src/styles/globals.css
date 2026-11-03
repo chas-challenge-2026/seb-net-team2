@@ -62,7 +62,22 @@ h1[tabindex="-1"]:focus-visible {
     transform: translateY(0);
 }
 
+/* A shared arrow animation for disclosure buttons, driven by their existing state. */
+[data-disclosure-chevron] {
+    transform: rotate(0deg);
+    transform-origin: center;
+    transition: transform 200ms ease-in-out;
+}
+
+[aria-expanded="true"] > [data-disclosure-chevron] {
+    transform: rotate(180deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
+    [data-disclosure-chevron] {
+        transition: none;
+    }
+
     *,
     *::before,
     *::after {

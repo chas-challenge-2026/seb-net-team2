@@ -28,5 +28,7 @@ namespace SebPortal.Models
 
         // Serializes a details object to camelCase JSON for the Details column.
         public static string ToDetailsJson(object details) => JsonSerializer.Serialize(details, DetailsJsonOptions);
+        public DateTime? NativeWrittenAt { get; set; }
+        public string? NativeHash { get; set; }
     }
 }

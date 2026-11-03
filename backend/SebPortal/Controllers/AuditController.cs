@@ -7,7 +7,7 @@ using SebPortal.Api.Services;
 namespace SebPortal.Api.Controllers
 {
     [ApiController]
-    [Authorize(Roles = UserRoles.Admin)]
+    [Authorize(Roles = UserRoles.Admin + "," + UserRoles.Attestant)]
     [Route("api/[controller]")]
     public class AuditController : ControllerBase
     {
@@ -31,7 +31,7 @@ namespace SebPortal.Api.Controllers
         /// <response code="200">Returns the page of audit entries.</response>
         /// <response code="400">Invalid filter values, e.g. `from` later than `to`.</response>
         /// <response code="401">Unauthorized if the user is not authenticated or the tenant claim is missing.</response>
-        /// <response code="403">Forbidden if the user is not an admin.</response>
+        /// <response code="403">Forbidden if the user is neither an admin nor an attestant.</response>
         [HttpGet]
         public async Task<ActionResult<PagedResult<AuditEntryDTO>>> GetEntries([FromQuery] AuditQueryDTO query)
         {
@@ -51,7 +51,7 @@ namespace SebPortal.Api.Controllers
         /// <returns>A page of audit entries for the entity.</returns>
         /// <response code="200">Returns the entity's audit history.</response>
         /// <response code="401">Unauthorized if the user is not authenticated or the tenant claim is missing.</response>
-        /// <response code="403">Forbidden if the user is not an admin.</response>
+        /// <response code="403">Forbidden if the user is neither an admin nor an attestant.</response>
         [HttpGet("{entityType}/{entityId:int}")]
         public async Task<ActionResult<PagedResult<AuditEntryDTO>>> GetEntityHistory(
             string entityType, int entityId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)

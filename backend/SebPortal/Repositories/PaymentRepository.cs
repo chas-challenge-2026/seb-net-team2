@@ -20,6 +20,24 @@ namespace SebPortal.Api.Repositories
             return payment;
         }
 
+        public async Task<IEnumerable<Payment>> GetRecentPaymentsAsync(int tenantId, int? attestantId)
+        {
+            var query = _context.Payments.AsNoTracking()
+                .Include(p => p.FromAccount)
+                .Where(p => p.TenantId == tenantId);
+
+            if (attestantId.HasValue)
+            {
+                query = query.Where(p => _context.ApprovalSteps.Any(s =>
+                    s.PaymentId == p.Id && s.AttestantId == attestantId.Value));
+            }
+
+            return await query.OrderByDescending(p => p.CreatedAt)
+                .ThenByDescending(p => p.Id)
+                .Take(50)
+                .ToListAsync();
+        }
+
         public async Task<Payment?> GetPaymentByIdAsync(int paymentId, int tenantId)
         {
             return await _context.Payments.Include(p => p.Tenant)

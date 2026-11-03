@@ -11,13 +11,14 @@ import { useCurrency } from "../../hooks/useCurrency";
 
 import Card from "../../components/Card/Card";
 import { CurrencySelector } from "../../components/CurrencySelector/CurrencySelector";
+import { PaymentsTable } from "./PaymentsTable";
 
 import styles from "./Dashboard.module.css";
 
 export function Dashboard() {
     const { t, i18n } = useTranslation();
     const { data: accounts, isLoading: loadingAccounts, isError: accountsError } = useAccounts();
-    const { data: payments, isLoading: loadingPayments } = usePayments();
+    const { data: payments, isLoading: loadingPayments, isError: paymentsError } = usePayments();
     const { user } = useAuth();
     const { primaryCurrency } = useCurrency();
     const [copyMessage, setCopyMessage] = useState("");
@@ -35,8 +36,7 @@ export function Dashboard() {
     const balances = calculateAccountBalances(displayedAccounts, rates, primaryCurrency);
     const loadingRates = rateQueries.some((query) => query.isPending);
 
-    // Only initiators may create payments (the backend rejects other roles).
-    const canCreatePayments = user?.role === "Initiator";
+    const canViewPayments = ["Initiator", "Admin", "Attestant"].includes(user?.role ?? "");
 
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
@@ -136,71 +136,20 @@ export function Dashboard() {
                 )}
             </section>
 
-            {/* "Recent payments" lists the user's own payments, so it is always empty for roles
-                that cannot create payments. */}
-            {canCreatePayments && (
+            {canViewPayments && (
             <section className={styles.recentPayments}>
                 <h2 className={styles.sectionTitle}>
                     <ReceiptText size={20} strokeWidth={2} aria-hidden="true" />
                     {t("dashboard.recentPayments")}
                 </h2>
 
-                <Card
-                >
+                <Card>
                     {loadingPayments ? (
                         <p role="status">{t("common.loading")}</p>
+                    ) : paymentsError ? (
+                        <p role="alert">{t("dashboard.errors.payments")}</p>
                     ) : (
-                        <div className={styles.tableScroll} role="region" aria-label={t("dashboard.recentPayments")} tabIndex={0}>
-                        <table className={styles.paymentsTable}>
-                            <thead>
-                                <tr>
-                                    <th scope="col">{t("dashboard.table.date")}</th>
-                                    <th scope="col">{t("dashboard.table.fromAccount")}</th>
-                                    <th scope="col">{t("dashboard.table.recipientIban")}</th>
-                                    <th scope="col">{t("dashboard.table.reference")}</th>
-                                    <th scope="col">{t("dashboard.table.amount")}</th>
-                                    <th scope="col">{t("dashboard.table.status")}</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                {payments?.map((payment) => (
-                                    <tr key={payment.id}>
-                                        <td>{payment.date}</td>
-                                        <td>{accounts?.find((account) => account.id === payment.fromAccountId)?.name ?? "—"}</td>
-                                        <td>{payment.toIban}</td>
-                                        <td>{payment.reference}</td>
-
-                                        <td>
-                                            {payment.amount.toLocaleString(locale, {
-                                                minimumFractionDigits: 2,
-                                            })}{" "}
-                                            {payment.currency}
-                                        </td>
-
-                                        <td>
-                                            <span
-                                                className={`${styles.status} ${styles[
-                                                    payment.status === "Completed"
-                                                        ? "status--done"
-                                                        : "status--pending"
-                                                ]
-                                                    }`}
-                                            >
-                                                {payment.status === "Completed"
-                                                    ? t("dashboard.status.completed")
-                                                    : payment.status === "Pending approval"
-                                                        ? t("dashboard.status.pending")
-                                                        : payment.status === "Rejected"
-                                                            ? t("dashboard.status.rejected")
-                                                            : payment.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                        </div>
+                        <PaymentsTable payments={payments ?? []} accounts={accounts ?? []} locale={locale} />
                     )}
                 </Card>
             </section>

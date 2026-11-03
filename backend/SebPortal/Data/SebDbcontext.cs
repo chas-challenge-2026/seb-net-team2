@@ -153,6 +153,8 @@ namespace SebPortal.Data
                 e.Property(x => x.Description).HasColumnName("description");
                 e.Property(x => x.Details).HasColumnName("details").HasColumnType("jsonb");
                 e.Property(x => x.DateTime).HasColumnName("created_at");
+                e.Property(x => x.NativeWrittenAt).HasColumnName("native_written_at");
+                e.Property(x => x.NativeHash).HasColumnName("native_hash");
 
                 // Revisionsloggen får aldrig raderas som bieffekt av att en användare eller tenant tas bort.
                 e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);

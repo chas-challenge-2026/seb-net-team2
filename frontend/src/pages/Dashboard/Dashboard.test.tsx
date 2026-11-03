@@ -180,18 +180,18 @@ describe("Dashboard account information", () => {
         expect(screen.queryByRole("link", { name: "Create payment" })).not.toBeInTheDocument();
     });
 
-    it("hides recent payments for roles that cannot create payments", () => {
+    it.each(["Attestant", "Admin"])("shows recent payments for %s", (role) => {
         mockedUseAuth.mockReturnValue({
             user: {
                 name: "Johan Berg",
                 tenantName: "Malmö Bygg AB",
-                role: "Attestant",
+                role,
             },
         } as unknown as ReturnType<typeof useAuth>);
 
         render(<Dashboard />);
 
-        expect(screen.queryByText("Recent payments")).not.toBeInTheDocument();
+        expect(screen.getByText("Recent payments")).toBeInTheDocument();
         expect(screen.getByText("Operating account")).toBeInTheDocument();
     });
 

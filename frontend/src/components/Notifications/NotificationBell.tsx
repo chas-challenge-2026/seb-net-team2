@@ -8,6 +8,7 @@ import { fetchPendingApprovals } from "../../services/approvalService";
 import { useAuth } from "../../hooks/useAuth";
 import { APPROVALS_QUERY_KEY } from "../../hooks/useApprovals";
 import type { Notification, NotificationType } from "../../types/notifications";
+import { translateSystemText } from "../../i18n/translateSystemText";
 
 import styles from "./NotificationBell.module.css";
 
@@ -18,7 +19,7 @@ const typeIcons: Record<NotificationType, string> = {
 };
 
 export function NotificationBell() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { user } = useAuth();
     const canWatchApprovals = user?.role === "Attestant" || user?.role === "Admin";
     const { data: pendingApprovals, isError: approvalWatchError } = useQuery({
@@ -54,13 +55,12 @@ export function NotificationBell() {
             .map((approval) => ({
                 id: `pending:${approval.stepId}`,
                 title: "notifications.approvalTitle",
-                message: t("notifications.newApprovalMessage", {
-                    reference: approval.reference || approval.paymentId,
-                }),
+                message: approval.reference || approval.paymentId,
                 type: "approval",
                 createdAt: new Date().toISOString(),
                 isRead: false,
                 href: "/attestkorg",
+                paymentId: approval.paymentId,
             }));
 
         if (newNotifications.length > 0) {
@@ -74,7 +74,7 @@ export function NotificationBell() {
         }
 
         previousPendingIdsRef.current = currentIds;
-    }, [canWatchApprovals, pendingApprovals, t]);
+    }, [canWatchApprovals, pendingApprovals]);
 
     useEffect(() => {
         let isCurrent = true;
@@ -294,6 +294,8 @@ export function NotificationBell() {
                                 <Link
                                     key={notification.id}
                                     to={notification.href ?? "/dashboard"}
+                                    search={notification.paymentId ? { betalning: notification.paymentId } : undefined}
+                                    state={(previous) => ({ ...previous, notificationClickedAt: Date.now() })}
                                     className={`${styles.item} ${!notification.isRead ? styles.unread : ""
                                         }`}
                                     onClick={() => {
@@ -310,8 +312,12 @@ export function NotificationBell() {
 
                                     <span className={styles.itemBody}>
                                         <strong>{t(notification.title)}</strong>
-                                        <span>{notification.message}</span>
-                                        <small>{notification.createdAt}</small>
+                                        <span>{notification.id.startsWith("pending:")
+                                            ? t("notifications.newApprovalMessage", { reference: notification.message })
+                                            : translateSystemText(notification.message, t)}</span>
+                                        <small>{new Date(notification.createdAt).toLocaleString(
+                                            i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-GB",
+                                        )}</small>
                                     </span>
 
                                     {!notification.isRead && (

@@ -1,12 +1,14 @@
+import { translateSystemText } from "../../i18n/translateSystemText";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { ChevronsDown, Circle, CircleCheck, CircleX, Download, RotateCcw, ScrollText } from "lucide-react";
+import { ChevronsDown, Circle, CircleCheck, CircleX, Download, RotateCcw, ClipboardList } from "lucide-react";
 
 import Card from "../../components/Card/Card";
 import { useAuditLog, usePaymentReferences, type AuditEntityRef } from "../../hooks/useAuditLog";
-import { AUDIT_ACTIONS, type AuditLogFilters } from "../../services/auditService";
+import { AUDIT_ACTIONS, fetchAuditLog, type AuditLogFilters } from "../../services/auditService";
 import { getAllUsers } from "../../services/authService";
+import { useAuth } from "../../hooks/useAuth";
 
 import { EntityHistoryDialog } from "./EntityHistoryDialog";
 import { auditCsvRows, downloadCsv, fetchAllEntries, toCsv } from "./auditExport";
@@ -21,6 +23,8 @@ const ACTION_ICON = { success: CircleCheck, danger: CircleX, neutral: Circle } a
 
 export function Granskningslogg() {
     const { t, i18n } = useTranslation();
+    const { user } = useAuth();
+    const isAdmin = user?.role === "Admin";
 
     const [historyEntity, setHistoryEntity] = useState<AuditEntityRef | null>(null);
 
@@ -51,12 +55,14 @@ export function Granskningslogg() {
 
     const filters = useMemo<AuditLogFilters>(
         () => ({
-            userPublicId: userFilter === ALL_USERS ? undefined : userFilter,
+            // Admins pick from the user list (public ids), attestants from the log (numeric ids).
+            userPublicId: !isAdmin || userFilter === ALL_USERS ? undefined : userFilter,
+            userId: isAdmin || userFilter === ALL_USERS ? undefined : Number(userFilter),
             action: eventFilter === ALL_EVENTS ? undefined : eventFilter,
             from: dateFrom || undefined,
             to: dateTo || undefined,
         }),
-        [userFilter, eventFilter, dateFrom, dateTo]
+        [isAdmin, userFilter, eventFilter, dateFrom, dateTo]
     );
 
     const {
@@ -72,11 +78,23 @@ export function Granskningslogg() {
     const { data: users = [] } = useQuery({
         queryKey: ["users"],
         queryFn: getAllUsers,
+        enabled: isAdmin,
+    });
+
+    // Attestants may not list users, so their choices are the people in the latest 200 events.
+    const { data: logUsers = [] } = useQuery({
+        queryKey: ["auditLogUsers"],
+        queryFn: async () => {
+            const page = await fetchAuditLog({}, 1, 200);
+            return [...new Map(page.items.map((entry) => [entry.userId, entry.userName]))]
+                .map(([id, name]) => ({ id: String(id), name }));
+        },
+        enabled: user !== undefined && !isAdmin,
     });
 
     const sortedUsers = useMemo(
-        () => [...users].sort((a, b) => a.name.localeCompare(b.name)),
-        [users]
+        () => [...(isAdmin ? users : logUsers)].sort((a, b) => a.name.localeCompare(b.name)),
+        [isAdmin, users, logUsers]
     );
 
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-SE";
@@ -119,7 +137,7 @@ export function Granskningslogg() {
         <section className={styles.page} aria-labelledby="audit-log-title">
             <header className={styles.header}>
                 <div className={styles.titleRow}>
-                    <ScrollText size={24} strokeWidth={2} aria-hidden="true" />
+                    <ClipboardList size={24} strokeWidth={2} aria-hidden="true" />
                     <h1 id="audit-log-title">{t("auditLog.title")}</h1>
                 </div>
                 <p className={styles.intro}>{t("auditLog.description")}</p>
@@ -127,7 +145,7 @@ export function Granskningslogg() {
 
             <Card>
                 <div className={styles.toolbar}>
-                    <div className={styles.filterField}>
+                    {(isAdmin || sortedUsers.length > 1) && <div className={styles.filterField}>
                         <label htmlFor="audit-user-filter">{t("auditLog.filters.user")}</label>
 
                         <select
@@ -141,7 +159,7 @@ export function Granskningslogg() {
                                 <option key={user.id} value={user.id}>{user.name}</option>
                             ))}
                         </select>
-                    </div>
+                    </div>}
 
                     <div className={styles.filterField}>
                         <label htmlFor="audit-event-filter">{t("auditLog.filters.eventType")}</label>
@@ -271,7 +289,7 @@ export function Granskningslogg() {
                                                     </button>
                                                 </td>
                                                 <td>
-                                                    {summary ?? entry.description}
+                                                    {summary ?? translateSystemText(entry.description, t)}
 
                                                     {step !== null && totalSteps !== null && (
                                                         // The main line for decisions, a detail under other events.

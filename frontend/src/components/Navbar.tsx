@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { UserRound } from "lucide-react";
 
 import { NotificationBell } from "./Notifications/NotificationBell";
 import LanguageSelector from "./LanguageSelector/LanguageSelector";
@@ -30,26 +29,6 @@ export function NavigationBar() {
 
             <div className={styles.navbar__actions}>
                 <LanguageSelector />
-                {isAuthenticated && user && (
-                    <Link
-                        to="/profil"
-                        className={styles.navbar__user}
-                        aria-label={`${user.name}, ${t(`users.roles.${user.role}`)}`}
-                    >
-                        <UserRound size={20} strokeWidth={2} aria-hidden="true" />
-
-                        <span className={styles.navbar__userText}>
-                            <span className={styles.navbar__userName}>
-                                {user.name}
-                            </span>
-
-                            <span className={styles.navbar__userRole}>
-                                {t(`users.roles.${user.role}`)}
-                            </span>
-                        </span>
-                    </Link>
-                )}
-
                 {isAuthenticated && <NotificationBell />}
 
             </div>

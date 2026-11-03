@@ -7,13 +7,18 @@
 /* Breadcrumb */
 
 .breadcrumb {
-    margin-bottom: var(--spacing-md);
+    margin-block: var(--spacing-lg);
 }
 
 .backLink {
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
     color: var(--color-text-soft);
 
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
     text-decoration: none;
 }
 
@@ -45,7 +50,7 @@
     gap: var(--spacing-md);
 }
 
-.titleRow > svg {
+.titleRow>svg {
     flex-shrink: 0;
     margin-top: 4px;
     color: var(--seb-green-dark-2);
@@ -290,7 +295,7 @@
     gap: var(--spacing-md);
 }
 
-.deleteWarning > svg {
+.deleteWarning>svg {
     flex-shrink: 0;
     margin-top: 2px;
     color: var(--color-error);
@@ -300,7 +305,7 @@
     margin: 0;
 }
 
-.deleteWarning p + p {
+.deleteWarning p+p {
     margin-top: var(--spacing-sm);
     color: var(--color-text-soft);
 }

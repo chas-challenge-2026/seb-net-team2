@@ -1,5 +1,25 @@
 {
-    "errors": {"connection":"Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.","request":"Begäran misslyckades. Försök igen.","configuration":"Serveradressen är inte konfigurerad.","exchangeConnection":"Kunde inte ansluta till valutatjänsten.","exchangeFetch":"Kunde inte hämta växelkursen.","exchangeMismatch":"Växelkursen motsvarar inte de valda valutorna."},
+    "errors": {"connection":"Kunde inte ansluta till servern. Kontrollera din anslutning och försök igen.","request":"Begäran misslyckades. Försök igen.","configuration":"Serveradressen är inte konfigurerad.","exchangeConnection":"Kunde inte ansluta till valutatjänsten.","exchangeFetch":"Kunde inte hämta växelkursen.","exchangeMismatch":"Växelkursen motsvarar inte de valda valutorna.",
+        "api": {
+            "emailExists": "En användare med denna e-postadress finns redan.",
+            "deleteSelf": "Du kan inte ta bort ditt eget konto.",
+            "userHasHistory": "Användaren har historik i granskningsloggen och kan inte tas bort.",
+            "approvalMinimum": "Minst en attestant krävs.",
+            "credentials": "Ogiltig e-postadress eller lösenord.",
+            "unauthorized": "Du saknar behörighet. Logga in igen.",
+            "positiveAmount": "Beloppet måste vara större än noll.",
+            "accountOrBalance": "Kontot hittades inte eller har otillräckligt saldo.",
+            "stepNotFound": "Atteststeget hittades inte.",
+            "decision": "Beslutet måste vara approved eller rejected.",
+            "stepPayment": "Steget tillhör inte denna betalning.",
+            "paymentHandled": "Betalningen väntar inte längre på attest.",
+            "stepHandled": "Det här atteststeget är redan beslutat.",
+            "accountNotFound": "Kontot hittades inte eller är inte tillgängligt för ditt företag.",
+            "limitExists": "Det finns redan en attestgräns för {{amount}}.",
+            "limitNotFound": "Attestgränsen hittades inte.",
+            "userNotFound": "Användaren hittades inte.",
+            "limitOrder": "Gränsen {{lowerAmount}} kräver {{lowerCount}} attestanter, medan den högre gränsen {{higherAmount}} kräver {{higherCount}}. Lägre belopp måste kräva färre attestanter."
+        }},
     "a11y": {"notFound":"Sidan kunde inte hittas","notFoundDescription":"Kontrollera adressen eller gå tillbaka till startsidan.","home":"Till startsidan","register":"Registrera dig","customerType":"Kundtyp","login":"Logga in","skip":"Hoppa till huvudinnehållet","main":"Huvudinnehåll","dialog":"Dialog","language":"Språk","mortgage":"Bolån"},
     "information": {
         "navigation": "Information och policyer",
@@ -55,6 +75,9 @@
         "description": "Konton, betalningar och attestering samlade på ett ställe. Här hittar du information om tjänsten, integritet och användningsvillkor."
     },
     "common": {
+        "backToUsers": "Tillbaka till användare",
+        "backToUserDetails": "Tillbaka till användaruppgifter",
+        "backToApprovalLimits": "Tillbaka till attestgränser",
         "loading": "Laddar...",
         "cancel": "Avbryt",
         "clear": "Rensa",
@@ -64,8 +87,6 @@
     "navigation": {
         "dashboard": "Översikt",
         "newPayment": "Ny betalning",
-        "saveInvest": "Spara & investera",
-        "batchPayments": "Batchbetalningar",
         "auditLog": "Granskningslogg",
         "profile": "Profil",
         "logout": "Logga ut",
@@ -100,8 +121,6 @@
         "dashboard": "Översikt",
         "payments": "Betalningar",
         "newPayment": "Ny betalning",
-        "batchUpload": "Batchuppladdning",
-        "savings": "Sparande",
         "approvals": "Attestering",
         "approvalInbox": "Attestkorg",
         "admin": "Administration",
@@ -110,6 +129,7 @@
         "myProfile": "Min profil",
         "logout": "Logga ut",
         "approvalsPending": "{{pending}} väntande",
+        "approvalsNeedAttention": "{{pending}} väntande, minst en attest behöver hanteras snart",
         "approvalsWithOverdue": "{{pending}} väntande, {{overdue}} försenade"
     },
     "dashboard": {
@@ -135,6 +155,7 @@
         "recentPayments": "Senaste betalningar",
         "errors": {
             "generic": "Något gick fel.",
+            "payments": "Det gick inte att hämta senaste betalningar. Försök igen senare.",
             "accounts": "Det gick inte att hämta företagets konton. Försök igen senare."
         },
         "table": {
@@ -143,7 +164,20 @@
             "recipientIban": "Mottagarens IBAN",
             "reference": "Referens",
             "amount": "Belopp",
-            "status": "Status"
+            "status": "Status",
+            "details": "Detaljer",
+            "paymentId": "Betalnings-ID",
+            "empty": "Inga betalningar att visa.",
+            "toggleDetails": "Detaljer för betalningen {{date}} på {{amount}}"
+        },
+        "filters": {
+            "label": "Filtrera på status",
+            "all": "Alla"
+        },
+        "statusDescription": {
+            "completed": "Betalningen är genomförd.",
+            "pending": "Betalningen väntar på attest och genomförs när den har godkänts.",
+            "rejected": "Betalningen avvisades och beloppet har återförts till kontot."
         },
         "status": {
             "completed": "Slutförd",
@@ -155,6 +189,11 @@
         "eyebrow": "BETALNINGAR",
         "title": "Skapa en ny betalning",
         "description": "Skicka en säker betalning från ditt företagskonto.",
+        "modes": {
+            "label": "Betalningstyp",
+            "single": "Enskild betalning",
+            "batch": "Batchuppladdning"
+        },
         "steps": {
             "label": "Betalningsflöde",
             "details": "Uppgifter",
@@ -253,10 +292,10 @@
         "loading": "Laddar attesteringar...",
         "pendingCount_one": "{{count}} väntande",
         "pendingCount_other": "{{count}} väntande",
+        "pendingTotal": "Totalt {{total}}",
+        "pendingSummary_one": "{{count}} väntande attest · {{total}}",
+        "pendingSummary_other": "{{count}} väntande attester · {{total}}",
         "dismissMessage": "Stäng meddelande",
-        "overdueBanner_one": "1 betalning har väntat längre än {{days}} dagar.",
-        "overdueBanner_other": "{{count}} betalningar har väntat längre än {{days}} dagar.",
-        "overdueFirst": "De visas först i listan nedan.",
         "errors": {
             "load": "Det gick inte att ladda attesteringarna.",
             "decision": "Det gick inte att behandla attestbeslutet."
@@ -265,6 +304,7 @@
             "approved": "{{reference}} ({{amount}}) godkändes.",
             "rejected": "{{reference}} ({{amount}}) avvisades.",
             "alreadyHandled": "Betalningen har redan hanterats. Listan har uppdaterats.",
+            "linkedNotPending": "Betalningen från notisen väntar inte längre på din attest. Den kan redan ha hanterats.",
             "showHandled": "Visa i Hanterade"
         },
         "sort": {
@@ -275,16 +315,28 @@
             "amountLow": "Belopp: lägst till högst",
             "announcement": "Listan är sorterad: {{order}}."
         },
+        "attestantFilter": {
+            "label": "Attestant",
+            "all": "Alla attestanter",
+            "announcement_one": "Visar {{count}} betalning.",
+            "announcement_other": "Visar {{count}} betalningar."
+        },
         "card": {
             "waitingDays_one": "Väntat {{count}} dag",
             "waitingDays_other": "Väntat {{count}} dagar",
             "reference": "Referens",
             "submittedBy": "Skickad av",
+            "assignedTo": "Tilldelad",
+            "assigneeUnknown": "Uppgift saknas",
+            "showDetails": "Visa detaljer",
+            "hideDetails": "Dölj detaljer",
+            "showDetailsFor": "Visa detaljer för {{reference}}",
+            "hideDetailsFor": "Dölj detaljer för {{reference}}",
             "toIban": "Till IBAN",
             "approvalStep": "Atteststeg {{step}}",
             "dualApprovalShort": "Dubbelattest",
             "waitingToday": "Skickad i dag",
-            "dualApproval": "Dubbelattest – betalningen kräver två attestanter",
+            "sentOn": "Skickad {{date}}",
             "recipientBank": "Mottagarbank",
             "fromAccount": "Från konto",
             "accountNumber": "Konto #{{id}}",
@@ -324,6 +376,27 @@
             "rejectDescription": "Kontrollera uppgifterna och förklara varför betalningen avvisas.",
             "amount": "Belopp",
             "attestingAs": "Du attesterar som {{name}} · Atteststeg {{step}}"
+        },
+        "bulk": {
+            "selectAll": "Markera alla",
+            "select": "Markera {{reference}}",
+            "summary_one": "{{count}} betalning markerad · {{total}}",
+            "summary_other": "{{count}} betalningar markerade · {{total}}",
+            "approveSelected": "Godkänn markerade ({{count}})",
+            "title_one": "Godkänn {{count}} betalning?",
+            "title_other": "Godkänn {{count}} betalningar?",
+            "description": "Alla markerade betalningar godkänns med samma kommentar. Beslutet går inte att ångra.",
+            "listLabel": "Betalningar som godkänns",
+            "total": "Totalt",
+            "hasWarning": "Varning",
+            "warnings_one": "{{count}} av betalningarna har en varning. Kontrollera den innan du godkänner.",
+            "warnings_other": "{{count}} av betalningarna har varningar. Kontrollera dem innan du godkänner.",
+            "confirm_one": "Godkänn",
+            "confirm_other": "Godkänn alla {{count}}",
+            "progress": "Godkänner {{done}} av {{count}}...",
+            "approved_one": "{{count}} betalning godkändes ({{total}}).",
+            "approved_other": "{{count}} betalningar godkändes ({{total}}).",
+            "failed": "Kunde inte godkännas: {{references}}."
         },
         "checks": {
             "title": "Kontrollera innan beslut",
@@ -374,51 +447,81 @@
         }
     },
     "batch": {
-        "eyebrow": "BETALNINGAR",
-        "title": "Batchuppladdning",
         "description": "Ladda upp flera betalningar samtidigt via en CSV-fil.",
-        "mockMode": "Mockläge",
+        "steps": {
+            "file": "Välj fil"
+        },
         "file": {
-            "title": "CSV-fil",
-            "description": "Välj en fil och ladda sedan upp och behandla den.",
+            "title": "Välj fil",
             "label": "CSV-fil",
-            "hint": "Maximal filstorlek: 1 MB. Kodning: UTF-8."
+            "hint": "Maximal filstorlek: 1 MB. Kodning: UTF-8.",
+            "dropHint": "Dra och släpp filen här",
+            "choose": "Välj fil",
+            "change": "Byt fil",
+            "selected": "Vald fil: {{name}}",
+            "noFile": "Har du ingen fil?"
         },
         "actions": {
-            "processing": "Behandlar...",
-            "upload": "Ladda upp och behandla"
+            "processing": "Läser filen...",
+            "review": "Granska betalningar",
+            "create_one": "Skapa {{count}} betalning",
+            "create_other": "Skapa {{count}} betalningar",
+            "newFile": "Ladda upp en ny fil",
+            "viewOverview": "Visa i Översikt"
         },
         "format": {
             "title": "CSV-format",
-            "description": "Filen måste innehålla följande kolumner:",
-            "warning": "Obs: kommatecken inuti ett fält stöds inte. Undvik referenser som innehåller kommatecken.",
-            "download": "Ladda ner example-batch.csv"
+            "description": "Filen måste ha de här kolumnerna, i den här ordningen:",
+            "columnHelp": {
+                "account": "Kontots nummer, till exempel 1",
+                "iban": "Mottagarens IBAN",
+                "amount": "Belopp, till exempel 5000.00",
+                "reference": "Fakturanummer, inom citattecken vid komma"
+            },
+            "warning": "Alla betalningar i filen skapas tillsammans. Om någon rad är fel skapas ingen betalning.",
+            "download": "Ladda ner en exempelfil"
+        },
+        "review": {
+            "title": "Granska betalningarna",
+            "summary_one": "{{count}} betalning från {{file}}. Kontrollera raden innan den skapas.",
+            "summary_other": "{{count}} betalningar från {{file}}. Kontrollera raderna innan de skapas.",
+            "total": "Totalt",
+            "duplicateTitle": "Den här filen verkar redan vara uppladdad",
+            "duplicateText": "Du skapade betalningar med exakt samma innehåll {{time}}. Kontrollera att du inte betalar två gånger innan du fortsätter."
         },
         "result": {
             "title": "Resultat",
-            "processed": "{{succeeded}} av {{total}} betalningar behandlades.",
-            "failed_one": "{{count}} rad misslyckades — se nedan.",
-            "failed_other": "{{count}} rader misslyckades — se nedan."
+            "createdTitle_one": "Betalningen skapades",
+            "createdTitle_other": "Alla {{count}} betalningar skapades",
+            "breakdown": "Genomförda: {{completed}} · Väntar på attest: {{pending}}",
+            "invalid_one": "Inga betalningar skickades. {{count}} rad behöver rättas — se nedan.",
+            "invalid_other": "Inga betalningar skickades. {{count}} rader behöver rättas — se nedan.",
+            "rejected": "Inga betalningar skapades. Servern svarade: {{reason}}",
+            "rejectedRow": "Inga betalningar skapades. Rätta raden som är markerad nedan."
         },
         "table": {
             "row": "Rad",
+            "fromAccount": "Från konto",
+            "accountNumber": "Konto {{id}}",
             "toIban": "Till IBAN",
             "amount": "Belopp",
             "reference": "Referens",
             "status": "Status",
-            "success": "Godkänd"
+            "created": "Skapad",
+            "notCreated": "Inte skapad"
         },
         "errors": {
             "csvOnly": "Endast .csv-filer stöds.",
             "fileTooLarge": "Filen är större än 1 MB.",
             "chooseFile": "Välj först en CSV-fil.",
-            "accountsLoading": "Kontoinformationen laddas fortfarande — försök igen om en stund.",
             "header": "CSV-rubriken måste vara exakt: {{header}}",
             "empty": "CSV-filen är tom eller innehåller inga datarader.",
-            "columns": "Förväntade 4 kolumner men fick {{count}}. Kommatecken inuti ett fält stöds inte.",
-            "unknownAccount": "Okänt from_account_id '{{id}}'",
+            "columns": "Förväntade 4 kolumner men fick {{count}}. Skriv fält som innehåller kommatecken inom citattecken.",
+            "invalidAccount": "from_account_id måste vara ett kontonummer, till exempel 1 (fick '{{id}}')",
+            "unknownAccount": "Kontot {{id}} finns inte hos ert företag",
             "invalidIban": "Ogiltigt IBAN '{{iban}}'",
-            "invalidAmount": "Ogiltigt belopp '{{amount}}'"
+            "invalidAmount": "Ogiltigt belopp '{{amount}}'. Använd punkt som decimaltecken, till exempel 5000.00",
+            "numericReference": "Referensen kan inte bara innehålla siffror"
         }
     },
     "auditLog": {
@@ -477,7 +580,12 @@
         },
         "summary": {
             "payment": "{{amount}} till {{iban}}",
-            "refund": "{{amount}} återfördes till kontot"
+            "refund": "{{amount}} återfördes till kontot",
+            "limit_one": "Gräns {{amount}} · {{count}} attestant",
+            "limit_other": "Gräns {{amount}} · {{count}} attestanter",
+            "user": "{{name}} ({{email}}) · {{role}}",
+            "userChanges": "{{name}}: {{fields}}",
+            "noChanges": "inga ändringar"
         },
         "entityTypes": {
             "payment": "Betalning #{{id}}",
@@ -493,6 +601,12 @@
             "error": "Det gick inte att ladda historiken.",
             "empty": "Inga händelser hittades.",
             "by": "av {{user}}"
+        },
+        "fields": {
+            "name": "namn",
+            "email": "e-post",
+            "role": "roll",
+            "password": "lösenord"
         }
     },
     "approvalLimits": {
@@ -513,7 +627,11 @@
             },
             "errors": {
                 "load": "Det gick inte att ladda attestgränserna."
-            }
+            },
+            "requires_one": "Kräver {{count}} attestant",
+            "requires_other": "Kräver {{count}} attestanter",
+            "requiresDual_one": "Kräver {{count}} attestant (dubbelattest)",
+            "requiresDual_other": "Kräver {{count}} attestanter (dubbelattest)"
         },
         "form": {
             "title": "Attestregel",
@@ -670,7 +788,13 @@
         "loading": "Laddar notiser...",
         "loadError": "Notiserna kunde inte hämtas. Försök igen senare.",
         "approvalWatchError": "Nya attesteringar kunde inte kontrolleras. Försöker igen...",
-        "updateError": "En notis kunde inte markeras som läst."
+        "updateError": "En notis kunde inte markeras som läst.",
+        "approved": "Din betalning med referens '{{reference}}' har godkänts.",
+        "rejected": "Din betalning med referens '{{reference}}' har avslagits.",
+        "approvedWithAmount": "Din betalning med referens '{{reference}}' på {{amount}} har godkänts.",
+        "rejectedWithAmount": "Din betalning med referens '{{reference}}' på {{amount}} har avslagits.",
+        "reminder": "Betalning '{{reference}}' ({{amount}}) väntar på din attest.",
+        "approvalWaiting": "Du har en betalning att attestera."
     },
     "overdueReminder": {
         "title": "Påminnelse: väntande attester",
@@ -678,76 +802,6 @@
         "message_other": "{{count}} betalningar har väntat längre än {{days}} dagar på din attest.",
         "goToInbox": "Gå till attestkorgen",
         "dismiss": "Stäng påminnelsen"
-    },
-    "saveInvest": {
-        "examples": {"emergencyFund":"Buffertsparande","longTermSavings":"Långsiktigt sparande","holidaySavings":"Semestersparande","newHome":"Ny bostad","summerHoliday":"Sommarsemester"},
-        "eyebrow": "SPARANDE & INVESTERINGAR",
-        "title": "Spara och investera",
-        "description": "Bygg din ekonomiska framtid med enkla och flexibla alternativ.",
-        "navigation": "Navigation för sparande",
-        "dismissMessage": "Stäng meddelande",
-        "tabs": {
-            "savings": "Sparande",
-            "investments": "Investeringar",
-            "goals": "Sparmål"
-        },
-        "actions": {
-            "openAccount": "Öppna ett sparkonto",
-            "showLess": "Visa mindre",
-            "viewAll": "Visa alla",
-            "manageAccount": "Hantera konto",
-            "addGoal": "Lägg till sparmål",
-            "createAccount": "Skapa konto",
-            "createGoal": "Skapa mål"
-        },
-        "savings": {
-            "totalSaved": "Totalt sparat",
-            "acrossAccounts": "På dina sparkonton",
-            "interestEarned": "Intjänad ränta i år",
-            "accountsTitle": "Dina sparkonton",
-            "accountsDescription": "Hantera ditt sparande och dina räntor.",
-            "interestRate": "ränta"
-        },
-        "investments": {
-            "overview": "Investeringsöversikt",
-            "portfolioValue": "Nuvarande portföljvärde",
-            "thisYear": "i år",
-            "allocation": "Portföljfördelning",
-            "equities": "Aktier",
-            "funds": "Fonder",
-            "bonds": "Obligationer"
-        },
-        "goals": {
-            "title": "Dina sparmål",
-            "description": "Följ utvecklingen mot det du sparar till.",
-            "of": "av",
-            "complete": "{{progress}}% klart"
-        },
-        "modals": {
-            "account": {
-                "eyebrow": "NYTT KONTO",
-                "title": "Öppna ett sparkonto",
-                "description": "Skapa ett mock-sparkonto för att se det i din översikt.",
-                "name": "Kontonamn",
-                "placeholder": "t.ex. Resekassa"
-            },
-            "goal": {
-                "eyebrow": "NYTT MÅL",
-                "title": "Lägg till ett sparmål",
-                "name": "Namn på mål",
-                "placeholder": "t.ex. Ny bil",
-                "target": "Målbelopp"
-            },
-            "manage": {
-                "eyebrow": "KONTO",
-                "interestRate": "Ränta: {{rate}}"
-            }
-        },
-        "messages": {
-            "accountCreated": "Sparkontot skapades.",
-            "goalCreated": "Sparmålet skapades.",
-            "accountOpened": "Kontouppgifterna öppnades."
-        }
     },
     "profilePage": {
         "title": "Min profil",

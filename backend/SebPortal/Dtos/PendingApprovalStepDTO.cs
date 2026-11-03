@@ -15,5 +15,6 @@ namespace SebPortal.Api.Dtos
         public Guid CreatedByUserId { get; set; }
         public required string CreatedByUserName { get; set; }
         public DateTime PaymentCreatedAt { get; set; }
+        public string AttestantName { get; set; } = string.Empty;
     }
 }

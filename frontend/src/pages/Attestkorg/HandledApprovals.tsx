@@ -16,6 +16,7 @@ import { useSessionDecisions } from "../../hooks/useSessionDecisions";
 import { historyEntryDate, type DecidedApproval } from "../../schemas/approvalHistorySchema";
 import { formatIban, recipientBank } from "../../utils/paymentChecks";
 
+import { ApprovalListSkeleton } from "./ApprovalListSkeleton";
 import styles from "./Attestkorg.module.css";
 
 type StatusFilter = "all" | "approved" | "rejected";
@@ -144,9 +145,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
     if (isPending) {
         return (
             <div id={id} role="tabpanel" aria-labelledby={labelledBy} tabIndex={0} className={styles.tabPanel}>
-                <div className={styles.loadingState} role="status">
-                    {t("approvalInbox.history.loading")}
-                </div>
+                <ApprovalListSkeleton label={t("approvalInbox.history.loading")} />
             </div>
         );
     }
@@ -200,9 +199,9 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                         <SlidersHorizontal size={16} aria-hidden="true" />
                         {t("approvalInbox.history.moreFilters")}
                         <ChevronDown
+                            data-disclosure-chevron
                             size={16}
                             aria-hidden="true"
-                            className={filtersOpen ? styles.chevronOpen : undefined}
                         />
                     </button>
 
@@ -403,7 +402,7 @@ export function HandledApprovals({ id, labelledBy }: { id: string; labelledBy: s
                     ))}
                 </div>
             ) : (
-                <div className={styles.emptyState}>
+                <div className={`${styles.emptyState} ${history.length === 0 ? styles.handledEmpty : ""}`}>
                     <History size={32} aria-hidden="true" />
                     <h2>
                         {history.length === 0
