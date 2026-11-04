@@ -146,7 +146,12 @@
             "rateDate": "Kursdatum:"
         },
         "welcome": "Välkommen, {{user}}",
-        "greeting": "God morgon, {{user}}",
+        "greetings": {
+            "night": "God natt, {{user}}",
+            "morning": "God morgon, {{user}}",
+            "afternoon": "God eftermiddag, {{user}}",
+            "evening": "God kväll, {{user}}"
+        },
         "createPayment": "Skapa betalning",
         "user": "användare",
         "companyName": "Företagsnamn",

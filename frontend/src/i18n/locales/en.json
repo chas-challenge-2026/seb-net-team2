@@ -203,7 +203,12 @@
             "rateDate": "Rate date:"
         },
         "welcome": "Welcome, {{user}}",
-        "greeting": "Good morning, {{user}}",
+        "greetings": {
+            "night": "Good night, {{user}}",
+            "morning": "Good morning, {{user}}",
+            "afternoon": "Good afternoon, {{user}}",
+            "evening": "Good evening, {{user}}"
+        },
         "createPayment": "Create payment",
         "user": "user",
         "companyName": "Company name",

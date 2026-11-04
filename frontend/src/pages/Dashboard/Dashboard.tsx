@@ -40,6 +40,8 @@ export function Dashboard() {
 
     const firstName = user?.name.trim().split(/\s+/)[0] || t("dashboard.user");
     const today = new Date();
+    const hour = today.getHours();
+    const greetingKey = hour < 5 ? "night" : hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
     const locale = i18n.resolvedLanguage === "sv" ? "sv-SE" : "en-GB";
     const formatBalance = (amount: number, currency: string) => {
         const symbol = currency.trim().toUpperCase() === "EUR" ? "€ "
@@ -60,7 +62,7 @@ export function Dashboard() {
         <div className={styles.dashboard}>
             <header className={styles.dashboard__header}>
                 <div>
-                    <h1>{t("dashboard.greeting", { user: firstName })}</h1>
+                    <h1>{t(`dashboard.greetings.${greetingKey}`, { user: firstName })}</h1>
 
                     <p>
                         {user?.tenantName && (
