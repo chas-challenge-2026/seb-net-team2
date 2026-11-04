@@ -367,18 +367,5 @@ tas bort efter demon.
 
 ---
 
-## Lägga till ett beslut
-
-Kopiera mallen, ge beslutet nästa nummer och lägg till en rad i översikten.
-
-```markdown
-### N. Kort rubrik (PR #, datum)
-
-**Problem:** Vad var fel eller saknades?
-
-**Beslut:** Vad valde vi?
-
-**Varför:** Varför detta och inte alternativen?
-
 **Konsekvenser:** Vad kostar det, och vad måste andra känna till?
 ```
