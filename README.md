@@ -2,12 +2,26 @@
 
 ## 📑 Innehåll
 
-1. [Arkitektur och teknikval](#1-arkitektur-och-teknikval)
-2. [Databasen](#2-databasen)
-3. [Roller, flöde och säkerhet (Approval flow)](#3-roller-flöde-och-säkerhet-approval-flow)
-4. [Säkerhet, konfiguration och kodstruktur](#4-säkerhet-konfiguration-och-kodstruktur)
-5. [Atomicitet, concurrency, transaktionalitet och testbarhet](#5-atomicitet-concurrency-transaktionalitet-och-testbarhet)
-6. [Beslutslogg](https://github.com/chas-challenge-2026/seb-net-team2/blob/main/beslut.md)
+- [SEB Företagsbetalningar](#seb-företagsbetalningar)
+  - [Funktioner](#funktioner)
+  - [Teknisk stack](#teknisk-stack)
+  - [Köra lokalt](#köra-lokalt)
+  - [Vanliga fel lokalt](#vanliga-fel-lokalt)
+- [Säkerhet och behörighet](#säkerhet-och-behörighet)
+  - [Felhantering](#felhantering)
+- [🏗️ Arkitektur & designbeslut](#️-arkitektur--designbeslut)
+  1. [Arkitektur och teknikval](#1-arkitektur-och-teknikval)
+  2. [Databasen](#2-databasen)
+  3. [Roller, flöde och säkerhet (Approval flow)](#3-roller-flöde-och-säkerhet-approval-flow)
+  4. [Säkerhet, konfiguration och kodstruktur](#4-säkerhet-konfiguration-och-kodstruktur)
+  5. [Atomicitet, concurrency, transaktionalitet och testbarhet](#5-atomicitet-concurrency-transaktionalitet-och-testbarhet)
+- [Systemarkitektur & komponenter](#systemarkitektur--komponenter)
+  - [Frontendarkitektur](#frontendarkitektur)
+  - [🧪 Testning](#-testning)
+- [Hantering av Feedforward och kontinuerlig förbättring](#hantering-av-feedforward-och-kontinuerlig-förbättring)
+- [Beslutslogg](https://github.com/chas-challenge-2026/seb-net-team2/blob/main/beslut.md)
+- [Kända brister och begränsningar](#kända-brister-och-begränsningar)
+- [Contributors](#contributors)
 
 # SEB Företagsbetalningar
 
@@ -71,7 +85,7 @@ Appen svarar sedan på http://localhost:PORT. Vilken port som gäller för ert c
 - **Kodändringar syns inte:** ni har glömt `--build`.
 - **Databasen i konstigt läge:** `docker compose down -v` och börja om. Volymen är bara lokal, inget försvinner i driftmiljön.
 
-# Säkerhet och behörighet
+## Säkerhet och behörighet
 
 Varje användare tillhör en tenant (ett företag) och har en av tre roller:
 **Initiator**, **Attestant** eller **Admin**. Rollen styr vilka delar av API:t
@@ -91,7 +105,7 @@ Hemligheter som anslutningssträngen och JWT-nyckeln hålls utanför källkoden.
 Lokalt lagras de med User Secrets. Vid en produktionslansering skulle de flyttas
 till en tjänst som Azure Key Vault.
 
-## Felhantering
+### Felhantering
 
 Felhanteringen är centraliserad, så controllers innehåller ingen try/catch-logik.
 Felsvar uppstår på tre ställen:
@@ -112,17 +126,16 @@ Felsvar uppstår på tre ställen:
 | `ServiceUnavailableException`                  | 503 Service Unavailable   |
 | Övriga (oväntade fel)                          | 500 Internal Server Error |
 
-# Betalningsflöde och affärsregler
 
-# 🏗️ Arkitektur & designbeslut
+## 🏗️ Arkitektur & designbeslut
 
 > En genomgång av de viktigaste tekniska besluten i projektet – **vad** vi byggt och framför allt **varför**.
 
 ---
 
-## 1. Arkitektur och teknikval
+### 1. Arkitektur och teknikval
 
-### Från Razor Pages till ASP.NET Core Web API
+#### Från Razor Pages till ASP.NET Core Web API
 
 > **💡 Varför?**
 > För att modernisera projektet och skapa en frikopplad struktur där frontend och backend kan utvecklas, driftsättas och testas oberoende av varandra.
@@ -157,7 +170,7 @@ flowchart LR
 
 ---
 
-## 2. Databasen
+### 2. Databasen
 
 Databasen består huvudsakligen av följande entiteter:
 
@@ -171,7 +184,7 @@ Alla entiteter fyller en egen viktig funktion i helheten – men **kärnan** i d
 > **💡 Varför `Payment`?**
 > `Payment` pekar på nästan alla andra entiteter på något sätt. Det är navet som konton, användare, tenants, attester och revisionsloggar kretsar kring.
 
-### Entiteten `Payment`
+#### Entiteten `Payment`
 
 | Fält | Beskrivning | Exempel |
 |---|---|---|
@@ -202,9 +215,9 @@ Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
 
 ---
 
-## 3. Roller, flöde och säkerhet (Approval flow)
+### 3. Roller, flöde och säkerhet (Approval flow)
 
-### 👥 Rollfördelning
+#### 👥 Rollfördelning
 
 | Roll | Får | Får inte |
 |---|---|---|
@@ -215,7 +228,7 @@ Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
 > **💡 Varför?**
 > Rollerna är kopplade till användaren och styr vem som får göra vad. En initiator får aldrig godkänna en betalning – **inte ens sin egen** om personen av misstag också skulle ha attestantrollen. Det är spärrat separat (self-approval-spärr).
 
-### 🔄 Betalningens flöde
+#### 🔄 Betalningens flöde
 
 1. **Initiatorn skapar en betalning** → beloppet reserveras direkt från kontot och betalningen sparas som `pending_approval`.
 2. **En regelmotor avgör antalet godkännanden** utifrån beloppet. Reglerna (`ApprovalLimit`) är konfigurerbara per tenant – inte hårdkodade – och sätts av tenantens admin.
@@ -228,7 +241,7 @@ Vårt centrala arkitekturbeslut kring `Payment` är ett **approval flow** 👇
 3. **Atteststeg skapas** (`ApprovalStep`) – ett per krävt godkännande – och tilldelas en attestant var. Attestanter tilldelas deterministiskt enligt en fast ordning från databasen. För betalningar med flera godkännande-steg sprids stegen mellan olika attestanter. Betalningsskaparen exkluderas alltid från tilldelningen.
 4. **Attestanterna beslutar.** När samtliga steg är godkända markeras betalningen som `completed`. Nekas ett steg avbryts hela flödet och det reserverade beloppet **återförs automatiskt** till kontot.
 
-### ✅ Valideringsregler vid beslut
+#### ✅ Valideringsregler vid beslut
 
 Innan ett beslut tillåts kontrolleras att:
 
@@ -243,9 +256,9 @@ Innan ett beslut tillåts kontrolleras att:
 
 ---
 
-## 4. Säkerhet, konfiguration och kodstruktur
+### 4. Säkerhet, konfiguration och kodstruktur
 
-### 🔐 Miljöoberoende konfiguration
+#### 🔐 Miljöoberoende konfiguration
 
 > **💡 Varför?**
 > För att förhindra att känsliga uppgifter och anslutningssträngar läcker ut i versionshistoriken hanteras konfigurationen dynamiskt via `builder.Configuration`:
@@ -255,32 +268,32 @@ Innan ett beslut tillåts kontrolleras att:
 > | Lokalt | User Secrets |
 > | Docker | Miljövariabler |
 
-### 🎫 Serverstyrd säkerhet & JWT
+#### 🎫 Serverstyrd säkerhet & JWT
 
 > **💡 Varför?**
 > `TenantId` och spårbarhetsfält som `LastModifiedBy` extraheras direkt från den inloggade användarens JWT-token **på serversidan**, vilket förhindrar att klienter manipulerar data.
 > Vid användarhantering används **BCrypt** för lösenordshashning, och känslig information exkluderas från DTO-svaren.
 
-### 🏢 Obligatorisk multi-tenant-isolering i `AuditEntries`
+#### 🏢 Obligatorisk multi-tenant-isolering i `AuditEntries`
 
 > **💡 Varför?**
 > `AuditEntries` har en obligatorisk `TenantId`-koppling (med tillhörande migrationer och kontextuppdateringar) så att händelse- och revisionsloggning är strikt isolerad per organisation.
 
-### 🛡️ Tenant-validering för admin (IDOR-skydd)
+#### 🛡️ Tenant-validering för admin (IDOR-skydd)
 
 > **💡 Varför?**
 > Strikta kontroller i controllers och servicelager verifierar att en inloggad administratörs `TenantId` (från JWT) matchar målresursen. Det förhindrar obehörig åtkomst eller manipulation mellan olika tenants.
 
-### 🪶 Tunna controllers
+#### 🪶 Tunna controllers
 
 > **💡 Varför?**
 > Controllers hålls medvetet tunna och ansvarar enbart för HTTP-anrop och claim-hantering. All komplex validering och affärslogik ligger i servicelagret.
 
 ---
 
-## 5. Atomicitet, concurrency, transaktionalitet och testbarhet
+### 5. Atomicitet, concurrency, transaktionalitet och testbarhet
 
-### ⚡ Optimistisk concurrency via villkorade uppdateringar
+#### ⚡ Optimistisk concurrency via villkorade uppdateringar
 
 > **💡 Varför?**
 > Kravet var att implementera optimistic concurrency (`RowVersion`). Vi undersökte var det behövdes och kom fram till att våra faktiska skrivvägar redan skyddas på ett mer specifikt sätt: varje statusändring skrivs som en **villkorad databasuppdatering**.
@@ -303,7 +316,7 @@ Databasen serialiserar själv samtidiga försök – **bara ett kan lyckas per r
 
 Båda är i grunden en *"har något ändrats sedan jag läste det?"*-kontroll – men den villkorade varianten är billigare.
 
-### 🔒 Atomära databastransaktioner
+#### 🔒 Atomära databastransaktioner
 
 > **💡 Varför?**
 > Hela beslutsflödet körs i **en och samma transaktion** – antingen går allt igenom eller inget. En attest kan därför aldrig lämna systemet i ett mellanläge.
@@ -323,17 +336,17 @@ flowchart LR
     class RB fail
 ```
 
-### 📬 Polly-retry-policy för e-postutskick
+#### 📬 Polly-retry-policy för e-postutskick
 
 > **💡 Varför?**
 > För hög tillförlitlighet i kringliggande processer används en Polly-retry-policy (**3 försök**) för e-postutskick, med automatisk fallback till tabellen `notificationLogs` vid permanenta fel.
 
-### 🧪 Standardiserad rollhantering och enhetstester
+#### 🧪 Standardiserad rollhantering och enhetstester
 
 > **💡 Varför?**
 > Rollhanteringen är standardiserad med `RoleClaimType = "Role"` och `UserRoles`-konstanter. Det kvalitetssäkras med enhetstester i **Moq**, bland annat för `UserService` och `ApprovalLimitService`.
 
-# Arkitektur
+## Systemarkitektur & komponenter
 
 System översikt
 
@@ -379,7 +392,7 @@ Servicen lämnar sedan över till repositoryt, som ansvarar för kommunikationen
 med databasen. Repositoryt använder DbContext (EF Core) för att skriva och läsa
 data, och slutligen sparas användaren i databasen.
 
-## Frontendarkitektur
+### Frontendarkitektur
 
 Frontend är byggd med React och TypeScript. `main.tsx` sätter upp routingen med
 TanStack Router och omsluter appen med TanStack Query samt providers för
@@ -391,7 +404,7 @@ gränssnittskomponenter finns i `src/components`, medan `src/hooks` samlar
 via en gemensam funktion som skickar JWT och validerar svar med Zod-scheman från
 `src/schemas`. Translations finns i `src/i18n`.
 
-## 🧪 Testning
+### 🧪 Testning
 
 Projektet har omfattande testning på flera nivåer:
 
@@ -409,6 +422,44 @@ cd backend && dotnet test
 ```bash
 cd native && make test
 ```
+
+## Hantering av Feedforward och kontinuerlig förbättring
+
+Under projektets gång genomfördes en strukturerad feedforward-granskning. Återkopplingen utvärderades, riskbedömdes och prioriterades i teambackloggen. Nedan redovisas de viktigaste förbättringarna som drivits igenom samt motiveringen till gjorda avgränsningar.
+
+---
+
+### 1. Användarupplevelse och Betalningsflöde (UX & Frontend)
+
+| Feedback / Identifierat behov | Åtgärd & Implementation | Status |
+|---|---|---|
+| **Tydlighet i Create Payment:** För mycket information på en gång skapade en överväldigande känsla. | Uppdelat flöde i tydliga delsteg (inmatning, summering och verifiering) för en bättre steg-för-steg-upplevelse. | ✅ Implementerat |
+| **Beslutsunderlag för attestant:** Behov av tydlig förhandsgranskning och kontext vid godkännande. | Attestvyn visar nu förhandsgranskning med mottagare, belopp, avdrags-IBAN, skapare och tidigare atteststeg. | ✅ Implementerat |
+| **Validering av IBAN/BIC:** IBAN-kontroll var osynlig för användaren vid inmatning. | Synlig live-validering mot C-modulen (`libiban`) som ger omedelbar visuell feedback om formatet är godkänt. | ✅ Implementerat |
+| **Felhantering och input-labels:** Tydligare vägledning när användaren anger felaktiga värden. | Infört tydliga fält-labels, placeholders och valideringsmeddelanden via Zod och React-formulär. | ✅ Implementerat |
+| **Compliance-export och Kantfall:** Vid batch-uppladdning (CSV) saknades tydlig feedback vid delvis misslyckande. | Byggt stöd för radvis felåterkoppling vid CSV-import (t.ex. vid 100 rader där 3 felar) som vägleder användaren till lösning. | ✅ Implementerat |
+| **Dashboard & Attestkorg:** Behov av bättre sök- och filtreringsmöjligheter upfront. | Lagt till kontofiltrering på dashboarden och utökat historikvyn för tidigare genomförda attester. | ✅ Implementerat |
+
+---
+
+### 2. Säkerhet, JWT och Behörighetshantering
+
+| Risk / Identifierat område | Åtgärd & Implementation | Status |
+|---|---|---|
+| **IDOR / Förutsägbara ID:n (PR #87):** Autoinkrementerade heltal i API:t gjorde det möjligt att gissa resurser. | **Hög prio.** Alla externa API-kontrakts-ID:n har ersatts med obrytbara GUID:er (`PublicId`). Interna heltal behålls i databasen för indexprestanda. | ✅ Implementerat |
+| **Säkerhet i JWT & Nyckelhantering (PR #43, #110):** Behov av minskad skaderadie vid läckta tokens. | **Hög prio.** JWT roteras atomärt med 15 min livslängd på access token och 7 dagar på refresh token. Refresh tokens lagras enbart som SHA-256-hashar. Känslig information (t.ex. e-post och namn) har rensats ur token payload. | ✅ Implementerat |
+| **Horisontell & Vertikal behörighet (PR #76):** Risk för Privilege Escalation och dataläckage mellan tenants. | **Hög prio.** Alla data-anrop validerar explicit `TenantId` från JWT-claims på serversidan. Strikta integrationstester (`CrossTenantIntegrationTests`) verifierar att en användare aldrig kan komma åt en annan tenants resurser. | ✅ Implementerat |
+| **Privilege Escalation vid rolltilldelning:** Risk att användare tilldelar sig själva Admin-rättigheter. | Endast befintliga administratörer har behörighet att hantera användare och roller inom sin egen tenant. Systemet förhindrar att en användare uppgraderar sin egen roll. | ✅ Implementerat |
+
+---
+
+### 3. Arkitektur, Notifieringar och Resiliens
+
+| Område | Åtgärd & Resonemang | Status |
+|---|---|---|
+| **Notifieringskedja och Tillförlitlighet (PR #48, #86, #103):** Notiser skickades synkront i sidan och sväljes vid fel. | Asynkron bakgrundskö (`Channel<T>`) med Polly-retry (exponentiell backoff vid tillfälliga fel) samt fallback till `NotificationLog`. Attestanter får notiser direkt i appen samt automatiska påminnelser. | ✅ Implementerat |
+| **Circuit Breaker vid Tredjepartsintegrationer:** Diskussion kring resiliensmönster vid externa API-avbrott. | Resonemang & Avgränsning: Då systemet saknar direkta anrop mot externa bankgateways har mönstret implementerats på notifierings- och e-postmotorn via Polly-retries med exponentiell backoff. | 💡 Resonerat & Avgränsat |
+| **Arbetssätt och Spårbarhet (PPP):** Struktur för daglig framdrift och överlämning. | Teamet tillämpar regelbundna standups i mindre undergrupper, arbetar konsekvent med feature-branches för god parallellism och upprätthåller en central beslutslogg (`beslut.md`). | ✅ Arbetssätt infört |
 
 ## Kända brister och begränsningar
 
