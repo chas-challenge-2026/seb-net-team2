@@ -27,10 +27,16 @@ jobs:
           make \
           libc6-dev \
           gcc \
-          libssl-dev
+          libssl-dev 
       
       - name: Build native code
         run: make -C native
+
+      - name: Install cmocka
+        run: ./native/cmocka-install-full.sh
+          
+      - name: Test native code
+        run: make -C native test
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
