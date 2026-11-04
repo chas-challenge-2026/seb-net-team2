@@ -346,13 +346,6 @@ idempotensnycklar en gång i timmen. Index lades till på utgångsdatumen.
 
 ---
 
-## Process
-
-### 21. Razor Pages behålls som referens
-
-**Beslut:** De gamla sidorna i v1 ligger kvar under projektet så att vi kan
-jämföra beteende med v2. De tas bort helt när projektet är klart.
-
 ### 22. Seed-data i drift fram till demon
 
 **Beslut:** `infra/seed.sql` med demoanvändare körs även i drift så att
@@ -360,19 +353,3 @@ systemet kan visas på demon. All seed-data och konfigurationen `Seed__Path`
 tas bort efter demon.
 
 ---
-
-## Lägga till ett beslut
-
-Kopiera mallen, ge beslutet nästa nummer och lägg till en rad i översikten.
-
-```markdown
-### N. Kort rubrik (PR #, datum)
-
-**Problem:** Vad var fel eller saknades?
-
-**Beslut:** Vad valde vi?
-
-**Varför:** Varför detta och inte alternativen?
-
-**Konsekvenser:** Vad kostar det, och vad måste andra känna till?
-```
