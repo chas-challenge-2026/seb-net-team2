@@ -36,6 +36,7 @@ Bakgrund: [v1-arkitektur](architecture.md) · [kända buggar i v1](known-bugs.md
 | 20  | Automatisk städning av utgångna tokens och nycklar        | Drift       | Infört   |
 | 21  | Razor Pages behålls som referens under projektet          | Process     | Tillfälligt |
 | 22  | Seed-data i drift fram till demon                         | Process     | Tillfälligt |
+| 23  | Klientrouting och AuthContext med skyddade rutter		  | Frontend    | Infört   | 
 
 ---
 
@@ -90,7 +91,7 @@ drift.
 **Konsekvenser:** Migrationer vid uppstart är enkelt men kräver att bara en
 instans startar åt gången. Det räcker för vår driftmiljö.
 
-### 4. Multi-tenant via `TenantId`
+### 4. Multi-tenant via `TenantId` (PR #76 2026-10-06)
 
 **Beslut:** Alla tabeller som tillhör ett företag har `TenantId`. Tenant
 hämtas från JWT:n och skickas med i varje repository-anrop.
@@ -137,7 +138,7 @@ gör att en databasläcka inte ger giltiga tokens.
 **Konsekvenser:** En accesstoken kan inte återkallas innan den går ut, så
 spärrade användare har kvar åtkomst i upp till 15 minuter.
 
-### 7. BCrypt för lösenord
+### 7. BCrypt för lösenord (PR #13 2026-09-02)
 
 **Problem:** v1 hashade lösenord med MD5 (BUG-002).
 
@@ -146,7 +147,7 @@ spärrade användare har kvar åtkomst i upp till 15 minuter.
 **Varför:** BCrypt är långsamt med flit och saltar automatiskt. Det är väl
 beprövat och enkelt att använda i .NET.
 
-### 8. Rollbaserad behörighet
+### 8. Rollbaserad behörighet (PR #35 2026-09-17)
 
 **Problem:** v1 jämförde roller som strängar (`== "attestant"`) i varje sida.
 
@@ -174,7 +175,7 @@ betalningen förs pengarna tillbaka.
 
 **Konsekvenser:** Pengar är låsta medan betalningen väntar på attest.
 
-### 10. Attestgränser per tenant
+### 10. Attestgränser per tenant (PR #33 2026-09-16, PR #17 2026-09-07)
 
 **Problem:** I v1 var gränserna hårdkodade, och två sidor använde olika
 gränser (BUG-006).
@@ -217,8 +218,7 @@ att förhindra dubbla godkännanden.
 
 **Beslut:** Vi har medvetet inte infört det.
 
-**Varför:** _[Fyll i teamets motivering]_. Dubbla beslut på samma atteststeg
-stoppas redan genom att uppdateringen bara lyckas om steget fortfarande är
+**Varför:** Dubbla beslut på samma atteststeg stoppas redan genom att uppdateringen bara lyckas om steget fortfarande är
 `pending`, och saldot skyddas av det villkorade avdraget i beslut 9.
 
 ---
@@ -249,7 +249,7 @@ fel, i stället för att fortsätta skriva på en trasig kedja.
 
 ## Notifieringar
 
-### 14. Kö i bakgrunden med retry (PR #48, #86, #103)
+### 14. Kö i bakgrunden med retry (PR #48, #86, #103, #115)
 
 **Problem:** I v1 skickades e-post direkt i sidan och alla fel sväljdes
 (BUG-007).
@@ -266,7 +266,7 @@ databasen i stället för att försvinna.
 inte hunnit skickas. Vi valde det framför Hangfire eller en extern kö för att
 hålla driften enkel.
 
-### 15. MailKit i stället för `SmtpClient`
+### 15. MailKit i stället för `SmtpClient` (PR #48 2026-09-22, #115 2026-10-20)
 
 **Beslut:** E-post skickas via `MailKit` bakom interfacet `IEmailSender`.
 
@@ -313,7 +313,7 @@ Stacktraces visas aldrig för klienten.
 
 ## Drift
 
-### 18. Frontend i samma container som API:t (PR #89, #117)
+### 18. Frontend i samma container som API:t (PR #89)
 
 **Beslut:** Dockerfilen har ett Node-steg som bygger frontend. Resultatet
 kopieras till `wwwroot` och serveras av API:t. Okända `/api/*`-rutter ger 404,
@@ -353,3 +353,33 @@ systemet kan visas på demon. All seed-data och konfigurationen `Seed__Path`
 tas bort efter demon.
 
 ---
+
+## Frontend
+
+### 23. Klientrouting och AuthContext med skyddade rutter (PR #6, 2026-08-31)
+
+**Problem:** När v1 (Razor Pages) ersattes med ett separat React-SPA behövdes ett säkert sätt att hantera användarens inloggningsstatus i klienten och förhindra oinloggade från att nå skyddade vyer.
+
+**Beslut:** Implementera TanStack Router tillsammans med en central `AuthContext` som hanterar JWT-tokens, användarstatus och automatiska omdirigeringar vid saknad behörighet.
+
+**Varför:** Skapar en sömlös användarupplevelse utan omladdningar och säkerställer att skyddade klientrutter valideras direkt i gränssnittet innan anrop skickas till API:t.
+
+**Konsekvenser:** Tillståndet i `AuthContext` måste alltid hållas i synk med backendens token-giltighet och refresh-flöde.
+
+---
+
+## Lägga till ett beslut
+
+Kopiera mallen, ge beslutet nästa nummer och lägg till en rad i översikten.
+
+```markdown
+### N. Kort rubrik (PR #, datum)
+
+**Problem:** Vad var fel eller saknades?
+
+**Beslut:** Vad valde vi?
+
+**Varför:** Varför detta och inte alternativen?
+
+**Konsekvenser:** Vad kostar det, och vad måste andra känna till?
+```
