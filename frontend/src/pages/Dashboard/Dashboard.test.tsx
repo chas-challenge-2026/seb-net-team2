@@ -24,7 +24,10 @@ jest.mock("react-i18next", () => ({
         t: (key: string, values?: Record<string, string>) => {
             const translations: Record<string, string> = {
                 "common.loading": "Loading...",
-                "dashboard.greeting": `Good morning, ${values?.user ?? "user"}`,
+                "dashboard.greetings.night": `Good night, ${values?.user ?? "user"}`,
+                "dashboard.greetings.morning": `Good morning, ${values?.user ?? "user"}`,
+                "dashboard.greetings.afternoon": `Good afternoon, ${values?.user ?? "user"}`,
+                "dashboard.greetings.evening": `Good evening, ${values?.user ?? "user"}`,
                 "dashboard.user": "user",
                 "dashboard.accounts": "Accounts",
                 "dashboard.accountsEmpty": "No accounts are set up for this company yet.",
@@ -97,6 +100,26 @@ afterEach(() => cleanup());
 describe("Dashboard account information", () => {
     beforeEach(() => {
         setDefaultHookValues();
+    });
+
+    it.each([
+        [0, "Good night"],
+        [4, "Good night"],
+        [5, "Good morning"],
+        [11, "Good morning"],
+        [12, "Good afternoon"],
+        [17, "Good afternoon"],
+        [18, "Good evening"],
+        [23, "Good evening"],
+    ])("greets the user at local hour %s", (hour, greeting) => {
+        jest.useFakeTimers();
+        try {
+            jest.setSystemTime(new Date(2026, 10, 3, Number(hour)));
+            render(<Dashboard />);
+            expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(`${greeting}, Lisa`);
+        } finally {
+            jest.useRealTimers();
+        }
     });
 
     it("shows each account name, formatted balance, currency and IBAN from the API", () => {

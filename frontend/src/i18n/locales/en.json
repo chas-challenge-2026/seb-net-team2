@@ -203,7 +203,12 @@
             "rateDate": "Rate date:"
         },
         "welcome": "Welcome, {{user}}",
-        "greeting": "Good morning, {{user}}",
+        "greetings": {
+            "night": "Good night, {{user}}",
+            "morning": "Good morning, {{user}}",
+            "afternoon": "Good afternoon, {{user}}",
+            "evening": "Good evening, {{user}}"
+        },
         "createPayment": "Create payment",
         "user": "user",
         "companyName": "Company name",
@@ -308,14 +313,14 @@
         "result": {
             "eyebrow": "PAYMENT STATUS",
             "title": "Payment submitted",
-            "completedTitle": "Payment completed",
-            "pendingTitle": "Approval required",
-            "rejectedTitle": "Payment rejected",
+            "completedTitle": "Payment created",
+            "pendingTitle": "Payment created",
+            "rejectedTitle": "Payment created",
             "sourceAccount": "From account",
             "submittedAt": "Submitted",
             "status": "Status",
             "completed": "The payment has been processed.",
-            "pendingApproval": "The payment was created and is waiting for approval.",
+            "pendingApproval": "The payment is waiting for approval.",
             "rejected": "The payment was rejected.",
             "accepted": "The payment was created. Check the status below.",
             "statusValues": {
