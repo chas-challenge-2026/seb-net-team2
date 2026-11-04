@@ -36,6 +36,7 @@ Bakgrund: [v1-arkitektur](architecture.md) · [kända buggar i v1](known-bugs.md
 | 20  | Automatisk städning av utgångna tokens och nycklar        | Drift       | Infört   |
 | 21  | Razor Pages behålls som referens under projektet          | Process     | Tillfälligt |
 | 22  | Seed-data i drift fram till demon                         | Process     | Tillfälligt |
+| 23  | Klientrouting och AuthContext med skyddade rutter		  | Frontend    | Infört   | 
 
 ---
 
@@ -357,6 +358,20 @@ jämföra beteende med v2. De tas bort helt när projektet är klart. Raderades 
 **Beslut:** `infra/seed.sql` med demoanvändare körs även i drift så att
 systemet kan visas på demon. All seed-data och konfigurationen `Seed__Path`
 tas bort efter demon.
+
+---
+
+## Frontend
+
+### 23. Klientrouting och AuthContext med skyddade rutter (PR #6, 2026-08-31)
+
+**Problem:** När v1 (Razor Pages) ersattes med ett separat React-SPA behövdes ett säkert sätt att hantera användarens inloggningsstatus i klienten och förhindra oinloggade från att nå skyddade vyer.
+
+**Beslut:** Implementera TanStack Router tillsammans med en central `AuthContext` som hanterar JWT-tokens, användarstatus och automatiska omdirigeringar vid saknad behörighet.
+
+**Varför:** Skapar en sömlös användarupplevelse utan omladdningar och säkerställer att skyddade klientrutter valideras direkt i gränssnittet innan anrop skickas till API:t.
+
+**Konsekvenser:** Tillståndet i `AuthContext` måste alltid hållas i synk med backendens token-giltighet och refresh-flöde.
 
 ---
 
